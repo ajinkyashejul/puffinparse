@@ -212,7 +212,12 @@ docs/SPEC.md            specification
 
 - More providers: Mistral OCR, Azure Document Intelligence, AWS Textract, Google Document AI, Gemini / GPT vision, Mathpix, local Tesseract / PaddleOCR.
 - Hosted gateway (`liteocr serve`) with keys, budgets and logging, built on `Router`.
-- Benchmark adapters for olmOCR-bench and OmniDocBench; LLM-judge as an optional plug-in.
+- **Meta-benchmark.** Every vendor publishes a benchmark it wins (LlamaParse's ParseBench,
+  Extend's RealDocBench, Reducto's LongExtractBench). LiteOCR will ship adapters that convert
+  each open benchmark, plus olmOCR-bench and OmniDocBench, into the manifest format and run them
+  all through the same harness, so one neutral leaderboard covers every provider on every
+  public dataset, with per-dataset and combined scores.
+- LLM-judge as an optional plug-in for metrics that need it (e.g. figure descriptions).
 - Webhooks instead of polling for async providers.
 
 ## Contributing
