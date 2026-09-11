@@ -1,0 +1,45 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/liteocr-core",
+    "crates/liteocr-cli",
+    "crates/liteocr-python",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+repository = "https://github.com/ajinkyashejul/liteocr"
+homepage = "https://github.com/ajinkyashejul/liteocr"
+authors = ["LiteOCR contributors"]
+keywords = ["ocr", "document-parsing", "pdf", "api", "benchmark"]
+categories = ["api-bindings", "text-processing"]
+
+[workspace.dependencies]
+liteocr-core = { path = "crates/liteocr-core", version = "0.1.0" }
+reqwest = { version = "0.13", default-features = false, features = ["json", "multipart", "rustls", "stream", "gzip"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "time", "sync"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+async-trait = "0.1"
+bytes = "1"
+mime_guess = "2"
+url = "2"
+strsim = "0.11"
+unicode-normalization = "0.1"
+uuid = { version = "1", features = ["v4"] }
+futures = "0.3"
+clap = { version = "4", features = ["derive", "env"] }
+anyhow = "1"
+comfy-table = "8"
+indicatif = "0.18"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

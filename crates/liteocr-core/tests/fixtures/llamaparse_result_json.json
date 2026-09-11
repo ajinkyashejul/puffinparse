@@ -1,0 +1,605 @@
+{
+ "pages": [
+  {
+   "page": 1,
+   "text": "Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78",
+   "md": "# Hello LiteOCR\n\nInvoice #1234\n\nTotal: $56.78",
+   "images": [
+    {
+     "name": "img_p0_1.jpg",
+     "height": 1300,
+     "width": 1000,
+     "x": 0,
+     "y": 0,
+     "original_width": 788,
+     "original_height": 446,
+     "rotation": 0,
+     "ocr": [
+      {
+       "x": 5,
+       "y": 366,
+       "w": 495,
+       "h": 80,
+       "confidence": 0.999,
+       "text": "Total: $56.78"
+      },
+      {
+       "x": 6,
+       "y": 32,
+       "w": 780,
+       "h": 97,
+       "confidence": 0.977,
+       "text": "Hello LiteOCR"
+      }
+     ]
+    },
+    {
+     "name": "page_1.jpg",
+     "height": 1300,
+     "width": 1000,
+     "x": 0,
+     "y": 0,
+     "original_width": 2462,
+     "original_height": 3200,
+     "rotation": 0,
+     "type": "full_page_screenshot"
+    },
+    {
+     "name": "page_1_sectionHeader_1.jpg",
+     "height": 89.394,
+     "width": 219.006,
+     "x": 58.563,
+     "y": 138.371,
+     "original_width": 539,
+     "original_height": 220,
+     "rotation": 0,
+     "type": "layout_sectionHeader"
+    },
+    {
+     "name": "page_1_title_1.jpg",
+     "height": 40.835,
+     "width": 308.672,
+     "x": 60.178,
+     "y": 56.552,
+     "original_width": 759,
+     "original_height": 100,
+     "rotation": 0,
+     "type": "layout_title"
+    },
+    {
+     "name": "page_1_sectionHeader_3.jpg",
+     "height": 29.949,
+     "width": 195.823,
+     "x": 58.558,
+     "y": 197.596,
+     "original_width": 482,
+     "original_height": 73,
+     "rotation": 0,
+     "type": "layout_sectionHeader"
+    },
+    {
+     "name": "page_1_sectionHeader_2.jpg",
+     "height": 40.835,
+     "width": 308.672,
+     "x": 60.178,
+     "y": 56.552,
+     "original_width": 759,
+     "original_height": 100,
+     "rotation": 0,
+     "type": "layout_sectionHeader"
+    },
+    {
+     "name": "page_1_sectionHeader_4.jpg",
+     "height": 28.366,
+     "width": 217.677,
+     "x": 59.731,
+     "y": 138.866,
+     "original_width": 535,
+     "original_height": 69,
+     "rotation": 0,
+     "type": "layout_sectionHeader"
+    },
+    {
+     "name": "page_1_text_1.jpg",
+     "height": 89.394,
+     "width": 219.006,
+     "x": 58.563,
+     "y": 138.371,
+     "original_width": 539,
+     "original_height": 220,
+     "rotation": 0,
+     "type": "layout_text"
+    }
+   ],
+   "charts": [],
+   "items": [
+    {
+     "type": "heading",
+     "md": "# Hello LiteOCR",
+     "value": "Hello LiteOCR",
+     "lvl": 1,
+     "bBox": {
+      "x": 60.17843018407407,
+      "y": 56.55255835989247,
+      "w": 308.6724022160405,
+      "h": 40.835458817689315,
+      "confidence": 0.84,
+      "label": "doc_title"
+     },
+     "layoutAwareBbox": [
+      {
+       "x": 60.17843018407407,
+       "y": 56.55255835989247,
+       "w": 308.6724022160405,
+       "h": 40.835458817689315,
+       "startIndex": 0,
+       "endIndex": 14,
+       "confidence": 0.84,
+       "label": "doc_title"
+      }
+     ]
+    },
+    {
+     "type": "text",
+     "md": "Invoice #1234",
+     "value": "Invoice #1234",
+     "bBox": {
+      "x": 59.73129687101944,
+      "y": 138.86669096739394,
+      "w": 217.67769689145297,
+      "h": 28.36677613465683,
+      "confidence": 0.75,
+      "label": "paragraph_title"
+     },
+     "layoutAwareBbox": [
+      {
+       "x": 53.21,
+       "y": 142.19,
+       "w": 226.24,
+       "h": 34.94,
+       "startIndex": 0,
+       "endIndex": 12,
+       "confidence": 1,
+       "label": "paragraph_title"
+      }
+     ]
+    },
+    {
+     "type": "text",
+     "md": "Total: $56.78",
+     "value": "Total: $56.78",
+     "bBox": {
+      "x": 58.55822044870128,
+      "y": 197.59684956592062,
+      "w": 195.82341546597686,
+      "h": 29.949647447337284,
+      "confidence": 0.79,
+      "label": "paragraph_title"
+     },
+     "layoutAwareBbox": [
+      {
+       "x": 58.55822044870128,
+       "y": 197.59684956592062,
+       "w": 195.82341546597686,
+       "h": 29.949647447337284,
+       "startIndex": 0,
+       "endIndex": 12,
+       "confidence": 0.79,
+       "label": "paragraph_title"
+      }
+     ]
+    }
+   ],
+   "status": "OK",
+   "originalOrientationAngle": 0,
+   "links": [],
+   "width": 1000,
+   "height": 1300,
+   "triggeredAutoMode": false,
+   "parsingMode": "accurate",
+   "structuredData": null,
+   "noStructuredContent": false,
+   "noTextContent": false,
+   "pageHeaderMarkdown": "",
+   "pageFooterMarkdown": "",
+   "printedPageNumber": "",
+   "slideSpeakerNotes": null,
+   "slideSectionName": null,
+   "confidence": 0.875,
+   "layout": [
+    {
+     "image": "page_1_sectionHeader_1.jpg",
+     "confidence": 0.728,
+     "label": "sectionHeader",
+     "bbox": {
+      "x": 0.058,
+      "y": 0.106,
+      "w": 0.219,
+      "h": 0.068
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_1_title_1.jpg",
+     "confidence": 0.679,
+     "label": "title",
+     "bbox": {
+      "x": 0.06,
+      "y": 0.043,
+      "w": 0.308,
+      "h": 0.031
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_1_sectionHeader_2.jpg",
+     "confidence": 0.586,
+     "label": "sectionHeader",
+     "bbox": {
+      "x": 0.06,
+      "y": 0.043,
+      "w": 0.308,
+      "h": 0.031
+     },
+     "isLikelyNoise": true
+    },
+    {
+     "image": "page_1_sectionHeader_3.jpg",
+     "confidence": 0.571,
+     "label": "sectionHeader",
+     "bbox": {
+      "x": 0.058,
+      "y": 0.151,
+      "w": 0.195,
+      "h": 0.023
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_1_sectionHeader_4.jpg",
+     "confidence": 0.508,
+     "label": "sectionHeader",
+     "bbox": {
+      "x": 0.059,
+      "y": 0.106,
+      "w": 0.217,
+      "h": 0.021
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_1_text_1.jpg",
+     "confidence": 0.507,
+     "label": "text",
+     "bbox": {
+      "x": 0.058,
+      "y": 0.106,
+      "w": 0.219,
+      "h": 0.068
+     },
+     "isLikelyNoise": true
+    },
+    {
+     "image": "page_1_paragraph_title_1_v2.jpg",
+     "confidence": 0.73,
+     "label": "paragraph_title",
+     "bbox": {
+      "x": 0.059,
+      "y": 0.106,
+      "w": 0.219,
+      "h": 0.069
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_1_doc_title_1_v2.jpg",
+     "confidence": 0.68,
+     "label": "doc_title",
+     "bbox": {
+      "x": 0.06,
+      "y": 0.044,
+      "w": 0.309,
+      "h": 0.031
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_1_paragraph_title_2_v2.jpg",
+     "confidence": 0.57,
+     "label": "paragraph_title",
+     "bbox": {
+      "x": 0.059,
+      "y": 0.152,
+      "w": 0.196,
+      "h": 0.023
+     },
+     "isLikelyNoise": true
+    },
+    {
+     "image": "page_1_paragraph_title_3_v2.jpg",
+     "confidence": 0.51,
+     "label": "paragraph_title",
+     "bbox": {
+      "x": 0.06,
+      "y": 0.107,
+      "w": 0.218,
+      "h": 0.022
+     },
+     "isLikelyNoise": true
+    }
+   ],
+   "costOptimized": false
+  },
+  {
+   "page": 2,
+   "text": "Line Items\n\nItem        Qty     Price\nWidget      2        $10.00\nGadget      1        $36.78\nShipping    1        $10.00",
+   "md": "## Line Items\n\n| Item     | Qty | Price  |\n| -------- | --- | ------ |\n| Widget   | 2   | $10.00 |\n| Gadget   | 1   | $36.78 |\n| Shipping | 1   | $10.00 |\n\n\n",
+   "images": [
+    {
+     "name": "img_p1_1.jpg",
+     "height": 1300,
+     "width": 1000,
+     "x": 0,
+     "y": 0,
+     "original_width": 2102,
+     "original_height": 826,
+     "rotation": 0,
+     "ocr": [
+      {
+       "x": 717,
+       "y": 689,
+       "w": 81,
+       "h": 105,
+       "confidence": 1,
+       "text": "1"
+      },
+      {
+       "x": 30,
+       "y": 539,
+       "w": 302,
+       "h": 117,
+       "confidence": 1,
+       "text": "Gadget"
+      },
+      {
+       "x": 1410,
+       "y": 542,
+       "w": 285,
+       "h": 105,
+       "confidence": 1,
+       "text": "$36.78"
+      },
+      {
+       "x": 1410,
+       "y": 393,
+       "w": 280,
+       "h": 106,
+       "confidence": 1,
+       "text": "$10.00"
+      },
+      {
+       "x": 1408,
+       "y": 243,
+       "w": 212,
+       "h": 109,
+       "confidence": 1,
+       "text": "Price"
+      },
+      {
+       "x": 713,
+       "y": 240,
+       "w": 171,
+       "h": 129,
+       "confidence": 1,
+       "text": "Qty"
+      },
+      {
+       "x": 9,
+       "y": 32,
+       "w": 589,
+       "h": 100,
+       "confidence": 0.999,
+       "text": "Line Items"
+      }
+     ]
+    },
+    {
+     "name": "page_2.jpg",
+     "height": 1300,
+     "width": 1000,
+     "x": 0,
+     "y": 0,
+     "original_width": 2462,
+     "original_height": 3200,
+     "rotation": 0,
+     "type": "full_page_screenshot"
+    },
+    {
+     "name": "page_2_table_1_v2.jpg",
+     "height": 242.651,
+     "width": 843.873,
+     "x": 57.918,
+     "y": 138.704,
+     "original_width": 2078,
+     "original_height": 598,
+     "rotation": 0,
+     "type": "layout_v3_table"
+    },
+    {
+     "name": "page_2_sectionHeader_1.jpg",
+     "height": 44.237,
+     "width": 235.113,
+     "x": 60.158,
+     "y": 55.671,
+     "original_width": 578,
+     "original_height": 108,
+     "rotation": 0,
+     "type": "layout_sectionHeader"
+    },
+    {
+     "name": "page_2_table_1.jpg",
+     "height": 242.651,
+     "width": 843.873,
+     "x": 57.918,
+     "y": 138.704,
+     "original_width": 2077,
+     "original_height": 597,
+     "rotation": 0,
+     "type": "layout_table"
+    }
+   ],
+   "charts": [],
+   "items": [
+    {
+     "type": "heading",
+     "md": "## Line Items",
+     "value": "Line Items",
+     "lvl": 2,
+     "bBox": {
+      "x": 60.15890059263809,
+      "y": 55.67149157109468,
+      "w": 235.11336679043978,
+      "h": 44.23767198687015,
+      "confidence": 0.84,
+      "label": "paragraph_title"
+     },
+     "layoutAwareBbox": [
+      {
+       "x": 56.36000541565123,
+       "y": 63.045979817708336,
+       "w": 239.23554698077436,
+       "h": 39.760660807291664,
+       "startIndex": 0,
+       "endIndex": 12,
+       "confidence": 0.84,
+       "label": "paragraph_title"
+      }
+     ]
+    },
+    {
+     "type": "table",
+     "md": "| Item     | Qty | Price  |\n| -------- | --- | ------ |\n| Widget   | 2   | $10.00 |\n| Gadget   | 1   | $36.78 |\n| Shipping | 1   | $10.00 |",
+     "html": "<table>\n  <thead>\n    <tr>\n        <th>Item</th>\n        <th>Qty</th>\n        <th>Price</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n        <td>Widget</td>\n<td>2</td>\n<td>$10.00</td>\n    </tr>\n<tr>\n        <td>Gadget</td>\n<td>1</td>\n<td>$36.78</td>\n    </tr>\n<tr>\n        <td>Shipping</td>\n<td>1</td>\n<td>$10.00</td>\n    </tr>\n  </tbody>\n</table>",
+     "rows": [
+      [
+       "Item",
+       "Qty",
+       "Price"
+      ],
+      [
+       "Widget",
+       "2",
+       "$10.00"
+      ],
+      [
+       "Gadget",
+       "1",
+       "$36.78"
+      ],
+      [
+       "Shipping",
+       "1",
+       "$10.00"
+      ]
+     ],
+     "isPerfectTable": true,
+     "csv": "\"Item\",\"Qty\",\"Price\"\n\"Widget\",\"2\",\"$10.00\"\n\"Gadget\",\"1\",\"$36.78\"\n\"Shipping\",\"1\",\"$10.00\"",
+     "bBox": {
+      "x": 57.91863669519839,
+      "y": 138.7049674987793,
+      "w": 843.8733919807102,
+      "h": 242.65153097069776,
+      "confidence": 0.99,
+      "label": "table"
+     },
+     "layoutAwareBbox": [
+      {
+       "x": 57.91863669519839,
+       "y": 138.7049674987793,
+       "w": 843.8733919807102,
+       "h": 242.65153097069776,
+       "startIndex": 0,
+       "endIndex": 138,
+       "confidence": 0.99,
+       "label": "table"
+      }
+     ]
+    }
+   ],
+   "status": "OK",
+   "originalOrientationAngle": 0,
+   "links": [],
+   "width": 1000,
+   "height": 1300,
+   "triggeredAutoMode": false,
+   "parsingMode": "accurate",
+   "structuredData": null,
+   "noStructuredContent": false,
+   "noTextContent": false,
+   "pageHeaderMarkdown": "",
+   "pageFooterMarkdown": "",
+   "printedPageNumber": "",
+   "slideSpeakerNotes": null,
+   "slideSectionName": null,
+   "confidence": 0.895,
+   "layout": [
+    {
+     "image": "page_2_table_1.jpg",
+     "confidence": 0.982,
+     "label": "table",
+     "bbox": {
+      "x": 0.057,
+      "y": 0.106,
+      "w": 0.843,
+      "h": 0.186
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_2_sectionHeader_1.jpg",
+     "confidence": 0.674,
+     "label": "sectionHeader",
+     "bbox": {
+      "x": 0.06,
+      "y": 0.042,
+      "w": 0.235,
+      "h": 0.034
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_2_table_1_v2.jpg",
+     "confidence": 0.98,
+     "label": "table",
+     "bbox": {
+      "x": 0.058,
+      "y": 0.107,
+      "w": 0.844,
+      "h": 0.187
+     },
+     "isLikelyNoise": false
+    },
+    {
+     "image": "page_2_paragraph_title_1_v2.jpg",
+     "confidence": 0.67,
+     "label": "paragraph_title",
+     "bbox": {
+      "x": 0.06,
+      "y": 0.043,
+      "w": 0.235,
+      "h": 0.034
+     },
+     "isLikelyNoise": false
+    }
+   ],
+   "costOptimized": false
+  }
+ ],
+ "job_metadata": {
+  "credits_used": 0,
+  "job_credits_usage": 0,
+  "job_pages": 2,
+  "job_auto_mode_triggered_pages": 0,
+  "job_is_cache_hit": false
+ }
+}

@@ -1,0 +1,535 @@
+//! The unified request / response model. Every provider is normalised to these types.
+
+use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
+
+/// Where the document comes from.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum DocumentInput {
+    /// A local file path.
+    Path { path: PathBuf },
+    /// In-memory bytes. `filename` is required so providers can infer the type.
+    Bytes {
+        #[serde(with = "base64_bytes")]
+        data: bytes::Bytes,
+        filename: String,
+    },
+    /// A publicly reachable http(s) URL.
+    Url { url: String },
+}
+
+impl DocumentInput {
+    /// Best-effort filename for uploads.
+    pub fn filename(&self) -> String {
+        match self {
+            DocumentInput::Path { path } => {
+                path.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| "document".into())
+            }
+            DocumentInput::Bytes { filename, .. } => filename.clone(),
+            DocumentInput::Url { url } => url
+                .rsplit('/')
+                .next()
+                .filter(|s| !s.is_empty())
+                .map(|s| s.split('?').next().unwrap_or(s).to_string())
+                .unwrap_or_else(|| "document".into()),
+        }
+    }
+
+    /// MIME type guessed from the filename extension.
+    pub fn mime_type(&self) -> String {
+        mime_guess::from_path(self.filename()).first_or_octet_stream().essence_str().to_string()
+    }
+
+    /// Short description used in logs / error messages (never includes bytes).
+    pub fn describe(&self) -> String {
+        match self {
+            DocumentInput::Path { path } => path.display().to_string(),
+            DocumentInput::Bytes { data, filename } => format!("{filename} ({} bytes)", data.len()),
+            DocumentInput::Url { url } => url.clone(),
+        }
+    }
+}
+
+mod base64_bytes {
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    fn encode(input: &[u8]) -> String {
+        let mut out = String::with_capacity(input.len().div_ceil(3) * 4);
+        for chunk in input.chunks(3) {
+            let b = [chunk[0], *chunk.get(1).unwrap_or(&0), *chunk.get(2).unwrap_or(&0)];
+            let n = (u32::from(b[0]) << 16) | (u32::from(b[1]) << 8) | u32::from(b[2]);
+            out.push(ALPHABET[(n >> 18) as usize & 63] as char);
+            out.push(ALPHABET[(n >> 12) as usize & 63] as char);
+            out.push(if chunk.len() > 1 { ALPHABET[(n >> 6) as usize & 63] as char } else { '=' });
+            out.push(if chunk.len() > 2 { ALPHABET[n as usize & 63] as char } else { '=' });
+        }
+        out
+    }
+
+    fn decode(s: &str) -> Result<Vec<u8>, String> {
+        let mut out = Vec::with_capacity(s.len() / 4 * 3);
+        let mut buf = 0u32;
+        let mut bits = 0;
+        for c in s.bytes() {
+            if c == b'=' {
+                break;
+            }
+            let v = ALPHABET.iter().position(|&a| a == c).ok_or_else(|| format!("invalid base64 byte {c}"))? as u32;
+            buf = (buf << 6) | v;
+            bits += 6;
+            if bits >= 8 {
+                bits -= 8;
+                out.push((buf >> bits) as u8);
+                buf &= (1 << bits) - 1;
+            }
+        }
+        Ok(out)
+    }
+
+    pub fn serialize<S: Serializer>(b: &bytes::Bytes, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_str(&encode(b))
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<bytes::Bytes, D::Error> {
+        let s = String::deserialize(d)?;
+        decode(&s).map(bytes::Bytes::from).map_err(serde::de::Error::custom)
+    }
+
+    #[cfg(test)]
+    mod tests {
+        #[test]
+        fn roundtrip() {
+            for input in [&b""[..], b"f", b"fo", b"foo", b"foob", b"fooba", b"foobar", &[0u8, 255, 17, 3]] {
+                assert_eq!(super::decode(&super::encode(input)).unwrap(), input);
+            }
+            assert_eq!(super::encode(b"foobar"), "Zm9vYmFy");
+        }
+    }
+}
+
+/// Preferred textual representation for block `content`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OutputFormat {
+    #[default]
+    Markdown,
+    Text,
+}
+
+/// A unified OCR request.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OcrRequest {
+    pub input: DocumentInput,
+    /// `"<provider>/<model>"`, e.g. `"reducto/standard"`. `"reducto"` selects the default model.
+    pub model: String,
+    /// 1-based page selection, e.g. `"1-3,7"`. Forwarded best-effort.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pages: Option<String>,
+    /// Language hint (BCP-47 / ISO 639-1), forwarded when the provider supports it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub language: Option<String>,
+    #[serde(default)]
+    pub output: OutputFormat,
+    /// Provider-specific options merged verbatim into the provider request.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_options: Option<serde_json::Value>,
+    /// Attach the provider's raw payload to `OcrResponse::raw`.
+    #[serde(default)]
+    pub include_raw: bool,
+    /// Whole-call deadline in seconds (upload + polling + result download).
+    #[serde(default = "default_timeout")]
+    pub timeout_secs: f64,
+    /// Retries on 429 / 5xx / network errors (exponential backoff with jitter).
+    #[serde(default = "default_retries")]
+    pub max_retries: u32,
+    /// Override the API key (otherwise read from the provider's env var).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub api_key: Option<String>,
+    /// Override the provider base URL.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub base_url: Option<String>,
+    /// Free-form metadata echoed back in the response.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub metadata: BTreeMap<String, serde_json::Value>,
+}
+
+fn default_timeout() -> f64 {
+    300.0
+}
+
+fn default_retries() -> u32 {
+    2
+}
+
+impl OcrRequest {
+    pub fn new(input: DocumentInput) -> Self {
+        Self {
+            input,
+            model: "reducto".to_string(),
+            pages: None,
+            language: None,
+            output: OutputFormat::Markdown,
+            provider_options: None,
+            include_raw: false,
+            timeout_secs: default_timeout(),
+            max_retries: default_retries(),
+            api_key: None,
+            base_url: None,
+            metadata: BTreeMap::new(),
+        }
+    }
+
+    pub fn from_path(path: impl AsRef<Path>) -> Self {
+        Self::new(DocumentInput::Path { path: path.as_ref().to_path_buf() })
+    }
+
+    pub fn from_bytes(data: impl Into<bytes::Bytes>, filename: impl Into<String>) -> Self {
+        Self::new(DocumentInput::Bytes { data: data.into(), filename: filename.into() })
+    }
+
+    pub fn from_url(url: impl Into<String>) -> Self {
+        Self::new(DocumentInput::Url { url: url.into() })
+    }
+
+    /// Build from a string that is either a URL or a local path.
+    pub fn from_str_input(s: &str) -> Self {
+        if s.starts_with("http://") || s.starts_with("https://") {
+            Self::from_url(s)
+        } else {
+            Self::from_path(s)
+        }
+    }
+
+    pub fn model(mut self, model: impl Into<String>) -> Self {
+        self.model = model.into();
+        self
+    }
+
+    pub fn pages(mut self, pages: impl Into<String>) -> Self {
+        self.pages = Some(pages.into());
+        self
+    }
+
+    pub fn language(mut self, language: impl Into<String>) -> Self {
+        self.language = Some(language.into());
+        self
+    }
+
+    pub fn output(mut self, output: OutputFormat) -> Self {
+        self.output = output;
+        self
+    }
+
+    pub fn provider_options(mut self, options: serde_json::Value) -> Self {
+        self.provider_options = Some(options);
+        self
+    }
+
+    pub fn include_raw(mut self, include: bool) -> Self {
+        self.include_raw = include;
+        self
+    }
+
+    pub fn timeout_secs(mut self, secs: f64) -> Self {
+        self.timeout_secs = secs;
+        self
+    }
+
+    pub fn max_retries(mut self, n: u32) -> Self {
+        self.max_retries = n;
+        self
+    }
+
+    pub fn api_key(mut self, key: impl Into<String>) -> Self {
+        self.api_key = Some(key.into());
+        self
+    }
+
+    pub fn base_url(mut self, url: impl Into<String>) -> Self {
+        self.base_url = Some(url.into());
+        self
+    }
+
+    /// Look up a provider option by key, if `provider_options` is an object.
+    pub fn option(&self, key: &str) -> Option<&serde_json::Value> {
+        self.provider_options.as_ref().and_then(|v| v.get(key))
+    }
+}
+
+/// Semantic type of a block, mapped from each provider's vocabulary.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BlockType {
+    Text,
+    Title,
+    SectionHeader,
+    List,
+    Table,
+    Figure,
+    Header,
+    Footer,
+    Footnote,
+    Caption,
+    Formula,
+    Other,
+}
+
+impl BlockType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            BlockType::Text => "text",
+            BlockType::Title => "title",
+            BlockType::SectionHeader => "section_header",
+            BlockType::List => "list",
+            BlockType::Table => "table",
+            BlockType::Figure => "figure",
+            BlockType::Header => "header",
+            BlockType::Footer => "footer",
+            BlockType::Footnote => "footnote",
+            BlockType::Caption => "caption",
+            BlockType::Formula => "formula",
+            BlockType::Other => "other",
+        }
+    }
+}
+
+/// Normalised bounding box: coordinates in `0..=1` relative to page size, origin top-left.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct BBox {
+    pub x0: f64,
+    pub y0: f64,
+    pub x1: f64,
+    pub y1: f64,
+}
+
+impl BBox {
+    /// Build from absolute `(x, y, w, h)` plus page dimensions; returns `None` if dims are unusable.
+    pub fn from_xywh(x: f64, y: f64, w: f64, h: f64, page_w: f64, page_h: f64) -> Option<Self> {
+        if page_w <= 0.0 || page_h <= 0.0 {
+            return None;
+        }
+        Some(Self {
+            x0: (x / page_w).clamp(0.0, 1.0),
+            y0: (y / page_h).clamp(0.0, 1.0),
+            x1: ((x + w) / page_w).clamp(0.0, 1.0),
+            y1: ((y + h) / page_h).clamp(0.0, 1.0),
+        })
+    }
+
+    /// Build from already-normalised `(left, top, width, height)`.
+    pub fn from_normalized_ltwh(left: f64, top: f64, width: f64, height: f64) -> Self {
+        Self {
+            x0: left.clamp(0.0, 1.0),
+            y0: top.clamp(0.0, 1.0),
+            x1: (left + width).clamp(0.0, 1.0),
+            y1: (top + height).clamp(0.0, 1.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Block {
+    #[serde(rename = "type")]
+    pub block_type: BlockType,
+    /// Markdown (or text, per `OutputFormat`) content of the block.
+    pub content: String,
+    /// Plain-text variant when the provider supplies one separately.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bbox: Option<BBox>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confidence: Option<f64>,
+    /// 1-based page number.
+    pub page_number: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Page {
+    /// 1-based.
+    pub page_number: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<f64>,
+    pub markdown: String,
+    pub text: String,
+    #[serde(default)]
+    pub blocks: Vec<Block>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+pub struct Usage {
+    /// Pages processed / billed.
+    pub pages: u32,
+    /// Provider-native credit units, when reported.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub credits: Option<f64>,
+    /// Dollar cost when the provider reports it directly.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_cost_usd: Option<f64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct OcrResponse {
+    /// LiteOCR-generated id (UUID v4).
+    pub id: String,
+    pub provider: String,
+    /// Fully-qualified model, e.g. `"reducto/standard"`.
+    pub model: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_job_id: Option<String>,
+    pub pages: Vec<Page>,
+    /// Whole-document markdown: pages joined by a blank line.
+    pub markdown: String,
+    pub text: String,
+    pub usage: Usage,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_usd: Option<f64>,
+    pub latency_ms: u64,
+    /// RFC 3339 timestamp.
+    pub created_at: String,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub metadata: BTreeMap<String, serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub raw: Option<serde_json::Value>,
+}
+
+impl OcrResponse {
+    /// Construct a response from pages, deriving document-level markdown/text.
+    pub fn from_pages(provider: &str, model: &str, mut pages: Vec<Page>, usage: Usage) -> Self {
+        pages.sort_by_key(|p| p.page_number);
+        let markdown = join_pages(pages.iter().map(|p| p.markdown.as_str()));
+        let text = join_pages(pages.iter().map(|p| p.text.as_str()));
+        Self {
+            id: uuid::Uuid::new_v4().to_string(),
+            provider: provider.to_string(),
+            model: model.to_string(),
+            provider_job_id: None,
+            pages,
+            markdown,
+            text,
+            usage,
+            cost_usd: None,
+            latency_ms: 0,
+            created_at: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
+            metadata: BTreeMap::new(),
+            raw: None,
+        }
+    }
+
+    pub fn page_count(&self) -> usize {
+        self.pages.len()
+    }
+}
+
+/// Join page strings with a blank line, skipping empty pages and trimming edges.
+pub fn join_pages<'a>(pages: impl Iterator<Item = &'a str>) -> String {
+    pages.map(str::trim).filter(|s| !s.is_empty()).collect::<Vec<_>>().join("\n\n")
+}
+
+/// Group blocks into pages by their `page_number`, producing markdown/text per page.
+pub fn pages_from_blocks(blocks: Vec<Block>, page_dims: &BTreeMap<u32, (f64, f64)>) -> Vec<Page> {
+    let mut by_page: BTreeMap<u32, Vec<Block>> = BTreeMap::new();
+    for b in blocks {
+        by_page.entry(b.page_number).or_default().push(b);
+    }
+    by_page
+        .into_iter()
+        .map(|(page_number, blocks)| {
+            let markdown = join_pages(blocks.iter().map(|b| b.content.as_str()));
+            let text = join_pages(blocks.iter().map(|b| b.text.as_deref().unwrap_or(b.content.as_str())));
+            let (width, height) = page_dims.get(&page_number).map(|&(w, h)| (Some(w), Some(h))).unwrap_or((None, None));
+            Page { page_number, width, height, markdown, text, blocks }
+        })
+        .collect()
+}
+
+/// Very small markdown → plain text conversion, used when a provider only gives markdown.
+pub fn markdown_to_text(md: &str) -> String {
+    let mut out = String::with_capacity(md.len());
+    for line in md.lines() {
+        let l = line.trim_end();
+        let trimmed = l.trim_start();
+        // Skip table separator rows like |---|---|
+        if trimmed.starts_with('|') && trimmed.chars().all(|c| matches!(c, '|' | '-' | ':' | ' ')) {
+            continue;
+        }
+        let mut s = trimmed.trim_start_matches('#').trim_start().to_string();
+        if trimmed.starts_with('#') && s.is_empty() {
+            continue;
+        }
+        for prefix in ["- ", "* ", "+ ", "> "] {
+            if let Some(rest) = s.strip_prefix(prefix) {
+                s = rest.to_string();
+                break;
+            }
+        }
+        if s.starts_with('|') {
+            s = s.trim_matches('|').split('|').map(str::trim).collect::<Vec<_>>().join(" ");
+        }
+        let s = s.replace("**", "").replace("__", "").replace('`', "");
+        out.push_str(s.trim());
+        out.push('\n');
+    }
+    out.trim_end().to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn input_filename_and_mime() {
+        let p = DocumentInput::Path { path: "/tmp/a/invoice.PDF".into() };
+        assert_eq!(p.filename(), "invoice.PDF");
+        assert_eq!(p.mime_type(), "application/pdf");
+        let u = DocumentInput::Url { url: "https://x.com/y/z.png?token=1".into() };
+        assert_eq!(u.filename(), "z.png");
+        assert_eq!(u.mime_type(), "image/png");
+        let b = DocumentInput::Bytes { data: bytes::Bytes::from_static(b"x"), filename: "a.bin".into() };
+        assert_eq!(b.mime_type(), "application/octet-stream");
+    }
+
+    #[test]
+    fn request_from_str_detects_url() {
+        assert!(matches!(OcrRequest::from_str_input("https://a/b.pdf").input, DocumentInput::Url { .. }));
+        assert!(matches!(OcrRequest::from_str_input("b.pdf").input, DocumentInput::Path { .. }));
+    }
+
+    #[test]
+    fn groups_blocks_into_pages() {
+        let mk = |p: u32, c: &str| Block {
+            block_type: BlockType::Text,
+            content: c.into(),
+            text: None,
+            bbox: None,
+            confidence: None,
+            page_number: p,
+        };
+        let pages = pages_from_blocks(vec![mk(2, "b"), mk(1, "a"), mk(1, "a2")], &BTreeMap::new());
+        assert_eq!(pages.len(), 2);
+        assert_eq!(pages[0].page_number, 1);
+        assert_eq!(pages[0].markdown, "a\n\na2");
+        assert_eq!(pages[1].markdown, "b");
+        let resp = OcrResponse::from_pages("p", "p/m", pages, Usage::default());
+        assert_eq!(resp.markdown, "a\n\na2\n\nb");
+    }
+
+    #[test]
+    fn markdown_to_text_strips_syntax() {
+        let md = "# Title\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n- **bold** item";
+        assert_eq!(markdown_to_text(md), "Title\n\na b\n1 2\n\nbold item");
+    }
+
+    #[test]
+    fn bbox_normalises() {
+        let b = BBox::from_xywh(10.0, 20.0, 30.0, 40.0, 100.0, 200.0).unwrap();
+        assert!((b.x0 - 0.1).abs() < 1e-9 && (b.y1 - 0.3).abs() < 1e-9);
+        assert!(BBox::from_xywh(1.0, 1.0, 1.0, 1.0, 0.0, 0.0).is_none());
+    }
+}

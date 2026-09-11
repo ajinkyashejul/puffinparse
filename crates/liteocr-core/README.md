@@ -1,0 +1,17 @@
+# liteocr-core
+
+Rust core of [LiteOCR](https://github.com/ajinkyashejul/liteocr): a single API
+for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, …).
+
+```rust
+use liteocr_core::{ocr, OcrRequest};
+
+#[tokio::main]
+async fn main() -> Result<(), liteocr_core::Error> {
+    let resp = ocr(OcrRequest::from_path("invoice.pdf").model("reducto/standard")).await?;
+    println!("{} pages, ${:.4}: {}", resp.usage.pages, resp.cost_usd.unwrap_or(0.0), resp.markdown);
+    Ok(())
+}
+```
+
+See the repository README for the Python SDK, CLI and benchmark.

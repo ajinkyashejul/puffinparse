@@ -1,0 +1,97 @@
+{
+ "response_type": "parse",
+ "job_id": "04fe7cf4-1f40-4a03-b1a0-460bd8d6a89a",
+ "duration": 0.7815132141113281,
+ "pdf_url": "https://example-storage.invalid/converted.pdf?X-Amz-Signature=REDACTED",
+ "studio_link": "https://studio.reducto.ai/job/04fe7cf4-1f40-4a03-b1a0-460bd8d6a89a",
+ "usage": {
+  "num_pages": 1,
+  "credits": 1.0,
+  "credit_breakdown": {
+   "page": 1.0
+  },
+  "page_billing_breakdown": {
+   "1": [
+    "page"
+   ]
+  },
+  "non_empty_cell_count": null
+ },
+ "result": {
+  "type": "full",
+  "chunks": [
+   {
+    "content": "# Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78\n\nAcme Corporation, 123 Main Street",
+    "embed": "# Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78\n\nAcme Corporation, 123 Main Street",
+    "enriched": null,
+    "enrichment_success": false,
+    "blocks": [
+     {
+      "type": "Title",
+      "bbox": {
+       "left": 0.119281045751634,
+       "top": 0.06818181818181818,
+       "width": 0.24754901960784315,
+       "height": 0.021464646464646464,
+       "page": 1,
+       "original_page": 1
+      },
+      "content": "Hello LiteOCR",
+      "image_url": null,
+      "chart_data": null,
+      "confidence": "high",
+      "granular_confidence": {
+       "extract_confidence": null,
+       "parse_confidence": 0.9461241155862807
+      },
+      "extra": null
+     },
+     {
+      "type": "Text",
+      "bbox": {
+       "left": 0.11764705882352941,
+       "top": 0.12184343434343434,
+       "width": 0.14215686274509803,
+       "height": 0.049873737373737376,
+       "page": 1,
+       "original_page": 1
+      },
+      "content": "Invoice #1234\nTotal: $56.78",
+      "image_url": null,
+      "chart_data": null,
+      "confidence": "high",
+      "granular_confidence": {
+       "extract_confidence": null,
+       "parse_confidence": 0.8186227351427078
+      },
+      "extra": null
+     },
+     {
+      "type": "Text",
+      "bbox": {
+       "left": 0.11764705882352941,
+       "top": 0.20075757575757575,
+       "width": 0.30718954248366015,
+       "height": 0.020833333333333332,
+       "page": 1,
+       "original_page": 1
+      },
+      "content": "Acme Corporation, 123 Main Street",
+      "image_url": null,
+      "chart_data": null,
+      "confidence": "high",
+      "granular_confidence": {
+       "extract_confidence": null,
+       "parse_confidence": 0.9274418026208877
+      },
+      "extra": null
+     }
+    ]
+   }
+  ],
+  "ocr": null,
+  "custom": null
+ },
+ "parse_mode": null,
+ "document_properties": null
+}
