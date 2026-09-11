@@ -95,10 +95,10 @@ jobs:
         run: maturin develop --release
 
       - name: Ruff lint
-        run: ruff check python/ benchmark/
+        run: ruff check python/ benchmark/ examples/
 
       - name: Ruff format check
-        run: ruff format --check python/ benchmark/
+        run: ruff format --check python/ benchmark/ examples/
 
       - name: Mypy
         run: mypy python/liteocr

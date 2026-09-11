@@ -30,14 +30,14 @@ test-python: ## pytest (requires `make develop` first)
 lint: ## fmt check, clippy, ruff, mypy — everything CI enforces
 	$(CARGO) fmt --all --check
 	$(CARGO) clippy --workspace --all-targets -- -D warnings
-	ruff check python/ benchmark/
-	ruff format --check python/ benchmark/
+	ruff check python/ benchmark/ examples/
+	ruff format --check python/ benchmark/ examples/
 	mypy python/liteocr
 
 fmt: ## Format Rust and Python sources in place
 	$(CARGO) fmt --all
-	ruff format python/ benchmark/
-	ruff check --fix python/ benchmark/
+	ruff format python/ benchmark/ examples/
+	ruff check --fix python/ benchmark/ examples/
 
 develop: ## Build the PyO3 extension and install liteocr into the active venv
 	maturin develop
