@@ -1016,6 +1016,7 @@ dependencies = [
 name = "liteocr-python"
 version = "0.1.0"
 dependencies = [
+ "bytes",
  "liteocr-core",
  "pyo3",
  "pyo3-async-runtimes",

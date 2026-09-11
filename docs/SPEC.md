@@ -74,9 +74,11 @@ Like LiteLLM, the `model` string selects provider and mode: `"<provider>/<model>
 
 | Provider | Models (v0.1) | Maps to |
 |---|---|---|
-| `reducto` | `reducto/standard` (default), `reducto/hybrid`, `reducto/agentic` | `options.ocr_mode` = `standard` / `hybrid` / `agentic` |
-| `extend` | `extend/parse` (default) | `POST /parse` with `config.target=MARKDOWN` |
-| `llamaparse` | `llamaparse/fast`, `llamaparse/cost_effective` (default), `llamaparse/agentic`, `llamaparse/agentic_plus` | `tier` form field |
+| `reducto` | `reducto/standard` (default), `reducto/r-1`, `reducto/agentic` | default settings / `settings.model="r-1"` / `enhance.agentic=[{scope:text},{scope:table}]` |
+| `extend` | `extend/parse_performance` (default), `extend/parse_light`, `extend/parse_auto` | `config.engine` |
+| `llamaparse` | `llamaparse/fast`, `llamaparse/cost_effective` (default), `llamaparse/agentic`, `llamaparse/agentic_plus` | `tier` form field (+ `version=latest`) |
+
+Aliases: `llama`, `llama_parse`, `llamacloud` → `llamaparse`. Matching is case-insensitive.
 
 `model="reducto"` (no slash) selects the provider default. Unknown providers or
 models raise `UnsupportedModelError` before any network call.
@@ -202,7 +204,7 @@ Every error carries `provider`, `status_code` (if any), `message`, and
 
 ```python
 router = liteocr.Router(
-    models=["reducto/standard", "llamaparse/agentic", "extend/parse"],
+    models=["reducto/standard", "llamaparse/agentic", "extend/parse_light"],
     strategy="ordered",          # "ordered" (fallback order) | "round_robin"
     max_retries=2,
     fallback_on=("ProviderError", "RateLimitError", "TimeoutError"),
@@ -219,48 +221,72 @@ exposed as `router.stats()`. Auth/BadRequest/Input errors never trigger fallback
 
 ## 8. Provider mapping
 
+All three mappings below were verified against live API responses on 2026-09-11;
+the captured payloads live in `crates/liteocr-core/tests/fixtures/` and drive unit tests.
+
 ### 8.1 Reducto
 
-- Base: `https://platform.reducto.ai`, header `Authorization: Bearer <key>`.
-- Flow: `POST /upload` (multipart `file`) → `{file_id}` (`reducto://…`) →
-  `POST /parse` `{document_url, options:{ocr_mode}, advanced_options, …}`.
-  For URLs, `document_url` is the URL directly.
-- Sync parse is used; async (`/parse_async` + `/job/{id}`) is used when
-  `provider_options.async = true` or the file exceeds a size threshold.
-- Response: `result.chunks[].blocks[]` with `type`, `bbox{left,top,width,height,page,original_page}`
-  (normalised 0..1), `content`, `confidence`. `usage.num_pages`, `usage.credits`.
-  If `result.type == "url"`, fetch `result.url` to get the full result.
-- Block type mapping: `Title→title`, `Section Header→section_header`,
-  `Text→text`, `List Item→list`, `Table→table`, `Figure→figure`,
-  `Header→header`, `Footer→footer`, `Footnote→footnote`, `Caption→caption`,
-  `Formula→formula`, `Page Number→other`.
-- Page reconstruction: group blocks by `bbox.page`.
+- Base: `https://platform.reducto.ai`, header `Authorization: Bearer <key>`
+  (`REDUCTO_API_KEY`, `REDUCTO_BASE_URL` override).
+- Flow: `POST /upload` (multipart `file`) → `{file_id: "reducto://…"}`; URLs are passed
+  directly. Then `POST /parse` (sync, 900 s ceiling) with the v3 body
+  `{input, retrieval:{chunking:{chunk_mode:"page"}}, formatting:{table_output_format:"md"}, settings:{…}}`.
+  With `provider_options.async = true`: `POST /parse_async` → `{job_id}` → poll
+  `GET /job/{id}` (`Pending` → `Completed` | `Failed`); the parse payload is `job.result`.
+- `pages` → `settings.page_range = [{start,end}]` (1-based).
+- Response: `result.type` is `"full"` (`chunks[]`) or `"url"` (fetch `result.url`; the body is
+  the same `FullResult` object). `chunks[].blocks[]` carry `type` (values contain spaces,
+  e.g. `"Section Header"`), `bbox{left,top,width,height,page,original_page}` already normalised
+  to 0..1, `content`, `confidence` (`"high"|"low"`), `granular_confidence.parse_confidence`.
+  `usage.num_pages`, `usage.credits` (null on per-product pricing accounts).
+- Block types: `Title→title`, `Section Header→section_header`, `Text`/`Key Value`/`Comment→text`,
+  `List Item→list`, `Table→table`, `Figure→figure`, `Header→header`, `Footer→footer`,
+  `Footnote→footnote`, `Caption→caption`, `Formula→formula`, else `other`.
+- Pages: with `chunk_mode=page` each chunk is one page; page number is taken from the chunk's
+  blocks' `bbox.page` (chunks themselves have no page field). Chunk `content` is kept as the
+  page markdown.
+- Errors: `{"error":{"code","name","message"},"detail"}`, `422` Pydantic arrays, a bare nginx
+  HTML `403` when the header is missing, and a non-standard `442` for password-protected files.
 
 ### 8.2 Extend
 
-- Base: `https://api.extend.ai`, headers `Authorization: Bearer <key>`,
-  `x-extend-api-version: <date>`.
-- Flow: `POST /files/upload` (multipart) → `fileId` → `POST /parse`
-  `{file:{fileId | fileUrl}, config:{target:"MARKDOWN", …}}` (sync) or
-  `/parse_async` + `GET /parser_runs/{id}`.
-- Response: `parserRun.output.chunks[].blocks[]` with `type`, `content`,
-  `pageNumber`, `boundingBox`, `confidence`; `parserRun.metrics.numPages`.
-- Page reconstruction: group blocks by `pageNumber`.
+- Base: `https://api.extend.ai` (`EXTEND_API_KEY`, `EXTEND_BASE_URL`), headers
+  `Authorization: Bearer <key>` and the **mandatory** `x-extend-api-version: 2026-02-09`.
+  `provider_options.workspace_id` sets `x-extend-workspace-id` for org-scoped keys.
+- Flow: `POST /files/upload` (multipart) → `{id: "file_…"}`; URLs are passed as
+  `file:{url,name}`. Then `POST /parse_runs` (async) → poll `GET /parse_runs/{id}` until
+  `status ∈ {PROCESSED, FAILED}`. (The sync `POST /parse` has a 5-minute hard limit, so LiteOCR
+  always uses runs.)
+- Body: `{file, config:{target:"markdown", chunkingStrategy:{type:"page"}, engine,
+  blockOptions:{tables:{targetFormat:"markdown"}}, advancedOptions:{pageRanges}}}`.
+  `provider_options` keys `target`, `chunkingStrategy`, `engine`, `engineVersion`,
+  `blockOptions`, `advancedOptions` are merged into `config`; others (`metadata`,
+  `dataRetention`) at top level.
+- Response: the run object itself: `output.chunks[]` (`type:"page"`, `content`,
+  `metadata.pageRange`) with `blocks[]` (`type`, `content`, `metadata.page{number,width,height}`,
+  `metadata.avgOcrConfidence`, `boundingBox{left,top,right,bottom}` in page pixels);
+  `metrics.pageCount`, `usage.credits`. `responseType=url` results are fetched from `outputUrl`.
+- Block types: `heading→title`, `section_heading→section_header`, `text`/`key_value→text`,
+  `table`/`table_head`/`table_cell→table`, `figure→figure`, `formula→formula`, `header`,
+  `footer`, else `other` (`page_number`, `barcode`).
+- Errors: `{code, message, requestId, retryable}`; failed runs carry `failureReason`.
 
 ### 8.3 LlamaParse
 
-- Base: `https://api.cloud.llamaindex.ai`, header `Authorization: Bearer <key>`.
-- Flow: `POST /api/v1/parsing/upload` (multipart `file` or `input_url`, form
-  fields `tier`, `version`, `language`, `page_separator`, …) → `{id}`; poll
-  `GET /api/v1/parsing/job/{id}` until `SUCCESS`/`ERROR`; then
-  `GET /api/v1/parsing/job/{id}/result/json` for pages + items + metadata.
-- Response: `pages[].{page, text, md, items[], width, height}`;
-  `job_metadata.{job_pages, job_credits_usage, credits_used}`.
-- Block type mapping: `heading→section_header` (level 1 → `title`),
-  `text→text`, `table→table`; items carry `bBox{x,y,w,h}` in page units.
-
-Exact field names are verified against live responses captured in
-`crates/liteocr-core/tests/fixtures/`.
+- Base: `https://api.cloud.llamaindex.ai` (`LLAMA_API_KEY`, `LLAMA_BASE_URL`; EU:
+  `https://api.cloud.eu.llamaindex.ai`), header `Authorization: Bearer llx-…`.
+- Flow: `POST /api/v1/parsing/upload` (multipart `file` or `input_url`; form fields
+  `tier`, `version=latest`, `language`, `target_pages` (0-based, converted from `pages`), plus any
+  `provider_options` as extra form fields) → `{id, status}`; poll `GET /api/v1/parsing/job/{id}`
+  until `SUCCESS | PARTIAL_SUCCESS | ERROR | CANCELLED`; then
+  `GET /api/v1/parsing/job/{id}/result/json`.
+- Response: `pages[].{page (1-based), text, md, items[], width, height}`; items have `type`
+  (`heading` with `lvl`, `text`, `table`), `md`, `value`, `bBox{x,y,w,h,confidence}` in page
+  units. `job_metadata.job_pages`; `job_credits_usage` is `0` until billing settles and is
+  therefore only reported when positive.
+- Block types: `heading` lvl 1 → `title`, other headings → `section_header`, `text→text`,
+  `table→table`, else `other`.
+- Errors: FastAPI `{"detail": "…"}` / `{"detail": [ValidationError]}`.
 
 ---
 
@@ -299,7 +325,9 @@ benchmark/datasets/<name>/
 
 `manifest.documents[]`: `{id, file, truth, pages, tags:[...], category}`.
 Categories in the built-in `synthetic-v1` set: `plain`, `invoice`, `table`,
-`two_column`, `noisy_scan`, `handwriting_like`, `low_res`, `rotated`.
+`two_column`, `headings`, `noisy_scan`, `low_res`, `multipage`, `skewed`, `dense`, `faded`,
+`receipt`, `complex_table`. The generator (`benchmark/generate_synthetic.py`) is seeded and
+byte-reproducible; the truth is produced from the same source the pixels are rendered from.
 
 ### 10.3 Metrics (computed in Rust, `liteocr_core::bench`)
 
@@ -310,8 +338,9 @@ whitespace, strip markdown emphasis, lowercase for the `case_insensitive` varian
 - `cer = levenshtein(P, T) / |T|`
 - `wer = word_levenshtein(P_words, T_words) / |T_words|`
 - `word_recall` = fraction of truth word tokens present in prediction (bag-of-words)
-- `table_score` (docs tagged `table`): char_similarity restricted to table lines
-- `order_score`: Kendall-τ–like agreement of shared line order (reading order)
+- `word_precision`, `word_f1`
+- `table_score` (when the truth has markdown table rows): char_similarity restricted to table rows
+- `order_score`: Kendall-τ–like agreement of the order of lines shared by both texts
 
 Per document all metrics are recorded; aggregate = mean over docs, plus per
 category. **Overall score** = `100 * mean(char_similarity)`.
@@ -320,13 +349,17 @@ category. **Overall score** = `100 * mean(char_similarity)`.
 
 ```
 liteocr bench run --dataset benchmark/datasets/synthetic-v1 \
-    --models reducto/standard extend/parse llamaparse/agentic \
+    --models reducto/standard extend/parse_performance llamaparse/agentic \
     --out benchmark/results/<date>-synthetic-v1.json
 liteocr bench report benchmark/results/*.json --format markdown > benchmark/LEADERBOARD.md
 ```
 
-Result JSON: `{run_id, created_at, dataset:{name, version, sha256}, models:[{model,
-docs:[{id, metrics, latency_ms, pages, cost_usd, error}], summary:{…}}]}`.
+Result JSON: `{run_id, created_at, liteocr_version, dataset:{name, version, documents, sha256},
+normalize, models:[{model, docs:[{id, category, pages, metrics, latency_ms, cost_usd, error}],
+summary:{documents, failed, char_similarity, cer, wer, word_f1, order_score, table_score, overall,
+latency_p50_ms, latency_p95_ms, latency_per_page_ms, total_pages, total_cost_usd,
+cost_per_1k_pages_usd, by_category}}]}`. The `sha256` covers the manifest plus every input and
+truth file, so a result is tied to an exact dataset revision.
 
 `LEADERBOARD.md` is regenerated from committed results and links to each run.
 
@@ -338,8 +371,11 @@ docs:[{id, metrics, latency_ms, pages, cost_usd, error}], summary:{…}}]}`.
   `Page`, `Block`, `BBox`, `Usage`, errors, `set_pricing`, `list_models`,
   `register_callback`.
 - Callbacks: `liteocr.success_callback: list[Callable[[OcrResponse], None]]`,
-  `liteocr.failure_callback` — invoked after each call (sync callbacks run
-  inline; async ones scheduled on the loop).
+  `liteocr.failure_callback` — invoked after each call; awaitables returned by a
+  callback are awaited (on the caller's loop for `aocr`, on a private loop for `ocr`).
+- Bytes never cross the FFI boundary as base64: the Python layer passes the document
+  as a separate `bytes` argument and the extension builds `DocumentInput::Bytes`.
+- `liteocr.score`, `normalize_text`, `markdown_to_text` expose the benchmark metrics.
 - Logging: `LITEOCR_LOG=debug` enables tracing in the core; Python uses
   `logging.getLogger("liteocr")`.
 - Typing: fully typed, `py.typed` shipped.
@@ -352,7 +388,7 @@ docs:[{id, metrics, latency_ms, pages, cost_usd, error}], summary:{…}}]}`.
 ```
 liteocr parse <file|url> [--model reducto/standard] [--format markdown|text|json] [--raw]
 liteocr providers                          # lists providers, models, pricing, key status
-liteocr bench run|report|generate          # see §10
+liteocr bench run|report|score             # see §10
 ```
 
 Exit code 0 on success, 1 on provider error, 2 on usage/config error.
