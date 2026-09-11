@@ -44,7 +44,9 @@ cargo build --release -p liteocr-cli
 ./target/release/liteocr bench report benchmark/results/*.json > benchmark/LEADERBOARD.md
 ```
 
-`--save-outputs` writes each model's markdown per document so mistakes can be inspected.
+`--save-outputs` writes each model's markdown per document so mistakes can be inspected. Committed
+runs keep them under `results/outputs/<run_id>/<model>/<doc_id>.md`; the static site under
+`site/` renders them next to the input and the truth with a word-level diff.
 `--filter <substring>` and `--limit N` select a subset of documents.
 
 Scoring a single pair without any network access:
