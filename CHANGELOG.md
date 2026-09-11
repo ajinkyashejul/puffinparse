@@ -22,6 +22,18 @@ Python package `liteocr` share a single version.
   and the lossy type mappings are enumerated in [`docs/COMPAT.md`](docs/COMPAT.md), and each
   provider's fixture is round-tripped through its own renderer in the test suite. Extract-mode
   rendering is best effort. See ADR-13.
+- **`output_format` in the Python SDK and the CLI.** `liteocr.parse(..., output_format="reducto")`
+  (and `aparse`, `extract`, `aextract`, plus the matching `Router` methods) returns the vendor's
+  own JSON as a `dict` instead of the dataclass; `output_format=None` (the default) or
+  `"liteocr"` keeps the unified shape. The value is validated in the core before any network call
+  — an unknown name raises `BadRequestError` listing `liteocr | reducto | extend | llamaparse` —
+  the rendering happens in Rust (`liteocr._core.render_parse` / `render_extract`), and success
+  callbacks still receive the dataclass. Overloads type the return (`None` → dataclass, `str` →
+  `dict`), `liteocr.output_formats()` lists the accepted values, and
+  `examples/switch_provider_keep_format.py` shows a provider swap with the parsing code untouched.
+  The CLI gains `--output-format <vendor>` on `parse` (with `--format json`; ignored with a
+  warning on stderr otherwise) and on `extract`, and `liteocr providers --json` now emits
+  `{"providers": [...], "output_formats": [...]}` instead of a bare array.
 
 ### Changed
 
@@ -37,6 +49,10 @@ Python package `liteocr` share a single version.
   `liteocr.ocr` (which returned markdown) is now `liteocr.parse`, and `OcrResponse`
   is now `ParseResponse`. Which models serve which mode is reported by
   `liteocr.list_models(mode)` and `liteocr providers --mode <mode>`.
+- **README model table.** The "Model names" section is regenerated from the registry and
+  `pricing.json`: every provider group carries its env var and verification status
+  (live-verified vs docs-only), every model its modes, the default per mode and the list price
+  per page for `parse · ocr · extract`.
 
 ## [0.1.0] - 2026-09-11
 

@@ -49,8 +49,18 @@ liteocr parse <INPUT> [OPTIONS]
 | Flag | Default | Description |
 |---|---|---|
 | `-f`, `--format <FORMAT>` | `markdown` | One of `markdown`, `text`, `json`. |
+| `--output-format <VENDOR>` | — | Render the JSON in a provider's **own** response shape: `reducto`, `extend`, `llamaparse`, or `liteocr` for the unified one. |
 
 `--format json` prints the whole `ParseResponse` as pretty JSON (and no summary line).
+
+`--output-format` is the native-format compatibility layer: whatever provider ran the call, the
+response is rendered into the named vendor's JSON, so a script that already parses Reducto's or
+Extend's output keeps working after a model swap. It only applies to `--format json` — with
+`markdown` or `text` output the flag is ignored and a warning goes to stderr. An unknown name
+fails before any network call (exit code `2`) and the message lists the valid values.
+[`docs/COMPAT.md`](https://github.com/ajinkyashejul/liteocr/blob/main/docs/COMPAT.md) documents
+exactly what is guaranteed (key set, counts, content, block vocabulary, coordinate units, billed
+pages) and what is always `null`.
 
 ```bash
 liteocr parse invoice.pdf -m extend/parse_light
@@ -59,6 +69,10 @@ liteocr parse doc.pdf -m reducto/r-1 --pages 1-3 -f text
 liteocr parse https://example.com/doc.pdf -m reducto/standard \
     --options '{"settings": {"return_ocr_data": true}}'
 liteocr parse big.pdf -m extend/parse_auto --timeout 900 --max-retries 4
+
+# Extend's engine, Reducto's response shape
+liteocr parse invoice.pdf -m extend/parse_light -f json --output-format reducto \
+    | jq '.result.chunks[0].blocks[0].bbox'
 ```
 
 ## `liteocr ocr`
@@ -94,11 +108,13 @@ liteocr extract <INPUT> --schema <FILE|JSON> [OPTIONS]
 | `-s`, `--schema <FILE\|JSON>` | *required* | JSON Schema for the object to extract: a path to a `.json` file, or inline JSON (anything starting with `{`). |
 | `--instructions <TEXT>` | — | Extra natural-language guidance for the extractor. |
 | `--citations` | off | Ask for per-field citations (page, box, source text) where the provider supports them. |
+| `--output-format <VENDOR>` | — | Render the extract envelope in `reducto`, `extend` or `llamaparse` shape instead of the unified one (best effort — see `docs/COMPAT.md` §7). `extract` always prints JSON, so it always applies. |
 
 ```bash
-liteocr extract invoice.pdf -s invoice.schema.json -m reducto/standard --citations
+liteocr extract invoice.pdf -s invoice.schema.json -m reducto/extract --citations
 liteocr extract invoice.pdf -s '{"type":"object","properties":{"total":{"type":"number"}}}' \
     --instructions 'Totals are inclusive of tax.' | jq '.data.total'
+liteocr extract invoice.pdf -s invoice.schema.json --output-format reducto | jq '.result'
 ```
 
 A model that does not serve `extract` fails before any network call (exit code `2`); use
@@ -123,20 +139,28 @@ liteocr providers --mode extract
 │ Model             │ Modes      │ Default │ Key │ $/page        │ Description              │
 ...
 Modes: parse (markdown + blocks), ocr (plain text + boxes), extract (JSON schema).
-Keys are read from: REDUCTO_API_KEY, EXTEND_API_KEY, LLAMA_API_KEY
+Keys are read from: REDUCTO_API_KEY, EXTEND_API_KEY, LLAMA_API_KEY, ...
+Native output formats (--output-format, json only): liteocr | reducto | extend | llamaparse
 ```
 
 `Default` marks each provider's default model, `Key` shows `✓` / `✗` for a non-empty environment
 variable, and `$/page` lists the price of every mode the model serves (one number when `--mode` is
 given).
 
-`--json` emits an array of providers with `name`, `display_name`, `env_var`, `key_configured`,
-`base_url`, `docs` and a `models` array of `{model, default, description, modes, per_page_usd}`,
-where `per_page_usd` is keyed by mode — handy for scripting or for an agent picking a model.
+`--json` emits an object with two keys:
+
+- `providers` — one entry per provider with `name`, `display_name`, `env_var`, `key_configured`,
+  `base_url`, `docs` and a `models` array of `{model, default, description, modes, per_page_usd}`,
+  where `per_page_usd` is keyed by mode;
+- `output_formats` — the vendor shapes this build can render (`--output-format`, and
+  `output_format=` in the SDK).
+
+Handy for scripting, or for an agent picking a model.
 
 ```bash
-liteocr providers --json | jq -r '.[].models[] | select(.per_page_usd.parse < 0.005) | .model'
-liteocr providers --mode ocr --json | jq -r '.[].models[].model'
+liteocr providers --json | jq -r '.providers[].models[] | select(.per_page_usd.parse < 0.005) | .model'
+liteocr providers --mode ocr --json | jq -r '.providers[].models[].model'
+liteocr providers --json | jq -r '.output_formats[]'
 ```
 
 ## `liteocr bench`

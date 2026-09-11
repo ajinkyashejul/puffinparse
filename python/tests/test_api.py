@@ -218,3 +218,100 @@ def test_score_and_normalize() -> None:
     partial = liteocr.score("hello there world", "hello world")
     assert 0.5 < partial.char_similarity < 1.0
     assert partial.word_recall == 1.0
+
+
+# ---- native-format output (output_format) --------------------------------------------------------
+
+
+def test_output_formats_lists_the_unified_shape_and_every_vendor() -> None:
+    assert liteocr.output_formats() == ["liteocr", "reducto", "extend", "llamaparse"]
+
+
+def test_bad_output_format_raises_before_any_network_call(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A typo must fail at request-build time, not after paying for a provider call."""
+
+    def unreachable(*args: object, **kwargs: object) -> None:
+        raise AssertionError("the core must not be called with an invalid output_format")
+
+    monkeypatch.setattr(liteocr.main._core, "parse", unreachable)
+    monkeypatch.setattr(liteocr.main._core, "extract", unreachable)
+
+    with pytest.raises(liteocr.BadRequestError) as ei:
+        liteocr.parse("invoice.pdf", model="reducto/standard", output_format="nope")
+    message = str(ei.value)
+    for name in ("liteocr", "reducto", "extend", "llamaparse"):
+        assert name in message, message
+
+    with pytest.raises(liteocr.BadRequestError):
+        liteocr.extract("invoice.pdf", SCHEMA, model="reducto/extract", output_format="nope")
+
+
+async def test_bad_output_format_raises_before_any_network_call_async() -> None:
+    # No key, no readable file: reaching the core at all would raise something else entirely.
+    with pytest.raises(liteocr.BadRequestError):
+        await liteocr.aparse("invoice.pdf", model="reducto/standard", output_format="reduct")
+    with pytest.raises(liteocr.BadRequestError):
+        await liteocr.aextract("invoice.pdf", SCHEMA, model="reducto/extract", output_format="reduct")
+
+
+def test_router_validates_output_format_before_any_network_call() -> None:
+    router = liteocr.Router(["reducto/standard", "extend/parse_light"])
+    with pytest.raises(liteocr.BadRequestError):
+        router.parse("invoice.pdf", output_format="reductoo")
+
+
+def test_output_format_accepts_vendor_aliases() -> None:
+    # aliases and case are resolved by the core, so the SDK and CLI agree on what is valid
+    assert liteocr.main._validate_output_format("Reducto") == "reducto"
+    assert liteocr.main._validate_output_format("llama_parse") == "llamaparse"
+    assert liteocr.main._validate_output_format("unified") == "liteocr"
+
+
+def test_render_of_a_unified_response_is_vendor_shaped() -> None:
+    """The renderers are pure functions of a response, so they need no network."""
+    resp = liteocr.ParseResponse(
+        id="resp_1",
+        provider="extend",
+        model="extend/parse_light",
+        pages=[
+            liteocr.Page(
+                page_number=1,
+                markdown="# Title",
+                text="Title",
+                width=100.0,
+                height=200.0,
+                blocks=[
+                    liteocr.Block(
+                        type="title",
+                        content="# Title",
+                        page_number=1,
+                        bbox=liteocr.BBox(0.1, 0.1, 0.5, 0.2),
+                        confidence=0.9,
+                    )
+                ],
+            )
+        ],
+        markdown="# Title",
+        text="Title",
+        usage=liteocr.Usage(pages=1),
+        latency_ms=10,
+        created_at="2026-09-11T00:00:00Z",
+    )
+    reducto = liteocr.main._render(resp.to_dict(), "reducto", "parse")
+    assert reducto["response_type"] == "parse"
+    block = reducto["result"]["chunks"][0]["blocks"][0]
+    assert block["type"] == "Title"
+    assert block["bbox"] == {
+        "left": 0.1,
+        "top": 0.1,
+        "width": 0.4,
+        "height": 0.1,
+        "page": 1,
+        "original_page": 1,
+    }
+    extend = liteocr.main._render(resp.to_dict(), "extend", "parse")
+    assert extend["object"] == "parse_run" and extend["status"] == "PROCESSED"
+    # Extend reports boxes in page pixels, so the page size is used verbatim
+    assert extend["output"]["chunks"][0]["blocks"][0]["boundingBox"]["left"] == pytest.approx(10.0)
+    llamaparse = liteocr.main._render(resp.to_dict(), "llamaparse", "parse")
+    assert llamaparse["pages"][0]["items"][0]["type"] == "heading"

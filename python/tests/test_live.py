@@ -56,3 +56,66 @@ async def test_aocr_bytes_input(model: str) -> None:
     assert resp.usage.pages >= 1
     assert resp.pages[0].text.strip()
     assert resp.pages[0].lines
+
+
+# ---- native-format output (output_format) --------------------------------------------------------
+
+
+def _prune(value: object) -> object:
+    """Drop what the Rust serialiser omits (``None`` fields, empty maps) from a dataclass dump."""
+    if isinstance(value, dict):
+        return {k: _prune(v) for k, v in value.items() if v is not None and v != {}}
+    if isinstance(value, list):
+        return [_prune(v) for v in value]
+    return value
+
+
+@live("extend")
+def test_parse_renders_extend_output_in_reductos_shape() -> None:
+    """Reducto's parse JSON, produced by Extend's engine: the whole point of the compat layer."""
+    doc = liteocr.parse(SAMPLE_PDF, model="extend/parse_light", output_format="reducto", timeout=240)
+    assert isinstance(doc, dict)
+    assert doc["response_type"] == "parse"
+    assert doc["usage"]["num_pages"] == 2
+    assert doc["result"]["type"] == "full"
+    chunks = doc["result"]["chunks"]
+    assert len(chunks) == 2
+    blocks = chunks[0]["blocks"]
+    assert blocks, "expected Reducto-shaped blocks"
+    first = blocks[0]
+    assert first["content"].strip()
+    assert set(first["bbox"]) == {"left", "top", "width", "height", "page", "original_page"}
+    assert first["bbox"]["page"] == 1
+    # Reducto's render uses a reduced block vocabulary (docs/COMPAT.md §4)
+    reducto_types = {"Title", "Section Header", "Text", "List Item", "Table", "Figure", "Header", "Footer"}
+    assert first["type"] in reducto_types
+
+
+@live("extend")
+def test_liteocr_output_format_equals_the_dataclass() -> None:
+    """``output_format="liteocr"`` is the unified shape, and callbacks still get the dataclass."""
+    seen: list[liteocr.Response] = []
+    liteocr.success_callback.append(seen.append)
+    try:
+        doc = liteocr.parse(SAMPLE_PDF, model="extend/parse_light", output_format="liteocr", timeout=240)
+    finally:
+        liteocr.success_callback.remove(seen.append)
+
+    assert isinstance(doc, dict)
+    assert len(seen) == 1 and isinstance(seen[0], liteocr.ParseResponse)
+    # same call, so nothing is volatile: the dict is exactly the dataclass, minus the fields the
+    # Rust serialiser omits when they are empty.
+    assert doc == _prune(seen[0].to_dict())
+
+
+@live("llamaparse")
+@pytest.mark.parametrize("output_format", ["reducto", "extend", "llamaparse"])
+def test_every_vendor_shape_deserialises(output_format: str) -> None:
+    doc = liteocr.parse(SAMPLE_PDF, model="llamaparse/fast", output_format=output_format, timeout=240)
+    assert isinstance(doc, dict) and doc
+    pages = {"reducto": ("result", "chunks"), "extend": ("output", "chunks"), "llamaparse": ("pages",)}
+    node: object = doc
+    for key in pages[output_format]:
+        assert isinstance(node, dict)
+        node = node[key]
+    assert isinstance(node, list) and len(node) == 2

@@ -8,8 +8,9 @@
 //! structured data). A model can only serve the modes it declares, so each entry point below
 //! resolves the model string against its own mode.
 
+use liteocr_core::compat::Format;
 use liteocr_core::router::{Router as CoreRouter, RouterConfig, Strategy};
-use liteocr_core::{DocumentInput, DocumentRequest, ExtractRequest, Mode};
+use liteocr_core::{DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, Mode, ParseResponse};
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyDict};
@@ -277,6 +278,43 @@ impl PyRouter {
     }
 }
 
+// ---- native-format compatibility -----------------------------------------------------------------
+
+/// Every value `output_format` accepts, in documentation order.
+///
+/// The SDK and CLI quote this list in their error messages, so it has exactly one source.
+#[pyfunction]
+fn output_formats() -> Vec<&'static str> {
+    Format::ALL.iter().map(Format::as_str).collect()
+}
+
+/// Fail fast on an unknown `output_format`, before any provider call.
+#[pyfunction]
+fn validate_output_format(format: &str) -> PyResult<String> {
+    format.parse::<Format>().map(|f| f.as_str().to_string()).map_err(to_py_err)
+}
+
+/// Render an already-computed unified `ParseResponse` dict in a provider's native JSON shape.
+///
+/// The rendering itself lives in `liteocr_core::compat`; this only bridges dict <-> struct so the
+/// Python package never has to know a vendor's payload layout.
+#[pyfunction]
+fn render_parse(py: Python<'_>, response: &Bound<'_, PyDict>, format: &str) -> PyResult<Py<PyAny>> {
+    let resp: ParseResponse = depythonize(response.as_any())
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("invalid parse response: {e}")))?;
+    let value = resp.to_format(format).map_err(to_py_err)?;
+    to_py(py, &value)
+}
+
+/// Render an already-computed unified `ExtractResponse` dict in a provider's native JSON shape.
+#[pyfunction]
+fn render_extract(py: Python<'_>, response: &Bound<'_, PyDict>, format: &str) -> PyResult<Py<PyAny>> {
+    let resp: ExtractResponse = depythonize(response.as_any())
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("invalid extract response: {e}")))?;
+    let value = resp.to_format(format).map_err(to_py_err)?;
+    to_py(py, &value)
+}
+
 // ---- registry, pricing, helpers ------------------------------------------------------------------
 
 /// All fully-qualified model names, optionally restricted to the ones serving `mode`.
@@ -383,6 +421,10 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(aocr, m)?)?;
     m.add_function(wrap_pyfunction!(extract, m)?)?;
     m.add_function(wrap_pyfunction!(aextract, m)?)?;
+    m.add_function(wrap_pyfunction!(output_formats, m)?)?;
+    m.add_function(wrap_pyfunction!(validate_output_format, m)?)?;
+    m.add_function(wrap_pyfunction!(render_parse, m)?)?;
+    m.add_function(wrap_pyfunction!(render_extract, m)?)?;
     m.add_function(wrap_pyfunction!(list_models, m)?)?;
     m.add_function(wrap_pyfunction!(modes, m)?)?;
     m.add_function(wrap_pyfunction!(providers, m)?)?;

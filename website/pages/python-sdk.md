@@ -29,7 +29,7 @@ freely *within* a mode; a model that does not serve the mode you asked for raise
 ```python
 doc  = liteocr.parse("invoice.pdf", model="reducto/standard")     # markdown + blocks
 text = liteocr.ocr("scan.png", model="llamaparse/fast")           # plain text + boxes
-data = liteocr.extract("invoice.pdf", schema, model="reducto/standard")
+data = liteocr.extract("invoice.pdf", schema, model="reducto/extract")
 ```
 
 ## `parse`
@@ -39,6 +39,7 @@ def parse(
     input: DocumentLike,
     model: str = "reducto",
     *,
+    output_format: Optional[str] = None,
     filename: Optional[str] = None,
     pages: Optional[str] = None,
     language: Optional[str] = None,
@@ -50,7 +51,7 @@ def parse(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     metadata: Optional[dict[str, Any]] = None,
-) -> ParseResponse
+) -> ParseResponse            # or dict[str, Any] when output_format is given
 ```
 
 `DocumentLike` is `str | os.PathLike[str] | bytes | bytearray | memoryview`.
@@ -63,6 +64,7 @@ def parse(
 | `pages` | 1-based page selection such as `"1-3,7"`, forwarded best-effort. |
 | `language` | Language hint (ISO 639-1) when the provider supports it. |
 | `output` | Preferred block content: `"markdown"` (default) or `"text"`. |
+| `output_format` | Return a vendor's own JSON `dict` instead of the dataclass: `"reducto"`, `"extend"`, `"llamaparse"`, or `"liteocr"` / `None` for the unified shape. See [Native-format output](#native-format-output-output_format). |
 | `provider_options` | Provider-specific options merged verbatim into the provider request body. |
 | `include_raw` | Attach the provider's raw payload as `response.raw`. |
 | `timeout` | Whole-call deadline in seconds (upload + polling + download). |
@@ -127,6 +129,7 @@ def extract(
     input: DocumentLike,
     schema: dict[str, Any],
     *,
+    output_format: Optional[str] = None,
     model: str = "reducto",
     instructions: Optional[str] = None,
     citations: bool = False,
@@ -140,7 +143,7 @@ def extract(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     metadata: Optional[dict[str, Any]] = None,
-) -> ExtractResponse
+) -> ExtractResponse          # or dict[str, Any] when output_format is given
 ```
 
 | Parameter | Meaning |
@@ -149,6 +152,7 @@ def extract(
 | `model` | Must support `extract`; a parse-only model raises `UnsupportedModelError` before any network call. |
 | `instructions` | Optional natural-language guidance, forwarded to providers that accept it. |
 | `citations` | Ask for per-field citations (page, box, source text) where the provider supports them. |
+| `output_format` | As for `parse`, rendering the vendor's *extract* envelope. Best effort — see [`docs/COMPAT.md`](https://github.com/ajinkyashejul/liteocr/blob/main/docs/COMPAT.md) §7. |
 
 Everything else matches `parse`. `aextract` is the async variant.
 
@@ -161,7 +165,7 @@ schema = {
     },
 }
 
-resp = liteocr.extract("invoice.pdf", schema, model="reducto/standard",
+resp = liteocr.extract("invoice.pdf", schema, model="reducto/extract",
                        instructions="Totals are inclusive of tax.", citations=True)
 
 resp.data["total"]                      # the object your schema asked for
@@ -193,9 +197,9 @@ quietly answer an extraction.
 | `mode` | `Mode` (property) | The mode this router serves. |
 | `plan()` | `list[str]` | The order models would be tried for the next call. Advances the round-robin cursor. |
 | `stats()` | `dict[str, dict[str, Any]]` | Per model: `successes`, `failures`, `total_latency_ms`, `total_cost_usd`, `total_pages`. |
-| `parse(input, **kw)` / `aparse` | `ParseResponse` | Same keyword arguments as `liteocr.parse` except `model`. |
+| `parse(input, **kw)` / `aparse` | `ParseResponse` | Same keyword arguments as `liteocr.parse` except `model`, `output_format` included. |
 | `ocr(input, **kw)` / `aocr` | `TextResponse` | Same, minus `output`. |
-| `extract(input, schema, *, instructions, citations, **kw)` / `aextract` | `ExtractResponse` | Same as `liteocr.extract` except `model`. |
+| `extract(input, schema, *, output_format, instructions, citations, **kw)` / `aextract` | `ExtractResponse` | Same as `liteocr.extract` except `model`. |
 
 `fallback_on` is a list of error-kind names; the default is `provider`, `rate_limit`, `timeout`,
 `network`. Authentication, bad-request, unsupported-model and input errors never trigger a
@@ -208,6 +212,59 @@ router.stats()["reducto/standard"]["successes"]
 
 text_router = liteocr.Router(["reducto/r-1", "extend/parse_light"], mode="ocr")
 text_router.ocr("scan.png").text
+```
+
+## Native-format output (`output_format`)
+
+LiteOCR normalises every provider to one response shape, which is the right default — and a
+migration cost if you are already integrated with a vendor. `output_format` removes it: ask for a
+vendor's shape and the response is rendered into *that vendor's own JSON*, whatever provider
+actually produced it.
+
+```python
+doc = liteocr.parse("invoice.pdf", model="extend/parse_light", output_format="reducto")
+
+for chunk in doc["result"]["chunks"]:          # Reducto's shape, Extend's engine
+    for block in chunk["blocks"]:
+        draw(block["bbox"]["left"], block["bbox"]["top"], block["type"])
+```
+
+| Value | Shape |
+|---|---|
+| `None` (default), `"liteocr"`, `"unified"` | LiteOCR's own response — a dataclass for `None`, the same JSON as a `dict` for `"liteocr"`. |
+| `"reducto"` | Reducto `POST /parse` response (`response_type: "parse"`). |
+| `"extend"` | Extend `parse_run` object (`GET /parse_runs/{id}`). |
+| `"llamaparse"` (`"llama"`, `"llama_parse"`) | LlamaParse `…/result/json` payload. |
+
+- Available on `parse`, `aparse`, `extract`, `aextract`, `Router.parse` / `aparse` / `extract` /
+  `aextract`, and the CLI (`--output-format`, with `--format json`).
+- Names are case-insensitive and `-`/`_` are interchangeable; `liteocr.output_formats()` lists
+  them. An unknown value raises `BadRequestError` **before any network call**.
+- The return type follows the argument: `None` gives the dataclass, a string gives a `dict`.
+  Both are `@overload`-typed, so a type checker knows which one it is.
+- **Callbacks always receive the dataclass**, whatever the caller asked for — logging and cost
+  tracking are unaffected.
+- `output_format` is independent of `output`: `output` picks markdown vs plain text *inside*
+  block content, `output_format` picks the JSON envelope around it.
+
+What is guaranteed is **structural fidelity**, not semantic identity: the key set and nesting, one
+chunk/page per unified page, the content strings, the vendor's own block vocabulary and coordinate
+units, and the billed page count. Not guaranteed: byte equality with what the vendor would have
+returned, fields LiteOCR does not model (they are rendered as `null` / `[]`, never invented), or
+vendor-specific enrichments. Extract-mode rendering is explicitly best effort.
+[`docs/COMPAT.md`](https://github.com/ajinkyashejul/liteocr/blob/main/docs/COMPAT.md) lists every
+always-null field, the lossy block-type mappings and the coordinate conversions, per format.
+
+```python
+liteocr.output_formats()      # ["liteocr", "reducto", "extend", "llamaparse"]
+
+# same call, both shapes
+doc = liteocr.parse("invoice.pdf", model="reducto/standard")                       # ParseResponse
+raw = liteocr.parse("invoice.pdf", model="reducto/standard", output_format="extend")
+raw["object"], raw["status"], raw["metrics"]["pageCount"]
+
+router = liteocr.Router(["reducto/standard", "extend/parse_light"])
+router.parse("doc.pdf", output_format="llamaparse")["pages"][0]["items"]
 ```
 
 ## Response types
@@ -443,6 +500,7 @@ liteocr.failure_callback.append(lambda e: print("failed:", e))
 
 ```python
 liteocr.modes() -> list[str]
+liteocr.output_formats() -> list[str]              # vendor shapes output_format accepts
 liteocr.list_models(mode: Optional[Mode] = None) -> list[str]
 liteocr.providers() -> list[dict[str, Any]]        # name, env var, base URL, docs, models + modes
 liteocr.resolve_model(model: str, mode: Optional[Mode] = None) -> str

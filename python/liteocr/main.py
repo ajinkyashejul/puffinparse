@@ -20,17 +20,17 @@ import logging
 import os
 from collections.abc import Awaitable
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, TypeVar, Union
+from typing import Any, Callable, Literal, Optional, TypeVar, Union, overload
 
 from . import _core
-from .exceptions import InputError, LiteOCRError, UnsupportedModelError, from_core
+from .exceptions import BadRequestError, InputError, LiteOCRError, UnsupportedModelError, from_core
 from .types import ExtractResponse, Metrics, Mode, ParseResponse, Response, TextResponse
 
 logger = logging.getLogger("liteocr")
 
 DocumentLike = Union[str, "os.PathLike[str]", bytes, bytearray, memoryview]
-SuccessCallback = Callable[[Response], Union[None, Awaitable[None]]]
-FailureCallback = Callable[[LiteOCRError], Union[None, Awaitable[None]]]
+SuccessCallback = Callable[[Response], Union[Awaitable[None], None]]
+FailureCallback = Callable[[LiteOCRError], Union[Awaitable[None], None]]
 
 #: Called after every successful call, in any mode, with the response.
 success_callback: list[SuccessCallback] = []
@@ -59,6 +59,7 @@ def _build_request(
     model: str,
     *,
     output: Literal["markdown", "text"] = "markdown",
+    output_format: Optional[str] = None,
     filename: Optional[str] = None,
     pages: Optional[str] = None,
     language: Optional[str] = None,
@@ -91,6 +92,8 @@ def _build_request(
         "max_retries": int(max_retries),
         "metadata": metadata or {},
     }
+    if output_format is not None:
+        req["output_format"] = output_format
     if pages is not None:
         req["pages"] = pages
     if language is not None:
@@ -206,13 +209,86 @@ def _trim_empty_list(message: str, mode: Mode) -> str:
     return message
 
 
+# ---- native-format compatibility -----------------------------------------------------------------
+
+
+def output_formats() -> list[str]:
+    """Every value ``output_format`` accepts: ``["liteocr", "reducto", "extend", "llamaparse"]``."""
+    return list(_core.output_formats())
+
+
+def _validate_output_format(output_format: str) -> str:
+    """Canonicalise ``output_format`` in the core, *before* any network call."""
+    try:
+        return str(_core.validate_output_format(output_format))
+    except _core.CoreError as e:
+        err = from_core(e)
+        if isinstance(err, UnsupportedModelError):
+            raise err from None
+        raise BadRequestError(
+            f"unknown output_format {output_format!r}: expected one of "
+            f"{' | '.join(output_formats())}, or output_format=None for LiteOCR's unified response"
+        ) from None
+
+
+def _render(resp_dict: dict[str, Any], output_format: str, mode: Mode) -> dict[str, Any]:
+    """Render a unified response dict in a vendor's own shape. All of it happens in Rust."""
+    render = _core.render_extract if mode == "extract" else _core.render_parse
+    try:
+        rendered: dict[str, Any] = render(resp_dict, output_format)
+    except _core.CoreError as e:
+        raise _fail(e, mode=mode) from None
+    return rendered
+
+
 # ---- parse mode ----------------------------------------------------------------------------------
+
+
+@overload
+def parse(
+    input: DocumentLike,
+    model: str = ...,
+    *,
+    output_format: None = ...,
+    filename: Optional[str] = ...,
+    pages: Optional[str] = ...,
+    language: Optional[str] = ...,
+    output: Literal["markdown", "text"] = ...,
+    provider_options: Optional[dict[str, Any]] = ...,
+    include_raw: bool = ...,
+    timeout: float = ...,
+    max_retries: int = ...,
+    api_key: Optional[str] = ...,
+    base_url: Optional[str] = ...,
+    metadata: Optional[dict[str, Any]] = ...,
+) -> ParseResponse: ...
+
+
+@overload
+def parse(
+    input: DocumentLike,
+    model: str = ...,
+    *,
+    output_format: str,
+    filename: Optional[str] = ...,
+    pages: Optional[str] = ...,
+    language: Optional[str] = ...,
+    output: Literal["markdown", "text"] = ...,
+    provider_options: Optional[dict[str, Any]] = ...,
+    include_raw: bool = ...,
+    timeout: float = ...,
+    max_retries: int = ...,
+    api_key: Optional[str] = ...,
+    base_url: Optional[str] = ...,
+    metadata: Optional[dict[str, Any]] = ...,
+) -> dict[str, Any]: ...
 
 
 def parse(
     input: DocumentLike,
     model: str = "reducto",
     *,
+    output_format: Optional[str] = None,
     filename: Optional[str] = None,
     pages: Optional[str] = None,
     language: Optional[str] = None,
@@ -224,7 +300,7 @@ def parse(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     metadata: Optional[dict[str, Any]] = None,
-) -> ParseResponse:
+) -> Union[ParseResponse, dict[str, Any]]:
     """Parse a document into markdown + typed blocks (``parse`` mode).
 
     Args:
@@ -235,6 +311,13 @@ def parse(
         pages: 1-based page selection such as ``"1-3,7"`` (forwarded best-effort).
         language: Language hint (ISO 639-1) when the provider supports it.
         output: Preferred block content: ``"markdown"`` (default) or ``"text"``.
+        output_format: Return the vendor's own JSON ``dict`` instead of a dataclass:
+            ``"reducto"``, ``"extend"``, ``"llamaparse"`` (or ``"liteocr"`` for the unified
+            shape, which is also what ``None`` gives you). Whatever provider actually ran the
+            call, the response is rendered into that vendor's response shape, so code already
+            written against their SDK keeps parsing it. Structural fidelity is guaranteed, byte
+            equality is not — ``docs/COMPAT.md`` lists the always-null fields and the lossy
+            block-type mappings. Callbacks still receive the dataclass.
         provider_options: Provider-specific options merged verbatim into the provider request.
         include_raw: Attach the provider's raw payload as ``response.raw``.
         timeout: Whole-call deadline in seconds (upload + polling + download).
@@ -244,12 +327,20 @@ def parse(
         metadata: Free-form dict echoed back in ``response.metadata``.
 
     Returns:
-        A :class:`~liteocr.types.ParseResponse`, identical in shape across providers.
+        A :class:`~liteocr.types.ParseResponse`, identical in shape across providers — or, when
+        ``output_format`` names a vendor, that vendor's own JSON as a ``dict``.
+
+    Example:
+        >>> doc = liteocr.parse("invoice.pdf", model="extend/parse_light", output_format="reducto")
+        >>> doc["result"]["chunks"][0]["blocks"][0]["bbox"]["left"]   # Reducto's shape, Extend's engine
     """
+    if output_format is not None:
+        output_format = _validate_output_format(output_format)
     req, data = _build_request(
         input,
         model,
         output=output,
+        output_format=output_format,
         filename=filename,
         pages=pages,
         language=language,
@@ -265,13 +356,55 @@ def parse(
         resp_dict = _core.parse(req, data)
     except _core.CoreError as e:
         raise _fail(e, mode="parse") from None
-    return _finish(ParseResponse.from_dict(resp_dict))
+    resp = _finish(ParseResponse.from_dict(resp_dict))
+    return resp if output_format is None else _render(resp_dict, output_format, "parse")
+
+
+@overload
+async def aparse(
+    input: DocumentLike,
+    model: str = ...,
+    *,
+    output_format: None = ...,
+    filename: Optional[str] = ...,
+    pages: Optional[str] = ...,
+    language: Optional[str] = ...,
+    output: Literal["markdown", "text"] = ...,
+    provider_options: Optional[dict[str, Any]] = ...,
+    include_raw: bool = ...,
+    timeout: float = ...,
+    max_retries: int = ...,
+    api_key: Optional[str] = ...,
+    base_url: Optional[str] = ...,
+    metadata: Optional[dict[str, Any]] = ...,
+) -> ParseResponse: ...
+
+
+@overload
+async def aparse(
+    input: DocumentLike,
+    model: str = ...,
+    *,
+    output_format: str,
+    filename: Optional[str] = ...,
+    pages: Optional[str] = ...,
+    language: Optional[str] = ...,
+    output: Literal["markdown", "text"] = ...,
+    provider_options: Optional[dict[str, Any]] = ...,
+    include_raw: bool = ...,
+    timeout: float = ...,
+    max_retries: int = ...,
+    api_key: Optional[str] = ...,
+    base_url: Optional[str] = ...,
+    metadata: Optional[dict[str, Any]] = ...,
+) -> dict[str, Any]: ...
 
 
 async def aparse(
     input: DocumentLike,
     model: str = "reducto",
     *,
+    output_format: Optional[str] = None,
     filename: Optional[str] = None,
     pages: Optional[str] = None,
     language: Optional[str] = None,
@@ -283,12 +416,15 @@ async def aparse(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     metadata: Optional[dict[str, Any]] = None,
-) -> ParseResponse:
-    """Async version of :func:`parse`. Runs on the Rust runtime; never blocks the event loop."""
+) -> Union[ParseResponse, dict[str, Any]]:
+    """Async version of :func:`parse`, including ``output_format``."""
+    if output_format is not None:
+        output_format = _validate_output_format(output_format)
     req, data = _build_request(
         input,
         model,
         output=output,
+        output_format=output_format,
         filename=filename,
         pages=pages,
         language=language,
@@ -306,7 +442,7 @@ async def aparse(
         raise await _afail(e, mode="parse") from None
     resp = ParseResponse.from_dict(resp_dict)
     await _run_callbacks_async(success_callback, resp)
-    return resp
+    return resp if output_format is None else _render(resp_dict, output_format, "parse")
 
 
 # ---- ocr mode ------------------------------------------------------------------------------------
@@ -418,10 +554,55 @@ async def aocr(
 # ---- extract mode --------------------------------------------------------------------------------
 
 
+@overload
 def extract(
     input: DocumentLike,
     schema: dict[str, Any],
     *,
+    output_format: None = ...,
+    model: str = ...,
+    instructions: Optional[str] = ...,
+    citations: bool = ...,
+    filename: Optional[str] = ...,
+    pages: Optional[str] = ...,
+    language: Optional[str] = ...,
+    provider_options: Optional[dict[str, Any]] = ...,
+    include_raw: bool = ...,
+    timeout: float = ...,
+    max_retries: int = ...,
+    api_key: Optional[str] = ...,
+    base_url: Optional[str] = ...,
+    metadata: Optional[dict[str, Any]] = ...,
+) -> ExtractResponse: ...
+
+
+@overload
+def extract(
+    input: DocumentLike,
+    schema: dict[str, Any],
+    *,
+    output_format: str,
+    model: str = ...,
+    instructions: Optional[str] = ...,
+    citations: bool = ...,
+    filename: Optional[str] = ...,
+    pages: Optional[str] = ...,
+    language: Optional[str] = ...,
+    provider_options: Optional[dict[str, Any]] = ...,
+    include_raw: bool = ...,
+    timeout: float = ...,
+    max_retries: int = ...,
+    api_key: Optional[str] = ...,
+    base_url: Optional[str] = ...,
+    metadata: Optional[dict[str, Any]] = ...,
+) -> dict[str, Any]: ...
+
+
+def extract(
+    input: DocumentLike,
+    schema: dict[str, Any],
+    *,
+    output_format: Optional[str] = None,
     model: str = "reducto",
     instructions: Optional[str] = None,
     citations: bool = False,
@@ -435,7 +616,7 @@ def extract(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     metadata: Optional[dict[str, Any]] = None,
-) -> ExtractResponse:
+) -> Union[ExtractResponse, dict[str, Any]]:
     """Pull a structured JSON object out of a document with a schema (``extract`` mode).
 
     Args:
@@ -446,6 +627,14 @@ def extract(
             ``liteocr.list_models("extract")``.
         instructions: Extra natural-language guidance, forwarded when the provider accepts it.
         citations: Ask for per-field citations (page, box, source text) where supported.
+        output_format: Return the vendor's own JSON ``dict`` instead of a dataclass:
+            ``"reducto"``, ``"extend"``, ``"llamaparse"`` (or ``"liteocr"`` for the unified
+            shape, which is also what ``None`` gives you). Whatever provider actually ran the
+            call, the response is rendered into that vendor's response shape, so code already
+            written against their SDK keeps parsing it. Structural fidelity is guaranteed, byte
+            equality is not — ``docs/COMPAT.md`` lists the always-null fields and the lossy
+            block-type mappings. Callbacks still receive the dataclass.
+            Extract-mode rendering is best effort (see ``docs/COMPAT.md`` §7).
         filename: Required when ``input`` is bytes.
         pages: 1-based page selection such as ``"1-3,7"``.
         language: Language hint (ISO 639-1) when the provider supports it.
@@ -459,8 +648,11 @@ def extract(
 
     Returns:
         An :class:`~liteocr.types.ExtractResponse` whose ``data`` follows ``schema`` and whose
-        ``fields`` maps JSON pointers to confidence and citations.
+        ``fields`` maps JSON pointers to confidence and citations — or, when ``output_format``
+        names a vendor, that vendor's own extract JSON as a ``dict``.
     """
+    if output_format is not None:
+        output_format = _validate_output_format(output_format)
     req, data = _build_extract_request(
         input,
         model,
@@ -468,6 +660,7 @@ def extract(
         instructions,
         citations,
         {
+            "output_format": output_format,
             "filename": filename,
             "pages": pages,
             "language": language,
@@ -484,13 +677,59 @@ def extract(
         resp_dict = _core.extract(req, data)
     except _core.CoreError as e:
         raise _fail(e, mode="extract") from None
-    return _finish(ExtractResponse.from_dict(resp_dict))
+    resp = _finish(ExtractResponse.from_dict(resp_dict))
+    return resp if output_format is None else _render(resp_dict, output_format, "extract")
+
+
+@overload
+async def aextract(
+    input: DocumentLike,
+    schema: dict[str, Any],
+    *,
+    output_format: None = ...,
+    model: str = ...,
+    instructions: Optional[str] = ...,
+    citations: bool = ...,
+    filename: Optional[str] = ...,
+    pages: Optional[str] = ...,
+    language: Optional[str] = ...,
+    provider_options: Optional[dict[str, Any]] = ...,
+    include_raw: bool = ...,
+    timeout: float = ...,
+    max_retries: int = ...,
+    api_key: Optional[str] = ...,
+    base_url: Optional[str] = ...,
+    metadata: Optional[dict[str, Any]] = ...,
+) -> ExtractResponse: ...
+
+
+@overload
+async def aextract(
+    input: DocumentLike,
+    schema: dict[str, Any],
+    *,
+    output_format: str,
+    model: str = ...,
+    instructions: Optional[str] = ...,
+    citations: bool = ...,
+    filename: Optional[str] = ...,
+    pages: Optional[str] = ...,
+    language: Optional[str] = ...,
+    provider_options: Optional[dict[str, Any]] = ...,
+    include_raw: bool = ...,
+    timeout: float = ...,
+    max_retries: int = ...,
+    api_key: Optional[str] = ...,
+    base_url: Optional[str] = ...,
+    metadata: Optional[dict[str, Any]] = ...,
+) -> dict[str, Any]: ...
 
 
 async def aextract(
     input: DocumentLike,
     schema: dict[str, Any],
     *,
+    output_format: Optional[str] = None,
     model: str = "reducto",
     instructions: Optional[str] = None,
     citations: bool = False,
@@ -504,8 +743,10 @@ async def aextract(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     metadata: Optional[dict[str, Any]] = None,
-) -> ExtractResponse:
-    """Async version of :func:`extract`."""
+) -> Union[ExtractResponse, dict[str, Any]]:
+    """Async version of :func:`extract`, including ``output_format``."""
+    if output_format is not None:
+        output_format = _validate_output_format(output_format)
     req, data = _build_extract_request(
         input,
         model,
@@ -513,6 +754,7 @@ async def aextract(
         instructions,
         citations,
         {
+            "output_format": output_format,
             "filename": filename,
             "pages": pages,
             "language": language,
@@ -531,7 +773,7 @@ async def aextract(
         raise await _afail(e, mode="extract") from None
     resp = ExtractResponse.from_dict(resp_dict)
     await _run_callbacks_async(success_callback, resp)
-    return resp
+    return resp if output_format is None else _render(resp_dict, output_format, "extract")
 
 
 # ---- router --------------------------------------------------------------------------------------
@@ -583,25 +825,56 @@ class Router:
     def stats(self) -> dict[str, dict[str, Any]]:
         return dict(self._inner.stats())
 
-    def parse(self, input: DocumentLike, **kwargs: Any) -> ParseResponse:
-        """Run a ``parse`` call across the configured models."""
-        req, data = _build_request(input, "reducto", **_router_kwargs(kwargs, "parse"))
+    @overload
+    def parse(self, input: DocumentLike, *, output_format: None = ..., **kwargs: Any) -> ParseResponse: ...
+
+    @overload
+    def parse(self, input: DocumentLike, *, output_format: str, **kwargs: Any) -> dict[str, Any]: ...
+
+    def parse(
+        self, input: DocumentLike, *, output_format: Optional[str] = None, **kwargs: Any
+    ) -> Union[ParseResponse, dict[str, Any]]:
+        """Run a ``parse`` call across the configured models.
+
+        ``output_format`` renders the winning model's response in a vendor's own JSON shape,
+        exactly as :func:`parse` does — the fallback chain is invisible to your parsing code.
+        """
+        if output_format is not None:
+            output_format = _validate_output_format(output_format)
+        kw = _router_kwargs(kwargs, "parse")
+        kw["output_format"] = output_format
+        req, data = _build_request(input, "reducto", **kw)
         try:
             resp_dict = self._inner.parse(req, data)
         except _core.CoreError as e:
             raise _fail(e, mode="parse") from None
-        return _finish(ParseResponse.from_dict(resp_dict))
+        resp = _finish(ParseResponse.from_dict(resp_dict))
+        return resp if output_format is None else _render(resp_dict, output_format, "parse")
 
-    async def aparse(self, input: DocumentLike, **kwargs: Any) -> ParseResponse:
+    @overload
+    async def aparse(
+        self, input: DocumentLike, *, output_format: None = ..., **kwargs: Any
+    ) -> ParseResponse: ...
+
+    @overload
+    async def aparse(self, input: DocumentLike, *, output_format: str, **kwargs: Any) -> dict[str, Any]: ...
+
+    async def aparse(
+        self, input: DocumentLike, *, output_format: Optional[str] = None, **kwargs: Any
+    ) -> Union[ParseResponse, dict[str, Any]]:
         """Async version of :meth:`parse`."""
-        req, data = _build_request(input, "reducto", **_router_kwargs(kwargs, "parse"))
+        if output_format is not None:
+            output_format = _validate_output_format(output_format)
+        kw = _router_kwargs(kwargs, "parse")
+        kw["output_format"] = output_format
+        req, data = _build_request(input, "reducto", **kw)
         try:
             resp_dict = await self._inner.aparse(req, data)
         except _core.CoreError as e:
             raise await _afail(e, mode="parse") from None
         resp = ParseResponse.from_dict(resp_dict)
         await _run_callbacks_async(success_callback, resp)
-        return resp
+        return resp if output_format is None else _render(resp_dict, output_format, "parse")
 
     def ocr(self, input: DocumentLike, **kwargs: Any) -> TextResponse:
         """Run an ``ocr`` call across the configured models."""
@@ -623,45 +896,100 @@ class Router:
         await _run_callbacks_async(success_callback, resp)
         return resp
 
+    @overload
     def extract(
         self,
         input: DocumentLike,
         schema: dict[str, Any],
         *,
+        output_format: None = ...,
+        instructions: Optional[str] = ...,
+        citations: bool = ...,
+        **kwargs: Any,
+    ) -> ExtractResponse: ...
+
+    @overload
+    def extract(
+        self,
+        input: DocumentLike,
+        schema: dict[str, Any],
+        *,
+        output_format: str,
+        instructions: Optional[str] = ...,
+        citations: bool = ...,
+        **kwargs: Any,
+    ) -> dict[str, Any]: ...
+
+    def extract(
+        self,
+        input: DocumentLike,
+        schema: dict[str, Any],
+        *,
+        output_format: Optional[str] = None,
         instructions: Optional[str] = None,
         citations: bool = False,
         **kwargs: Any,
-    ) -> ExtractResponse:
+    ) -> Union[ExtractResponse, dict[str, Any]]:
         """Run an ``extract`` call across the configured models."""
-        req, data = _build_extract_request(
-            input, "reducto", schema, instructions, citations, _router_kwargs(kwargs, "extract")
-        )
+        if output_format is not None:
+            output_format = _validate_output_format(output_format)
+        kw = _router_kwargs(kwargs, "extract")
+        kw["output_format"] = output_format
+        req, data = _build_extract_request(input, "reducto", schema, instructions, citations, kw)
         try:
             resp_dict = self._inner.extract(req, data)
         except _core.CoreError as e:
             raise _fail(e, mode="extract") from None
-        return _finish(ExtractResponse.from_dict(resp_dict))
+        resp = _finish(ExtractResponse.from_dict(resp_dict))
+        return resp if output_format is None else _render(resp_dict, output_format, "extract")
+
+    @overload
+    async def aextract(
+        self,
+        input: DocumentLike,
+        schema: dict[str, Any],
+        *,
+        output_format: None = ...,
+        instructions: Optional[str] = ...,
+        citations: bool = ...,
+        **kwargs: Any,
+    ) -> ExtractResponse: ...
+
+    @overload
+    async def aextract(
+        self,
+        input: DocumentLike,
+        schema: dict[str, Any],
+        *,
+        output_format: str,
+        instructions: Optional[str] = ...,
+        citations: bool = ...,
+        **kwargs: Any,
+    ) -> dict[str, Any]: ...
 
     async def aextract(
         self,
         input: DocumentLike,
         schema: dict[str, Any],
         *,
+        output_format: Optional[str] = None,
         instructions: Optional[str] = None,
         citations: bool = False,
         **kwargs: Any,
-    ) -> ExtractResponse:
+    ) -> Union[ExtractResponse, dict[str, Any]]:
         """Async version of :meth:`extract`."""
-        req, data = _build_extract_request(
-            input, "reducto", schema, instructions, citations, _router_kwargs(kwargs, "extract")
-        )
+        if output_format is not None:
+            output_format = _validate_output_format(output_format)
+        kw = _router_kwargs(kwargs, "extract")
+        kw["output_format"] = output_format
+        req, data = _build_extract_request(input, "reducto", schema, instructions, citations, kw)
         try:
             resp_dict = await self._inner.aextract(req, data)
         except _core.CoreError as e:
             raise await _afail(e, mode="extract") from None
         resp = ExtractResponse.from_dict(resp_dict)
         await _run_callbacks_async(success_callback, resp)
-        return resp
+        return resp if output_format is None else _render(resp_dict, output_format, "extract")
 
     def __repr__(self) -> str:
         return f"Router(models={self.models!r}, mode={self.mode!r})"
@@ -799,6 +1127,7 @@ __all__ = [
     "modes",
     "normalize_text",
     "ocr",
+    "output_formats",
     "parse",
     "pricing",
     "providers",

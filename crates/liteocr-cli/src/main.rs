@@ -106,6 +106,10 @@ struct ParseArgs {
     /// Output format.
     #[arg(short, long, value_enum, default_value_t = ParseFormat::Markdown)]
     format: ParseFormat,
+    /// Render the JSON in a provider's own response shape instead of the unified one:
+    /// reducto | extend | llamaparse | liteocr. Only affects `--format json`.
+    #[arg(long, value_name = "VENDOR")]
+    output_format: Option<String>,
 }
 
 #[derive(clap::Args, Debug)]
@@ -130,6 +134,10 @@ struct ExtractArgs {
     /// Ask for per-field citations (page, box, source text) when the provider supports them.
     #[arg(long)]
     citations: bool,
+    /// Render the JSON in a provider's own extract shape instead of the unified one:
+    /// reducto | extend | llamaparse | liteocr (best effort — see docs/COMPAT.md).
+    #[arg(long, value_name = "VENDOR")]
+    output_format: Option<String>,
 }
 
 #[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
@@ -187,12 +195,19 @@ async fn run(cli: Cli) -> Result<()> {
 
 async fn parse(args: ParseArgs) -> Result<()> {
     let output = if args.format == ParseFormat::Text { OutputFormat::Text } else { OutputFormat::Markdown };
-    let req = args.common.into_request(output)?;
+    let mut req = args.common.into_request(output)?;
+    let shape = native_shape(args.output_format, args.format == ParseFormat::Json)?;
+    if let Some(f) = &shape {
+        req = req.output_format(f.clone());
+    }
     let resp = liteocr_core::parse(req).await?;
     match args.format {
         ParseFormat::Markdown => println!("{}", resp.markdown),
         ParseFormat::Text => println!("{}", resp.text),
-        ParseFormat::Json => println!("{}", serde_json::to_string_pretty(&resp)?),
+        ParseFormat::Json => match &shape {
+            Some(f) => println!("{}", serde_json::to_string_pretty(&resp.to_format(f)?)?),
+            None => println!("{}", serde_json::to_string_pretty(&resp)?),
+        },
     }
     if args.format != ParseFormat::Json {
         summary(&resp.model, resp.usage.pages, resp.latency_ms, resp.cost_usd);
@@ -215,14 +230,34 @@ async fn ocr(args: OcrArgs) -> Result<()> {
 
 async fn extract(args: ExtractArgs) -> Result<()> {
     let schema = load_schema(&args.schema)?;
-    let document = args.common.into_request(OutputFormat::Markdown)?;
+    let mut document = args.common.into_request(OutputFormat::Markdown)?;
+    // `extract` always prints JSON, so a native shape is always meaningful here.
+    let shape = native_shape(args.output_format, true)?;
+    if let Some(f) = &shape {
+        document = document.output_format(f.clone());
+    }
     let mut req = ExtractRequest::new(document, schema).citations(args.citations);
     if let Some(i) = args.instructions {
         req = req.instructions(i);
     }
     let resp = liteocr_core::extract(req).await?;
-    println!("{}", serde_json::to_string_pretty(&resp)?);
+    match &shape {
+        Some(f) => println!("{}", serde_json::to_string_pretty(&resp.to_format(f)?)?),
+        None => println!("{}", serde_json::to_string_pretty(&resp)?),
+    }
     Ok(())
+}
+
+/// Validate `--output-format` before any network call, and drop it (with a warning) when the
+/// command is not printing JSON — the vendor shapes only exist as JSON.
+fn native_shape(output_format: Option<String>, json_output: bool) -> Result<Option<String>> {
+    let Some(raw) = output_format else { return Ok(None) };
+    let format: liteocr_core::OutputShape = raw.parse()?;
+    if !json_output {
+        eprintln!("warning: --output-format {format} only applies to --format json; ignoring it for this output");
+        return Ok(None);
+    }
+    Ok(Some(format.to_string()))
 }
 
 /// `--schema` is either inline JSON (starts with `{`) or a path to a JSON file.
@@ -251,8 +286,11 @@ fn providers(mode: Option<&str>, json: bool) -> Result<()> {
     let price_of = |model: &str, m: Mode| prices.get(model).and_then(|e| e.for_mode(m));
     let keep = |mi: &liteocr_core::ModelInfo| mode.map(|m| mi.supports(m)).unwrap_or(true);
 
+    let output_formats: Vec<&str> =
+        liteocr_core::OutputShape::ALL.iter().map(liteocr_core::OutputShape::as_str).collect();
+
     if json {
-        let v: Vec<serde_json::Value> = liteocr_core::PROVIDERS
+        let providers: Vec<serde_json::Value> = liteocr_core::PROVIDERS
             .iter()
             .map(|p| {
                 serde_json::json!({
@@ -277,6 +315,7 @@ fn providers(mode: Option<&str>, json: bool) -> Result<()> {
                 })
             })
             .collect();
+        let v = serde_json::json!({ "providers": providers, "output_formats": output_formats });
         println!("{}", serde_json::to_string_pretty(&v)?);
         return Ok(());
     }
@@ -321,6 +360,7 @@ fn providers(mode: Option<&str>, json: bool) -> Result<()> {
         "Keys are read from: {}",
         liteocr_core::PROVIDERS.iter().map(|p| p.env_var).collect::<Vec<_>>().join(", ")
     );
+    println!("Native output formats (--output-format, json only): {}", output_formats.join(" | "));
     Ok(())
 }
 

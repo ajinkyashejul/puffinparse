@@ -392,6 +392,12 @@ class Metrics:
     truth_chars: int
     order_score: Optional[float] = None
     table_score: Optional[float] = None
+    #: ``passed / total`` of a rule-scored document; ``None`` for transcript documents.
+    rule_pass_rate: Optional[float] = None
+    #: Rules that passed, for a rule-scored document.
+    rules_passed: Optional[int] = None
+    #: Rules checked, for a rule-scored document.
+    rules_total: Optional[int] = None
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Metrics:
@@ -406,6 +412,9 @@ class Metrics:
             truth_chars=d["truth_chars"],
             order_score=d.get("order_score"),
             table_score=d.get("table_score"),
+            rule_pass_rate=d.get("rule_pass_rate"),
+            rules_passed=d.get("rules_passed"),
+            rules_total=d.get("rules_total"),
         )
 
 
