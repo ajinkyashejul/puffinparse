@@ -1,0 +1,34 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"vendor\": \"Cedar Ridge Supply\",\n  \"invoice_number\": \"INV-9865\",\n  \"invoice_date\": \"2024-08-03\",\n  \"due_date\": \"2024-09-03\",\n  \"purchase_order\": \"PO-28844\",\n  \"bill_to\": \"Globex Industries\",\n  \"currency\": \"USD\",\n  \"subtotal\": 13792.89,\n  \"tax\": 862.06,\n  \"total_due\": 14667.43,\n  \"line_items\": [\n    {\n      \"description\": \"Hydraulic fluid, 5 gal\",\n      \"quantity\": 18,\n      \"unit_price\": 24.4,\n      \"amount\": 439.2\n    },\n    {\n      \"description\": \"Thermal label rolls\",\n      \"quantity\": 10,\n      \"unit_price\": 156.27,\n      \"amount\": 1562.7\n    },\n    {\n      \"description\": \"Workbench vise, 6 inch\",\n      \"quantity\": 12,\n      \"unit_price\": 88.57,\n      \"amount\": 1062.84\n    },\n    {\n      \"description\": \"Safety goggles, pack of 12\",\n      \"quantity\": 21,\n      \"unit_price\": 299.02,\n      \"amount\": 6279.42\n    },\n    {\n      \"description\": \"Kraft shipping boxes, large\",\n      \"quantity\": 15,\n      \"unit_price\": 281.05,\n      \"amount\": 4215.75\n    },\n    {\n      \"description\": \"Replacement drive belts\",\n      \"quantity\": 22,\n      \"unit_price\": 10.59,\n      \"amount\": 232.98\n    }\n  ]\n}"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1402,
+    "candidatesTokenCount": 412,
+    "thoughtsTokenCount": 288,
+    "totalTokenCount": 2102,
+    "promptTokensDetails": [
+      {
+        "modality": "IMAGE",
+        "tokenCount": 1290
+      },
+      {
+        "modality": "TEXT",
+        "tokenCount": 112
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "QvTJaJjLD5SFm9IPy_rIsQ4"
+}

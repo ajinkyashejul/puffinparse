@@ -30,6 +30,7 @@ pub fn build(name: &str) -> Result<Arc<dyn Provider>> {
         "mistral" => Ok(Arc::new(mistral::Mistral)),
         "azure" => Ok(Arc::new(azure::Azure)),
         "textract" => Ok(Arc::new(textract::Textract)),
+        "gemini" => Ok(Arc::new(gemini::Gemini)),
         other => Err(Error::unsupported_model(format!("unknown provider '{other}'"))),
     }
 }

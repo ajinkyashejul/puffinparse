@@ -24,5 +24,11 @@
   "textract/detect-text": { "ocr": 0.0015, "source": "https://aws.amazon.com/textract/pricing/ (DetectDocumentText, us-east-1: $1.50/1k pages, first 1M/month)", "updated": "2026-09-11" },
   "textract/layout": { "parse": 0.015, "ocr": 0.015, "source": "https://aws.amazon.com/textract/pricing/ (AnalyzeDocument TABLES, us-east-1: $15/1k pages; LAYOUT is free with TABLES)", "updated": "2026-09-11" },
   "textract/queries": { "extract": 0.015, "source": "https://aws.amazon.com/textract/pricing/ (AnalyzeDocument QUERIES, us-east-1: $15/1k pages)", "updated": "2026-09-11" },
-  "textract/forms": { "extract": 0.05, "source": "https://aws.amazon.com/textract/pricing/ (AnalyzeDocument FORMS, us-east-1: $50/1k pages)", "updated": "2026-09-11" }
+  "textract/forms": { "extract": 0.05, "source": "https://aws.amazon.com/textract/pricing/ (AnalyzeDocument FORMS, us-east-1: $50/1k pages)", "updated": "2026-09-11" },
+  "gemini/2.5-flash": { "parse": 0.00245, "ocr": 0.00245, "extract": 0.0012, "source": "https://ai.google.dev/gemini-api/docs/pricing ($0.30/$2.50 per 1M in/out; per-page ESTIMATE = 1500 input + 800 output tokens, extract 300 output; real cost comes from usageMetadata)", "updated": "2026-09-11" },
+  "gemini/2.5-pro": { "parse": 0.009875, "ocr": 0.009875, "extract": 0.004875, "source": "https://ai.google.dev/gemini-api/docs/pricing ($1.25/$10.00 per 1M; per-page ESTIMATE = 1500 input + 800 output tokens, extract 300 output)", "updated": "2026-09-11" },
+  "gemini/2.5-flash-lite": { "parse": 0.00047, "ocr": 0.00047, "extract": 0.00027, "source": "https://ai.google.dev/gemini-api/docs/pricing ($0.10/$0.40 per 1M; per-page ESTIMATE = 1500 input + 800 output tokens, extract 300 output)", "updated": "2026-09-11" },
+  "gemini/3.5-flash": { "parse": 0.00945, "ocr": 0.00945, "extract": 0.00495, "source": "https://ai.google.dev/gemini-api/docs/pricing ($1.50/$9.00 per 1M; per-page ESTIMATE = 1500 input + 800 output tokens, extract 300 output)", "updated": "2026-09-11" },
+  "gemini/3.5-flash-lite": { "parse": 0.00245, "ocr": 0.00245, "extract": 0.0012, "source": "https://ai.google.dev/gemini-api/docs/pricing ($0.30/$2.50 per 1M; per-page ESTIMATE = 1500 input + 800 output tokens, extract 300 output)", "updated": "2026-09-11" },
+  "gemini/3.8-flash": { "parse": 0.004125, "ocr": 0.004125, "extract": 0.00225, "source": "https://ai.google.dev/gemini-api/docs/pricing ($0.75/$3.75 per 1M introductory through 2026-12-31; per-page ESTIMATE = 1500 input + 800 output tokens, extract 300 output)", "updated": "2026-09-11" }
 }

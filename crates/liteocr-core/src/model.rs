@@ -272,6 +272,57 @@ pub const PROVIDERS: &[ProviderInfo] = &[
             },
         ],
     },
+    ProviderInfo {
+        name: "gemini",
+        display_name: "Google Gemini",
+        env_var: "GEMINI_API_KEY",
+        base_url: "https://generativelanguage.googleapis.com",
+        docs: "https://ai.google.dev/gemini-api/docs",
+        models: &[
+            ModelInfo {
+                provider: "gemini",
+                model: "2.5-flash",
+                description: "Gemini 2.5 Flash: vision-LLM transcription, the price/quality default",
+                default: true,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "gemini",
+                model: "2.5-pro",
+                description: "Gemini 2.5 Pro: highest accuracy, ~4x the cost of Flash",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "gemini",
+                model: "2.5-flash-lite",
+                description: "Gemini 2.5 Flash-Lite: cheapest and fastest, clean documents",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "gemini",
+                model: "3.5-flash",
+                description: "Gemini 3.5 Flash: frontier Flash generation (GA 2026-05-19)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "gemini",
+                model: "3.5-flash-lite",
+                description: "Gemini 3.5 Flash-Lite: low-latency 3.x tier (GA 2026-07-21)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "gemini",
+                model: "3.8-flash",
+                description: "Gemini 3.8 Flash: newest Flash model (GA 2026-09-02, introductory pricing)",
+                default: false,
+                modes: Mode::ALL,
+            },
+        ],
+    },
 ];
 
 /// A parsed, validated model reference.
@@ -412,6 +463,6 @@ mod tests {
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 25);
+        assert_eq!(m.len(), 31);
     }
 }

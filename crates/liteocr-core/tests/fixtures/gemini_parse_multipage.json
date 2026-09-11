@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"pages\": [\n    {\n      \"page_number\": 1,\n      \"markdown\": \"# A Short History of the Harbor\\n\\nShe kept detailed notes in a leather bound journal that traveled everywhere with her. Readers often skip the appendix, which is where the most interesting tables live. The orchestra rehearsed the final movement until the balance felt right.\\n\\n## Scope of the Study\\n\\nStudents designed a weather station using parts they found in the workshop. He learned to bake bread from his grandmother, who never once used a recipe. A quiet enthusiasm spread through the office once the results were announced. The committee met on Tuesday to review the proposed budget for the coming year. Sales of electric bicycles grew steadily in every region except the far north.\"\n    },\n    {\n      \"page_number\": 2,\n      \"markdown\": \"# Site Measurement Log\\n\\nThe table below summarizes the figures collected during the reporting period.\\n\\n| Site | Samples | Mean Depth | Variance |\\n| --- | --- | --- | --- |\\n| Hazel Bend | 205 | 3.12 | 2.493 |\\n| Ash Grove | 195 | 8.26 | 1.458 |\\n| Birch Hollow | 218 | 7.51 | 2.972 |\\n| Elm Point | 185 | 2.43 | 3.075 |\\n| Cedar Flat | 205 | 1.02 | 3.014 |\\n| Gull Rock | 50 | 9.99 | 0.492 |\\n| Dunes East | 69 | 6.00 | 1.665 |\"\n    }\n  ]\n}"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1809,
+    "candidatesTokenCount": 1060,
+    "totalTokenCount": 2869,
+    "promptTokensDetails": [
+      {
+        "modality": "DOCUMENT",
+        "tokenCount": 1548
+      },
+      {
+        "modality": "TEXT",
+        "tokenCount": 261
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1060
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "HfPJaNXKO7OXm9IPk7P1kQc"
+}
