@@ -1,0 +1,158 @@
+{
+  "site": {
+    "title": "LiteOCR",
+    "tagline": "One API for every OCR / document-parsing provider.",
+    "summary": "LiteOCR is one API for every OCR and document-parsing provider (Reducto, Extend, LlamaParse, ...). A Rust core, a typed Python SDK, a CLI, and an open benchmark that ranks providers on accuracy, latency and cost. Switching provider is a one-string change.",
+    "repo": "https://github.com/ajinkyashejul/liteocr",
+    "branch": "main",
+    "license": "MIT"
+  },
+  "sections": [
+    {
+      "title": "",
+      "pages": [
+        {
+          "slug": "",
+          "title": "LiteOCR",
+          "nav_title": "Home",
+          "source": "README.md",
+          "description": "Overview, install, usage, the model table and how LiteOCR maps each provider.",
+          "home": true
+        },
+        {
+          "slug": "getting-started",
+          "title": "Getting started",
+          "source": "website/pages/getting-started.md",
+          "description": "Install, set a provider key, and make your first call from Python, the CLI or Rust."
+        }
+      ]
+    },
+    {
+      "title": "Reference",
+      "pages": [
+        {
+          "slug": "python",
+          "title": "Python SDK",
+          "source": "website/pages/python-sdk.md",
+          "description": "The complete public Python API: the parse / ocr / extract modes, Router, response dataclasses, exceptions, callbacks, pricing and scoring helpers."
+        },
+        {
+          "slug": "cli",
+          "title": "CLI",
+          "source": "website/pages/cli.md",
+          "description": "Every liteocr subcommand and flag: parse, ocr, extract, providers, and bench run / report / score."
+        },
+        {
+          "slug": "rust",
+          "title": "Rust",
+          "source": "website/pages/rust.md",
+          "description": "Using the liteocr-core crate: modes, the DocumentRequest builder, ParseResponse / TextResponse / ExtractResponse, Router, errors and the bench module."
+        }
+      ]
+    },
+    {
+      "title": "Providers",
+      "pages": [
+        {
+          "slug": "providers",
+          "title": "Providers",
+          "nav_title": "Overview",
+          "source": "docs/providers/README.md",
+          "description": "Provider matrix: upload method, sync vs async, page and bbox handling, credits and shared behaviour.",
+          "provider_index": true
+        },
+        {
+          "slug": "providers/reducto",
+          "title": "Reducto",
+          "source": "docs/providers/reducto.md",
+          "description": "Reducto: endpoints, request flow, response mapping, errors, gotchas and provider_options."
+        },
+        {
+          "slug": "providers/extend",
+          "title": "Extend",
+          "source": "docs/providers/extend.md",
+          "description": "Extend: endpoints, request flow, response mapping, errors, gotchas and provider_options."
+        },
+        {
+          "slug": "providers/llamaparse",
+          "title": "LlamaParse",
+          "source": "docs/providers/llamaparse.md",
+          "description": "LlamaParse: endpoints, request flow, response mapping, errors, gotchas and provider_options."
+        }
+      ]
+    },
+    {
+      "title": "Benchmark",
+      "pages": [
+        {
+          "slug": "benchmark",
+          "title": "Benchmark",
+          "nav_title": "Methodology",
+          "source": "benchmark/README.md",
+          "description": "How the open benchmark works: principles, metric definitions, how to run it, datasets and caveats."
+        },
+        {
+          "slug": "benchmark/leaderboard",
+          "title": "Leaderboard",
+          "source": "benchmark/LEADERBOARD.md",
+          "description": "Current results: accuracy, latency and cost per 1,000 pages for every model, plus a per-category breakdown."
+        },
+        {
+          "slug": "benchmark/vendor-benchmarks",
+          "title": "Vendor benchmarks",
+          "source": "docs/benchmarks/vendor-benchmarks.md",
+          "description": "Survey of public OCR benchmarks and vendor-published results, with adapter notes for the combined dataset."
+        }
+      ]
+    },
+    {
+      "title": "Project",
+      "pages": [
+        {
+          "slug": "project/spec",
+          "title": "Specification",
+          "source": "docs/SPEC.md",
+          "description": "The product and architecture specification: goals, unified request/response, errors, router, provider mappings, benchmark design."
+        },
+        {
+          "slug": "project/decisions",
+          "title": "Decisions",
+          "source": "docs/DECISIONS.md",
+          "description": "Architecture decision records — what was decided, why, and what it rules out."
+        },
+        {
+          "slug": "project/tasks",
+          "title": "Task board",
+          "source": "docs/TASKS.md",
+          "description": "Live task board: what is done, in progress and next.",
+          "optional": true
+        },
+        {
+          "slug": "project/contributing",
+          "title": "Contributing",
+          "source": "CONTRIBUTING.md",
+          "description": "Setup, the checks to run, how to add a provider or a dataset, and the PR checklist."
+        },
+        {
+          "slug": "project/changelog",
+          "title": "Changelog",
+          "source": "CHANGELOG.md",
+          "description": "Keep-a-Changelog history of user-visible changes.",
+          "optional": true
+        },
+        {
+          "slug": "project/security",
+          "title": "Security",
+          "source": "SECURITY.md",
+          "description": "Supported versions, how to report a vulnerability, and how LiteOCR handles API keys."
+        },
+        {
+          "slug": "project/for-agents",
+          "title": "For agents",
+          "source": "CLAUDE.md",
+          "description": "Working agreement for AI agents and contributors: branch, identity, required checks, and where each kind of change goes."
+        }
+      ]
+    }
+  ]
+}

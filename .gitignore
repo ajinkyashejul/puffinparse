@@ -28,3 +28,5 @@ benchmark/runs/
 benchmark/cache/
 *.tmp
 .DS_Store
+benchmark/site/dist/
+website/dist/
