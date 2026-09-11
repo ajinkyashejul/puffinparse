@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "(uv pip install --system markdown || pip3 install --break-system-packages markdown)",
-  "buildCommand": "python3 website/build.py --out website/dist --site-url https://liteocr.vercel.app",
+  "installCommand": "echo 'deps resolved by uv run at build time'",
+  "buildCommand": "uv run --no-project --with markdown python website/build.py --out website/dist --site-url https://liteocr.vercel.app",
   "outputDirectory": "website/dist",
   "cleanUrls": true,
   "trailingSlash": true,
