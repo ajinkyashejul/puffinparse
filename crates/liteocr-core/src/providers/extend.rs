@@ -133,10 +133,8 @@ fn build_body(request: &OcrRequest, model: &str, file_ref: Value) -> Result<Valu
         "parse_performance" | "parse_light" | "parse_auto" => model,
         other => return Err(Error::unsupported_model(format!("extend: unknown engine '{other}'"))),
     };
-    let table_format = match request.output {
-        OutputFormat::Markdown => "markdown",
-        OutputFormat::Text => "markdown",
-    };
+    // Tables are always requested as markdown; `OutputFormat::Text` is derived from it afterwards.
+    let table_format = "markdown";
     let mut config = json!({
         "target": "markdown",
         "chunkingStrategy": { "type": "page" },

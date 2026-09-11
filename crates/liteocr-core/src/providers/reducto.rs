@@ -4,7 +4,7 @@
 //! `POST /parse_async` + `GET /job/{id}` when `provider_options.async == true`.
 //! Results with `result.type == "url"` are fetched from the presigned URL.
 
-use crate::error::{Error, ErrorKind, Result};
+use crate::error::{Error, Result};
 use crate::http::{self, Deadline, Retry};
 use crate::provider::{self, OcrProvider};
 use crate::types::{BBox, Block, BlockType, DocumentInput, OcrRequest, OcrResponse, OutputFormat, Page, Usage};
@@ -378,18 +378,6 @@ pub(crate) fn normalize(parsed: &ParseResponse, full: &FullResult, fmt: OutputFo
         resp.metadata.insert("reducto_studio_link".into(), json!(link));
     }
     resp
-}
-
-/// Map Reducto's non-standard 442 (password-protected) to a bad request.
-#[allow(dead_code)]
-pub(crate) fn map_status(status: u16) -> ErrorKind {
-    match status {
-        442 => ErrorKind::BadRequest,
-        401 | 403 => ErrorKind::Authentication,
-        429 => ErrorKind::RateLimit,
-        400..=499 => ErrorKind::BadRequest,
-        _ => ErrorKind::Provider,
-    }
 }
 
 #[cfg(test)]
