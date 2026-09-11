@@ -233,6 +233,45 @@ pub const PROVIDERS: &[ProviderInfo] = &[
             },
         ],
     },
+    ProviderInfo {
+        name: "textract",
+        display_name: "AWS Textract",
+        // Also reads AWS_SECRET_ACCESS_KEY (required), AWS_SESSION_TOKEN (optional),
+        // AWS_REGION / AWS_DEFAULT_REGION (default us-east-1). `api_key` overrides the key id only.
+        env_var: "AWS_ACCESS_KEY_ID",
+        base_url: "https://textract.us-east-1.amazonaws.com",
+        docs: "https://docs.aws.amazon.com/textract/latest/dg/what-is.html",
+        models: &[
+            ModelInfo {
+                provider: "textract",
+                model: "detect-text",
+                description: "Textract DetectDocumentText: raw OCR, lines + words with boxes (cheapest)",
+                default: true,
+                modes: &[Mode::Ocr],
+            },
+            ModelInfo {
+                provider: "textract",
+                model: "layout",
+                description: "Textract AnalyzeDocument LAYOUT + TABLES: reading-order markdown + tables",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "textract",
+                model: "queries",
+                description: "Textract AnalyzeDocument QUERIES: one natural-language query per schema field",
+                default: true,
+                modes: &[Mode::Extract],
+            },
+            ModelInfo {
+                provider: "textract",
+                model: "forms",
+                description: "Textract AnalyzeDocument FORMS: key-value pairs matched to schema fields",
+                default: false,
+                modes: &[Mode::Extract],
+            },
+        ],
+    },
 ];
 
 /// A parsed, validated model reference.
@@ -373,6 +412,6 @@ mod tests {
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 21);
+        assert_eq!(m.len(), 25);
     }
 }

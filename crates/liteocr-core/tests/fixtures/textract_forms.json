@@ -1,0 +1,636 @@
+{
+  "DocumentMetadata": {
+    "Pages": 1
+  },
+  "Blocks": [
+    {
+      "BlockType": "PAGE",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 1.0,
+          "Height": 1.0,
+          "Left": 0.0,
+          "Top": 0.0
+        },
+        "Polygon": [
+          {
+            "X": 0.0,
+            "Y": 0.0
+          },
+          {
+            "X": 1.0,
+            "Y": 0.0
+          },
+          {
+            "X": 1.0,
+            "Y": 1.0
+          },
+          {
+            "X": 0.0,
+            "Y": 1.0
+          }
+        ]
+      },
+      "Id": "page-1",
+      "Page": 1,
+      "Relationships": [
+        {
+          "Type": "CHILD",
+          "Ids": [
+            "k1",
+            "v1",
+            "k2",
+            "v2",
+            "k3",
+            "v3"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "KEY_VALUE_SET",
+      "Confidence": 98.4,
+      "EntityTypes": [
+        "KEY"
+      ],
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.2,
+          "Height": 0.02,
+          "Left": 0.12,
+          "Top": 0.12
+        },
+        "Polygon": [
+          {
+            "X": 0.12,
+            "Y": 0.12
+          },
+          {
+            "X": 0.32,
+            "Y": 0.12
+          },
+          {
+            "X": 0.32,
+            "Y": 0.13999999999999999
+          },
+          {
+            "X": 0.12,
+            "Y": 0.13999999999999999
+          }
+        ]
+      },
+      "Id": "k1",
+      "Page": 1,
+      "Relationships": [
+        {
+          "Type": "CHILD",
+          "Ids": [
+            "fw1",
+            "fw2"
+          ]
+        },
+        {
+          "Type": "VALUE",
+          "Ids": [
+            "v1"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "KEY_VALUE_SET",
+      "Confidence": 97.8,
+      "EntityTypes": [
+        "VALUE"
+      ],
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.2,
+          "Height": 0.02,
+          "Left": 0.34,
+          "Top": 0.12
+        },
+        "Polygon": [
+          {
+            "X": 0.34,
+            "Y": 0.12
+          },
+          {
+            "X": 0.54,
+            "Y": 0.12
+          },
+          {
+            "X": 0.54,
+            "Y": 0.13999999999999999
+          },
+          {
+            "X": 0.34,
+            "Y": 0.13999999999999999
+          }
+        ]
+      },
+      "Id": "v1",
+      "Page": 1,
+      "Relationships": [
+        {
+          "Type": "CHILD",
+          "Ids": [
+            "fw3"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "KEY_VALUE_SET",
+      "Confidence": 99.3,
+      "EntityTypes": [
+        "KEY"
+      ],
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.2,
+          "Height": 0.02,
+          "Left": 0.12,
+          "Top": 0.16
+        },
+        "Polygon": [
+          {
+            "X": 0.12,
+            "Y": 0.16
+          },
+          {
+            "X": 0.32,
+            "Y": 0.16
+          },
+          {
+            "X": 0.32,
+            "Y": 0.18
+          },
+          {
+            "X": 0.12,
+            "Y": 0.18
+          }
+        ]
+      },
+      "Id": "k2",
+      "Page": 1,
+      "Relationships": [
+        {
+          "Type": "CHILD",
+          "Ids": [
+            "fw4"
+          ]
+        },
+        {
+          "Type": "VALUE",
+          "Ids": [
+            "v2"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "KEY_VALUE_SET",
+      "Confidence": 99.1,
+      "EntityTypes": [
+        "VALUE"
+      ],
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.2,
+          "Height": 0.02,
+          "Left": 0.34,
+          "Top": 0.16
+        },
+        "Polygon": [
+          {
+            "X": 0.34,
+            "Y": 0.16
+          },
+          {
+            "X": 0.54,
+            "Y": 0.16
+          },
+          {
+            "X": 0.54,
+            "Y": 0.18
+          },
+          {
+            "X": 0.34,
+            "Y": 0.18
+          }
+        ]
+      },
+      "Id": "v2",
+      "Page": 1,
+      "Relationships": [
+        {
+          "Type": "CHILD",
+          "Ids": [
+            "fw5"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "KEY_VALUE_SET",
+      "Confidence": 96.2,
+      "EntityTypes": [
+        "KEY"
+      ],
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.2,
+          "Height": 0.02,
+          "Left": 0.12,
+          "Top": 0.2
+        },
+        "Polygon": [
+          {
+            "X": 0.12,
+            "Y": 0.2
+          },
+          {
+            "X": 0.32,
+            "Y": 0.2
+          },
+          {
+            "X": 0.32,
+            "Y": 0.22
+          },
+          {
+            "X": 0.12,
+            "Y": 0.22
+          }
+        ]
+      },
+      "Id": "k3",
+      "Page": 1,
+      "Relationships": [
+        {
+          "Type": "CHILD",
+          "Ids": [
+            "fw6",
+            "fw7",
+            "fw8"
+          ]
+        },
+        {
+          "Type": "VALUE",
+          "Ids": [
+            "v3"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "KEY_VALUE_SET",
+      "Confidence": 95.4,
+      "EntityTypes": [
+        "VALUE"
+      ],
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.2,
+          "Height": 0.02,
+          "Left": 0.34,
+          "Top": 0.2
+        },
+        "Polygon": [
+          {
+            "X": 0.34,
+            "Y": 0.2
+          },
+          {
+            "X": 0.54,
+            "Y": 0.2
+          },
+          {
+            "X": 0.54,
+            "Y": 0.22
+          },
+          {
+            "X": 0.34,
+            "Y": 0.22
+          }
+        ]
+      },
+      "Id": "v3",
+      "Page": 1,
+      "Relationships": [
+        {
+          "Type": "CHILD",
+          "Ids": [
+            "sel1"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "WORD",
+      "Confidence": 98.5,
+      "Text": "Invoice",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.09,
+          "Height": 0.018,
+          "Left": 0.12,
+          "Top": 0.12
+        },
+        "Polygon": [
+          {
+            "X": 0.12,
+            "Y": 0.12
+          },
+          {
+            "X": 0.21,
+            "Y": 0.12
+          },
+          {
+            "X": 0.21,
+            "Y": 0.13799999999999998
+          },
+          {
+            "X": 0.12,
+            "Y": 0.13799999999999998
+          }
+        ]
+      },
+      "Id": "fw1",
+      "Page": 1
+    },
+    {
+      "BlockType": "WORD",
+      "Confidence": 98.3,
+      "Text": "Number:",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.1,
+          "Height": 0.018,
+          "Left": 0.22,
+          "Top": 0.12
+        },
+        "Polygon": [
+          {
+            "X": 0.22,
+            "Y": 0.12
+          },
+          {
+            "X": 0.32,
+            "Y": 0.12
+          },
+          {
+            "X": 0.32,
+            "Y": 0.13799999999999998
+          },
+          {
+            "X": 0.22,
+            "Y": 0.13799999999999998
+          }
+        ]
+      },
+      "Id": "fw2",
+      "Page": 1
+    },
+    {
+      "BlockType": "WORD",
+      "Confidence": 97.8,
+      "Text": "1234",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.06,
+          "Height": 0.018,
+          "Left": 0.34,
+          "Top": 0.12
+        },
+        "Polygon": [
+          {
+            "X": 0.34,
+            "Y": 0.12
+          },
+          {
+            "X": 0.4,
+            "Y": 0.12
+          },
+          {
+            "X": 0.4,
+            "Y": 0.13799999999999998
+          },
+          {
+            "X": 0.34,
+            "Y": 0.13799999999999998
+          }
+        ]
+      },
+      "Id": "fw3",
+      "Page": 1
+    },
+    {
+      "BlockType": "WORD",
+      "Confidence": 99.3,
+      "Text": "Total:",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.07,
+          "Height": 0.018,
+          "Left": 0.12,
+          "Top": 0.16
+        },
+        "Polygon": [
+          {
+            "X": 0.12,
+            "Y": 0.16
+          },
+          {
+            "X": 0.19,
+            "Y": 0.16
+          },
+          {
+            "X": 0.19,
+            "Y": 0.178
+          },
+          {
+            "X": 0.12,
+            "Y": 0.178
+          }
+        ]
+      },
+      "Id": "fw4",
+      "Page": 1
+    },
+    {
+      "BlockType": "WORD",
+      "Confidence": 99.1,
+      "Text": "$56.78",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.09,
+          "Height": 0.018,
+          "Left": 0.34,
+          "Top": 0.16
+        },
+        "Polygon": [
+          {
+            "X": 0.34,
+            "Y": 0.16
+          },
+          {
+            "X": 0.43000000000000005,
+            "Y": 0.16
+          },
+          {
+            "X": 0.43000000000000005,
+            "Y": 0.178
+          },
+          {
+            "X": 0.34,
+            "Y": 0.178
+          }
+        ]
+      },
+      "Id": "fw5",
+      "Page": 1
+    },
+    {
+      "BlockType": "WORD",
+      "Confidence": 96.4,
+      "Text": "Paid",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.05,
+          "Height": 0.018,
+          "Left": 0.12,
+          "Top": 0.2
+        },
+        "Polygon": [
+          {
+            "X": 0.12,
+            "Y": 0.2
+          },
+          {
+            "X": 0.16999999999999998,
+            "Y": 0.2
+          },
+          {
+            "X": 0.16999999999999998,
+            "Y": 0.218
+          },
+          {
+            "X": 0.12,
+            "Y": 0.218
+          }
+        ]
+      },
+      "Id": "fw6",
+      "Page": 1
+    },
+    {
+      "BlockType": "WORD",
+      "Confidence": 96.1,
+      "Text": "in",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.03,
+          "Height": 0.018,
+          "Left": 0.18,
+          "Top": 0.2
+        },
+        "Polygon": [
+          {
+            "X": 0.18,
+            "Y": 0.2
+          },
+          {
+            "X": 0.21,
+            "Y": 0.2
+          },
+          {
+            "X": 0.21,
+            "Y": 0.218
+          },
+          {
+            "X": 0.18,
+            "Y": 0.218
+          }
+        ]
+      },
+      "Id": "fw7",
+      "Page": 1
+    },
+    {
+      "BlockType": "WORD",
+      "Confidence": 96.0,
+      "Text": "full",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.04,
+          "Height": 0.018,
+          "Left": 0.22,
+          "Top": 0.2
+        },
+        "Polygon": [
+          {
+            "X": 0.22,
+            "Y": 0.2
+          },
+          {
+            "X": 0.26,
+            "Y": 0.2
+          },
+          {
+            "X": 0.26,
+            "Y": 0.218
+          },
+          {
+            "X": 0.22,
+            "Y": 0.218
+          }
+        ]
+      },
+      "Id": "fw8",
+      "Page": 1
+    },
+    {
+      "BlockType": "SELECTION_ELEMENT",
+      "Confidence": 95.4,
+      "SelectionStatus": "SELECTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.02,
+          "Height": 0.018,
+          "Left": 0.34,
+          "Top": 0.2
+        },
+        "Polygon": [
+          {
+            "X": 0.34,
+            "Y": 0.2
+          },
+          {
+            "X": 0.36000000000000004,
+            "Y": 0.2
+          },
+          {
+            "X": 0.36000000000000004,
+            "Y": 0.218
+          },
+          {
+            "X": 0.34,
+            "Y": 0.218
+          }
+        ]
+      },
+      "Id": "sel1",
+      "Page": 1
+    }
+  ],
+  "AnalyzeDocumentModelVersion": "1.0"
+}

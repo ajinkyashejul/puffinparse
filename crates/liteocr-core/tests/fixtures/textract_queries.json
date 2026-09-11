@@ -1,0 +1,158 @@
+{
+  "DocumentMetadata": {
+    "Pages": 1
+  },
+  "Blocks": [
+    {
+      "BlockType": "PAGE",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 1.0,
+          "Height": 1.0,
+          "Left": 0.0,
+          "Top": 0.0
+        },
+        "Polygon": [
+          {
+            "X": 0.0,
+            "Y": 0.0
+          },
+          {
+            "X": 1.0,
+            "Y": 0.0
+          },
+          {
+            "X": 1.0,
+            "Y": 1.0
+          },
+          {
+            "X": 0.0,
+            "Y": 1.0
+          }
+        ]
+      },
+      "Id": "page-1",
+      "Page": 1,
+      "Relationships": [
+        {
+          "Type": "CHILD",
+          "Ids": [
+            "q1",
+            "q2",
+            "q3"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "QUERY",
+      "Id": "q1",
+      "Page": 1,
+      "Query": {
+        "Text": "What is the invoice number?",
+        "Alias": "invoice_number"
+      },
+      "Relationships": [
+        {
+          "Type": "ANSWER",
+          "Ids": [
+            "a1"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "QUERY_RESULT",
+      "Confidence": 97.23,
+      "Text": "1234",
+      "Id": "a1",
+      "Page": 1,
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.073,
+          "Height": 0.018,
+          "Left": 0.222,
+          "Top": 0.125
+        },
+        "Polygon": [
+          {
+            "X": 0.222,
+            "Y": 0.125
+          },
+          {
+            "X": 0.295,
+            "Y": 0.125
+          },
+          {
+            "X": 0.295,
+            "Y": 0.143
+          },
+          {
+            "X": 0.222,
+            "Y": 0.143
+          }
+        ]
+      }
+    },
+    {
+      "BlockType": "QUERY",
+      "Id": "q2",
+      "Page": 1,
+      "Query": {
+        "Text": "What is the total amount?",
+        "Alias": "total"
+      },
+      "Relationships": [
+        {
+          "Type": "ANSWER",
+          "Ids": [
+            "a2"
+          ]
+        }
+      ]
+    },
+    {
+      "BlockType": "QUERY_RESULT",
+      "Confidence": 95.1,
+      "Text": "$56.78",
+      "Id": "a2",
+      "Page": 1,
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.089,
+          "Height": 0.018,
+          "Left": 0.199,
+          "Top": 0.16
+        },
+        "Polygon": [
+          {
+            "X": 0.199,
+            "Y": 0.16
+          },
+          {
+            "X": 0.28800000000000003,
+            "Y": 0.16
+          },
+          {
+            "X": 0.28800000000000003,
+            "Y": 0.178
+          },
+          {
+            "X": 0.199,
+            "Y": 0.178
+          }
+        ]
+      }
+    },
+    {
+      "BlockType": "QUERY",
+      "Id": "q3",
+      "Page": 1,
+      "Query": {
+        "Text": "What is the due date?",
+        "Alias": "due_date"
+      }
+    }
+  ],
+  "AnalyzeDocumentModelVersion": "1.0"
+}

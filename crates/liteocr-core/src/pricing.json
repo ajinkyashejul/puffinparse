@@ -20,5 +20,9 @@
   "azure/receipt": { "extract": 0.01, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (prebuilt models: $10/1k pages)", "updated": "2026-09-11" },
   "azure/id_document": { "extract": 0.01, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (prebuilt models: $10/1k pages)", "updated": "2026-09-11" },
   "azure/tax_us_w2": { "extract": 0.01, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (prebuilt models: $10/1k pages)", "updated": "2026-09-11" },
-  "azure/custom": { "parse": 0.03, "ocr": 0.03, "extract": 0.03, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (custom extraction: $30/1k pages)", "updated": "2026-09-11" }
+  "azure/custom": { "parse": 0.03, "ocr": 0.03, "extract": 0.03, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (custom extraction: $30/1k pages)", "updated": "2026-09-11" },
+  "textract/detect-text": { "ocr": 0.0015, "source": "https://aws.amazon.com/textract/pricing/ (DetectDocumentText, us-east-1: $1.50/1k pages, first 1M/month)", "updated": "2026-09-11" },
+  "textract/layout": { "parse": 0.015, "ocr": 0.015, "source": "https://aws.amazon.com/textract/pricing/ (AnalyzeDocument TABLES, us-east-1: $15/1k pages; LAYOUT is free with TABLES)", "updated": "2026-09-11" },
+  "textract/queries": { "extract": 0.015, "source": "https://aws.amazon.com/textract/pricing/ (AnalyzeDocument QUERIES, us-east-1: $15/1k pages)", "updated": "2026-09-11" },
+  "textract/forms": { "extract": 0.05, "source": "https://aws.amazon.com/textract/pricing/ (AnalyzeDocument FORMS, us-east-1: $50/1k pages)", "updated": "2026-09-11" }
 }
