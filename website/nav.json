@@ -78,6 +78,78 @@
           "title": "LlamaParse",
           "source": "docs/providers/llamaparse.md",
           "description": "LlamaParse: endpoints, request flow, response mapping, errors, gotchas and provider_options."
+        },
+        {
+          "slug": "providers/mistral",
+          "title": "Mistral Document AI",
+          "source": "docs/providers/mistral.md",
+          "description": "Mistral OCR: single-call parse, paragraph blocks, document annotations for extraction."
+        },
+        {
+          "slug": "providers/azure",
+          "title": "Azure Document Intelligence",
+          "source": "docs/providers/azure.md",
+          "description": "Azure prebuilt-read / layout / invoice and friends via the 2024-11-30 REST API."
+        },
+        {
+          "slug": "providers/textract",
+          "title": "AWS Textract",
+          "source": "docs/providers/textract.md",
+          "description": "DetectDocumentText, AnalyzeDocument LAYOUT/TABLES, QUERIES and FORMS with in-house SigV4."
+        },
+        {
+          "slug": "providers/gemini",
+          "title": "Google Gemini",
+          "source": "docs/providers/gemini.md",
+          "description": "Vision-LLM transcription and schema extraction with structured output; no geometry."
+        },
+        {
+          "slug": "providers/openai",
+          "title": "OpenAI",
+          "source": "docs/providers/openai.md",
+          "description": "Responses API vision transcription and strict-schema extraction."
+        },
+        {
+          "slug": "providers/anthropic",
+          "title": "Anthropic (Claude)",
+          "source": "docs/providers/anthropic.md",
+          "description": "Messages API transcription and tool-forced structured extraction."
+        },
+        {
+          "slug": "providers/mathpix",
+          "title": "Mathpix",
+          "source": "docs/providers/mathpix.md",
+          "description": "STEM and handwriting OCR to Mathpix Markdown with line and word polygons."
+        },
+        {
+          "slug": "providers/datalab",
+          "title": "Datalab (Marker)",
+          "source": "docs/providers/datalab.md",
+          "description": "Hosted Marker Convert API: fast, balanced and accurate modes."
+        },
+        {
+          "slug": "providers/unstructured",
+          "title": "Unstructured",
+          "source": "docs/providers/unstructured.md",
+          "description": "Partition API elements with coordinates and table HTML."
+        },
+        {
+          "slug": "providers/upstage",
+          "title": "Upstage Document Parse",
+          "source": "docs/providers/upstage.md",
+          "description": "Layout parsing to HTML/Markdown with element coordinates."
+        },
+        {
+          "slug": "providers/landingai",
+          "title": "Landing AI ADE",
+          "source": "docs/providers/landingai.md",
+          "description": "Agentic Document Extraction: parse with groundings and schema extraction."
+        },
+        {
+          "slug": "providers/google-documentai",
+          "title": "Google Document AI",
+          "source": "docs/providers/google-documentai.md",
+          "description": "Document OCR, Layout Parser, Form Parser and prebuilt processors."
         }
       ]
     },
@@ -115,10 +187,16 @@
           "description": "The product and architecture specification: goals, unified request/response, errors, router, provider mappings, benchmark design."
         },
         {
+          "slug": "project/compat",
+          "title": "Native-format compatibility",
+          "source": "docs/COMPAT.md",
+          "description": "Get responses in Reducto, Extend or LlamaParse native shape from any provider."
+        },
+        {
           "slug": "project/decisions",
           "title": "Decisions",
           "source": "docs/DECISIONS.md",
-          "description": "Architecture decision records — what was decided, why, and what it rules out."
+          "description": "Architecture decision records \u2014 what was decided, why, and what it rules out."
         },
         {
           "slug": "project/tasks",
