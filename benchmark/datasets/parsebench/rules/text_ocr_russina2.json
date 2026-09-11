@@ -1,0 +1,1632 @@
+[
+  {
+    "id": "text_ocr_russina2_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "В результате между наперед установленными точками построены для двух вариантов трасс продольные профили в масштабах 15000 (горизонтальный) и 1100 (вертикальный) и нанесена проектная линия",
+      "Г , Церклевич А",
+      "Г ЛИСОВЕЦ, А",
+      "Дейнека Ю",
+      "Для первого и второго вариантов трассы разбито соответственно 68 и 69 пикетов",
+      "Для сравнительного анализа эффективности определения объемов земляных работ на плане, а затем на местности проложено два магистральных хода: протяженность — первого варианта 6870 и второго — 6948 м",
+      "Для этого использован топоплан в масштабе 15000, составленный по результатам тахеометрической съемки этого же масштаба с сечением рельефа 1 м поймы реки Западный Буг и ее окрестностей",
+      "Земляные работы подсчитывают как объемы геометрических фигур — призм, пирамид, конусов и их различных сочетаний, взятых из продольного профиля, построенного на основании запроектированной на топографическом материале трассы дороги",
+      "Л , 1993 11",
+      "Л ЦЕРКЛЕВИЧ",
+      "На плане пикеты по трассам разбивались через 100 м, отметки которых определялись графически — путем интерполирования между горизонталями",
+      "Объемы земляных работ (масс), необходимые для возведения насыпей и устройства выемок — определяющий фактор при выборе оптимального окончательного варианта дороги",
+      "Отмечались также плюсовые точки",
+      "П , Лисовец А",
+      "По профилям определяли проектные, а затем рабочие отметки",
+      "После определения на местности положения крайних точек трассы разбивался пикетаж через",
+      "Последние находили как разности черных и проектных отметок пикетов, отождествленных на плане",
+      "Проект трассы, разработанный в двух вариантах на топоплане, перенесен в натуру",
+      "Таким образом, выбран район местности, имеющей сравнительно равнинный рельеф — перепады высот по трассам не превышали 10 м",
+      "Таким образом, при расчетах используются данные, которые снимаются графически с этих материалов",
+      "УДК 528.486",
+      "Цель данной работы — исследование влияния ошибок определения отметок пикетов при линейном трассировании по топографической карте на вычисления объемов земляных масс — установление конкретной их величины и характера распределения",
+      "ЭФФЕКТИВНОСТЬ ОПРЕДЕЛЕНИЯ ОБЪЕМОВ ЗЕМЛЯНЫХ РАБОТ ПО РЕЗУЛЬТАТАМ КАМЕРАЛЬНОГО И ПОЛЕВОГО ТРАССИРОВАНИЯ",
+      "Ю П ДЕЙНЕКА, А"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_7",
+    "type": "present",
+    "text": "10",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_7"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_8",
+    "type": "present",
+    "text": "100",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_8"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_9",
+    "type": "present",
+    "text": "11",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_9"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_10",
+    "type": "present",
+    "text": "1100",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_10"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_11",
+    "type": "present",
+    "text": "15000",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_11"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_12",
+    "type": "present",
+    "text": "1993",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_12"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_13",
+    "type": "present",
+    "text": "486",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_13"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_14",
+    "type": "present",
+    "text": "528",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_14"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_15",
+    "type": "present",
+    "text": "68",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_15"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_16",
+    "type": "present",
+    "text": "6870",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_16"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_17",
+    "type": "present",
+    "text": "69",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_17"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_18",
+    "type": "present",
+    "text": "6948",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_18"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_19",
+    "type": "present",
+    "text": "анализа",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_19"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_20",
+    "type": "present",
+    "text": "буг",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_20"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_21",
+    "type": "present",
+    "text": "варианта",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_21"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_22",
+    "type": "present",
+    "text": "вариантах",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_22"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_23",
+    "type": "present",
+    "text": "вариантов",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_23"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_24",
+    "type": "present",
+    "text": "величины",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_24"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_25",
+    "type": "present",
+    "text": "вертикальный",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_25"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_26",
+    "type": "present",
+    "text": "взятых",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_26"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_27",
+    "type": "present",
+    "text": "влияния",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_27"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_28",
+    "type": "present",
+    "text": "возведения",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_28"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_29",
+    "type": "present",
+    "text": "второго",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_29"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_30",
+    "type": "present",
+    "text": "выборе",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_30"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_31",
+    "type": "present",
+    "text": "выбран",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_31"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_32",
+    "type": "present",
+    "text": "выемок",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_32"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_33",
+    "type": "present",
+    "text": "высот",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_33"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_34",
+    "type": "present",
+    "text": "вычисления",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_34"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_35",
+    "type": "present",
+    "text": "геометрических",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_35"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_36",
+    "type": "present",
+    "text": "горизонтальный",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_36"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_37",
+    "type": "present",
+    "text": "горизонталями",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_37"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_38",
+    "type": "present",
+    "text": "графически",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_38"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_39",
+    "type": "present",
+    "text": "данной",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_39"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_40",
+    "type": "present",
+    "text": "данные",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_40"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_41",
+    "type": "present",
+    "text": "два",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_41"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_42",
+    "type": "present",
+    "text": "двух",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_42"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_43",
+    "type": "present",
+    "text": "дейнека",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_43"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_44",
+    "type": "present",
+    "text": "для",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_44"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_45",
+    "type": "present",
+    "text": "дороги",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_45"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_46",
+    "type": "present",
+    "text": "ее",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_46"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_47",
+    "type": "present",
+    "text": "же",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_47"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_48",
+    "type": "present",
+    "text": "западный",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_48"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_49",
+    "type": "present",
+    "text": "запроектированной",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_49"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_50",
+    "type": "present",
+    "text": "затем",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_50"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_51",
+    "type": "present",
+    "text": "земляные",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_51"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_52",
+    "type": "present",
+    "text": "земляных",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_52"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_53",
+    "type": "present",
+    "text": "из",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_53"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_54",
+    "type": "present",
+    "text": "имеющей",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_54"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_55",
+    "type": "present",
+    "text": "интерполирования",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_55"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_56",
+    "type": "present",
+    "text": "использован",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_56"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_57",
+    "type": "present",
+    "text": "используются",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_57"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_58",
+    "type": "present",
+    "text": "исследование",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_58"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_59",
+    "type": "present",
+    "text": "их",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_59"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_60",
+    "type": "present",
+    "text": "как",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_60"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_61",
+    "type": "present",
+    "text": "камерального",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_61"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_62",
+    "type": "present",
+    "text": "карте",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_62"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_63",
+    "type": "present",
+    "text": "конкретной",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_63"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_64",
+    "type": "present",
+    "text": "конусов",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_64"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_65",
+    "type": "present",
+    "text": "которые",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_65"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_66",
+    "type": "present",
+    "text": "которых",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_66"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_67",
+    "type": "present",
+    "text": "крайних",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_67"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_68",
+    "type": "present",
+    "text": "линейном",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_68"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_69",
+    "type": "present",
+    "text": "линия",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_69"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_70",
+    "type": "present",
+    "text": "лисовец",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_70"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_71",
+    "type": "present",
+    "text": "магистральных",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_71"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_72",
+    "type": "present",
+    "text": "масс",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_72"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_73",
+    "type": "present",
+    "text": "масштаба",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_73"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_74",
+    "type": "present",
+    "text": "масштабах",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_74"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_75",
+    "type": "present",
+    "text": "масштабе",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_75"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_76",
+    "type": "present",
+    "text": "материале",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_76"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_77",
+    "type": "present",
+    "text": "материалов",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_77"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_78",
+    "type": "present",
+    "text": "между",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_78"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_79",
+    "type": "present",
+    "text": "местности",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_79"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_80",
+    "type": "present",
+    "text": "на",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_80"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_81",
+    "type": "present",
+    "text": "нанесена",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_81"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_82",
+    "type": "present",
+    "text": "наперед",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_82"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_83",
+    "type": "present",
+    "text": "насыпей",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_83"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_84",
+    "type": "present",
+    "text": "натуру",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_84"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_85",
+    "type": "present",
+    "text": "находили",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_85"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_86",
+    "type": "present",
+    "text": "не",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_86"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_87",
+    "type": "present",
+    "text": "необходимые",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_87"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_88",
+    "type": "present",
+    "text": "образом",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_88"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_89",
+    "type": "present",
+    "text": "объемов",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_89"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_90",
+    "type": "present",
+    "text": "объемы",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_90"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_91",
+    "type": "present",
+    "text": "окончательного",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_91"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_92",
+    "type": "present",
+    "text": "окрестностей",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_92"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_93",
+    "type": "present",
+    "text": "определения",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_93"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_94",
+    "type": "present",
+    "text": "определяли",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_94"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_95",
+    "type": "present",
+    "text": "определялись",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_95"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_96",
+    "type": "present",
+    "text": "определяющий",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_96"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_97",
+    "type": "present",
+    "text": "оптимального",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_97"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_98",
+    "type": "present",
+    "text": "основании",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_98"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_99",
+    "type": "present",
+    "text": "отметки",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_99"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_100",
+    "type": "present",
+    "text": "отметок",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_100"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_101",
+    "type": "present",
+    "text": "отмечались",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_101"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_102",
+    "type": "present",
+    "text": "отождествленных",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_102"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_103",
+    "type": "present",
+    "text": "ошибок",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_103"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_104",
+    "type": "present",
+    "text": "первого",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_104"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_105",
+    "type": "present",
+    "text": "перенесен",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_105"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_106",
+    "type": "present",
+    "text": "перепады",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_106"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_107",
+    "type": "present",
+    "text": "пикетаж",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_107"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_108",
+    "type": "present",
+    "text": "пикетов",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_108"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_109",
+    "type": "present",
+    "text": "пикеты",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_109"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_110",
+    "type": "present",
+    "text": "пирамид",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_110"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_111",
+    "type": "present",
+    "text": "плане",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_111"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_112",
+    "type": "present",
+    "text": "плюсовые",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_112"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_113",
+    "type": "present",
+    "text": "по",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_113"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_114",
+    "type": "present",
+    "text": "подсчитывают",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_114"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_115",
+    "type": "present",
+    "text": "поймы",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_115"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_116",
+    "type": "present",
+    "text": "полевого",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_116"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_117",
+    "type": "present",
+    "text": "положения",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_117"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_118",
+    "type": "present",
+    "text": "после",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_118"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_119",
+    "type": "present",
+    "text": "последние",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_119"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_120",
+    "type": "present",
+    "text": "построенного",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_120"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_121",
+    "type": "present",
+    "text": "построены",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_121"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_122",
+    "type": "present",
+    "text": "превышали",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_122"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_123",
+    "type": "present",
+    "text": "при",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_123"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_124",
+    "type": "present",
+    "text": "призм",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_124"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_125",
+    "type": "present",
+    "text": "продольного",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_125"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_126",
+    "type": "present",
+    "text": "продольные",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_126"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_127",
+    "type": "present",
+    "text": "проект",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_127"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_128",
+    "type": "present",
+    "text": "проектная",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_128"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_129",
+    "type": "present",
+    "text": "проектные",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_129"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_130",
+    "type": "present",
+    "text": "проектных",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_130"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_131",
+    "type": "present",
+    "text": "проложено",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_131"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_132",
+    "type": "present",
+    "text": "протяженность",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_132"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_133",
+    "type": "present",
+    "text": "профили",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_133"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_134",
+    "type": "present",
+    "text": "профиля",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_134"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_135",
+    "type": "present",
+    "text": "профилям",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_135"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_136",
+    "type": "present",
+    "text": "путем",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_136"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_137",
+    "type": "present",
+    "text": "работ",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_137"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_138",
+    "type": "present",
+    "text": "работы",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_138"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_139",
+    "type": "present",
+    "text": "рабочие",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_139"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_140",
+    "type": "present",
+    "text": "равнинный",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_140"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_141",
+    "type": "present",
+    "text": "разбивались",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_141"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_142",
+    "type": "present",
+    "text": "разбивался",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_142"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_143",
+    "type": "present",
+    "text": "разбито",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_143"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_144",
+    "type": "present",
+    "text": "различных",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_144"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_145",
+    "type": "present",
+    "text": "разности",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_145"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_146",
+    "type": "present",
+    "text": "разработанный",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_146"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_147",
+    "type": "present",
+    "text": "район",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_147"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_148",
+    "type": "present",
+    "text": "распределения",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_148"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_149",
+    "type": "present",
+    "text": "расчетах",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_149"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_150",
+    "type": "present",
+    "text": "результатам",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_150"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_151",
+    "type": "present",
+    "text": "результате",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_151"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_152",
+    "type": "present",
+    "text": "реки",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_152"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_153",
+    "type": "present",
+    "text": "рельеф",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_153"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_154",
+    "type": "present",
+    "text": "рельефа",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_154"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_155",
+    "type": "present",
+    "text": "сечением",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_155"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_156",
+    "type": "present",
+    "text": "снимаются",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_156"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_157",
+    "type": "present",
+    "text": "соответственно",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_157"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_158",
+    "type": "present",
+    "text": "составленный",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_158"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_159",
+    "type": "present",
+    "text": "сочетаний",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_159"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_160",
+    "type": "present",
+    "text": "сравнительно",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_160"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_161",
+    "type": "present",
+    "text": "сравнительного",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_161"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_162",
+    "type": "present",
+    "text": "съемки",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_162"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_163",
+    "type": "present",
+    "text": "также",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_163"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_164",
+    "type": "present",
+    "text": "таким",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_164"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_165",
+    "type": "present",
+    "text": "тахеометрической",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_165"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_166",
+    "type": "present",
+    "text": "топографической",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_166"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_167",
+    "type": "present",
+    "text": "топографическом",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_167"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_168",
+    "type": "present",
+    "text": "топоплан",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_168"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_169",
+    "type": "present",
+    "text": "топоплане",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_169"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_170",
+    "type": "present",
+    "text": "точек",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_170"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_171",
+    "type": "present",
+    "text": "точками",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_171"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_172",
+    "type": "present",
+    "text": "точки",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_172"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_173",
+    "type": "present",
+    "text": "трасс",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_173"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_174",
+    "type": "present",
+    "text": "трассам",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_174"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_175",
+    "type": "present",
+    "text": "трассировании",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_175"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_176",
+    "type": "present",
+    "text": "трассирования",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_176"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_177",
+    "type": "present",
+    "text": "трассы",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_177"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_178",
+    "type": "present",
+    "text": "удк",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_178"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_179",
+    "type": "present",
+    "text": "установление",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_179"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_180",
+    "type": "present",
+    "text": "установленными",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_180"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_181",
+    "type": "present",
+    "text": "устройства",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_181"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_182",
+    "type": "present",
+    "text": "фактор",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_182"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_183",
+    "type": "present",
+    "text": "фигур",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_183"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_184",
+    "type": "present",
+    "text": "характера",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_184"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_185",
+    "type": "present",
+    "text": "хода",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_185"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_186",
+    "type": "present",
+    "text": "цель",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_186"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_187",
+    "type": "present",
+    "text": "церклевич",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_187"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_188",
+    "type": "present",
+    "text": "через",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_188"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_189",
+    "type": "present",
+    "text": "черных",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_189"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_190",
+    "type": "present",
+    "text": "этих",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_190"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_191",
+    "type": "present",
+    "text": "этого",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_191"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_192",
+    "type": "present",
+    "text": "эффективности",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_192"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_word_193",
+    "type": "present",
+    "text": "эффективность",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_word_193"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_194",
+    "type": "present",
+    "text": "В результате между наперед установленными точками построены для двух вариантов трасс продольные профили в масштабах 15000 (горизонтальный) и 1100 (вертикальный) и нанесена проектная линия",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_194"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_195",
+    "type": "present",
+    "text": "Г , Церклевич А",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_195"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_196",
+    "type": "present",
+    "text": "Г ЛИСОВЕЦ, А",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_196"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_197",
+    "type": "present",
+    "text": "Дейнека Ю",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_197"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_198",
+    "type": "present",
+    "text": "Для первого и второго вариантов трассы разбито соответственно 68 и 69 пикетов",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_198"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_199",
+    "type": "present",
+    "text": "Для сравнительного анализа эффективности определения объемов земляных работ на плане, а затем на местности проложено два магистральных хода: протяженность — первого варианта 6870 и второго — 6948 м",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_199"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_200",
+    "type": "present",
+    "text": "Для этого использован топоплан в масштабе 15000, составленный по результатам тахеометрической съемки этого же масштаба с сечением рельефа 1 м поймы реки Западный Буг и ее окрестностей",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_200"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_201",
+    "type": "present",
+    "text": "Земляные работы подсчитывают как объемы геометрических фигур — призм, пирамид, конусов и их различных сочетаний, взятых из продольного профиля, построенного на основании запроектированной на топографическом материале трассы дороги",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_201"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_202",
+    "type": "present",
+    "text": "Л , 1993 11",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_202"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_203",
+    "type": "present",
+    "text": "Л ЦЕРКЛЕВИЧ",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_203"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_204",
+    "type": "present",
+    "text": "На плане пикеты по трассам разбивались через 100 м, отметки которых определялись графически — путем интерполирования между горизонталями",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_204"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_205",
+    "type": "present",
+    "text": "Объемы земляных работ (масс), необходимые для возведения насыпей и устройства выемок — определяющий фактор при выборе оптимального окончательного варианта дороги",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_205"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_206",
+    "type": "present",
+    "text": "Отмечались также плюсовые точки",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_206"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_207",
+    "type": "present",
+    "text": "П , Лисовец А",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_207"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_208",
+    "type": "present",
+    "text": "По профилям определяли проектные, а затем рабочие отметки",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_208"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_209",
+    "type": "present",
+    "text": "После определения на местности положения крайних точек трассы разбивался пикетаж через",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_209"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_210",
+    "type": "present",
+    "text": "Последние находили как разности черных и проектных отметок пикетов, отождествленных на плане",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_210"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_211",
+    "type": "present",
+    "text": "Проект трассы, разработанный в двух вариантах на топоплане, перенесен в натуру",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_211"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_212",
+    "type": "present",
+    "text": "Таким образом, выбран район местности, имеющей сравнительно равнинный рельеф — перепады высот по трассам не превышали 10 м",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_212"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_213",
+    "type": "present",
+    "text": "Таким образом, при расчетах используются данные, которые снимаются графически с этих материалов",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_213"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_214",
+    "type": "present",
+    "text": "УДК 528.486",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_214"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_215",
+    "type": "present",
+    "text": "Цель данной работы — исследование влияния ошибок определения отметок пикетов при линейном трассировании по топографической карте на вычисления объемов земляных масс — установление конкретной их величины и характера распределения",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_215"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_216",
+    "type": "present",
+    "text": "ЭФФЕКТИВНОСТЬ ОПРЕДЕЛЕНИЯ ОБЪЕМОВ ЗЕМЛЯНЫХ РАБОТ ПО РЕЗУЛЬТАТАМ КАМЕРАЛЬНОГО И ПОЛЕВОГО ТРАССИРОВАНИЯ",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_216"
+  },
+  {
+    "id": "text_ocr_russina2_missing_specific_sentence_217",
+    "type": "present",
+    "text": "Ю П ДЕЙНЕКА, А",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_missing_specific_sentence_217"
+  },
+  {
+    "id": "text_ocr_russina2_order_218",
+    "type": "order",
+    "before": "ЭФФЕКТИВНОСТЬ ОПРЕДЕЛЕНИЯ ОБЪЕМОВ ЗЕМЛЯНЫХ РАБОТ ПО РЕЗУЛЬТАТАМ КАМЕРАЛЬНОГО И ПОЛЕВОГО ТРАССИРОВАНИЯ",
+    "after": "Объемы земляных работ (масс), необходимые для возведения насыпей и устройства выемок — определяющий фактор при выборе оптимального окончательного варианта дороги.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_218"
+  },
+  {
+    "id": "text_ocr_russina2_order_219",
+    "type": "order",
+    "before": "Объемы земляных работ (масс), необходимые для возведения насыпей и устройства выемок — определяющий фактор при выборе оптимального окончательного варианта дороги.",
+    "after": "Земляные работы подсчитывают как объемы геометрических фигур — призм, пирамид, конусов и их различных сочетаний, взятых из продольного профиля, построенного на основании запроектированной на топографическом материале трассы дороги.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_219"
+  },
+  {
+    "id": "text_ocr_russina2_order_220",
+    "type": "order",
+    "before": "Земляные работы подсчитывают как объемы геометрических фигур — призм, пирамид, конусов и их различных сочетаний, взятых из продольного профиля, построенного на основании запроектированной на топографическом материале трассы дороги.",
+    "after": "Таким образом, при расчетах используются данные, которые снимаются графически с этих материалов.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_220"
+  },
+  {
+    "id": "text_ocr_russina2_order_221",
+    "type": "order",
+    "before": "Таким образом, при расчетах используются данные, которые снимаются графически с этих материалов.",
+    "after": "Цель данной работы — исследование влияния ошибок определения отметок пикетов при линейном трассировании по топографической карте на вычисления объемов земляных масс — установление конкретной их величины и характера распределения.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_221"
+  },
+  {
+    "id": "text_ocr_russina2_order_222",
+    "type": "order",
+    "before": "Цель данной работы — исследование влияния ошибок определения отметок пикетов при линейном трассировании по топографической карте на вычисления объемов земляных масс — установление конкретной их величины и характера распределения.",
+    "after": "Для этого использован топоплан в масштабе 15000, составленный по результатам тахеометрической съемки этого же масштаба с сечением рельефа 1 м поймы реки Западный Буг и ее окрестностей.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_222"
+  },
+  {
+    "id": "text_ocr_russina2_order_223",
+    "type": "order",
+    "before": "Для этого использован топоплан в масштабе 15000, составленный по результатам тахеометрической съемки этого же масштаба с сечением рельефа 1 м поймы реки Западный Буг и ее окрестностей.",
+    "after": "Таким образом, выбран район местности, имеющей сравнительно равнинный рельеф — перепады высот по трассам не превышали 10 м.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_223"
+  },
+  {
+    "id": "text_ocr_russina2_order_224",
+    "type": "order",
+    "before": "Таким образом, выбран район местности, имеющей сравнительно равнинный рельеф — перепады высот по трассам не превышали 10 м.",
+    "after": "Для сравнительного анализа эффективности определения объемов земляных работ на плане, а затем на местности проложено два магистральных хода: протяженность — первого варианта 6870 и второго — 6948 м.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_224"
+  },
+  {
+    "id": "text_ocr_russina2_order_225",
+    "type": "order",
+    "before": "Для сравнительного анализа эффективности определения объемов земляных работ на плане, а затем на местности проложено два магистральных хода: протяженность — первого варианта 6870 и второго — 6948 м.",
+    "after": "На плане пикеты по трассам разбивались через 100 м, отметки которых определялись графически — путем интерполирования между горизонталями.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_225"
+  },
+  {
+    "id": "text_ocr_russina2_order_226",
+    "type": "order",
+    "before": "На плане пикеты по трассам разбивались через 100 м, отметки которых определялись графически — путем интерполирования между горизонталями.",
+    "after": "Для первого и второго вариантов трассы разбито соответственно 68 и 69 пикетов.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_226"
+  },
+  {
+    "id": "text_ocr_russina2_order_227",
+    "type": "order",
+    "before": "Для первого и второго вариантов трассы разбито соответственно 68 и 69 пикетов.",
+    "after": "Отмечались также плюсовые точки.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_227"
+  },
+  {
+    "id": "text_ocr_russina2_order_228",
+    "type": "order",
+    "before": "Отмечались также плюсовые точки.",
+    "after": "В результате между наперед установленными точками построены для двух вариантов трасс продольные профили в масштабах 15000 (горизонтальный) и 1100 (вертикальный) и нанесена проектная линия.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_228"
+  },
+  {
+    "id": "text_ocr_russina2_order_229",
+    "type": "order",
+    "before": "В результате между наперед установленными точками построены для двух вариантов трасс продольные профили в масштабах 15000 (горизонтальный) и 1100 (вертикальный) и нанесена проектная линия.",
+    "after": "По профилям определяли проектные, а затем рабочие отметки.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_229"
+  },
+  {
+    "id": "text_ocr_russina2_order_230",
+    "type": "order",
+    "before": "По профилям определяли проектные, а затем рабочие отметки.",
+    "after": "Последние находили как разности черных и проектных отметок пикетов, отождествленных на плане.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_230"
+  },
+  {
+    "id": "text_ocr_russina2_order_231",
+    "type": "order",
+    "before": "Последние находили как разности черных и проектных отметок пикетов, отождествленных на плане.",
+    "after": "Проект трассы, разработанный в двух вариантах на топоплане, перенесен в натуру.",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_231"
+  },
+  {
+    "id": "text_ocr_russina2_order_232",
+    "type": "order",
+    "before": "Проект трассы, разработанный в двух вариантах на топоплане, перенесен в натуру.",
+    "after": "После определения на местности положения крайних точек трассы разбивался пикетаж через",
+    "case_sensitive": false,
+    "source": "text_ocr__russina2_order_232"
+  }
+]

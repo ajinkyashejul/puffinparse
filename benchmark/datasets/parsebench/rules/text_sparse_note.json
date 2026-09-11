@@ -1,0 +1,33 @@
+[
+  {
+    "id": "text_sparse_note_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "NOTE 23"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_sparse__note_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_sparse_note_missing_specific_word_7",
+    "type": "present",
+    "text": "23",
+    "case_sensitive": false,
+    "source": "text_sparse__note_missing_specific_word_7"
+  },
+  {
+    "id": "text_sparse_note_missing_specific_word_8",
+    "type": "present",
+    "text": "note",
+    "case_sensitive": false,
+    "source": "text_sparse__note_missing_specific_word_8"
+  },
+  {
+    "id": "text_sparse_note_missing_specific_sentence_9",
+    "type": "present",
+    "text": "NOTE 23",
+    "case_sensitive": false,
+    "source": "text_sparse__note_missing_specific_sentence_9"
+  }
+]

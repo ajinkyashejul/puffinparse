@@ -1,0 +1,2627 @@
+[
+  {
+    "id": "text_multilang_french2_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "230 V ou 120 V), indiquée sur le panneau arrière",
+      "ATTENTION",
+      "AVERTISSEMENT",
+      "Assurez-vous qu'elle est éliminée correctement après sa dépose",
+      "Assurez-vous que la tension du secteur de la région où l'appareil sera utilisé correspond à la tension requise (par ex",
+      "Avant de brancher l'appareil pour la première, lisez attentivement la section suivante",
+      "Ce produit est destiné à une utilisation domestique générale",
+      "Ce remplacement et la fixation d'une fiche secteur sur le cordon d'alimentation de cet appareil doivent être effectués par un personnel de service qualifié",
+      "Cela risque de provoquer un court-circuit ou un choc électrique",
+      "Cet appareil fait appel à des principes technologiques destinés à interdire la piraterie des œuvres protégées par des droits d'auteurs, principes qui sont eux-mêmes couverts aux Etats-Unis par des brevets et d'autres formes de propriété intellectuelle détenus par Macrovision Corporation et d'autres personnes physiques ou morales",
+      "Comme le cordon d'alimentation fait office de dispositif de déconnexion du secteur, il devra être débranché au niveau de la prise secteur pour que l'appareil soit complètement hors tension",
+      "Contacter le service après-vente PIONEER le plus proche ou le revendeur pour un remplacement",
+      "D3-4-2-1-4 A Fr",
+      "D3-4-2-2-1a A Fr",
+      "D3-4-2-2-2a A Fr",
+      "Dans les pays qui ne sont pas mentionnés ci-dessus, veuillez contacter les autorités locales pour savoir comment vous pouvez vous débarrasser de vos appareils",
+      "En cas de branchement sur une prise secteur, la fiche de coupure peut provoquer une sérieuse décharge électrique",
+      "Il existe un système de collecte séparé pour les appareils électroniques usagés, qui doivent être récupérés, traités et recyclés conformément à la législation",
+      "K041 Fr",
+      "K058 A Fr",
+      "L'appareil doit être déconnecté en débranchant sa fiche secteur au niveau de la prise murale si vous prévoyez une période prolongée de non utilisation (par exemple avant un départ en vacances",
+      "L'interrupteur ⏻ STANDBY/ON de cet appareil ne coupe pas complètement celui-ci de sa prise secteur",
+      "L'utilisation de ces principes technologiques visant à la protection des droits d'auteur doit être autorisée par Macrovision Corporation et doit être limitée à des fins domestiques, ou similaires, sauf accord préalable de Macrovision Corporation",
+      "La rétro-technique ou le désassemblage sont proscrits",
+      "La tension de l'alimentation électrique disponible varie selon le pays ou la région",
+      "Les câbles d'alimentation doivent être posés de façon à ne pas être écrasés",
+      "Les habitants des états membres de l'UE, de Suisse et de Norvège peuvent retourner gratuitement leurs appareils électroniques usagés aux centres de collecte agréés ou à un détaillant (si vous rachetez un appareil similaire neuf",
+      "NOTE IMPORTANTE SUR LE CABLE D'ALIMENTATION",
+      "Ne pas débrancher la prise en tirant sur le câble et ne pas toucher le câble avec les mains mouillées",
+      "Ne pas faire de noeud avec le câble ou l'attacher à d'autres câbles",
+      "Ne pas pincer le câble",
+      "Ne pas poser l'appareil ou un meuble sur le câble",
+      "Par conséquent, veillez à installer l'appareil de telle manière que son cordon d'alimentation puisse être facilement débranché de la prise secteur en cas d'accident",
+      "Pour éviter tout risque d'incendie, le cordon d'alimentation sera débranché au niveau de la prise secteur si vous prévoyez une période prolongée de non utilisation (par exemple avant un départ en vacances",
+      "S002 Fr",
+      "Si la fiche d'alimentation secteur de cet appareil ne convient pas à la prise secteur à utiliser, la fiche doit être remplacée par une appropriée",
+      "Si vous souhaitez vous débarrasser de cet appareil, ne le mettez pas à la poubelle avec vos ordures ménagères",
+      "Tenir le câble d'alimentation par la fiche",
+      "Toute panne due à une utilisation autre qu'à des fins privées (comme une utilisation à des fins commerciales dans un restaurant, dans un autocar ou sur un bateau) et qui nécessite une réparation sera aux frais du client, même pendant la période de garantie",
+      "Un câble abîmé peut provoquer un risque d'incendie ou un choc électrique",
+      "Vous garantirez ainsi que les appareils dont vous vous débarrassez sont correctement récupérés, traités et recyclés et préviendrez de cette façon les impacts néfastes possibles sur l'environnement et la santé humaine",
+      "Vérifier le câble d'alimentation de temps en temps"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_7",
+    "type": "present",
+    "text": "120",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_7"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_8",
+    "type": "present",
+    "text": "1a",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_8"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_9",
+    "type": "present",
+    "text": "230",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_9"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_10",
+    "type": "present",
+    "text": "2a",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_10"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_11",
+    "type": "present",
+    "text": "abîmé",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_11"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_12",
+    "type": "present",
+    "text": "accident",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_12"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_13",
+    "type": "present",
+    "text": "accord",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_13"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_14",
+    "type": "present",
+    "text": "agréés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_14"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_15",
+    "type": "present",
+    "text": "ainsi",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_15"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_16",
+    "type": "present",
+    "text": "alimentation",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_16"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_17",
+    "type": "present",
+    "text": "appareil",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_17"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_18",
+    "type": "present",
+    "text": "appareils",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_18"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_19",
+    "type": "present",
+    "text": "appel",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_19"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_20",
+    "type": "present",
+    "text": "appropriée",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_20"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_21",
+    "type": "present",
+    "text": "après",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_21"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_22",
+    "type": "present",
+    "text": "arrière",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_22"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_23",
+    "type": "present",
+    "text": "assurez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_23"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_24",
+    "type": "present",
+    "text": "attacher",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_24"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_25",
+    "type": "present",
+    "text": "attention",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_25"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_26",
+    "type": "present",
+    "text": "attentivement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_26"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_27",
+    "type": "present",
+    "text": "au",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_27"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_28",
+    "type": "present",
+    "text": "auteur",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_28"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_29",
+    "type": "present",
+    "text": "auteurs",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_29"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_30",
+    "type": "present",
+    "text": "autocar",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_30"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_31",
+    "type": "present",
+    "text": "autorisée",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_31"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_32",
+    "type": "present",
+    "text": "autorités",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_32"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_33",
+    "type": "present",
+    "text": "autre",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_33"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_34",
+    "type": "present",
+    "text": "autres",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_34"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_35",
+    "type": "present",
+    "text": "aux",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_35"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_36",
+    "type": "present",
+    "text": "avant",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_36"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_37",
+    "type": "present",
+    "text": "avec",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_37"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_38",
+    "type": "present",
+    "text": "avertissement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_38"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_39",
+    "type": "present",
+    "text": "bateau",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_39"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_40",
+    "type": "present",
+    "text": "branchement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_40"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_41",
+    "type": "present",
+    "text": "brancher",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_41"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_42",
+    "type": "present",
+    "text": "brevets",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_42"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_43",
+    "type": "present",
+    "text": "cable",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_43"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_44",
+    "type": "present",
+    "text": "cas",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_44"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_45",
+    "type": "present",
+    "text": "ce",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_45"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_46",
+    "type": "present",
+    "text": "cela",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_46"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_47",
+    "type": "present",
+    "text": "celui",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_47"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_48",
+    "type": "present",
+    "text": "centres",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_48"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_49",
+    "type": "present",
+    "text": "ces",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_49"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_50",
+    "type": "present",
+    "text": "cet",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_50"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_51",
+    "type": "present",
+    "text": "cette",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_51"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_52",
+    "type": "present",
+    "text": "choc",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_52"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_53",
+    "type": "present",
+    "text": "ci",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_53"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_54",
+    "type": "present",
+    "text": "circuit",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_54"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_55",
+    "type": "present",
+    "text": "client",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_55"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_56",
+    "type": "present",
+    "text": "collecte",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_56"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_57",
+    "type": "present",
+    "text": "comme",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_57"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_58",
+    "type": "present",
+    "text": "comment",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_58"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_59",
+    "type": "present",
+    "text": "commerciales",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_59"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_60",
+    "type": "present",
+    "text": "complètement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_60"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_61",
+    "type": "present",
+    "text": "conformément",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_61"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_62",
+    "type": "present",
+    "text": "conséquent",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_62"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_63",
+    "type": "present",
+    "text": "contacter",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_63"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_64",
+    "type": "present",
+    "text": "convient",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_64"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_65",
+    "type": "present",
+    "text": "cordon",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_65"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_66",
+    "type": "present",
+    "text": "corporation",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_66"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_67",
+    "type": "present",
+    "text": "correctement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_67"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_68",
+    "type": "present",
+    "text": "correspond",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_68"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_69",
+    "type": "present",
+    "text": "coupe",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_69"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_70",
+    "type": "present",
+    "text": "coupure",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_70"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_71",
+    "type": "present",
+    "text": "court",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_71"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_72",
+    "type": "present",
+    "text": "couverts",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_72"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_73",
+    "type": "present",
+    "text": "câble",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_73"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_74",
+    "type": "present",
+    "text": "câbles",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_74"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_75",
+    "type": "present",
+    "text": "d3",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_75"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_76",
+    "type": "present",
+    "text": "dans",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_76"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_77",
+    "type": "present",
+    "text": "de",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_77"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_78",
+    "type": "present",
+    "text": "des",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_78"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_79",
+    "type": "present",
+    "text": "dessus",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_79"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_80",
+    "type": "present",
+    "text": "destiné",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_80"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_81",
+    "type": "present",
+    "text": "destinés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_81"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_82",
+    "type": "present",
+    "text": "devra",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_82"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_83",
+    "type": "present",
+    "text": "disponible",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_83"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_84",
+    "type": "present",
+    "text": "dispositif",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_84"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_85",
+    "type": "present",
+    "text": "doit",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_85"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_86",
+    "type": "present",
+    "text": "doivent",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_86"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_87",
+    "type": "present",
+    "text": "domestique",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_87"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_88",
+    "type": "present",
+    "text": "domestiques",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_88"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_89",
+    "type": "present",
+    "text": "dont",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_89"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_90",
+    "type": "present",
+    "text": "droits",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_90"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_91",
+    "type": "present",
+    "text": "du",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_91"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_92",
+    "type": "present",
+    "text": "due",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_92"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_93",
+    "type": "present",
+    "text": "débarrasser",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_93"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_94",
+    "type": "present",
+    "text": "débarrassez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_94"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_95",
+    "type": "present",
+    "text": "débranchant",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_95"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_96",
+    "type": "present",
+    "text": "débrancher",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_96"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_97",
+    "type": "present",
+    "text": "débranché",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_97"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_98",
+    "type": "present",
+    "text": "décharge",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_98"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_99",
+    "type": "present",
+    "text": "déconnecté",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_99"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_100",
+    "type": "present",
+    "text": "déconnexion",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_100"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_101",
+    "type": "present",
+    "text": "départ",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_101"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_102",
+    "type": "present",
+    "text": "dépose",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_102"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_103",
+    "type": "present",
+    "text": "désassemblage",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_103"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_104",
+    "type": "present",
+    "text": "détaillant",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_104"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_105",
+    "type": "present",
+    "text": "détenus",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_105"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_106",
+    "type": "present",
+    "text": "effectués",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_106"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_107",
+    "type": "present",
+    "text": "elle",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_107"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_108",
+    "type": "present",
+    "text": "en",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_108"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_109",
+    "type": "present",
+    "text": "environnement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_109"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_110",
+    "type": "present",
+    "text": "est",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_110"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_111",
+    "type": "present",
+    "text": "et",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_111"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_112",
+    "type": "present",
+    "text": "etats",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_112"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_113",
+    "type": "present",
+    "text": "eux",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_113"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_114",
+    "type": "present",
+    "text": "ex",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_114"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_115",
+    "type": "present",
+    "text": "exemple",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_115"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_116",
+    "type": "present",
+    "text": "existe",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_116"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_117",
+    "type": "present",
+    "text": "facilement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_117"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_118",
+    "type": "present",
+    "text": "faire",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_118"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_119",
+    "type": "present",
+    "text": "fait",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_119"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_120",
+    "type": "present",
+    "text": "façon",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_120"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_121",
+    "type": "present",
+    "text": "fiche",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_121"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_122",
+    "type": "present",
+    "text": "fins",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_122"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_123",
+    "type": "present",
+    "text": "fixation",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_123"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_124",
+    "type": "present",
+    "text": "formes",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_124"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_125",
+    "type": "present",
+    "text": "fr",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_125"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_126",
+    "type": "present",
+    "text": "frais",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_126"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_127",
+    "type": "present",
+    "text": "garantie",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_127"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_128",
+    "type": "present",
+    "text": "garantirez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_128"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_129",
+    "type": "present",
+    "text": "gratuitement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_129"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_130",
+    "type": "present",
+    "text": "générale",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_130"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_131",
+    "type": "present",
+    "text": "habitants",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_131"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_132",
+    "type": "present",
+    "text": "hors",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_132"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_133",
+    "type": "present",
+    "text": "humaine",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_133"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_134",
+    "type": "present",
+    "text": "il",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_134"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_135",
+    "type": "present",
+    "text": "impacts",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_135"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_136",
+    "type": "present",
+    "text": "importante",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_136"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_137",
+    "type": "present",
+    "text": "incendie",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_137"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_138",
+    "type": "present",
+    "text": "indiquée",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_138"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_139",
+    "type": "present",
+    "text": "installer",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_139"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_140",
+    "type": "present",
+    "text": "intellectuelle",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_140"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_141",
+    "type": "present",
+    "text": "interdire",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_141"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_142",
+    "type": "present",
+    "text": "interrupteur",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_142"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_143",
+    "type": "present",
+    "text": "k041",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_143"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_144",
+    "type": "present",
+    "text": "k058",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_144"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_145",
+    "type": "present",
+    "text": "la",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_145"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_146",
+    "type": "present",
+    "text": "le",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_146"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_147",
+    "type": "present",
+    "text": "les",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_147"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_148",
+    "type": "present",
+    "text": "leurs",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_148"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_149",
+    "type": "present",
+    "text": "limitée",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_149"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_150",
+    "type": "present",
+    "text": "lisez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_150"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_151",
+    "type": "present",
+    "text": "locales",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_151"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_152",
+    "type": "present",
+    "text": "législation",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_152"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_153",
+    "type": "present",
+    "text": "macrovision",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_153"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_154",
+    "type": "present",
+    "text": "mains",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_154"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_155",
+    "type": "present",
+    "text": "manière",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_155"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_156",
+    "type": "present",
+    "text": "membres",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_156"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_157",
+    "type": "present",
+    "text": "mentionnés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_157"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_158",
+    "type": "present",
+    "text": "mettez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_158"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_159",
+    "type": "present",
+    "text": "meuble",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_159"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_160",
+    "type": "present",
+    "text": "morales",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_160"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_161",
+    "type": "present",
+    "text": "mouillées",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_161"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_162",
+    "type": "present",
+    "text": "murale",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_162"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_163",
+    "type": "present",
+    "text": "ménagères",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_163"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_164",
+    "type": "present",
+    "text": "même",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_164"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_165",
+    "type": "present",
+    "text": "mêmes",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_165"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_166",
+    "type": "present",
+    "text": "ne",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_166"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_167",
+    "type": "present",
+    "text": "neuf",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_167"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_168",
+    "type": "present",
+    "text": "niveau",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_168"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_169",
+    "type": "present",
+    "text": "noeud",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_169"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_170",
+    "type": "present",
+    "text": "non",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_170"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_171",
+    "type": "present",
+    "text": "norvège",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_171"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_172",
+    "type": "present",
+    "text": "note",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_172"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_173",
+    "type": "present",
+    "text": "nécessite",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_173"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_174",
+    "type": "present",
+    "text": "néfastes",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_174"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_175",
+    "type": "present",
+    "text": "office",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_175"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_176",
+    "type": "present",
+    "text": "on",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_176"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_177",
+    "type": "present",
+    "text": "ordures",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_177"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_178",
+    "type": "present",
+    "text": "ou",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_178"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_179",
+    "type": "present",
+    "text": "où",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_179"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_180",
+    "type": "present",
+    "text": "panne",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_180"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_181",
+    "type": "present",
+    "text": "panneau",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_181"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_182",
+    "type": "present",
+    "text": "par",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_182"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_183",
+    "type": "present",
+    "text": "pas",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_183"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_184",
+    "type": "present",
+    "text": "pays",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_184"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_185",
+    "type": "present",
+    "text": "pendant",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_185"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_186",
+    "type": "present",
+    "text": "personnel",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_186"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_187",
+    "type": "present",
+    "text": "personnes",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_187"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_188",
+    "type": "present",
+    "text": "peut",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_188"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_189",
+    "type": "present",
+    "text": "peuvent",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_189"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_190",
+    "type": "present",
+    "text": "physiques",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_190"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_191",
+    "type": "present",
+    "text": "pincer",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_191"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_192",
+    "type": "present",
+    "text": "pioneer",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_192"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_193",
+    "type": "present",
+    "text": "piraterie",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_193"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_194",
+    "type": "present",
+    "text": "plus",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_194"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_195",
+    "type": "present",
+    "text": "poser",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_195"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_196",
+    "type": "present",
+    "text": "possibles",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_196"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_197",
+    "type": "present",
+    "text": "posés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_197"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_198",
+    "type": "present",
+    "text": "poubelle",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_198"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_199",
+    "type": "present",
+    "text": "pour",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_199"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_200",
+    "type": "present",
+    "text": "pouvez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_200"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_201",
+    "type": "present",
+    "text": "première",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_201"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_202",
+    "type": "present",
+    "text": "principes",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_202"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_203",
+    "type": "present",
+    "text": "prise",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_203"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_204",
+    "type": "present",
+    "text": "privées",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_204"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_205",
+    "type": "present",
+    "text": "proche",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_205"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_206",
+    "type": "present",
+    "text": "produit",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_206"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_207",
+    "type": "present",
+    "text": "prolongée",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_207"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_208",
+    "type": "present",
+    "text": "propriété",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_208"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_209",
+    "type": "present",
+    "text": "proscrits",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_209"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_210",
+    "type": "present",
+    "text": "protection",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_210"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_211",
+    "type": "present",
+    "text": "protégées",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_211"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_212",
+    "type": "present",
+    "text": "provoquer",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_212"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_213",
+    "type": "present",
+    "text": "préalable",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_213"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_214",
+    "type": "present",
+    "text": "préviendrez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_214"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_215",
+    "type": "present",
+    "text": "prévoyez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_215"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_216",
+    "type": "present",
+    "text": "puisse",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_216"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_217",
+    "type": "present",
+    "text": "période",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_217"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_218",
+    "type": "present",
+    "text": "qu",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_218"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_219",
+    "type": "present",
+    "text": "qualifié",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_219"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_220",
+    "type": "present",
+    "text": "que",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_220"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_221",
+    "type": "present",
+    "text": "qui",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_221"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_222",
+    "type": "present",
+    "text": "rachetez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_222"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_223",
+    "type": "present",
+    "text": "recyclés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_223"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_224",
+    "type": "present",
+    "text": "remplacement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_224"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_225",
+    "type": "present",
+    "text": "remplacée",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_225"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_226",
+    "type": "present",
+    "text": "requise",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_226"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_227",
+    "type": "present",
+    "text": "restaurant",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_227"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_228",
+    "type": "present",
+    "text": "retourner",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_228"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_229",
+    "type": "present",
+    "text": "revendeur",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_229"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_230",
+    "type": "present",
+    "text": "risque",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_230"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_231",
+    "type": "present",
+    "text": "récupérés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_231"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_232",
+    "type": "present",
+    "text": "région",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_232"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_233",
+    "type": "present",
+    "text": "réparation",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_233"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_234",
+    "type": "present",
+    "text": "rétro",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_234"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_235",
+    "type": "present",
+    "text": "s002",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_235"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_236",
+    "type": "present",
+    "text": "sa",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_236"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_237",
+    "type": "present",
+    "text": "santé",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_237"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_238",
+    "type": "present",
+    "text": "sauf",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_238"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_239",
+    "type": "present",
+    "text": "savoir",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_239"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_240",
+    "type": "present",
+    "text": "secteur",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_240"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_241",
+    "type": "present",
+    "text": "section",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_241"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_242",
+    "type": "present",
+    "text": "selon",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_242"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_243",
+    "type": "present",
+    "text": "sera",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_243"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_244",
+    "type": "present",
+    "text": "service",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_244"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_245",
+    "type": "present",
+    "text": "si",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_245"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_246",
+    "type": "present",
+    "text": "similaire",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_246"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_247",
+    "type": "present",
+    "text": "similaires",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_247"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_248",
+    "type": "present",
+    "text": "soit",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_248"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_249",
+    "type": "present",
+    "text": "son",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_249"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_250",
+    "type": "present",
+    "text": "sont",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_250"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_251",
+    "type": "present",
+    "text": "souhaitez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_251"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_252",
+    "type": "present",
+    "text": "standby",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_252"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_253",
+    "type": "present",
+    "text": "suisse",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_253"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_254",
+    "type": "present",
+    "text": "suivante",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_254"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_255",
+    "type": "present",
+    "text": "sur",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_255"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_256",
+    "type": "present",
+    "text": "système",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_256"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_257",
+    "type": "present",
+    "text": "séparé",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_257"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_258",
+    "type": "present",
+    "text": "sérieuse",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_258"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_259",
+    "type": "present",
+    "text": "technique",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_259"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_260",
+    "type": "present",
+    "text": "technologiques",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_260"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_261",
+    "type": "present",
+    "text": "telle",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_261"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_262",
+    "type": "present",
+    "text": "temps",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_262"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_263",
+    "type": "present",
+    "text": "tenir",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_263"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_264",
+    "type": "present",
+    "text": "tension",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_264"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_265",
+    "type": "present",
+    "text": "tirant",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_265"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_266",
+    "type": "present",
+    "text": "toucher",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_266"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_267",
+    "type": "present",
+    "text": "tout",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_267"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_268",
+    "type": "present",
+    "text": "toute",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_268"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_269",
+    "type": "present",
+    "text": "traités",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_269"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_270",
+    "type": "present",
+    "text": "ue",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_270"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_271",
+    "type": "present",
+    "text": "un",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_271"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_272",
+    "type": "present",
+    "text": "une",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_272"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_273",
+    "type": "present",
+    "text": "unis",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_273"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_274",
+    "type": "present",
+    "text": "usagés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_274"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_275",
+    "type": "present",
+    "text": "utilisation",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_275"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_276",
+    "type": "present",
+    "text": "utiliser",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_276"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_277",
+    "type": "present",
+    "text": "utilisé",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_277"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_278",
+    "type": "present",
+    "text": "vacances",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_278"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_279",
+    "type": "present",
+    "text": "varie",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_279"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_280",
+    "type": "present",
+    "text": "veillez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_280"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_281",
+    "type": "present",
+    "text": "vente",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_281"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_282",
+    "type": "present",
+    "text": "veuillez",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_282"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_283",
+    "type": "present",
+    "text": "visant",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_283"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_284",
+    "type": "present",
+    "text": "vos",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_284"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_285",
+    "type": "present",
+    "text": "vous",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_285"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_286",
+    "type": "present",
+    "text": "vérifier",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_286"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_287",
+    "type": "present",
+    "text": "écrasés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_287"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_288",
+    "type": "present",
+    "text": "électrique",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_288"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_289",
+    "type": "present",
+    "text": "électroniques",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_289"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_290",
+    "type": "present",
+    "text": "éliminée",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_290"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_291",
+    "type": "present",
+    "text": "états",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_291"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_292",
+    "type": "present",
+    "text": "éviter",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_292"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_293",
+    "type": "present",
+    "text": "être",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_293"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_word_294",
+    "type": "present",
+    "text": "œuvres",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_word_294"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_295",
+    "type": "present",
+    "text": "230 V ou 120 V), indiquée sur le panneau arrière",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_295"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_296",
+    "type": "present",
+    "text": "ATTENTION",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_296"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_297",
+    "type": "present",
+    "text": "AVERTISSEMENT",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_297"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_298",
+    "type": "present",
+    "text": "Assurez-vous qu'elle est éliminée correctement après sa dépose",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_298"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_299",
+    "type": "present",
+    "text": "Assurez-vous que la tension du secteur de la région où l'appareil sera utilisé correspond à la tension requise (par ex",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_299"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_300",
+    "type": "present",
+    "text": "Avant de brancher l'appareil pour la première, lisez attentivement la section suivante",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_300"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_301",
+    "type": "present",
+    "text": "Ce produit est destiné à une utilisation domestique générale",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_301"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_302",
+    "type": "present",
+    "text": "Ce remplacement et la fixation d'une fiche secteur sur le cordon d'alimentation de cet appareil doivent être effectués par un personnel de service qualifié",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_302"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_303",
+    "type": "present",
+    "text": "Cela risque de provoquer un court-circuit ou un choc électrique",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_303"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_304",
+    "type": "present",
+    "text": "Cet appareil fait appel à des principes technologiques destinés à interdire la piraterie des œuvres protégées par des droits d'auteurs, principes qui sont eux-mêmes couverts aux Etats-Unis par des brevets et d'autres formes de propriété intellectuelle détenus par Macrovision Corporation et d'autres personnes physiques ou morales",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_304"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_305",
+    "type": "present",
+    "text": "Comme le cordon d'alimentation fait office de dispositif de déconnexion du secteur, il devra être débranché au niveau de la prise secteur pour que l'appareil soit complètement hors tension",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_305"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_306",
+    "type": "present",
+    "text": "Contacter le service après-vente PIONEER le plus proche ou le revendeur pour un remplacement",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_306"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_307",
+    "type": "present",
+    "text": "D3-4-2-1-4 A Fr",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_307"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_308",
+    "type": "present",
+    "text": "D3-4-2-2-1a A Fr",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_308"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_309",
+    "type": "present",
+    "text": "D3-4-2-2-2a A Fr",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_309"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_310",
+    "type": "present",
+    "text": "Dans les pays qui ne sont pas mentionnés ci-dessus, veuillez contacter les autorités locales pour savoir comment vous pouvez vous débarrasser de vos appareils",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_310"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_311",
+    "type": "present",
+    "text": "En cas de branchement sur une prise secteur, la fiche de coupure peut provoquer une sérieuse décharge électrique",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_311"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_312",
+    "type": "present",
+    "text": "Il existe un système de collecte séparé pour les appareils électroniques usagés, qui doivent être récupérés, traités et recyclés conformément à la législation",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_312"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_313",
+    "type": "present",
+    "text": "K041 Fr",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_313"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_314",
+    "type": "present",
+    "text": "K058 A Fr",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_314"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_315",
+    "type": "present",
+    "text": "L'appareil doit être déconnecté en débranchant sa fiche secteur au niveau de la prise murale si vous prévoyez une période prolongée de non utilisation (par exemple avant un départ en vacances",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_315"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_316",
+    "type": "present",
+    "text": "L'interrupteur ⏻ STANDBY/ON de cet appareil ne coupe pas complètement celui-ci de sa prise secteur",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_316"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_317",
+    "type": "present",
+    "text": "L'utilisation de ces principes technologiques visant à la protection des droits d'auteur doit être autorisée par Macrovision Corporation et doit être limitée à des fins domestiques, ou similaires, sauf accord préalable de Macrovision Corporation",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_317"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_318",
+    "type": "present",
+    "text": "La rétro-technique ou le désassemblage sont proscrits",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_318"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_319",
+    "type": "present",
+    "text": "La tension de l'alimentation électrique disponible varie selon le pays ou la région",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_319"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_320",
+    "type": "present",
+    "text": "Les câbles d'alimentation doivent être posés de façon à ne pas être écrasés",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_320"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_321",
+    "type": "present",
+    "text": "Les habitants des états membres de l'UE, de Suisse et de Norvège peuvent retourner gratuitement leurs appareils électroniques usagés aux centres de collecte agréés ou à un détaillant (si vous rachetez un appareil similaire neuf",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_321"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_322",
+    "type": "present",
+    "text": "NOTE IMPORTANTE SUR LE CABLE D'ALIMENTATION",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_322"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_323",
+    "type": "present",
+    "text": "Ne pas débrancher la prise en tirant sur le câble et ne pas toucher le câble avec les mains mouillées",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_323"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_324",
+    "type": "present",
+    "text": "Ne pas faire de noeud avec le câble ou l'attacher à d'autres câbles",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_324"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_325",
+    "type": "present",
+    "text": "Ne pas pincer le câble",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_325"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_326",
+    "type": "present",
+    "text": "Ne pas poser l'appareil ou un meuble sur le câble",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_326"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_327",
+    "type": "present",
+    "text": "Par conséquent, veillez à installer l'appareil de telle manière que son cordon d'alimentation puisse être facilement débranché de la prise secteur en cas d'accident",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_327"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_328",
+    "type": "present",
+    "text": "Pour éviter tout risque d'incendie, le cordon d'alimentation sera débranché au niveau de la prise secteur si vous prévoyez une période prolongée de non utilisation (par exemple avant un départ en vacances",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_328"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_329",
+    "type": "present",
+    "text": "S002 Fr",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_329"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_330",
+    "type": "present",
+    "text": "Si la fiche d'alimentation secteur de cet appareil ne convient pas à la prise secteur à utiliser, la fiche doit être remplacée par une appropriée",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_330"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_331",
+    "type": "present",
+    "text": "Si vous souhaitez vous débarrasser de cet appareil, ne le mettez pas à la poubelle avec vos ordures ménagères",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_331"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_332",
+    "type": "present",
+    "text": "Tenir le câble d'alimentation par la fiche",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_332"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_333",
+    "type": "present",
+    "text": "Toute panne due à une utilisation autre qu'à des fins privées (comme une utilisation à des fins commerciales dans un restaurant, dans un autocar ou sur un bateau) et qui nécessite une réparation sera aux frais du client, même pendant la période de garantie",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_333"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_334",
+    "type": "present",
+    "text": "Un câble abîmé peut provoquer un risque d'incendie ou un choc électrique",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_334"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_335",
+    "type": "present",
+    "text": "Vous garantirez ainsi que les appareils dont vous vous débarrassez sont correctement récupérés, traités et recyclés et préviendrez de cette façon les impacts néfastes possibles sur l'environnement et la santé humaine",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_335"
+  },
+  {
+    "id": "text_multilang_french2_missing_specific_sentence_336",
+    "type": "present",
+    "text": "Vérifier le câble d'alimentation de temps en temps",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_missing_specific_sentence_336"
+  },
+  {
+    "id": "text_multilang_french2_order_337",
+    "type": "order",
+    "before": "Avant de brancher l'appareil pour la première, lisez attentivement la section suivante.",
+    "after": "La tension de l'alimentation électrique disponible varie selon le pays ou la région.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_337"
+  },
+  {
+    "id": "text_multilang_french2_order_338",
+    "type": "order",
+    "before": "La tension de l'alimentation électrique disponible varie selon le pays ou la région.",
+    "after": "Assurez-vous que la tension du secteur de la région où l'appareil sera utilisé correspond à la tension requise (par ex.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_338"
+  },
+  {
+    "id": "text_multilang_french2_order_339",
+    "type": "order",
+    "before": "Assurez-vous que la tension du secteur de la région où l'appareil sera utilisé correspond à la tension requise (par ex.",
+    "after": "230 V ou 120 V), indiquée sur le panneau arrière.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_339"
+  },
+  {
+    "id": "text_multilang_french2_order_340",
+    "type": "order",
+    "before": "230 V ou 120 V), indiquée sur le panneau arrière.",
+    "after": "Si la fiche d'alimentation secteur de cet appareil ne convient pas à la prise secteur à utiliser, la fiche doit être remplacée par une appropriée.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_340"
+  },
+  {
+    "id": "text_multilang_french2_order_341",
+    "type": "order",
+    "before": "Si la fiche d'alimentation secteur de cet appareil ne convient pas à la prise secteur à utiliser, la fiche doit être remplacée par une appropriée.",
+    "after": "Ce remplacement et la fixation d'une fiche secteur sur le cordon d'alimentation de cet appareil doivent être effectués par un personnel de service qualifié.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_341"
+  },
+  {
+    "id": "text_multilang_french2_order_342",
+    "type": "order",
+    "before": "Ce remplacement et la fixation d'une fiche secteur sur le cordon d'alimentation de cet appareil doivent être effectués par un personnel de service qualifié.",
+    "after": "En cas de branchement sur une prise secteur, la fiche de coupure peut provoquer une sérieuse décharge électrique.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_342"
+  },
+  {
+    "id": "text_multilang_french2_order_343",
+    "type": "order",
+    "before": "En cas de branchement sur une prise secteur, la fiche de coupure peut provoquer une sérieuse décharge électrique.",
+    "after": "Assurez-vous qu'elle est éliminée correctement après sa dépose.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_343"
+  },
+  {
+    "id": "text_multilang_french2_order_344",
+    "type": "order",
+    "before": "Assurez-vous qu'elle est éliminée correctement après sa dépose.",
+    "after": "L'appareil doit être déconnecté en débranchant sa fiche secteur au niveau de la prise murale si vous prévoyez une période prolongée de non utilisation (par exemple avant un départ en vacances).",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_344"
+  },
+  {
+    "id": "text_multilang_french2_order_345",
+    "type": "order",
+    "before": "L'appareil doit être déconnecté en débranchant sa fiche secteur au niveau de la prise murale si vous prévoyez une période prolongée de non utilisation (par exemple avant un départ en vacances).",
+    "after": "NOTE IMPORTANTE SUR LE CABLE D'ALIMENTATION",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_345"
+  },
+  {
+    "id": "text_multilang_french2_order_346",
+    "type": "order",
+    "before": "NOTE IMPORTANTE SUR LE CABLE D'ALIMENTATION",
+    "after": "Tenir le câble d'alimentation par la fiche.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_346"
+  },
+  {
+    "id": "text_multilang_french2_order_347",
+    "type": "order",
+    "before": "Tenir le câble d'alimentation par la fiche.",
+    "after": "Ne pas débrancher la prise en tirant sur le câble et ne pas toucher le câble avec les mains mouillées.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_347"
+  },
+  {
+    "id": "text_multilang_french2_order_348",
+    "type": "order",
+    "before": "Ne pas débrancher la prise en tirant sur le câble et ne pas toucher le câble avec les mains mouillées.",
+    "after": "Cela risque de provoquer un court-circuit ou un choc électrique.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_348"
+  },
+  {
+    "id": "text_multilang_french2_order_349",
+    "type": "order",
+    "before": "Cela risque de provoquer un court-circuit ou un choc électrique.",
+    "after": "Ne pas poser l'appareil ou un meuble sur le câble.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_349"
+  },
+  {
+    "id": "text_multilang_french2_order_350",
+    "type": "order",
+    "before": "Ne pas poser l'appareil ou un meuble sur le câble.",
+    "after": "Ne pas pincer le câble.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_350"
+  },
+  {
+    "id": "text_multilang_french2_order_351",
+    "type": "order",
+    "before": "Ne pas pincer le câble.",
+    "after": "Ne pas faire de noeud avec le câble ou l'attacher à d'autres câbles.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_351"
+  },
+  {
+    "id": "text_multilang_french2_order_352",
+    "type": "order",
+    "before": "Ne pas faire de noeud avec le câble ou l'attacher à d'autres câbles.",
+    "after": "Les câbles d'alimentation doivent être posés de façon à ne pas être écrasés.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_352"
+  },
+  {
+    "id": "text_multilang_french2_order_353",
+    "type": "order",
+    "before": "Les câbles d'alimentation doivent être posés de façon à ne pas être écrasés.",
+    "after": "Un câble abîmé peut provoquer un risque d'incendie ou un choc électrique.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_353"
+  },
+  {
+    "id": "text_multilang_french2_order_354",
+    "type": "order",
+    "before": "Un câble abîmé peut provoquer un risque d'incendie ou un choc électrique.",
+    "after": "Vérifier le câble d'alimentation de temps en temps.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_354"
+  },
+  {
+    "id": "text_multilang_french2_order_355",
+    "type": "order",
+    "before": "Vérifier le câble d'alimentation de temps en temps.",
+    "after": "Contacter le service après-vente PIONEER le plus proche ou le revendeur pour un remplacement.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_355"
+  },
+  {
+    "id": "text_multilang_french2_order_356",
+    "type": "order",
+    "before": "Contacter le service après-vente PIONEER le plus proche ou le revendeur pour un remplacement.",
+    "after": "L'interrupteur ⏻ STANDBY/ON de cet appareil ne coupe pas complètement celui-ci de sa prise secteur.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_356"
+  },
+  {
+    "id": "text_multilang_french2_order_357",
+    "type": "order",
+    "before": "L'interrupteur ⏻ STANDBY/ON de cet appareil ne coupe pas complètement celui-ci de sa prise secteur.",
+    "after": "Comme le cordon d'alimentation fait office de dispositif de déconnexion du secteur, il devra être débranché au niveau de la prise secteur pour que l'appareil soit complètement hors tension.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_357"
+  },
+  {
+    "id": "text_multilang_french2_order_358",
+    "type": "order",
+    "before": "Comme le cordon d'alimentation fait office de dispositif de déconnexion du secteur, il devra être débranché au niveau de la prise secteur pour que l'appareil soit complètement hors tension.",
+    "after": "Par conséquent, veillez à installer l'appareil de telle manière que son cordon d'alimentation puisse être facilement débranché de la prise secteur en cas d'accident.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_358"
+  },
+  {
+    "id": "text_multilang_french2_order_359",
+    "type": "order",
+    "before": "Par conséquent, veillez à installer l'appareil de telle manière que son cordon d'alimentation puisse être facilement débranché de la prise secteur en cas d'accident.",
+    "after": "Pour éviter tout risque d'incendie, le cordon d'alimentation sera débranché au niveau de la prise secteur si vous prévoyez une période prolongée de non utilisation (par exemple avant un départ en vacances).",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_359"
+  },
+  {
+    "id": "text_multilang_french2_order_360",
+    "type": "order",
+    "before": "Pour éviter tout risque d'incendie, le cordon d'alimentation sera débranché au niveau de la prise secteur si vous prévoyez une période prolongée de non utilisation (par exemple avant un départ en vacances).",
+    "after": "Ce produit est destiné à une utilisation domestique générale.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_360"
+  },
+  {
+    "id": "text_multilang_french2_order_361",
+    "type": "order",
+    "before": "Ce produit est destiné à une utilisation domestique générale.",
+    "after": "Toute panne due à une utilisation autre qu'à des fins privées (comme une utilisation à des fins commerciales dans un restaurant, dans un autocar ou sur un bateau) et qui nécessite une réparation sera aux frais du client, même pendant la période de garantie.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_361"
+  },
+  {
+    "id": "text_multilang_french2_order_362",
+    "type": "order",
+    "before": "Toute panne due à une utilisation autre qu'à des fins privées (comme une utilisation à des fins commerciales dans un restaurant, dans un autocar ou sur un bateau) et qui nécessite une réparation sera aux frais du client, même pendant la période de garantie.",
+    "after": "Cet appareil fait appel à des principes technologiques destinés à interdire la piraterie des œuvres protégées par des droits d'auteurs, principes qui sont eux-mêmes couverts aux Etats-Unis par des brevets et d'autres formes de propriété intellectuelle détenus par Macrovision Corporation et d'autres personnes physiques ou morales.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_362"
+  },
+  {
+    "id": "text_multilang_french2_order_363",
+    "type": "order",
+    "before": "Cet appareil fait appel à des principes technologiques destinés à interdire la piraterie des œuvres protégées par des droits d'auteurs, principes qui sont eux-mêmes couverts aux Etats-Unis par des brevets et d'autres formes de propriété intellectuelle détenus par Macrovision Corporation et d'autres personnes physiques ou morales.",
+    "after": "L'utilisation de ces principes technologiques visant à la protection des droits d'auteur doit être autorisée par Macrovision Corporation et doit être limitée à des fins domestiques, ou similaires, sauf accord préalable de Macrovision Corporation.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_363"
+  },
+  {
+    "id": "text_multilang_french2_order_364",
+    "type": "order",
+    "before": "L'utilisation de ces principes technologiques visant à la protection des droits d'auteur doit être autorisée par Macrovision Corporation et doit être limitée à des fins domestiques, ou similaires, sauf accord préalable de Macrovision Corporation.",
+    "after": "La rétro-technique ou le désassemblage sont proscrits.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_364"
+  },
+  {
+    "id": "text_multilang_french2_order_365",
+    "type": "order",
+    "before": "La rétro-technique ou le désassemblage sont proscrits.",
+    "after": "Si vous souhaitez vous débarrasser de cet appareil, ne le mettez pas à la poubelle avec vos ordures ménagères.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_365"
+  },
+  {
+    "id": "text_multilang_french2_order_366",
+    "type": "order",
+    "before": "Si vous souhaitez vous débarrasser de cet appareil, ne le mettez pas à la poubelle avec vos ordures ménagères.",
+    "after": "Il existe un système de collecte séparé pour les appareils électroniques usagés, qui doivent être récupérés, traités et recyclés conformément à la législation.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_366"
+  },
+  {
+    "id": "text_multilang_french2_order_367",
+    "type": "order",
+    "before": "Il existe un système de collecte séparé pour les appareils électroniques usagés, qui doivent être récupérés, traités et recyclés conformément à la législation.",
+    "after": "Les habitants des états membres de l'UE, de Suisse et de Norvège peuvent retourner gratuitement leurs appareils électroniques usagés aux centres de collecte agréés ou à un détaillant (si vous rachetez un appareil similaire neuf).",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_367"
+  },
+  {
+    "id": "text_multilang_french2_order_368",
+    "type": "order",
+    "before": "Les habitants des états membres de l'UE, de Suisse et de Norvège peuvent retourner gratuitement leurs appareils électroniques usagés aux centres de collecte agréés ou à un détaillant (si vous rachetez un appareil similaire neuf).",
+    "after": "Dans les pays qui ne sont pas mentionnés ci-dessus, veuillez contacter les autorités locales pour savoir comment vous pouvez vous débarrasser de vos appareils.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_368"
+  },
+  {
+    "id": "text_multilang_french2_order_369",
+    "type": "order",
+    "before": "Dans les pays qui ne sont pas mentionnés ci-dessus, veuillez contacter les autorités locales pour savoir comment vous pouvez vous débarrasser de vos appareils.",
+    "after": "Vous garantirez ainsi que les appareils dont vous vous débarrassez sont correctement récupérés, traités et recyclés et préviendrez de cette façon les impacts néfastes possibles sur l'environnement et la santé humaine.",
+    "case_sensitive": false,
+    "source": "text_multilang__french2_order_369"
+  }
+]

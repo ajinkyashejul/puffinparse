@@ -1,0 +1,1386 @@
+{
+  "name": "combined-v1",
+  "version": "1.0.0",
+  "description": "Union of the committed LiteOCR benchmark datasets (synthetic-v1 and the redistributable ParseBench subset). No bytes are copied: every document is referenced relatively in its own dataset directory, so the per-dataset and combined runs score exactly the same files.",
+  "license": "mixed — per-document `license`, summarised in `sources`",
+  "generator": "benchmark/adapters/combined.py",
+  "sources": [
+    {
+      "name": "synthetic-v1",
+      "version": "1.1.0",
+      "license": "CC0-1.0",
+      "path": "../synthetic-v1",
+      "documents": 39,
+      "manifest_sha256": "663403469a63ef4e8c3dee61442b69c5f5dc08d7d13dccce66eb2384e53b2f67"
+    },
+    {
+      "name": "parsebench",
+      "version": "1.0.0",
+      "license": "Apache-2.0",
+      "path": "../parsebench",
+      "documents": 40,
+      "manifest_sha256": "d74e2c51c05f3bc650df180574cb734a5571a6efa2dac2d3d1e7112dcc5e1f4c",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    }
+  ],
+  "notes": [
+    "Document ids are `<source>/<upstream id>`; use `--filter synthetic` or `--filter parsebench` to run one source.",
+    "`file` and `truth` are relative to this directory and start with `../`.",
+    "Documents with `kind: \"rules\"` have no markdown truth. A transcript-only scorer must skip them; the current Rust CLI reports them as errors instead (see docs/benchmarks/adapters.md).",
+    "A combined score mixes licences, difficulty and document kinds — always read it next to the per-dataset scores."
+  ],
+  "documents": [
+    {
+      "id": "parsebench/1653739079_page2",
+      "file": "../parsebench/docs/1653739079_page2.pdf",
+      "truth": "../parsebench/truth/1653739079_page2.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "1653739079_page2",
+      "sha256": "b6e78af59b811036d59dd4263ebe98277cac00647bf6e6b5ba14d686a2651466",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/222876fb_page2",
+      "file": "../parsebench/docs/222876fb_page2.pdf",
+      "truth": "../parsebench/truth/222876fb_page2.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "222876fb_page2",
+      "sha256": "277cb833db85ab0711a6feb167524eb47ce5b5099d7a38f04f09d9ff7ca6f796",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/245804406_cv_nevers_signe_ex_page10",
+      "file": "../parsebench/docs/245804406_cv_nevers_signe_ex_page10.pdf",
+      "truth": "../parsebench/truth/245804406_cv_nevers_signe_ex_page10.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "245804406_cv_nevers_signe_ex_page10",
+      "sha256": "67aadf54b040e7619fd94fdbeb862b1ebfe97b8e51f970ec250a4f1480881a89",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1",
+      "file": "../parsebench/docs/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.pdf",
+      "truth": "../parsebench/truth/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1",
+      "sha256": "0adddec3f7662792d69cefad45c26d9d0941068b6c32d54d315708d1312e6aac",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1",
+      "file": "../parsebench/docs/7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1.pdf",
+      "truth": "../parsebench/truth/7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1",
+      "sha256": "cea3ed8daabdc656283653a78e79045855fd6f57081a2d658d2bdd0e639f3f7c",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/apple_10_k_page1",
+      "file": "../parsebench/docs/apple_10_k_page1.pdf",
+      "truth": "../parsebench/truth/apple_10_k_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "apple_10_k_page1",
+      "sha256": "e2c0c500996a8433217e9d274b3f8dee4d7d4e60d3d8c413e97fbebc333c6665",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/az_lic_rate_tables_2_0_v2_page47",
+      "file": "../parsebench/docs/az_lic_rate_tables_2_0_v2_page47.pdf",
+      "truth": "../parsebench/truth/az_lic_rate_tables_2_0_v2_page47.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "az_lic_rate_tables_2_0_v2_page47",
+      "sha256": "5c81a50fcbe8ec4122c924bf0adb61537eaa65cf7ce15ea375a0e55aa863d7f1",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/blackrock_funds_i_icav_annual_report_2022_page13",
+      "file": "../parsebench/docs/blackrock_funds_i_icav_annual_report_2022_page13.pdf",
+      "truth": "../parsebench/truth/blackrock_funds_i_icav_annual_report_2022_page13.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "blackrock_funds_i_icav_annual_report_2022_page13",
+      "sha256": "ee8ba1593472f452dc51d43613dbe2fd6b24d9c9e364fbe383e87256cfdfff66",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/bls_feb_2026_page14",
+      "file": "../parsebench/docs/bls_feb_2026_page14.pdf",
+      "truth": "../parsebench/truth/bls_feb_2026_page14.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "bls_feb_2026_page14",
+      "sha256": "c005cc79b03dd77a585e24a167939c8586f15bf85047e24b7ca6128014683e69",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/cinf_2006_page_93_pdf_140594_page1",
+      "file": "../parsebench/docs/cinf_2006_page_93_pdf_140594_page1.pdf",
+      "truth": "../parsebench/truth/cinf_2006_page_93_pdf_140594_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "cinf_2006_page_93_pdf_140594_page1",
+      "sha256": "5022c5b12930f45a63e12e7a8106ba70799fb8439b9c25ad428b9c8f805391a3",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/earnings_presentation_fy26_q2_page22",
+      "file": "../parsebench/docs/earnings_presentation_fy26_q2_page22.pdf",
+      "truth": "../parsebench/truth/earnings_presentation_fy26_q2_page22.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "earnings_presentation_fy26_q2_page22",
+      "sha256": "0f240b9484878e4fad98533f3774ff18cb99b37e89702f86a5ce1104c011dfe5",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/home_depot_10_k_unrestricted_page106",
+      "file": "../parsebench/docs/home_depot_10_k_unrestricted_page106.pdf",
+      "truth": "../parsebench/truth/home_depot_10_k_unrestricted_page106.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "home_depot_10_k_unrestricted_page106",
+      "sha256": "ee9fee8a92769a788043ea9467df0d70b0bb2a44754b7fde323cf9e0ceda9985",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/it_2009_page_74_pdf_78635_page1",
+      "file": "../parsebench/docs/it_2009_page_74_pdf_78635_page1.pdf",
+      "truth": "../parsebench/truth/it_2009_page_74_pdf_78635_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "it_2009_page_74_pdf_78635_page1",
+      "sha256": "e34b6a5f9d8175e283c268b8d9574dfd2200ca292adf7ee35f561fa0699d5e1f",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/jnpr_2010_page_167_pdf_111113_page1",
+      "file": "../parsebench/docs/jnpr_2010_page_167_pdf_111113_page1.pdf",
+      "truth": "../parsebench/truth/jnpr_2010_page_167_pdf_111113_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "jnpr_2010_page_167_pdf_111113_page1",
+      "sha256": "e16253797891ffb81573bd90a79c23e94fdd37054060622224e461df6ed13c30",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/jnpr_2011_page_82_pdf_110673_page1",
+      "file": "../parsebench/docs/jnpr_2011_page_82_pdf_110673_page1.pdf",
+      "truth": "../parsebench/truth/jnpr_2011_page_82_pdf_110673_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "jnpr_2011_page_82_pdf_110673_page1",
+      "sha256": "cb956bf00c7efb0a2639667121f9d240e31c3f6c2a17e940c00af065b34135bc",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/jnpr_2018_page_212_pdf_110717_page1",
+      "file": "../parsebench/docs/jnpr_2018_page_212_pdf_110717_page1.pdf",
+      "truth": "../parsebench/truth/jnpr_2018_page_212_pdf_110717_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "jnpr_2018_page_212_pdf_110717_page1",
+      "sha256": "604effa798683d16acf37b6ad137cfff8dd05433f491c741202ce85e2864bc75",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/llama_page18",
+      "file": "../parsebench/docs/llama_page18.pdf",
+      "truth": "../parsebench/truth/llama_page18.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "llama_page18",
+      "sha256": "0c152a2c4f3fecce4ce822d262ecae0d4440810412b9ad218f1bd8760aba5c5d",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/printablerulessection_page17",
+      "file": "../parsebench/docs/printablerulessection_page17.pdf",
+      "truth": "../parsebench/truth/printablerulessection_page17.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "printablerulessection_page17",
+      "sha256": "4643abfa967b5be8adfd1fbc2655692a5d195bbc44361bed3b9834490d3e0b01",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/pub_derivatives_quarterly_qtr1_2019_page6",
+      "file": "../parsebench/docs/pub_derivatives_quarterly_qtr1_2019_page6.pdf",
+      "truth": "../parsebench/truth/pub_derivatives_quarterly_qtr1_2019_page6.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "pub_derivatives_quarterly_qtr1_2019_page6",
+      "sha256": "36be85a3fec2d48504d40bb71f5a99d080ec7a5719b99a8c2e85704f5e973b26",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/serff_ca_random_pages_1_page1020",
+      "file": "../parsebench/docs/serff_ca_random_pages_1_page1020.pdf",
+      "truth": "../parsebench/truth/serff_ca_random_pages_1_page1020.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "serff_ca_random_pages_1_page1020",
+      "sha256": "165f54ddbf6c07a0e6a6fd49446071f902e8fc9a6e308b0686e1db5684c6ffa9",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/serff_interstate_random_pages_1_page174",
+      "file": "../parsebench/docs/serff_interstate_random_pages_1_page174.pdf",
+      "truth": "../parsebench/truth/serff_interstate_random_pages_1_page174.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "serff_interstate_random_pages_1_page174",
+      "sha256": "907b4bacc0e999c4012d353d1fda6b03d55dab0b8a135fd7c16ba2e3db7a7bf8",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/sizingchart_page1",
+      "file": "../parsebench/docs/sizingchart_page1.pdf",
+      "truth": "../parsebench/truth/sizingchart_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "sizingchart_page1",
+      "sha256": "ad51e39df0968d23775e5fc72deba19eb38dcf2d84fdbd02f6aa2719114e0cec",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/teds_paper_page6",
+      "file": "../parsebench/docs/teds_paper_page6.pdf",
+      "truth": "../parsebench/truth/teds_paper_page6.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "teds_paper_page6",
+      "sha256": "87e5e4bc65caa0b5ea519c419da8b467cc9c5097775eafb541af893214b3a0c0",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_dense_legalnotices",
+      "file": "../parsebench/docs/text_dense_legalnotices.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dense",
+        "hard",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_dense_legalnotices.json",
+      "source_id": "text_dense_legalnotices",
+      "sha256": "0d664588aedc35270d688f05f556c91871579c3ba5aac515363f1fdf56c9f79c",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_handwritting_address",
+      "file": "../parsebench/docs/text_handwritting_address.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "handwritting",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_handwritting_address.json",
+      "source_id": "text_handwritting_address",
+      "sha256": "036d4ede7796c9678e322523bd891472415dd85bcc6dbdf9a7de14b37f6f8b63",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_handwritting_math2",
+      "file": "../parsebench/docs/text_handwritting_math2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "handwritting",
+        "hard",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_handwritting_math2.json",
+      "source_id": "text_handwritting_math2",
+      "sha256": "7eadc0d97381067c464eb2b967358ba3638f77b60be3dd3ff6b27e94b5917584",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_misc_mark2",
+      "file": "../parsebench/docs/text_misc_mark2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "misc",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_misc_mark2.json",
+      "source_id": "text_misc_mark2",
+      "sha256": "d79260da52319364f014730e6fb158bbcb0eef510be653cf40f8b6bbd6da5e20",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_misc_missing",
+      "file": "../parsebench/docs/text_misc_missing.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "misc",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_misc_missing.json",
+      "source_id": "text_misc_missing",
+      "sha256": "f09098d852a12959ec15c3697d007860581bf06c7a8817a7d549035b5252ddcc",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_multicolumns_2col",
+      "file": "../parsebench/docs/text_multicolumns_2col.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multicolumns",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_multicolumns_2col.json",
+      "source_id": "text_multicolumns_2col",
+      "sha256": "08b3e3a7011f6451eda81b8163ce208e178e7ae050a2877d7869f03a3bf3acd6",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_multicolumns_anual_2col",
+      "file": "../parsebench/docs/text_multicolumns_anual_2col.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multicolumns",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_multicolumns_anual_2col.json",
+      "source_id": "text_multicolumns_anual_2col",
+      "sha256": "df566084758cb61eacb0fc66f9e5b677b0e6f8972d8f4b5f0966ae7509908bae",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_multilang_bengali",
+      "file": "../parsebench/docs/text_multilang_bengali.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multilang",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_multilang_bengali.json",
+      "source_id": "text_multilang_bengali",
+      "sha256": "e52e4ead1e00aedd6ab88028406faaabe3b10bfb20abbf7bae6810db0a169080",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_multilang_french2",
+      "file": "../parsebench/docs/text_multilang_french2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multilang",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_multilang_french2.json",
+      "source_id": "text_multilang_french2",
+      "sha256": "5d80ea1050034be5ee680051c9962a33f4e6127c2e204c57a40a7e14b00d91be",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_ocr_clearmont",
+      "file": "../parsebench/docs/text_ocr_clearmont.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "ocr",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_ocr_clearmont.json",
+      "source_id": "text_ocr_clearmont",
+      "sha256": "8cf16944d06c5f9bdb653c49f99cec9db83967a88170b2bbae57010e29295fe0",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_ocr_russina2",
+      "file": "../parsebench/docs/text_ocr_russina2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "ocr",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_ocr_russina2.json",
+      "source_id": "text_ocr_russina2",
+      "sha256": "70ff42e1bf7db8f5e7893d5ba60fc1760e6d62c0ff0c6a2c9a0f8f7246115024",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_simple_agreement",
+      "file": "../parsebench/docs/text_simple_agreement.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_simple_agreement.json",
+      "source_id": "text_simple_agreement",
+      "sha256": "c563e471664735e3313085d679be9b4f5eff91b3f4ff3427387e77de39a5865f",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_simple_predictive",
+      "file": "../parsebench/docs/text_simple_predictive.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_simple_predictive.json",
+      "source_id": "text_simple_predictive",
+      "sha256": "93dd5c1fc732dbc490101651cc2ede421c8ef01131edcc4d73b533061d1ad401",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_simple_wordforwords",
+      "file": "../parsebench/docs/text_simple_wordforwords.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_simple_wordforwords.json",
+      "source_id": "text_simple_wordforwords",
+      "sha256": "c096ff3a6bb089f81341d1b21bc56309f5caadf341214fdc76e79d5a4df82c4b",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_sparse_note",
+      "file": "../parsebench/docs/text_sparse_note.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "sparse"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_sparse_note.json",
+      "source_id": "text_sparse_note",
+      "sha256": "8cbc365f504c9d4e948725329dcec5d0c347ac7130c641104ed0c3f27f892069",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/victoria_secret_10_k_page1",
+      "file": "../parsebench/docs/victoria_secret_10_k_page1.pdf",
+      "truth": "../parsebench/truth/victoria_secret_10_k_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "victoria_secret_10_k_page1",
+      "sha256": "0f45691c6f4c8e4af015b5f384969b86633db54f11326760e59d8b13e416c31e",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/walmart_earnings_release_fy24_q4_page4",
+      "file": "../parsebench/docs/walmart_earnings_release_fy24_q4_page4.pdf",
+      "truth": "../parsebench/truth/walmart_earnings_release_fy24_q4_page4.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "walmart_earnings_release_fy24_q4_page4",
+      "sha256": "a2bc0664d56d6fca05e2ee0a10a3f6bc5234b919f08f263cf3354c5edc6a3242",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "synthetic/complex_table_001",
+      "file": "../synthetic-v1/docs/complex_table_001.png",
+      "truth": "../synthetic-v1/truth/complex_table_001.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table",
+        "wide_table"
+      ],
+      "kind": "transcript",
+      "source_id": "complex_table_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/complex_table_002",
+      "file": "../synthetic-v1/docs/complex_table_002.png",
+      "truth": "../synthetic-v1/truth/complex_table_002.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table",
+        "wide_table"
+      ],
+      "kind": "transcript",
+      "source_id": "complex_table_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/complex_table_003",
+      "file": "../synthetic-v1/docs/complex_table_003.png",
+      "truth": "../synthetic-v1/truth/complex_table_003.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table",
+        "wide_table"
+      ],
+      "kind": "transcript",
+      "source_id": "complex_table_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/dense_001",
+      "file": "../synthetic-v1/docs/dense_001.png",
+      "truth": "../synthetic-v1/truth/dense_001.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "long",
+        "small_print",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "dense_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/dense_002",
+      "file": "../synthetic-v1/docs/dense_002.png",
+      "truth": "../synthetic-v1/truth/dense_002.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "long",
+        "small_print",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "dense_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/dense_003",
+      "file": "../synthetic-v1/docs/dense_003.png",
+      "truth": "../synthetic-v1/truth/dense_003.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "long",
+        "small_print",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "dense_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/faded_001",
+      "file": "../synthetic-v1/docs/faded_001.png",
+      "truth": "../synthetic-v1/truth/faded_001.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "blur",
+        "degraded",
+        "jpeg",
+        "low_contrast",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "faded_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/faded_002",
+      "file": "../synthetic-v1/docs/faded_002.png",
+      "truth": "../synthetic-v1/truth/faded_002.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "blur",
+        "degraded",
+        "jpeg",
+        "low_contrast",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "faded_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/faded_003",
+      "file": "../synthetic-v1/docs/faded_003.png",
+      "truth": "../synthetic-v1/truth/faded_003.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "blur",
+        "degraded",
+        "jpeg",
+        "low_contrast",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "faded_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/headings_001",
+      "file": "../synthetic-v1/docs/headings_001.png",
+      "truth": "../synthetic-v1/truth/headings_001.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "list",
+        "structure",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "headings_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/headings_002",
+      "file": "../synthetic-v1/docs/headings_002.png",
+      "truth": "../synthetic-v1/truth/headings_002.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "list",
+        "structure",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "headings_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/headings_003",
+      "file": "../synthetic-v1/docs/headings_003.png",
+      "truth": "../synthetic-v1/truth/headings_003.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "list",
+        "structure",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "headings_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/invoice_001",
+      "file": "../synthetic-v1/docs/invoice_001.png",
+      "truth": "../synthetic-v1/truth/invoice_001.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "key_value",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "invoice_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/invoice_002",
+      "file": "../synthetic-v1/docs/invoice_002.png",
+      "truth": "../synthetic-v1/truth/invoice_002.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "key_value",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "invoice_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/invoice_003",
+      "file": "../synthetic-v1/docs/invoice_003.png",
+      "truth": "../synthetic-v1/truth/invoice_003.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "key_value",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "invoice_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/low_res_001",
+      "file": "../synthetic-v1/docs/low_res_001.png",
+      "truth": "../synthetic-v1/truth/low_res_001.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "low_res_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/low_res_002",
+      "file": "../synthetic-v1/docs/low_res_002.png",
+      "truth": "../synthetic-v1/truth/low_res_002.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "low_res_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/low_res_003",
+      "file": "../synthetic-v1/docs/low_res_003.png",
+      "truth": "../synthetic-v1/truth/low_res_003.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "low_res_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/multipage_001",
+      "file": "../synthetic-v1/docs/multipage_001.pdf",
+      "truth": "../synthetic-v1/truth/multipage_001.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "structure",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "multipage_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/multipage_002",
+      "file": "../synthetic-v1/docs/multipage_002.pdf",
+      "truth": "../synthetic-v1/truth/multipage_002.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "structure",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "multipage_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/multipage_003",
+      "file": "../synthetic-v1/docs/multipage_003.pdf",
+      "truth": "../synthetic-v1/truth/multipage_003.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "structure",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "multipage_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/noisy_scan_001",
+      "file": "../synthetic-v1/docs/noisy_scan_001.png",
+      "truth": "../synthetic-v1/truth/noisy_scan_001.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "blur",
+        "degraded",
+        "noise",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "noisy_scan_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/noisy_scan_002",
+      "file": "../synthetic-v1/docs/noisy_scan_002.png",
+      "truth": "../synthetic-v1/truth/noisy_scan_002.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "blur",
+        "degraded",
+        "noise",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "noisy_scan_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/noisy_scan_003",
+      "file": "../synthetic-v1/docs/noisy_scan_003.png",
+      "truth": "../synthetic-v1/truth/noisy_scan_003.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "blur",
+        "degraded",
+        "noise",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "noisy_scan_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/plain_001",
+      "file": "../synthetic-v1/docs/plain_001.png",
+      "truth": "../synthetic-v1/truth/plain_001.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "synthetic",
+        "text"
+      ],
+      "kind": "transcript",
+      "source_id": "plain_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/plain_002",
+      "file": "../synthetic-v1/docs/plain_002.png",
+      "truth": "../synthetic-v1/truth/plain_002.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "synthetic",
+        "text"
+      ],
+      "kind": "transcript",
+      "source_id": "plain_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/plain_003",
+      "file": "../synthetic-v1/docs/plain_003.png",
+      "truth": "../synthetic-v1/truth/plain_003.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "synthetic",
+        "text"
+      ],
+      "kind": "transcript",
+      "source_id": "plain_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/receipt_001",
+      "file": "../synthetic-v1/docs/receipt_001.png",
+      "truth": "../synthetic-v1/truth/receipt_001.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "monospace",
+        "receipt",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "receipt_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/receipt_002",
+      "file": "../synthetic-v1/docs/receipt_002.png",
+      "truth": "../synthetic-v1/truth/receipt_002.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "monospace",
+        "receipt",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "receipt_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/receipt_003",
+      "file": "../synthetic-v1/docs/receipt_003.png",
+      "truth": "../synthetic-v1/truth/receipt_003.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "monospace",
+        "receipt",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "receipt_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/skewed_001",
+      "file": "../synthetic-v1/docs/skewed_001.png",
+      "truth": "../synthetic-v1/truth/skewed_001.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "layout",
+        "rotation",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "skewed_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/skewed_002",
+      "file": "../synthetic-v1/docs/skewed_002.png",
+      "truth": "../synthetic-v1/truth/skewed_002.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "layout",
+        "rotation",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "skewed_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/skewed_003",
+      "file": "../synthetic-v1/docs/skewed_003.png",
+      "truth": "../synthetic-v1/truth/skewed_003.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "layout",
+        "rotation",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "skewed_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/table_001",
+      "file": "../synthetic-v1/docs/table_001.png",
+      "truth": "../synthetic-v1/truth/table_001.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "table_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/table_002",
+      "file": "../synthetic-v1/docs/table_002.png",
+      "truth": "../synthetic-v1/truth/table_002.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "table_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/table_003",
+      "file": "../synthetic-v1/docs/table_003.png",
+      "truth": "../synthetic-v1/truth/table_003.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "table_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/two_column_001",
+      "file": "../synthetic-v1/docs/two_column_001.png",
+      "truth": "../synthetic-v1/truth/two_column_001.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "two_column_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/two_column_002",
+      "file": "../synthetic-v1/docs/two_column_002.png",
+      "truth": "../synthetic-v1/truth/two_column_002.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "two_column_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/two_column_003",
+      "file": "../synthetic-v1/docs/two_column_003.png",
+      "truth": "../synthetic-v1/truth/two_column_003.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "two_column_003",
+      "license": "CC0-1.0"
+    }
+  ]
+}

@@ -1,0 +1,1172 @@
+[
+  {
+    "id": "text_multicolumns_2col_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "1 riskiest scam type this year, with 80.4% of those targeted reporting a monetary loss",
+      "10 riskiest scams reported by consumers in 2023",
+      "12 BBB org/ScamTracker • 2023 BBB SCAM TRACKER RISK REPORT",
+      "6 In 2023, employment scams remained the second riskiest scam",
+      "6 This year, we combined cryptocurrency and investment scams into one category because the majority of cryptocurrency scams involve investment scenarios",
+      "Although online purchase scams dropped to third riskiest on our list, these scams continued to have a huge impact, with the highest percentage of reports to BBB Scam Tracker (41.9%) and the second-highest percentage of reports with a monetary loss (susceptibility",
+      "Credit repair/debt relief scams appeared on the list of 10 riskiest scams for the first time since we began publishing the BBB Scam Tracker Risk Report in 2016",
+      "Credit repair/debt relief scams appeared on the list of 10 riskiest scams for the first time since we began publishing the BBB Scam Tracker Risk Report in 2016. The percentage of reports with a monetary loss (susceptibility) for this scam type rose 64.3% from 2022 to 2023. The median dollar loss rose from 870to1,000",
+      "Each year, BBB publishes its list of 10 riskiest scam types (Table 1), which is calculated using the BBB Risk Index and reports submitted to BBB Scam Tracker",
+      "In 2023, there were some significant shifts in position on the list",
+      "Investment/cryptocurrency scams became the No",
+      "More than 82% of those who reported being targeted by online purchase scams lost money",
+      "Romance scams rose on the list from seventh to fifth riskiest",
+      "The median dollar loss for this scam type dropped from 100in2022to71 in 2023",
+      "The percentage of reports for this scam type rose 54.2%, from 9.6% in 2022 to 14.8% in 2023. The reported median dollar loss for employment scams rose 33%, from 1,500in2022to1,995 in 2023",
+      "The reported median dollar loss ($3,800) was the second highest of all scam types",
+      "The reported median dollar loss rose from 1,411in2022to3,600 in 2023. In 2023, 65.7% of romance scam reports included a monetary loss compared to only 16.1% in 2022"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_7",
+    "type": "present",
+    "text": "000",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_7"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_8",
+    "type": "present",
+    "text": "10",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_8"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_9",
+    "type": "present",
+    "text": "100in2022to71",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_9"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_10",
+    "type": "present",
+    "text": "12",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_10"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_11",
+    "type": "present",
+    "text": "14",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_11"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_12",
+    "type": "present",
+    "text": "16",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_12"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_13",
+    "type": "present",
+    "text": "2016",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_13"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_14",
+    "type": "present",
+    "text": "2022",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_14"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_15",
+    "type": "present",
+    "text": "2023",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_15"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_16",
+    "type": "present",
+    "text": "33",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_16"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_17",
+    "type": "present",
+    "text": "41",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_17"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_18",
+    "type": "present",
+    "text": "411in2022to3",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_18"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_19",
+    "type": "present",
+    "text": "500in2022to1",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_19"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_20",
+    "type": "present",
+    "text": "54",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_20"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_21",
+    "type": "present",
+    "text": "600",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_21"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_22",
+    "type": "present",
+    "text": "64",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_22"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_23",
+    "type": "present",
+    "text": "65",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_23"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_24",
+    "type": "present",
+    "text": "80",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_24"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_25",
+    "type": "present",
+    "text": "800",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_25"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_26",
+    "type": "present",
+    "text": "82",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_26"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_27",
+    "type": "present",
+    "text": "870to1",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_27"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_28",
+    "type": "present",
+    "text": "995",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_28"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_29",
+    "type": "present",
+    "text": "all",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_29"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_30",
+    "type": "present",
+    "text": "although",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_30"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_31",
+    "type": "present",
+    "text": "and",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_31"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_32",
+    "type": "present",
+    "text": "appeared",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_32"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_33",
+    "type": "present",
+    "text": "bbb",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_33"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_34",
+    "type": "present",
+    "text": "became",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_34"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_35",
+    "type": "present",
+    "text": "because",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_35"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_36",
+    "type": "present",
+    "text": "began",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_36"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_37",
+    "type": "present",
+    "text": "being",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_37"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_38",
+    "type": "present",
+    "text": "by",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_38"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_39",
+    "type": "present",
+    "text": "calculated",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_39"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_40",
+    "type": "present",
+    "text": "category",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_40"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_41",
+    "type": "present",
+    "text": "combined",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_41"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_42",
+    "type": "present",
+    "text": "compared",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_42"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_43",
+    "type": "present",
+    "text": "consumers",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_43"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_44",
+    "type": "present",
+    "text": "continued",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_44"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_45",
+    "type": "present",
+    "text": "credit",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_45"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_46",
+    "type": "present",
+    "text": "cryptocurrency",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_46"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_47",
+    "type": "present",
+    "text": "debt",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_47"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_48",
+    "type": "present",
+    "text": "dollar",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_48"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_49",
+    "type": "present",
+    "text": "dropped",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_49"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_50",
+    "type": "present",
+    "text": "each",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_50"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_51",
+    "type": "present",
+    "text": "employment",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_51"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_52",
+    "type": "present",
+    "text": "fifth",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_52"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_53",
+    "type": "present",
+    "text": "first",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_53"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_54",
+    "type": "present",
+    "text": "for",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_54"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_55",
+    "type": "present",
+    "text": "from",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_55"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_56",
+    "type": "present",
+    "text": "have",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_56"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_57",
+    "type": "present",
+    "text": "highest",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_57"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_58",
+    "type": "present",
+    "text": "huge",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_58"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_59",
+    "type": "present",
+    "text": "impact",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_59"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_60",
+    "type": "present",
+    "text": "in",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_60"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_61",
+    "type": "present",
+    "text": "included",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_61"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_62",
+    "type": "present",
+    "text": "index",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_62"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_63",
+    "type": "present",
+    "text": "into",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_63"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_64",
+    "type": "present",
+    "text": "investment",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_64"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_65",
+    "type": "present",
+    "text": "involve",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_65"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_66",
+    "type": "present",
+    "text": "is",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_66"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_67",
+    "type": "present",
+    "text": "its",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_67"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_68",
+    "type": "present",
+    "text": "list",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_68"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_69",
+    "type": "present",
+    "text": "loss",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_69"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_70",
+    "type": "present",
+    "text": "lost",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_70"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_71",
+    "type": "present",
+    "text": "majority",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_71"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_72",
+    "type": "present",
+    "text": "median",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_72"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_73",
+    "type": "present",
+    "text": "monetary",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_73"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_74",
+    "type": "present",
+    "text": "money",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_74"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_75",
+    "type": "present",
+    "text": "more",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_75"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_76",
+    "type": "present",
+    "text": "no",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_76"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_77",
+    "type": "present",
+    "text": "of",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_77"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_78",
+    "type": "present",
+    "text": "on",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_78"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_79",
+    "type": "present",
+    "text": "one",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_79"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_80",
+    "type": "present",
+    "text": "online",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_80"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_81",
+    "type": "present",
+    "text": "only",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_81"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_82",
+    "type": "present",
+    "text": "org",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_82"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_83",
+    "type": "present",
+    "text": "our",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_83"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_84",
+    "type": "present",
+    "text": "percentage",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_84"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_85",
+    "type": "present",
+    "text": "position",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_85"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_86",
+    "type": "present",
+    "text": "publishes",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_86"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_87",
+    "type": "present",
+    "text": "publishing",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_87"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_88",
+    "type": "present",
+    "text": "purchase",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_88"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_89",
+    "type": "present",
+    "text": "relief",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_89"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_90",
+    "type": "present",
+    "text": "remained",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_90"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_91",
+    "type": "present",
+    "text": "repair",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_91"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_92",
+    "type": "present",
+    "text": "report",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_92"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_93",
+    "type": "present",
+    "text": "reported",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_93"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_94",
+    "type": "present",
+    "text": "reporting",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_94"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_95",
+    "type": "present",
+    "text": "reports",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_95"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_96",
+    "type": "present",
+    "text": "risk",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_96"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_97",
+    "type": "present",
+    "text": "riskiest",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_97"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_98",
+    "type": "present",
+    "text": "romance",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_98"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_99",
+    "type": "present",
+    "text": "rose",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_99"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_100",
+    "type": "present",
+    "text": "scam",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_100"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_101",
+    "type": "present",
+    "text": "scams",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_101"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_102",
+    "type": "present",
+    "text": "scamtracker",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_102"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_103",
+    "type": "present",
+    "text": "scenarios",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_103"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_104",
+    "type": "present",
+    "text": "second",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_104"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_105",
+    "type": "present",
+    "text": "seventh",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_105"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_106",
+    "type": "present",
+    "text": "shifts",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_106"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_107",
+    "type": "present",
+    "text": "significant",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_107"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_108",
+    "type": "present",
+    "text": "since",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_108"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_109",
+    "type": "present",
+    "text": "some",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_109"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_110",
+    "type": "present",
+    "text": "submitted",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_110"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_111",
+    "type": "present",
+    "text": "susceptibility",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_111"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_112",
+    "type": "present",
+    "text": "table",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_112"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_113",
+    "type": "present",
+    "text": "targeted",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_113"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_114",
+    "type": "present",
+    "text": "than",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_114"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_115",
+    "type": "present",
+    "text": "the",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_115"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_116",
+    "type": "present",
+    "text": "there",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_116"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_117",
+    "type": "present",
+    "text": "these",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_117"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_118",
+    "type": "present",
+    "text": "third",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_118"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_119",
+    "type": "present",
+    "text": "this",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_119"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_120",
+    "type": "present",
+    "text": "those",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_120"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_121",
+    "type": "present",
+    "text": "time",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_121"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_122",
+    "type": "present",
+    "text": "to",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_122"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_123",
+    "type": "present",
+    "text": "tracker",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_123"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_124",
+    "type": "present",
+    "text": "type",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_124"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_125",
+    "type": "present",
+    "text": "types",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_125"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_126",
+    "type": "present",
+    "text": "using",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_126"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_127",
+    "type": "present",
+    "text": "was",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_127"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_128",
+    "type": "present",
+    "text": "we",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_128"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_129",
+    "type": "present",
+    "text": "were",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_129"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_130",
+    "type": "present",
+    "text": "which",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_130"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_131",
+    "type": "present",
+    "text": "who",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_131"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_132",
+    "type": "present",
+    "text": "with",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_132"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_word_133",
+    "type": "present",
+    "text": "year",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_word_133"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_134",
+    "type": "present",
+    "text": "1 riskiest scam type this year, with 80.4% of those targeted reporting a monetary loss",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_134"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_135",
+    "type": "present",
+    "text": "10 riskiest scams reported by consumers in 2023",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_135"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_136",
+    "type": "present",
+    "text": "12 BBB org/ScamTracker • 2023 BBB SCAM TRACKER RISK REPORT",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_136"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_137",
+    "type": "present",
+    "text": "6 In 2023, employment scams remained the second riskiest scam",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_137"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_138",
+    "type": "present",
+    "text": "6 This year, we combined cryptocurrency and investment scams into one category because the majority of cryptocurrency scams involve investment scenarios",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_138"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_139",
+    "type": "present",
+    "text": "Although online purchase scams dropped to third riskiest on our list, these scams continued to have a huge impact, with the highest percentage of reports to BBB Scam Tracker (41.9%) and the second-highest percentage of reports with a monetary loss (susceptibility",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_139"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_140",
+    "type": "present",
+    "text": "Credit repair/debt relief scams appeared on the list of 10 riskiest scams for the first time since we began publishing the BBB Scam Tracker Risk Report in 2016",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_140"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_141",
+    "type": "present",
+    "text": "Credit repair/debt relief scams appeared on the list of 10 riskiest scams for the first time since we began publishing the BBB Scam Tracker Risk Report in 2016. The percentage of reports with a monetary loss (susceptibility) for this scam type rose 64.3% from 2022 to 2023. The median dollar loss rose from 870to1,000",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_141"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_142",
+    "type": "present",
+    "text": "Each year, BBB publishes its list of 10 riskiest scam types (Table 1), which is calculated using the BBB Risk Index and reports submitted to BBB Scam Tracker",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_142"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_143",
+    "type": "present",
+    "text": "In 2023, there were some significant shifts in position on the list",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_143"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_144",
+    "type": "present",
+    "text": "Investment/cryptocurrency scams became the No",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_144"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_145",
+    "type": "present",
+    "text": "More than 82% of those who reported being targeted by online purchase scams lost money",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_145"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_146",
+    "type": "present",
+    "text": "Romance scams rose on the list from seventh to fifth riskiest",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_146"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_147",
+    "type": "present",
+    "text": "The median dollar loss for this scam type dropped from 100in2022to71 in 2023",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_147"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_148",
+    "type": "present",
+    "text": "The percentage of reports for this scam type rose 54.2%, from 9.6% in 2022 to 14.8% in 2023. The reported median dollar loss for employment scams rose 33%, from 1,500in2022to1,995 in 2023",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_148"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_149",
+    "type": "present",
+    "text": "The reported median dollar loss ($3,800) was the second highest of all scam types",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_149"
+  },
+  {
+    "id": "text_multicolumns_2col_missing_specific_sentence_150",
+    "type": "present",
+    "text": "The reported median dollar loss rose from 1,411in2022to3,600 in 2023. In 2023, 65.7% of romance scam reports included a monetary loss compared to only 16.1% in 2022",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_missing_specific_sentence_150"
+  },
+  {
+    "id": "text_multicolumns_2col_order_151",
+    "type": "order",
+    "before": "10 riskiest scams reported by consumers in 2023",
+    "after": "Each year, BBB publishes its list of 10 riskiest scam types (Table 1), which is calculated using the BBB Risk Index and reports submitted to BBB Scam Tracker.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_151"
+  },
+  {
+    "id": "text_multicolumns_2col_order_152",
+    "type": "order",
+    "before": "Each year, BBB publishes its list of 10 riskiest scam types (Table 1), which is calculated using the BBB Risk Index and reports submitted to BBB Scam Tracker.",
+    "after": "In 2023, there were some significant shifts in position on the list.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_152"
+  },
+  {
+    "id": "text_multicolumns_2col_order_153",
+    "type": "order",
+    "before": "In 2023, there were some significant shifts in position on the list.",
+    "after": "Investment/cryptocurrency scams became the No. 1 riskiest scam type this year, with 80.4% of those targeted reporting a monetary loss.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_153"
+  },
+  {
+    "id": "text_multicolumns_2col_order_154",
+    "type": "order",
+    "before": "Investment/cryptocurrency scams became the No. 1 riskiest scam type this year, with 80.4% of those targeted reporting a monetary loss.",
+    "after": "The reported median dollar loss ($3,800) was the second highest of all scam types.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_154"
+  },
+  {
+    "id": "text_multicolumns_2col_order_155",
+    "type": "order",
+    "before": "The reported median dollar loss ($3,800) was the second highest of all scam types.",
+    "after": "In 2023, employment scams remained the second riskiest scam.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_155"
+  },
+  {
+    "id": "text_multicolumns_2col_order_156",
+    "type": "order",
+    "before": "In 2023, employment scams remained the second riskiest scam.",
+    "after": "The percentage of reports for this scam type rose 54.2%, from 9.6% in 2022 to 14.8% in 2023.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_156"
+  },
+  {
+    "id": "text_multicolumns_2col_order_157",
+    "type": "order",
+    "before": "The percentage of reports for this scam type rose 54.2%, from 9.6% in 2022 to 14.8% in 2023.",
+    "after": "The reported median dollar loss for employment scams rose 33%, from 1,500in2022to1,995 in 2023.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_157"
+  },
+  {
+    "id": "text_multicolumns_2col_order_158",
+    "type": "order",
+    "before": "The reported median dollar loss for employment scams rose 33%, from 1,500in2022to1,995 in 2023.",
+    "after": "Although online purchase scams dropped to third riskiest on our list, these scams continued to have a huge impact, with the highest percentage of reports to BBB Scam Tracker (41.9%) and the second-highest percentage of reports with a monetary loss (susceptibility).",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_158"
+  },
+  {
+    "id": "text_multicolumns_2col_order_159",
+    "type": "order",
+    "before": "Although online purchase scams dropped to third riskiest on our list, these scams continued to have a huge impact, with the highest percentage of reports to BBB Scam Tracker (41.9%) and the second-highest percentage of reports with a monetary loss (susceptibility).",
+    "after": "More than 82% of those who reported being targeted by online purchase scams lost money.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_159"
+  },
+  {
+    "id": "text_multicolumns_2col_order_160",
+    "type": "order",
+    "before": "More than 82% of those who reported being targeted by online purchase scams lost money.",
+    "after": "The median dollar loss for this scam type dropped from 100in2022to71 in 2023.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_160"
+  },
+  {
+    "id": "text_multicolumns_2col_order_161",
+    "type": "order",
+    "before": "The median dollar loss for this scam type dropped from 100in2022to71 in 2023.",
+    "after": "Romance scams rose on the list from seventh to fifth riskiest.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_161"
+  },
+  {
+    "id": "text_multicolumns_2col_order_162",
+    "type": "order",
+    "before": "Romance scams rose on the list from seventh to fifth riskiest.",
+    "after": "The reported median dollar loss rose from 1,411in2022to3,600 in 2023.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_162"
+  },
+  {
+    "id": "text_multicolumns_2col_order_163",
+    "type": "order",
+    "before": "The reported median dollar loss rose from 1,411in2022to3,600 in 2023.",
+    "after": "In 2023, 65.7% of romance scam reports included a monetary loss compared to only 16.1% in 2022.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_163"
+  },
+  {
+    "id": "text_multicolumns_2col_order_164",
+    "type": "order",
+    "before": "In 2023, 65.7% of romance scam reports included a monetary loss compared to only 16.1% in 2022.",
+    "after": "The percentage of reports with a monetary loss (susceptibility) for this scam type rose 64.3% from 2022 to 2023.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_164"
+  },
+  {
+    "id": "text_multicolumns_2col_order_165",
+    "type": "order",
+    "before": "The percentage of reports with a monetary loss (susceptibility) for this scam type rose 64.3% from 2022 to 2023.",
+    "after": "The median dollar loss rose from 870to1,000.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_165"
+  },
+  {
+    "id": "text_multicolumns_2col_order_166",
+    "type": "order",
+    "before": "The median dollar loss rose from 870to1,000.",
+    "after": "6 This year, we combined cryptocurrency and investment scams into one category because the majority of cryptocurrency scams involve investment scenarios.",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_166"
+  },
+  {
+    "id": "text_multicolumns_2col_order_167",
+    "type": "order",
+    "before": "6 This year, we combined cryptocurrency and investment scams into one category because the majority of cryptocurrency scams involve investment scenarios.",
+    "after": "12 BBB.org/ScamTracker • 2023 BBB SCAM TRACKER RISK REPORT",
+    "case_sensitive": false,
+    "source": "text_multicolumns__2col_order_167"
+  }
+]

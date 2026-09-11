@@ -1,0 +1,1658 @@
+[
+  {
+    "id": "text_simple_predictive_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "1. MODEL DEVELOPMENT",
+      "Any associated rates, rating factors or changes to base rates associated with the predictive model are to be filed separately as Rate, or Rate/Rule filing types",
+      "If filing a usage based insurance, telematics or similar type of behavior model, please refer to the Telematics Checklist found on SERFF",
+      "If purchased from an RSO/Advisory, provide a contact or the SERFF filing number that the model was filed under",
+      "If so, also provide the SERFF number/s for the prior version/s",
+      "In a descriptive written narrative, provide the following information",
+      "In addition to addressing questions in sections 1-4 refer to additional questions in section 5) Revised Model",
+      "NOTE: File the predictive model under the applicable type of insurance (TOI) and filing type Predictive Model",
+      "Please send any questions regarding this checklist to: propcas@difi",
+      "Predictive Modeling Checklist",
+      "Provide requested charts and graphs and Excel workbooks where applicable",
+      "Provide the following information when making a filing to introduce a new or modify an existing predictive model, to include but not limited to: Generalized Linear Model (GLM), GBM, Decision Trees and Random Forest",
+      "Was the risk of overfitting data considered and how was it mitigated",
+      "a What is the Predictive Model intended to model",
+      "az gov - include Predictive Modeling Checklist in the subject line",
+      "b If not purchased from an Rate Service Organization (RSO) or an Advisory Organization, provide the modeler's qualifications and credentials, include the entire modeling team as well as the members of company leadership involved",
+      "c Is this model a re-fresh or a re-build of a previously filed model",
+      "d If any external models were used in the building of this model, reference those models and the appropriate SERFF filing number",
+      "e Address if this predictive model is intended to interact with an existing model, or is a sub-model",
+      "e g Frequency and Severity, Loss Ratios, Pure Premium",
+      "f Reference the modeling software used and why it was selected",
+      "g Provide a description of the training, testing, and validation data used",
+      "h Describe actuarial standards employed, including any specific ASOPs",
+      "i Provide an academic reference for the model type used",
+      "j Provide a correlation matrix or heat map in Excel for the variables used in the model",
+      "k How was the model tested for stability",
+      "l Describe the methods used to validate the goodness of fit such as lift charts"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_7",
+    "type": "present",
+    "text": "academic",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_7"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_8",
+    "type": "present",
+    "text": "actuarial",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_8"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_9",
+    "type": "present",
+    "text": "addition",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_9"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_10",
+    "type": "present",
+    "text": "additional",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_10"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_11",
+    "type": "present",
+    "text": "address",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_11"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_12",
+    "type": "present",
+    "text": "addressing",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_12"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_13",
+    "type": "present",
+    "text": "advisory",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_13"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_14",
+    "type": "present",
+    "text": "also",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_14"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_15",
+    "type": "present",
+    "text": "an",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_15"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_16",
+    "type": "present",
+    "text": "and",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_16"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_17",
+    "type": "present",
+    "text": "any",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_17"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_18",
+    "type": "present",
+    "text": "applicable",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_18"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_19",
+    "type": "present",
+    "text": "appropriate",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_19"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_20",
+    "type": "present",
+    "text": "are",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_20"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_21",
+    "type": "present",
+    "text": "as",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_21"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_22",
+    "type": "present",
+    "text": "asops",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_22"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_23",
+    "type": "present",
+    "text": "associated",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_23"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_24",
+    "type": "present",
+    "text": "az",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_24"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_25",
+    "type": "present",
+    "text": "base",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_25"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_26",
+    "type": "present",
+    "text": "based",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_26"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_27",
+    "type": "present",
+    "text": "be",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_27"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_28",
+    "type": "present",
+    "text": "behavior",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_28"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_29",
+    "type": "present",
+    "text": "build",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_29"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_30",
+    "type": "present",
+    "text": "building",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_30"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_31",
+    "type": "present",
+    "text": "but",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_31"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_32",
+    "type": "present",
+    "text": "changes",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_32"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_33",
+    "type": "present",
+    "text": "charts",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_33"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_34",
+    "type": "present",
+    "text": "checklist",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_34"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_35",
+    "type": "present",
+    "text": "company",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_35"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_36",
+    "type": "present",
+    "text": "considered",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_36"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_37",
+    "type": "present",
+    "text": "contact",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_37"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_38",
+    "type": "present",
+    "text": "correlation",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_38"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_39",
+    "type": "present",
+    "text": "credentials",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_39"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_40",
+    "type": "present",
+    "text": "data",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_40"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_41",
+    "type": "present",
+    "text": "decision",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_41"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_42",
+    "type": "present",
+    "text": "describe",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_42"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_43",
+    "type": "present",
+    "text": "description",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_43"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_44",
+    "type": "present",
+    "text": "descriptive",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_44"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_45",
+    "type": "present",
+    "text": "development",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_45"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_46",
+    "type": "present",
+    "text": "difi",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_46"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_47",
+    "type": "present",
+    "text": "employed",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_47"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_48",
+    "type": "present",
+    "text": "entire",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_48"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_49",
+    "type": "present",
+    "text": "excel",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_49"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_50",
+    "type": "present",
+    "text": "existing",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_50"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_51",
+    "type": "present",
+    "text": "external",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_51"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_52",
+    "type": "present",
+    "text": "factors",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_52"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_53",
+    "type": "present",
+    "text": "file",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_53"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_54",
+    "type": "present",
+    "text": "filed",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_54"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_55",
+    "type": "present",
+    "text": "filing",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_55"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_56",
+    "type": "present",
+    "text": "fit",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_56"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_57",
+    "type": "present",
+    "text": "following",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_57"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_58",
+    "type": "present",
+    "text": "for",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_58"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_59",
+    "type": "present",
+    "text": "forest",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_59"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_60",
+    "type": "present",
+    "text": "found",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_60"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_61",
+    "type": "present",
+    "text": "frequency",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_61"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_62",
+    "type": "present",
+    "text": "fresh",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_62"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_63",
+    "type": "present",
+    "text": "from",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_63"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_64",
+    "type": "present",
+    "text": "gbm",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_64"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_65",
+    "type": "present",
+    "text": "generalized",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_65"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_66",
+    "type": "present",
+    "text": "glm",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_66"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_67",
+    "type": "present",
+    "text": "goodness",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_67"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_68",
+    "type": "present",
+    "text": "gov",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_68"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_69",
+    "type": "present",
+    "text": "graphs",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_69"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_70",
+    "type": "present",
+    "text": "heat",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_70"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_71",
+    "type": "present",
+    "text": "how",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_71"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_72",
+    "type": "present",
+    "text": "if",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_72"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_73",
+    "type": "present",
+    "text": "in",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_73"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_74",
+    "type": "present",
+    "text": "include",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_74"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_75",
+    "type": "present",
+    "text": "including",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_75"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_76",
+    "type": "present",
+    "text": "information",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_76"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_77",
+    "type": "present",
+    "text": "insurance",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_77"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_78",
+    "type": "present",
+    "text": "intended",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_78"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_79",
+    "type": "present",
+    "text": "interact",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_79"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_80",
+    "type": "present",
+    "text": "introduce",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_80"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_81",
+    "type": "present",
+    "text": "involved",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_81"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_82",
+    "type": "present",
+    "text": "is",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_82"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_83",
+    "type": "present",
+    "text": "it",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_83"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_84",
+    "type": "present",
+    "text": "leadership",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_84"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_85",
+    "type": "present",
+    "text": "lift",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_85"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_86",
+    "type": "present",
+    "text": "limited",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_86"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_87",
+    "type": "present",
+    "text": "line",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_87"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_88",
+    "type": "present",
+    "text": "linear",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_88"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_89",
+    "type": "present",
+    "text": "loss",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_89"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_90",
+    "type": "present",
+    "text": "making",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_90"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_91",
+    "type": "present",
+    "text": "map",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_91"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_92",
+    "type": "present",
+    "text": "matrix",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_92"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_93",
+    "type": "present",
+    "text": "members",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_93"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_94",
+    "type": "present",
+    "text": "methods",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_94"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_95",
+    "type": "present",
+    "text": "mitigated",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_95"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_96",
+    "type": "present",
+    "text": "model",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_96"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_97",
+    "type": "present",
+    "text": "modeler",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_97"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_98",
+    "type": "present",
+    "text": "modeling",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_98"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_99",
+    "type": "present",
+    "text": "models",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_99"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_100",
+    "type": "present",
+    "text": "modify",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_100"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_101",
+    "type": "present",
+    "text": "narrative",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_101"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_102",
+    "type": "present",
+    "text": "new",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_102"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_103",
+    "type": "present",
+    "text": "not",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_103"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_104",
+    "type": "present",
+    "text": "note",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_104"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_105",
+    "type": "present",
+    "text": "number",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_105"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_106",
+    "type": "present",
+    "text": "of",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_106"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_107",
+    "type": "present",
+    "text": "on",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_107"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_108",
+    "type": "present",
+    "text": "or",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_108"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_109",
+    "type": "present",
+    "text": "organization",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_109"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_110",
+    "type": "present",
+    "text": "overfitting",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_110"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_111",
+    "type": "present",
+    "text": "please",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_111"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_112",
+    "type": "present",
+    "text": "predictive",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_112"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_113",
+    "type": "present",
+    "text": "premium",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_113"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_114",
+    "type": "present",
+    "text": "previously",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_114"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_115",
+    "type": "present",
+    "text": "prior",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_115"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_116",
+    "type": "present",
+    "text": "propcas",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_116"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_117",
+    "type": "present",
+    "text": "provide",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_117"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_118",
+    "type": "present",
+    "text": "purchased",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_118"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_119",
+    "type": "present",
+    "text": "pure",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_119"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_120",
+    "type": "present",
+    "text": "qualifications",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_120"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_121",
+    "type": "present",
+    "text": "questions",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_121"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_122",
+    "type": "present",
+    "text": "random",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_122"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_123",
+    "type": "present",
+    "text": "rate",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_123"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_124",
+    "type": "present",
+    "text": "rates",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_124"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_125",
+    "type": "present",
+    "text": "rating",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_125"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_126",
+    "type": "present",
+    "text": "ratios",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_126"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_127",
+    "type": "present",
+    "text": "re",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_127"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_128",
+    "type": "present",
+    "text": "refer",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_128"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_129",
+    "type": "present",
+    "text": "reference",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_129"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_130",
+    "type": "present",
+    "text": "regarding",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_130"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_131",
+    "type": "present",
+    "text": "requested",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_131"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_132",
+    "type": "present",
+    "text": "revised",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_132"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_133",
+    "type": "present",
+    "text": "risk",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_133"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_134",
+    "type": "present",
+    "text": "rso",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_134"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_135",
+    "type": "present",
+    "text": "rule",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_135"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_136",
+    "type": "present",
+    "text": "section",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_136"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_137",
+    "type": "present",
+    "text": "sections",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_137"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_138",
+    "type": "present",
+    "text": "selected",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_138"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_139",
+    "type": "present",
+    "text": "send",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_139"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_140",
+    "type": "present",
+    "text": "separately",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_140"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_141",
+    "type": "present",
+    "text": "serff",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_141"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_142",
+    "type": "present",
+    "text": "service",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_142"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_143",
+    "type": "present",
+    "text": "severity",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_143"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_144",
+    "type": "present",
+    "text": "similar",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_144"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_145",
+    "type": "present",
+    "text": "so",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_145"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_146",
+    "type": "present",
+    "text": "software",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_146"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_147",
+    "type": "present",
+    "text": "specific",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_147"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_148",
+    "type": "present",
+    "text": "stability",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_148"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_149",
+    "type": "present",
+    "text": "standards",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_149"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_150",
+    "type": "present",
+    "text": "sub",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_150"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_151",
+    "type": "present",
+    "text": "subject",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_151"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_152",
+    "type": "present",
+    "text": "such",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_152"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_153",
+    "type": "present",
+    "text": "team",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_153"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_154",
+    "type": "present",
+    "text": "telematics",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_154"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_155",
+    "type": "present",
+    "text": "tested",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_155"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_156",
+    "type": "present",
+    "text": "testing",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_156"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_157",
+    "type": "present",
+    "text": "that",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_157"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_158",
+    "type": "present",
+    "text": "the",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_158"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_159",
+    "type": "present",
+    "text": "this",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_159"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_160",
+    "type": "present",
+    "text": "those",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_160"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_161",
+    "type": "present",
+    "text": "to",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_161"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_162",
+    "type": "present",
+    "text": "toi",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_162"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_163",
+    "type": "present",
+    "text": "training",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_163"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_164",
+    "type": "present",
+    "text": "trees",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_164"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_165",
+    "type": "present",
+    "text": "type",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_165"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_166",
+    "type": "present",
+    "text": "types",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_166"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_167",
+    "type": "present",
+    "text": "under",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_167"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_168",
+    "type": "present",
+    "text": "usage",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_168"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_169",
+    "type": "present",
+    "text": "used",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_169"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_170",
+    "type": "present",
+    "text": "validate",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_170"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_171",
+    "type": "present",
+    "text": "validation",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_171"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_172",
+    "type": "present",
+    "text": "variables",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_172"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_173",
+    "type": "present",
+    "text": "version",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_173"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_174",
+    "type": "present",
+    "text": "was",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_174"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_175",
+    "type": "present",
+    "text": "well",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_175"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_176",
+    "type": "present",
+    "text": "were",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_176"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_177",
+    "type": "present",
+    "text": "what",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_177"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_178",
+    "type": "present",
+    "text": "when",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_178"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_179",
+    "type": "present",
+    "text": "where",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_179"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_180",
+    "type": "present",
+    "text": "why",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_180"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_181",
+    "type": "present",
+    "text": "with",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_181"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_182",
+    "type": "present",
+    "text": "workbooks",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_182"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_word_183",
+    "type": "present",
+    "text": "written",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_word_183"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_184",
+    "type": "present",
+    "text": "1. MODEL DEVELOPMENT",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_184"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_185",
+    "type": "present",
+    "text": "Any associated rates, rating factors or changes to base rates associated with the predictive model are to be filed separately as Rate, or Rate/Rule filing types",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_185"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_186",
+    "type": "present",
+    "text": "If filing a usage based insurance, telematics or similar type of behavior model, please refer to the Telematics Checklist found on SERFF",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_186"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_187",
+    "type": "present",
+    "text": "If purchased from an RSO/Advisory, provide a contact or the SERFF filing number that the model was filed under",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_187"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_188",
+    "type": "present",
+    "text": "If so, also provide the SERFF number/s for the prior version/s",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_188"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_189",
+    "type": "present",
+    "text": "In a descriptive written narrative, provide the following information",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_189"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_190",
+    "type": "present",
+    "text": "In addition to addressing questions in sections 1-4 refer to additional questions in section 5) Revised Model",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_190"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_191",
+    "type": "present",
+    "text": "NOTE: File the predictive model under the applicable type of insurance (TOI) and filing type Predictive Model",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_191"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_192",
+    "type": "present",
+    "text": "Please send any questions regarding this checklist to: propcas@difi",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_192"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_193",
+    "type": "present",
+    "text": "Predictive Modeling Checklist",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_193"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_194",
+    "type": "present",
+    "text": "Provide requested charts and graphs and Excel workbooks where applicable",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_194"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_195",
+    "type": "present",
+    "text": "Provide the following information when making a filing to introduce a new or modify an existing predictive model, to include but not limited to: Generalized Linear Model (GLM), GBM, Decision Trees and Random Forest",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_195"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_196",
+    "type": "present",
+    "text": "Was the risk of overfitting data considered and how was it mitigated",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_196"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_197",
+    "type": "present",
+    "text": "a What is the Predictive Model intended to model",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_197"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_198",
+    "type": "present",
+    "text": "az gov - include Predictive Modeling Checklist in the subject line",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_198"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_199",
+    "type": "present",
+    "text": "b If not purchased from an Rate Service Organization (RSO) or an Advisory Organization, provide the modeler's qualifications and credentials, include the entire modeling team as well as the members of company leadership involved",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_199"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_200",
+    "type": "present",
+    "text": "c Is this model a re-fresh or a re-build of a previously filed model",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_200"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_201",
+    "type": "present",
+    "text": "d If any external models were used in the building of this model, reference those models and the appropriate SERFF filing number",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_201"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_202",
+    "type": "present",
+    "text": "e Address if this predictive model is intended to interact with an existing model, or is a sub-model",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_202"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_203",
+    "type": "present",
+    "text": "e g Frequency and Severity, Loss Ratios, Pure Premium",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_203"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_204",
+    "type": "present",
+    "text": "f Reference the modeling software used and why it was selected",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_204"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_205",
+    "type": "present",
+    "text": "g Provide a description of the training, testing, and validation data used",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_205"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_206",
+    "type": "present",
+    "text": "h Describe actuarial standards employed, including any specific ASOPs",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_206"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_207",
+    "type": "present",
+    "text": "i Provide an academic reference for the model type used",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_207"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_208",
+    "type": "present",
+    "text": "j Provide a correlation matrix or heat map in Excel for the variables used in the model",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_208"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_209",
+    "type": "present",
+    "text": "k How was the model tested for stability",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_209"
+  },
+  {
+    "id": "text_simple_predictive_missing_specific_sentence_210",
+    "type": "present",
+    "text": "l Describe the methods used to validate the goodness of fit such as lift charts",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_missing_specific_sentence_210"
+  },
+  {
+    "id": "text_simple_predictive_order_211",
+    "type": "order",
+    "before": "Predictive Modeling Checklist",
+    "after": "Provide the following information when making a filing to introduce a new or modify an existing predictive model, to include but not limited to: Generalized Linear Model (GLM), GBM, Decision Trees and Random Forest.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_211"
+  },
+  {
+    "id": "text_simple_predictive_order_212",
+    "type": "order",
+    "before": "Provide the following information when making a filing to introduce a new or modify an existing predictive model, to include but not limited to: Generalized Linear Model (GLM), GBM, Decision Trees and Random Forest.",
+    "after": "If filing a usage based insurance, telematics or similar type of behavior model, please refer to the Telematics Checklist found on SERFF",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_212"
+  },
+  {
+    "id": "text_simple_predictive_order_213",
+    "type": "order",
+    "before": "If filing a usage based insurance, telematics or similar type of behavior model, please refer to the Telematics Checklist found on SERFF",
+    "after": "Please send any questions regarding this checklist to: propcas@difi.az.gov - include Predictive Modeling Checklist in the subject line.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_213"
+  },
+  {
+    "id": "text_simple_predictive_order_214",
+    "type": "order",
+    "before": "Please send any questions regarding this checklist to: propcas@difi.az.gov - include Predictive Modeling Checklist in the subject line.",
+    "after": "NOTE: File the predictive model under the applicable type of insurance (TOI) and filing type Predictive Model .",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_214"
+  },
+  {
+    "id": "text_simple_predictive_order_215",
+    "type": "order",
+    "before": "NOTE: File the predictive model under the applicable type of insurance (TOI) and filing type Predictive Model .",
+    "after": "Any associated rates, rating factors or changes to base rates associated with the predictive model are to be filed separately as Rate , or Rate/Rule filing types.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_215"
+  },
+  {
+    "id": "text_simple_predictive_order_216",
+    "type": "order",
+    "before": "Any associated rates, rating factors or changes to base rates associated with the predictive model are to be filed separately as Rate , or Rate/Rule filing types.",
+    "after": "In a descriptive written narrative, provide the following information.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_216"
+  },
+  {
+    "id": "text_simple_predictive_order_217",
+    "type": "order",
+    "before": "In a descriptive written narrative, provide the following information.",
+    "after": "Provide requested charts and graphs and Excel workbooks where applicable.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_217"
+  },
+  {
+    "id": "text_simple_predictive_order_218",
+    "type": "order",
+    "before": "Provide requested charts and graphs and Excel workbooks where applicable.",
+    "after": "What is the Predictive Model intended to model?",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_218"
+  },
+  {
+    "id": "text_simple_predictive_order_219",
+    "type": "order",
+    "before": "What is the Predictive Model intended to model?",
+    "after": "Frequency and Severity, Loss Ratios, Pure Premium)",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_219"
+  },
+  {
+    "id": "text_simple_predictive_order_220",
+    "type": "order",
+    "before": "Frequency and Severity, Loss Ratios, Pure Premium)",
+    "after": "If not purchased from an Rate Service Organization (RSO) or an Advisory Organization, provide the modeler's qualifications and credentials, include the entire modeling team as well as the members of company leadership involved.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_220"
+  },
+  {
+    "id": "text_simple_predictive_order_221",
+    "type": "order",
+    "before": "If not purchased from an Rate Service Organization (RSO) or an Advisory Organization, provide the modeler's qualifications and credentials, include the entire modeling team as well as the members of company leadership involved.",
+    "after": "If purchased from an RSO/Advisory, provide a contact or the SERFF filing number that the model was filed under.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_221"
+  },
+  {
+    "id": "text_simple_predictive_order_222",
+    "type": "order",
+    "before": "If purchased from an RSO/Advisory, provide a contact or the SERFF filing number that the model was filed under.",
+    "after": "Is this model a re-fresh or a re-build of a previously filed model?",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_222"
+  },
+  {
+    "id": "text_simple_predictive_order_223",
+    "type": "order",
+    "before": "Is this model a re-fresh or a re-build of a previously filed model?",
+    "after": "If so, also provide the SERFF number/s for the prior version/s.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_223"
+  },
+  {
+    "id": "text_simple_predictive_order_224",
+    "type": "order",
+    "before": "If so, also provide the SERFF number/s for the prior version/s.",
+    "after": "In addition to addressing questions in sections 1-4 refer to additional questions in section 5) Revised Model.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_224"
+  },
+  {
+    "id": "text_simple_predictive_order_225",
+    "type": "order",
+    "before": "In addition to addressing questions in sections 1-4 refer to additional questions in section 5) Revised Model.",
+    "after": "If any external models were used in the building of this model, reference those models and the appropriate SERFF filing number.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_225"
+  },
+  {
+    "id": "text_simple_predictive_order_226",
+    "type": "order",
+    "before": "If any external models were used in the building of this model, reference those models and the appropriate SERFF filing number.",
+    "after": "Address if this predictive model is intended to interact with an existing model, or is a sub-model.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_226"
+  },
+  {
+    "id": "text_simple_predictive_order_227",
+    "type": "order",
+    "before": "Address if this predictive model is intended to interact with an existing model, or is a sub-model.",
+    "after": "Reference the modeling software used and why it was selected.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_227"
+  },
+  {
+    "id": "text_simple_predictive_order_228",
+    "type": "order",
+    "before": "Reference the modeling software used and why it was selected.",
+    "after": "Provide a description of the training, testing, and validation data used.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_228"
+  },
+  {
+    "id": "text_simple_predictive_order_229",
+    "type": "order",
+    "before": "Provide a description of the training, testing, and validation data used.",
+    "after": "Describe actuarial standards employed, including any specific ASOPs.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_229"
+  },
+  {
+    "id": "text_simple_predictive_order_230",
+    "type": "order",
+    "before": "Describe actuarial standards employed, including any specific ASOPs.",
+    "after": "Provide an academic reference for the model type used.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_230"
+  },
+  {
+    "id": "text_simple_predictive_order_231",
+    "type": "order",
+    "before": "Provide an academic reference for the model type used.",
+    "after": "Provide a correlation matrix or heat map in Excel for the variables used in the model.",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_231"
+  },
+  {
+    "id": "text_simple_predictive_order_232",
+    "type": "order",
+    "before": "Provide a correlation matrix or heat map in Excel for the variables used in the model.",
+    "after": "How was the model tested for stability?",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_232"
+  },
+  {
+    "id": "text_simple_predictive_order_233",
+    "type": "order",
+    "before": "How was the model tested for stability?",
+    "after": "Was the risk of overfitting data considered and how was it mitigated?",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_233"
+  },
+  {
+    "id": "text_simple_predictive_order_234",
+    "type": "order",
+    "before": "Was the risk of overfitting data considered and how was it mitigated?",
+    "after": "Describe the methods used to validate the goodness of fit such as lift charts,",
+    "case_sensitive": false,
+    "source": "text_simple__predictive_order_234"
+  }
+]

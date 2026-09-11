@@ -1,0 +1,1809 @@
+[
+  {
+    "id": "text_simple_wordforwords_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "At the heart of the NPPF is a presumption in favour of sustainable development – provided the development is in accord with the Cornwall Local Plan",
+      "Chairman",
+      "Foreword",
+      "Hayle Neighbourhood Plan Steering Group Page 1",
+      "How many times have you wondered \"how on earth did that get built,\" or \"wow, that development fits in well there,\" or \"why can't we have more affordable housing so that we or our children can get on the housing ladder",
+      "John Bennett",
+      "Planning law has changed substantially in recent years and the primary document now defining the government's planning policies for England is the National Planning Policy Framework (NPPF) of March 2012. The NPPF requires that the local planning authority, in our case Cornwall Council, should make a Local Plan that will set strategic objectives for each area",
+      "Policies contained within a Neighbourhood Plan, once adopted, must be observed by the local planning authority",
+      "Since the Cornwall Local Plan takes a strategic view of development, any planning application in line with its policies that meets the criteria of sustainable development benefits from the presumption in favour of approval",
+      "Since these policies have been produced through extensive consultation with the residents of the Hayle Parish – including our villages and rural areas – our development will meet the needs of our community for the Plan period",
+      "The NPPF, however, recognises that local communities, while planning to positively support local development, will wish to shape and direct development in their area",
+      "There are three dimensions to sustainable development – economic, social and environmental – and the planning system must encompass them all",
+      "These objectives will include the amount of housing to be built, infrastructure requirements and support for economic development",
+      "This Neighbourhood Plan is an opportunity to bring decisions on the way our area develops back to us – the people who live here",
+      "This is Hayle's Plan (described throughout as our Plan and containing our policies",
+      "This is achieved through a Neighbourhood Plan",
+      "UN Resolution 42/187 defines sustainable development as meeting the needs of the present without compromising the ability of future generations to meet their own needs",
+      "Until now, planning decisions have seemed remote from the people they affect",
+      "We hope that by 2030 we all will be pleased with the outcome and that Hayle will be even better than it is today",
+      "While the Hayle Neighbourhood Plan has been led by a Steering Group comprising six town councillors and six community representatives, the content has been driven by the views of residents",
+      "Without careful planning, our towns and villages will grow in an uncoordinated way without necessarily enhancing and improving the areas where we live",
+      "signature:John Bennett"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_7",
+    "type": "present",
+    "text": "187",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_7"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_8",
+    "type": "present",
+    "text": "2012",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_8"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_9",
+    "type": "present",
+    "text": "2030",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_9"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_10",
+    "type": "present",
+    "text": "42",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_10"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_11",
+    "type": "present",
+    "text": "ability",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_11"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_12",
+    "type": "present",
+    "text": "accord",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_12"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_13",
+    "type": "present",
+    "text": "achieved",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_13"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_14",
+    "type": "present",
+    "text": "adopted",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_14"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_15",
+    "type": "present",
+    "text": "affect",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_15"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_16",
+    "type": "present",
+    "text": "affordable",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_16"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_17",
+    "type": "present",
+    "text": "all",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_17"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_18",
+    "type": "present",
+    "text": "amount",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_18"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_19",
+    "type": "present",
+    "text": "an",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_19"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_20",
+    "type": "present",
+    "text": "and",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_20"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_21",
+    "type": "present",
+    "text": "any",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_21"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_22",
+    "type": "present",
+    "text": "application",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_22"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_23",
+    "type": "present",
+    "text": "approval",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_23"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_24",
+    "type": "present",
+    "text": "are",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_24"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_25",
+    "type": "present",
+    "text": "area",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_25"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_26",
+    "type": "present",
+    "text": "areas",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_26"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_27",
+    "type": "present",
+    "text": "as",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_27"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_28",
+    "type": "present",
+    "text": "at",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_28"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_29",
+    "type": "present",
+    "text": "authority",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_29"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_30",
+    "type": "present",
+    "text": "back",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_30"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_31",
+    "type": "present",
+    "text": "be",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_31"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_32",
+    "type": "present",
+    "text": "been",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_32"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_33",
+    "type": "present",
+    "text": "benefits",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_33"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_34",
+    "type": "present",
+    "text": "bennett",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_34"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_35",
+    "type": "present",
+    "text": "better",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_35"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_36",
+    "type": "present",
+    "text": "bring",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_36"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_37",
+    "type": "present",
+    "text": "built",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_37"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_38",
+    "type": "present",
+    "text": "by",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_38"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_39",
+    "type": "present",
+    "text": "can",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_39"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_40",
+    "type": "present",
+    "text": "careful",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_40"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_41",
+    "type": "present",
+    "text": "case",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_41"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_42",
+    "type": "present",
+    "text": "chairman",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_42"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_43",
+    "type": "present",
+    "text": "changed",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_43"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_44",
+    "type": "present",
+    "text": "children",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_44"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_45",
+    "type": "present",
+    "text": "communities",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_45"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_46",
+    "type": "present",
+    "text": "community",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_46"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_47",
+    "type": "present",
+    "text": "comprising",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_47"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_48",
+    "type": "present",
+    "text": "compromising",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_48"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_49",
+    "type": "present",
+    "text": "consultation",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_49"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_50",
+    "type": "present",
+    "text": "contained",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_50"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_51",
+    "type": "present",
+    "text": "containing",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_51"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_52",
+    "type": "present",
+    "text": "content",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_52"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_53",
+    "type": "present",
+    "text": "cornwall",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_53"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_54",
+    "type": "present",
+    "text": "council",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_54"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_55",
+    "type": "present",
+    "text": "councillors",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_55"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_56",
+    "type": "present",
+    "text": "criteria",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_56"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_57",
+    "type": "present",
+    "text": "decisions",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_57"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_58",
+    "type": "present",
+    "text": "defines",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_58"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_59",
+    "type": "present",
+    "text": "defining",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_59"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_60",
+    "type": "present",
+    "text": "described",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_60"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_61",
+    "type": "present",
+    "text": "development",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_61"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_62",
+    "type": "present",
+    "text": "develops",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_62"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_63",
+    "type": "present",
+    "text": "did",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_63"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_64",
+    "type": "present",
+    "text": "dimensions",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_64"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_65",
+    "type": "present",
+    "text": "direct",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_65"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_66",
+    "type": "present",
+    "text": "document",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_66"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_67",
+    "type": "present",
+    "text": "driven",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_67"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_68",
+    "type": "present",
+    "text": "each",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_68"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_69",
+    "type": "present",
+    "text": "earth",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_69"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_70",
+    "type": "present",
+    "text": "economic",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_70"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_71",
+    "type": "present",
+    "text": "encompass",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_71"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_72",
+    "type": "present",
+    "text": "england",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_72"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_73",
+    "type": "present",
+    "text": "enhancing",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_73"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_74",
+    "type": "present",
+    "text": "environmental",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_74"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_75",
+    "type": "present",
+    "text": "even",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_75"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_76",
+    "type": "present",
+    "text": "extensive",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_76"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_77",
+    "type": "present",
+    "text": "favour",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_77"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_78",
+    "type": "present",
+    "text": "fits",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_78"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_79",
+    "type": "present",
+    "text": "for",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_79"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_80",
+    "type": "present",
+    "text": "foreword",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_80"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_81",
+    "type": "present",
+    "text": "framework",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_81"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_82",
+    "type": "present",
+    "text": "from",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_82"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_83",
+    "type": "present",
+    "text": "future",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_83"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_84",
+    "type": "present",
+    "text": "generations",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_84"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_85",
+    "type": "present",
+    "text": "get",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_85"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_86",
+    "type": "present",
+    "text": "government",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_86"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_87",
+    "type": "present",
+    "text": "group",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_87"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_88",
+    "type": "present",
+    "text": "grow",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_88"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_89",
+    "type": "present",
+    "text": "has",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_89"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_90",
+    "type": "present",
+    "text": "have",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_90"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_91",
+    "type": "present",
+    "text": "hayle",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_91"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_92",
+    "type": "present",
+    "text": "heart",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_92"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_93",
+    "type": "present",
+    "text": "here",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_93"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_94",
+    "type": "present",
+    "text": "hope",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_94"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_95",
+    "type": "present",
+    "text": "housing",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_95"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_96",
+    "type": "present",
+    "text": "how",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_96"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_97",
+    "type": "present",
+    "text": "however",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_97"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_98",
+    "type": "present",
+    "text": "improving",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_98"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_99",
+    "type": "present",
+    "text": "in",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_99"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_100",
+    "type": "present",
+    "text": "include",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_100"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_101",
+    "type": "present",
+    "text": "including",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_101"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_102",
+    "type": "present",
+    "text": "infrastructure",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_102"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_103",
+    "type": "present",
+    "text": "is",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_103"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_104",
+    "type": "present",
+    "text": "it",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_104"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_105",
+    "type": "present",
+    "text": "its",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_105"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_106",
+    "type": "present",
+    "text": "john",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_106"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_107",
+    "type": "present",
+    "text": "ladder",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_107"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_108",
+    "type": "present",
+    "text": "law",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_108"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_109",
+    "type": "present",
+    "text": "led",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_109"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_110",
+    "type": "present",
+    "text": "line",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_110"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_111",
+    "type": "present",
+    "text": "live",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_111"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_112",
+    "type": "present",
+    "text": "local",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_112"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_113",
+    "type": "present",
+    "text": "make",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_113"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_114",
+    "type": "present",
+    "text": "many",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_114"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_115",
+    "type": "present",
+    "text": "march",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_115"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_116",
+    "type": "present",
+    "text": "meet",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_116"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_117",
+    "type": "present",
+    "text": "meeting",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_117"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_118",
+    "type": "present",
+    "text": "meets",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_118"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_119",
+    "type": "present",
+    "text": "more",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_119"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_120",
+    "type": "present",
+    "text": "must",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_120"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_121",
+    "type": "present",
+    "text": "national",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_121"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_122",
+    "type": "present",
+    "text": "necessarily",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_122"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_123",
+    "type": "present",
+    "text": "needs",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_123"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_124",
+    "type": "present",
+    "text": "neighbourhood",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_124"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_125",
+    "type": "present",
+    "text": "now",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_125"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_126",
+    "type": "present",
+    "text": "nppf",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_126"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_127",
+    "type": "present",
+    "text": "objectives",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_127"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_128",
+    "type": "present",
+    "text": "observed",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_128"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_129",
+    "type": "present",
+    "text": "of",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_129"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_130",
+    "type": "present",
+    "text": "on",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_130"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_131",
+    "type": "present",
+    "text": "once",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_131"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_132",
+    "type": "present",
+    "text": "opportunity",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_132"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_133",
+    "type": "present",
+    "text": "or",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_133"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_134",
+    "type": "present",
+    "text": "our",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_134"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_135",
+    "type": "present",
+    "text": "outcome",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_135"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_136",
+    "type": "present",
+    "text": "own",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_136"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_137",
+    "type": "present",
+    "text": "page",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_137"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_138",
+    "type": "present",
+    "text": "parish",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_138"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_139",
+    "type": "present",
+    "text": "people",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_139"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_140",
+    "type": "present",
+    "text": "period",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_140"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_141",
+    "type": "present",
+    "text": "plan",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_141"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_142",
+    "type": "present",
+    "text": "planning",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_142"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_143",
+    "type": "present",
+    "text": "pleased",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_143"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_144",
+    "type": "present",
+    "text": "policies",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_144"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_145",
+    "type": "present",
+    "text": "policy",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_145"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_146",
+    "type": "present",
+    "text": "positively",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_146"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_147",
+    "type": "present",
+    "text": "present",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_147"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_148",
+    "type": "present",
+    "text": "presumption",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_148"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_149",
+    "type": "present",
+    "text": "primary",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_149"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_150",
+    "type": "present",
+    "text": "produced",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_150"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_151",
+    "type": "present",
+    "text": "provided",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_151"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_152",
+    "type": "present",
+    "text": "recent",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_152"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_153",
+    "type": "present",
+    "text": "recognises",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_153"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_154",
+    "type": "present",
+    "text": "remote",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_154"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_155",
+    "type": "present",
+    "text": "representatives",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_155"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_156",
+    "type": "present",
+    "text": "requirements",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_156"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_157",
+    "type": "present",
+    "text": "requires",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_157"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_158",
+    "type": "present",
+    "text": "residents",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_158"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_159",
+    "type": "present",
+    "text": "resolution",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_159"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_160",
+    "type": "present",
+    "text": "rural",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_160"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_161",
+    "type": "present",
+    "text": "seemed",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_161"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_162",
+    "type": "present",
+    "text": "set",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_162"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_163",
+    "type": "present",
+    "text": "shape",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_163"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_164",
+    "type": "present",
+    "text": "should",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_164"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_165",
+    "type": "present",
+    "text": "signature",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_165"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_166",
+    "type": "present",
+    "text": "since",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_166"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_167",
+    "type": "present",
+    "text": "six",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_167"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_168",
+    "type": "present",
+    "text": "so",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_168"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_169",
+    "type": "present",
+    "text": "social",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_169"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_170",
+    "type": "present",
+    "text": "steering",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_170"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_171",
+    "type": "present",
+    "text": "strategic",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_171"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_172",
+    "type": "present",
+    "text": "substantially",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_172"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_173",
+    "type": "present",
+    "text": "support",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_173"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_174",
+    "type": "present",
+    "text": "sustainable",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_174"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_175",
+    "type": "present",
+    "text": "system",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_175"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_176",
+    "type": "present",
+    "text": "takes",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_176"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_177",
+    "type": "present",
+    "text": "than",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_177"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_178",
+    "type": "present",
+    "text": "that",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_178"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_179",
+    "type": "present",
+    "text": "the",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_179"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_180",
+    "type": "present",
+    "text": "their",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_180"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_181",
+    "type": "present",
+    "text": "them",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_181"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_182",
+    "type": "present",
+    "text": "there",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_182"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_183",
+    "type": "present",
+    "text": "these",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_183"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_184",
+    "type": "present",
+    "text": "they",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_184"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_185",
+    "type": "present",
+    "text": "this",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_185"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_186",
+    "type": "present",
+    "text": "three",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_186"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_187",
+    "type": "present",
+    "text": "through",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_187"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_188",
+    "type": "present",
+    "text": "throughout",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_188"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_189",
+    "type": "present",
+    "text": "times",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_189"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_190",
+    "type": "present",
+    "text": "to",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_190"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_191",
+    "type": "present",
+    "text": "today",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_191"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_192",
+    "type": "present",
+    "text": "town",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_192"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_193",
+    "type": "present",
+    "text": "towns",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_193"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_194",
+    "type": "present",
+    "text": "un",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_194"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_195",
+    "type": "present",
+    "text": "uncoordinated",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_195"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_196",
+    "type": "present",
+    "text": "until",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_196"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_197",
+    "type": "present",
+    "text": "us",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_197"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_198",
+    "type": "present",
+    "text": "view",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_198"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_199",
+    "type": "present",
+    "text": "views",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_199"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_200",
+    "type": "present",
+    "text": "villages",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_200"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_201",
+    "type": "present",
+    "text": "way",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_201"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_202",
+    "type": "present",
+    "text": "we",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_202"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_203",
+    "type": "present",
+    "text": "well",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_203"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_204",
+    "type": "present",
+    "text": "where",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_204"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_205",
+    "type": "present",
+    "text": "while",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_205"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_206",
+    "type": "present",
+    "text": "who",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_206"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_207",
+    "type": "present",
+    "text": "why",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_207"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_208",
+    "type": "present",
+    "text": "will",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_208"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_209",
+    "type": "present",
+    "text": "wish",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_209"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_210",
+    "type": "present",
+    "text": "with",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_210"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_211",
+    "type": "present",
+    "text": "within",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_211"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_212",
+    "type": "present",
+    "text": "without",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_212"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_213",
+    "type": "present",
+    "text": "wondered",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_213"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_214",
+    "type": "present",
+    "text": "wow",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_214"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_215",
+    "type": "present",
+    "text": "years",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_215"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_word_216",
+    "type": "present",
+    "text": "you",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_word_216"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_217",
+    "type": "present",
+    "text": "At the heart of the NPPF is a presumption in favour of sustainable development – provided the development is in accord with the Cornwall Local Plan",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_217"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_218",
+    "type": "present",
+    "text": "Chairman",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_218"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_219",
+    "type": "present",
+    "text": "Foreword",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_219"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_220",
+    "type": "present",
+    "text": "Hayle Neighbourhood Plan Steering Group Page 1",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_220"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_221",
+    "type": "present",
+    "text": "How many times have you wondered \"how on earth did that get built,\" or \"wow, that development fits in well there,\" or \"why can't we have more affordable housing so that we or our children can get on the housing ladder",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_221"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_222",
+    "type": "present",
+    "text": "John Bennett",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_222"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_223",
+    "type": "present",
+    "text": "Planning law has changed substantially in recent years and the primary document now defining the government's planning policies for England is the National Planning Policy Framework (NPPF) of March 2012. The NPPF requires that the local planning authority, in our case Cornwall Council, should make a Local Plan that will set strategic objectives for each area",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_223"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_224",
+    "type": "present",
+    "text": "Policies contained within a Neighbourhood Plan, once adopted, must be observed by the local planning authority",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_224"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_225",
+    "type": "present",
+    "text": "Since the Cornwall Local Plan takes a strategic view of development, any planning application in line with its policies that meets the criteria of sustainable development benefits from the presumption in favour of approval",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_225"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_226",
+    "type": "present",
+    "text": "Since these policies have been produced through extensive consultation with the residents of the Hayle Parish – including our villages and rural areas – our development will meet the needs of our community for the Plan period",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_226"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_227",
+    "type": "present",
+    "text": "The NPPF, however, recognises that local communities, while planning to positively support local development, will wish to shape and direct development in their area",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_227"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_228",
+    "type": "present",
+    "text": "There are three dimensions to sustainable development – economic, social and environmental – and the planning system must encompass them all",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_228"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_229",
+    "type": "present",
+    "text": "These objectives will include the amount of housing to be built, infrastructure requirements and support for economic development",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_229"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_230",
+    "type": "present",
+    "text": "This Neighbourhood Plan is an opportunity to bring decisions on the way our area develops back to us – the people who live here",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_230"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_231",
+    "type": "present",
+    "text": "This is Hayle's Plan (described throughout as our Plan and containing our policies",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_231"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_232",
+    "type": "present",
+    "text": "This is achieved through a Neighbourhood Plan",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_232"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_233",
+    "type": "present",
+    "text": "UN Resolution 42/187 defines sustainable development as meeting the needs of the present without compromising the ability of future generations to meet their own needs",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_233"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_234",
+    "type": "present",
+    "text": "Until now, planning decisions have seemed remote from the people they affect",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_234"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_235",
+    "type": "present",
+    "text": "We hope that by 2030 we all will be pleased with the outcome and that Hayle will be even better than it is today",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_235"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_236",
+    "type": "present",
+    "text": "While the Hayle Neighbourhood Plan has been led by a Steering Group comprising six town councillors and six community representatives, the content has been driven by the views of residents",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_236"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_237",
+    "type": "present",
+    "text": "Without careful planning, our towns and villages will grow in an uncoordinated way without necessarily enhancing and improving the areas where we live",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_237"
+  },
+  {
+    "id": "text_simple_wordforwords_missing_specific_sentence_238",
+    "type": "present",
+    "text": "signature:John Bennett",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_missing_specific_sentence_238"
+  },
+  {
+    "id": "text_simple_wordforwords_order_239",
+    "type": "order",
+    "before": "Without careful planning, our towns and villages will grow in an uncoordinated way without necessarily enhancing and improving the areas where we live.",
+    "after": "How many times have you wondered \"how on earth did that get built,\" or \"wow, that development fits in well there,\" or \"why can't we have more affordable housing so that we or our children can get on the housing ladder\"?",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_239"
+  },
+  {
+    "id": "text_simple_wordforwords_order_240",
+    "type": "order",
+    "before": "How many times have you wondered \"how on earth did that get built,\" or \"wow, that development fits in well there,\" or \"why can't we have more affordable housing so that we or our children can get on the housing ladder\"?",
+    "after": "Until now, planning decisions have seemed remote from the people they affect.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_240"
+  },
+  {
+    "id": "text_simple_wordforwords_order_241",
+    "type": "order",
+    "before": "Until now, planning decisions have seemed remote from the people they affect.",
+    "after": "This Neighbourhood Plan is an opportunity to bring decisions on the way our area develops back to us – the people who live here.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_241"
+  },
+  {
+    "id": "text_simple_wordforwords_order_242",
+    "type": "order",
+    "before": "This Neighbourhood Plan is an opportunity to bring decisions on the way our area develops back to us – the people who live here.",
+    "after": "Planning law has changed substantially in recent years and the primary document now defining the government's planning policies for England is the National Planning Policy Framework (NPPF) of March 2012.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_242"
+  },
+  {
+    "id": "text_simple_wordforwords_order_243",
+    "type": "order",
+    "before": "Planning law has changed substantially in recent years and the primary document now defining the government's planning policies for England is the National Planning Policy Framework (NPPF) of March 2012.",
+    "after": "The NPPF requires that the local planning authority, in our case Cornwall Council, should make a Local Plan that will set strategic objectives for each area.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_243"
+  },
+  {
+    "id": "text_simple_wordforwords_order_244",
+    "type": "order",
+    "before": "The NPPF requires that the local planning authority, in our case Cornwall Council, should make a Local Plan that will set strategic objectives for each area.",
+    "after": "These objectives will include the amount of housing to be built, infrastructure requirements and support for economic development.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_244"
+  },
+  {
+    "id": "text_simple_wordforwords_order_245",
+    "type": "order",
+    "before": "These objectives will include the amount of housing to be built, infrastructure requirements and support for economic development.",
+    "after": "At the heart of the NPPF is a presumption in favour of sustainable development – provided the development is in accord with the Cornwall Local Plan.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_245"
+  },
+  {
+    "id": "text_simple_wordforwords_order_246",
+    "type": "order",
+    "before": "At the heart of the NPPF is a presumption in favour of sustainable development – provided the development is in accord with the Cornwall Local Plan.",
+    "after": "UN Resolution 42/187 defines sustainable development as meeting the needs of the present without compromising the ability of future generations to meet their own needs .",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_246"
+  },
+  {
+    "id": "text_simple_wordforwords_order_247",
+    "type": "order",
+    "before": "UN Resolution 42/187 defines sustainable development as meeting the needs of the present without compromising the ability of future generations to meet their own needs .",
+    "after": "There are three dimensions to sustainable development – economic, social and environmental – and the planning system must encompass them all.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_247"
+  },
+  {
+    "id": "text_simple_wordforwords_order_248",
+    "type": "order",
+    "before": "There are three dimensions to sustainable development – economic, social and environmental – and the planning system must encompass them all.",
+    "after": "Since the Cornwall Local Plan takes a strategic view of development, any planning application in line with its policies that meets the criteria of sustainable development benefits from the presumption in favour of approval.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_248"
+  },
+  {
+    "id": "text_simple_wordforwords_order_249",
+    "type": "order",
+    "before": "Since the Cornwall Local Plan takes a strategic view of development, any planning application in line with its policies that meets the criteria of sustainable development benefits from the presumption in favour of approval.",
+    "after": "The NPPF, however, recognises that local communities, while planning to positively support local development, will wish to shape and direct development in their area.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_249"
+  },
+  {
+    "id": "text_simple_wordforwords_order_250",
+    "type": "order",
+    "before": "The NPPF, however, recognises that local communities, while planning to positively support local development, will wish to shape and direct development in their area.",
+    "after": "This is achieved through a Neighbourhood Plan.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_250"
+  },
+  {
+    "id": "text_simple_wordforwords_order_251",
+    "type": "order",
+    "before": "This is achieved through a Neighbourhood Plan.",
+    "after": "Policies contained within a Neighbourhood Plan, once adopted, must be observed by the local planning authority.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_251"
+  },
+  {
+    "id": "text_simple_wordforwords_order_252",
+    "type": "order",
+    "before": "Policies contained within a Neighbourhood Plan, once adopted, must be observed by the local planning authority.",
+    "after": "Since these policies have been produced through extensive consultation with the residents of the Hayle Parish – including our villages and rural areas – our development will meet the needs of our community for the Plan period.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_252"
+  },
+  {
+    "id": "text_simple_wordforwords_order_253",
+    "type": "order",
+    "before": "Since these policies have been produced through extensive consultation with the residents of the Hayle Parish – including our villages and rural areas – our development will meet the needs of our community for the Plan period.",
+    "after": "While the Hayle Neighbourhood Plan has been led by a Steering Group comprising six town councillors and six community representatives, the content has been driven by the views of residents.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_253"
+  },
+  {
+    "id": "text_simple_wordforwords_order_254",
+    "type": "order",
+    "before": "While the Hayle Neighbourhood Plan has been led by a Steering Group comprising six town councillors and six community representatives, the content has been driven by the views of residents.",
+    "after": "This is Hayle's Plan (described throughout as our Plan and containing our policies).",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_254"
+  },
+  {
+    "id": "text_simple_wordforwords_order_255",
+    "type": "order",
+    "before": "This is Hayle's Plan (described throughout as our Plan and containing our policies).",
+    "after": "We hope that by 2030 we all will be pleased with the outcome and that Hayle will be even better than it is today.",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_255"
+  },
+  {
+    "id": "text_simple_wordforwords_order_256",
+    "type": "order",
+    "before": "We hope that by 2030 we all will be pleased with the outcome and that Hayle will be even better than it is today.",
+    "after": "[signature:John Bennett]",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_256"
+  },
+  {
+    "id": "text_simple_wordforwords_order_257",
+    "type": "order",
+    "before": "[signature:John Bennett]",
+    "after": "Hayle Neighbourhood Plan Steering Group",
+    "case_sensitive": false,
+    "source": "text_simple__wordForwords_order_257"
+  }
+]

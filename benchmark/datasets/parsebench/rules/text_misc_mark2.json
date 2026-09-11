@@ -1,0 +1,1118 @@
+[
+  {
+    "id": "text_misc_mark2_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "02-2012 Edition",
+      "1. Medical Payments (Private Passenger Car, Utility Car, Special Interest Car",
+      "MEDICAL PAYMENTS",
+      "Medical Payments (Antique Car",
+      "Ohio Road Rating Logic - Page H6",
+      "Rate and Rule Filing Manual",
+      "Road and Residence",
+      "Rounding: Round step m",
+      "Rounding: Round step t",
+      "a Base rate territory factor",
+      "b a increased limit factor",
+      "b a medical payment symbol factor",
+      "c b level factor",
+      "c b liability model year factor (not applicable if nonowned auto",
+      "d c increased limit factor",
+      "d c responsibility factor",
+      "e d level factor",
+      "e d valued customer factor",
+      "f e responsibility factor",
+      "f e safe driver discount factor",
+      "g f reinstatement surcharge factor",
+      "g f valued customer factor",
+      "h g persistency discount factor",
+      "h g safe driver discount factor",
+      "i h class factor",
+      "i h reinstatement surcharge factor",
+      "j i 25 k",
+      "j i persistency discount factor",
+      "j term factor",
+      "k j accident prevention course discount",
+      "l k point surcharge factor",
+      "l k profession discount factor (if applicable",
+      "m l class factor",
+      "m l renewal premium cap factor (if applicable",
+      "n m driver age factors",
+      "o n annual mileage factors",
+      "p o permissive use factor",
+      "q p nonowned discount factor (if applicable",
+      "r q term factor",
+      "s r profession discount factor (if applicable",
+      "t s renewal premium cap factor (if applicable",
+      "to the nearest 1.00. Round all other steps to the nearest.10"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_7",
+    "type": "present",
+    "text": "00",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_7"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_8",
+    "type": "present",
+    "text": "02",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_8"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_9",
+    "type": "present",
+    "text": "10",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_9"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_10",
+    "type": "present",
+    "text": "2012",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_10"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_11",
+    "type": "present",
+    "text": "25",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_11"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_12",
+    "type": "present",
+    "text": "accident",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_12"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_13",
+    "type": "present",
+    "text": "age",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_13"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_14",
+    "type": "present",
+    "text": "all",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_14"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_15",
+    "type": "present",
+    "text": "and",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_15"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_16",
+    "type": "present",
+    "text": "annual",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_16"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_17",
+    "type": "present",
+    "text": "antique",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_17"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_18",
+    "type": "present",
+    "text": "applicable",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_18"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_19",
+    "type": "present",
+    "text": "auto",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_19"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_20",
+    "type": "present",
+    "text": "base",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_20"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_21",
+    "type": "present",
+    "text": "cap",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_21"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_22",
+    "type": "present",
+    "text": "car",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_22"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_23",
+    "type": "present",
+    "text": "class",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_23"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_24",
+    "type": "present",
+    "text": "course",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_24"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_25",
+    "type": "present",
+    "text": "customer",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_25"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_26",
+    "type": "present",
+    "text": "discount",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_26"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_27",
+    "type": "present",
+    "text": "driver",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_27"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_28",
+    "type": "present",
+    "text": "edition",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_28"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_29",
+    "type": "present",
+    "text": "factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_29"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_30",
+    "type": "present",
+    "text": "factors",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_30"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_31",
+    "type": "present",
+    "text": "filing",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_31"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_32",
+    "type": "present",
+    "text": "h6",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_32"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_33",
+    "type": "present",
+    "text": "if",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_33"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_34",
+    "type": "present",
+    "text": "increased",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_34"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_35",
+    "type": "present",
+    "text": "interest",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_35"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_36",
+    "type": "present",
+    "text": "level",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_36"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_37",
+    "type": "present",
+    "text": "liability",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_37"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_38",
+    "type": "present",
+    "text": "limit",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_38"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_39",
+    "type": "present",
+    "text": "logic",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_39"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_40",
+    "type": "present",
+    "text": "manual",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_40"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_41",
+    "type": "present",
+    "text": "medical",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_41"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_42",
+    "type": "present",
+    "text": "mileage",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_42"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_43",
+    "type": "present",
+    "text": "model",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_43"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_44",
+    "type": "present",
+    "text": "nearest",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_44"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_45",
+    "type": "present",
+    "text": "nonowned",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_45"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_46",
+    "type": "present",
+    "text": "not",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_46"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_47",
+    "type": "present",
+    "text": "ohio",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_47"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_48",
+    "type": "present",
+    "text": "other",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_48"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_49",
+    "type": "present",
+    "text": "page",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_49"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_50",
+    "type": "present",
+    "text": "passenger",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_50"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_51",
+    "type": "present",
+    "text": "payment",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_51"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_52",
+    "type": "present",
+    "text": "payments",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_52"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_53",
+    "type": "present",
+    "text": "permissive",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_53"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_54",
+    "type": "present",
+    "text": "persistency",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_54"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_55",
+    "type": "present",
+    "text": "point",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_55"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_56",
+    "type": "present",
+    "text": "premium",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_56"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_57",
+    "type": "present",
+    "text": "prevention",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_57"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_58",
+    "type": "present",
+    "text": "private",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_58"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_59",
+    "type": "present",
+    "text": "profession",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_59"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_60",
+    "type": "present",
+    "text": "rate",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_60"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_61",
+    "type": "present",
+    "text": "rating",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_61"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_62",
+    "type": "present",
+    "text": "reinstatement",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_62"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_63",
+    "type": "present",
+    "text": "renewal",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_63"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_64",
+    "type": "present",
+    "text": "residence",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_64"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_65",
+    "type": "present",
+    "text": "responsibility",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_65"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_66",
+    "type": "present",
+    "text": "road",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_66"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_67",
+    "type": "present",
+    "text": "round",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_67"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_68",
+    "type": "present",
+    "text": "rounding",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_68"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_69",
+    "type": "present",
+    "text": "rule",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_69"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_70",
+    "type": "present",
+    "text": "safe",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_70"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_71",
+    "type": "present",
+    "text": "special",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_71"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_72",
+    "type": "present",
+    "text": "step",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_72"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_73",
+    "type": "present",
+    "text": "steps",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_73"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_74",
+    "type": "present",
+    "text": "surcharge",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_74"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_75",
+    "type": "present",
+    "text": "symbol",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_75"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_76",
+    "type": "present",
+    "text": "term",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_76"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_77",
+    "type": "present",
+    "text": "territory",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_77"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_78",
+    "type": "present",
+    "text": "the",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_78"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_79",
+    "type": "present",
+    "text": "to",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_79"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_80",
+    "type": "present",
+    "text": "use",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_80"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_81",
+    "type": "present",
+    "text": "utility",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_81"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_82",
+    "type": "present",
+    "text": "valued",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_82"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_word_83",
+    "type": "present",
+    "text": "year",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_word_83"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_84",
+    "type": "present",
+    "text": "02-2012 Edition",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_84"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_85",
+    "type": "present",
+    "text": "1. Medical Payments (Private Passenger Car, Utility Car, Special Interest Car",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_85"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_86",
+    "type": "present",
+    "text": "MEDICAL PAYMENTS",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_86"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_87",
+    "type": "present",
+    "text": "Medical Payments (Antique Car",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_87"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_88",
+    "type": "present",
+    "text": "Ohio Road Rating Logic - Page H6",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_88"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_89",
+    "type": "present",
+    "text": "Rate and Rule Filing Manual",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_89"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_90",
+    "type": "present",
+    "text": "Road and Residence",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_90"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_91",
+    "type": "present",
+    "text": "Rounding: Round step m",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_91"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_92",
+    "type": "present",
+    "text": "Rounding: Round step t",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_92"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_93",
+    "type": "present",
+    "text": "a Base rate territory factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_93"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_94",
+    "type": "present",
+    "text": "b a increased limit factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_94"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_95",
+    "type": "present",
+    "text": "b a medical payment symbol factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_95"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_96",
+    "type": "present",
+    "text": "c b level factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_96"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_97",
+    "type": "present",
+    "text": "c b liability model year factor (not applicable if nonowned auto",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_97"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_98",
+    "type": "present",
+    "text": "d c increased limit factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_98"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_99",
+    "type": "present",
+    "text": "d c responsibility factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_99"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_100",
+    "type": "present",
+    "text": "e d level factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_100"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_101",
+    "type": "present",
+    "text": "e d valued customer factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_101"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_102",
+    "type": "present",
+    "text": "f e responsibility factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_102"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_103",
+    "type": "present",
+    "text": "f e safe driver discount factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_103"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_104",
+    "type": "present",
+    "text": "g f reinstatement surcharge factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_104"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_105",
+    "type": "present",
+    "text": "g f valued customer factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_105"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_106",
+    "type": "present",
+    "text": "h g persistency discount factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_106"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_107",
+    "type": "present",
+    "text": "h g safe driver discount factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_107"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_108",
+    "type": "present",
+    "text": "i h class factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_108"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_109",
+    "type": "present",
+    "text": "i h reinstatement surcharge factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_109"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_110",
+    "type": "present",
+    "text": "j i 25 k",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_110"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_111",
+    "type": "present",
+    "text": "j i persistency discount factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_111"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_112",
+    "type": "present",
+    "text": "j term factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_112"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_113",
+    "type": "present",
+    "text": "k j accident prevention course discount",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_113"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_114",
+    "type": "present",
+    "text": "l k point surcharge factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_114"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_115",
+    "type": "present",
+    "text": "l k profession discount factor (if applicable",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_115"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_116",
+    "type": "present",
+    "text": "m l class factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_116"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_117",
+    "type": "present",
+    "text": "m l renewal premium cap factor (if applicable",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_117"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_118",
+    "type": "present",
+    "text": "n m driver age factors",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_118"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_119",
+    "type": "present",
+    "text": "o n annual mileage factors",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_119"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_120",
+    "type": "present",
+    "text": "p o permissive use factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_120"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_121",
+    "type": "present",
+    "text": "q p nonowned discount factor (if applicable",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_121"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_122",
+    "type": "present",
+    "text": "r q term factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_122"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_123",
+    "type": "present",
+    "text": "s r profession discount factor (if applicable",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_123"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_124",
+    "type": "present",
+    "text": "t s renewal premium cap factor (if applicable",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_124"
+  },
+  {
+    "id": "text_misc_mark2_missing_specific_sentence_125",
+    "type": "present",
+    "text": "to the nearest 1.00. Round all other steps to the nearest.10",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_missing_specific_sentence_125"
+  },
+  {
+    "id": "text_misc_mark2_order_126",
+    "type": "order",
+    "before": "Rate and Rule Filing Manual",
+    "after": "Medical Payments (Private Passenger Car, Utility Car, Special Interest Car)",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_126"
+  },
+  {
+    "id": "text_misc_mark2_order_127",
+    "type": "order",
+    "before": "Medical Payments (Private Passenger Car, Utility Car, Special Interest Car)",
+    "after": "b. a. medical payment symbol factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_127"
+  },
+  {
+    "id": "text_misc_mark2_order_128",
+    "type": "order",
+    "before": "b. a. medical payment symbol factor",
+    "after": "c. b. liability model year factor (not applicable if nonowned auto)",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_128"
+  },
+  {
+    "id": "text_misc_mark2_order_129",
+    "type": "order",
+    "before": "c. b. liability model year factor (not applicable if nonowned auto)",
+    "after": "d. c. increased limit factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_129"
+  },
+  {
+    "id": "text_misc_mark2_order_130",
+    "type": "order",
+    "before": "d. c. increased limit factor",
+    "after": "f. e. responsibility factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_130"
+  },
+  {
+    "id": "text_misc_mark2_order_131",
+    "type": "order",
+    "before": "f. e. responsibility factor",
+    "after": "g. f. valued customer factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_131"
+  },
+  {
+    "id": "text_misc_mark2_order_132",
+    "type": "order",
+    "before": "g. f. valued customer factor",
+    "after": "h. g. safe driver discount factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_132"
+  },
+  {
+    "id": "text_misc_mark2_order_133",
+    "type": "order",
+    "before": "h. g. safe driver discount factor",
+    "after": "i. h. reinstatement surcharge factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_133"
+  },
+  {
+    "id": "text_misc_mark2_order_134",
+    "type": "order",
+    "before": "i. h. reinstatement surcharge factor",
+    "after": "j. i. persistency discount factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_134"
+  },
+  {
+    "id": "text_misc_mark2_order_135",
+    "type": "order",
+    "before": "j. i. persistency discount factor",
+    "after": "k. j. accident prevention course discount",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_135"
+  },
+  {
+    "id": "text_misc_mark2_order_136",
+    "type": "order",
+    "before": "k. j. accident prevention course discount",
+    "after": "l. k. point surcharge factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_136"
+  },
+  {
+    "id": "text_misc_mark2_order_137",
+    "type": "order",
+    "before": "l. k. point surcharge factor",
+    "after": "n. m. driver age factors",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_137"
+  },
+  {
+    "id": "text_misc_mark2_order_138",
+    "type": "order",
+    "before": "n. m. driver age factors",
+    "after": "o. n. annual mileage factors",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_138"
+  },
+  {
+    "id": "text_misc_mark2_order_139",
+    "type": "order",
+    "before": "o. n. annual mileage factors",
+    "after": "p. o. permissive use factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_139"
+  },
+  {
+    "id": "text_misc_mark2_order_140",
+    "type": "order",
+    "before": "p. o. permissive use factor",
+    "after": "q. p. nonowned discount factor (if applicable)",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_140"
+  },
+  {
+    "id": "text_misc_mark2_order_141",
+    "type": "order",
+    "before": "q. p. nonowned discount factor (if applicable)",
+    "after": "s. r. profession discount factor (if applicable)",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_141"
+  },
+  {
+    "id": "text_misc_mark2_order_142",
+    "type": "order",
+    "before": "s. r. profession discount factor (if applicable)",
+    "after": "t. s. renewal premium cap factor (if applicable)",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_142"
+  },
+  {
+    "id": "text_misc_mark2_order_143",
+    "type": "order",
+    "before": "t. s. renewal premium cap factor (if applicable)",
+    "after": "Rounding: Round step t. to the nearest 1.00.",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_143"
+  },
+  {
+    "id": "text_misc_mark2_order_144",
+    "type": "order",
+    "before": "Rounding: Round step t. to the nearest 1.00.",
+    "after": "Medical Payments (Antique Car)",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_144"
+  },
+  {
+    "id": "text_misc_mark2_order_145",
+    "type": "order",
+    "before": "Medical Payments (Antique Car)",
+    "after": "b. a. increased limit factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_145"
+  },
+  {
+    "id": "text_misc_mark2_order_146",
+    "type": "order",
+    "before": "b. a. increased limit factor",
+    "after": "d. c. responsibility factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_146"
+  },
+  {
+    "id": "text_misc_mark2_order_147",
+    "type": "order",
+    "before": "d. c. responsibility factor",
+    "after": "e. d. valued customer factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_147"
+  },
+  {
+    "id": "text_misc_mark2_order_148",
+    "type": "order",
+    "before": "e. d. valued customer factor",
+    "after": "f. e. safe driver discount factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_148"
+  },
+  {
+    "id": "text_misc_mark2_order_149",
+    "type": "order",
+    "before": "f. e. safe driver discount factor",
+    "after": "g. f. reinstatement surcharge factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_149"
+  },
+  {
+    "id": "text_misc_mark2_order_150",
+    "type": "order",
+    "before": "g. f. reinstatement surcharge factor",
+    "after": "h. g. persistency discount factor",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_150"
+  },
+  {
+    "id": "text_misc_mark2_order_151",
+    "type": "order",
+    "before": "h. g. persistency discount factor",
+    "after": "l. k. profession discount factor (if applicable)",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_151"
+  },
+  {
+    "id": "text_misc_mark2_order_152",
+    "type": "order",
+    "before": "l. k. profession discount factor (if applicable)",
+    "after": "m. l. renewal premium cap factor (if applicable)",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_152"
+  },
+  {
+    "id": "text_misc_mark2_order_153",
+    "type": "order",
+    "before": "m. l. renewal premium cap factor (if applicable)",
+    "after": "Rounding: Round step m. to the nearest 1.00.",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_153"
+  },
+  {
+    "id": "text_misc_mark2_order_154",
+    "type": "order",
+    "before": "Rounding: Round step m. to the nearest 1.00.",
+    "after": "Ohio Road Rating Logic - Page H6",
+    "case_sensitive": false,
+    "source": "text_misc__mark2_order_154"
+  }
+]

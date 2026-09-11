@@ -1,0 +1,382 @@
+[
+  {
+    "id": "text_misc_missing_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "2 CEQ075FY18150 000000948",
+      "A CEQ spokesman said the document would be published \"in the next couple of days",
+      "The Council on Environmental Quality submitted an advanced notice of proposed rulemaking on NEPA to the Federal Register last Friday",
+      "The White House has taken the first official steps toward rewriting regulations for the National Environmental Policy Act"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_7",
+    "type": "present",
+    "text": "000000948",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_7"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_8",
+    "type": "present",
+    "text": "act",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_8"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_9",
+    "type": "present",
+    "text": "advanced",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_9"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_10",
+    "type": "present",
+    "text": "an",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_10"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_11",
+    "type": "present",
+    "text": "be",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_11"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_12",
+    "type": "present",
+    "text": "ceq",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_12"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_13",
+    "type": "present",
+    "text": "ceq075fy18150",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_13"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_14",
+    "type": "present",
+    "text": "council",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_14"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_15",
+    "type": "present",
+    "text": "couple",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_15"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_16",
+    "type": "present",
+    "text": "days",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_16"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_17",
+    "type": "present",
+    "text": "document",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_17"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_18",
+    "type": "present",
+    "text": "environmental",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_18"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_19",
+    "type": "present",
+    "text": "federal",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_19"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_20",
+    "type": "present",
+    "text": "first",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_20"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_21",
+    "type": "present",
+    "text": "for",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_21"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_22",
+    "type": "present",
+    "text": "friday",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_22"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_23",
+    "type": "present",
+    "text": "has",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_23"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_24",
+    "type": "present",
+    "text": "house",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_24"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_25",
+    "type": "present",
+    "text": "in",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_25"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_26",
+    "type": "present",
+    "text": "last",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_26"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_27",
+    "type": "present",
+    "text": "national",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_27"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_28",
+    "type": "present",
+    "text": "nepa",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_28"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_29",
+    "type": "present",
+    "text": "next",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_29"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_30",
+    "type": "present",
+    "text": "notice",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_30"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_31",
+    "type": "present",
+    "text": "of",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_31"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_32",
+    "type": "present",
+    "text": "official",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_32"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_33",
+    "type": "present",
+    "text": "on",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_33"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_34",
+    "type": "present",
+    "text": "policy",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_34"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_35",
+    "type": "present",
+    "text": "proposed",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_35"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_36",
+    "type": "present",
+    "text": "published",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_36"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_37",
+    "type": "present",
+    "text": "quality",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_37"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_38",
+    "type": "present",
+    "text": "register",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_38"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_39",
+    "type": "present",
+    "text": "regulations",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_39"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_40",
+    "type": "present",
+    "text": "rewriting",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_40"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_41",
+    "type": "present",
+    "text": "rulemaking",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_41"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_42",
+    "type": "present",
+    "text": "said",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_42"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_43",
+    "type": "present",
+    "text": "spokesman",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_43"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_44",
+    "type": "present",
+    "text": "steps",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_44"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_45",
+    "type": "present",
+    "text": "submitted",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_45"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_46",
+    "type": "present",
+    "text": "taken",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_46"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_47",
+    "type": "present",
+    "text": "the",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_47"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_48",
+    "type": "present",
+    "text": "to",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_48"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_49",
+    "type": "present",
+    "text": "toward",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_49"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_50",
+    "type": "present",
+    "text": "white",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_50"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_word_51",
+    "type": "present",
+    "text": "would",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_word_51"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_sentence_52",
+    "type": "present",
+    "text": "2 CEQ075FY18150 000000948",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_sentence_52"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_sentence_53",
+    "type": "present",
+    "text": "A CEQ spokesman said the document would be published \"in the next couple of days",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_sentence_53"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_sentence_54",
+    "type": "present",
+    "text": "The Council on Environmental Quality submitted an advanced notice of proposed rulemaking on NEPA to the Federal Register last Friday",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_sentence_54"
+  },
+  {
+    "id": "text_misc_missing_missing_specific_sentence_55",
+    "type": "present",
+    "text": "The White House has taken the first official steps toward rewriting regulations for the National Environmental Policy Act",
+    "case_sensitive": false,
+    "source": "text_misc__missing_missing_specific_sentence_55"
+  },
+  {
+    "id": "text_misc_missing_order_56",
+    "type": "order",
+    "before": "The White House has taken the first official steps toward rewriting regulations for the National Environmental Policy Act.",
+    "after": "The Council on Environmental Quality submitted an advanced notice of proposed rulemaking on NEPA to the Federal Register last Friday.",
+    "case_sensitive": false,
+    "source": "text_misc__missing_order_56"
+  },
+  {
+    "id": "text_misc_missing_order_57",
+    "type": "order",
+    "before": "The Council on Environmental Quality submitted an advanced notice of proposed rulemaking on NEPA to the Federal Register last Friday.",
+    "after": "A CEQ spokesman said the document would be published \"in the next couple of days.\"",
+    "case_sensitive": false,
+    "source": "text_misc__missing_order_57"
+  },
+  {
+    "id": "text_misc_missing_order_58",
+    "type": "order",
+    "before": "A CEQ spokesman said the document would be published \"in the next couple of days.\"",
+    "after": "2 CEQ075FY18150 000000948",
+    "case_sensitive": false,
+    "source": "text_misc__missing_order_58"
+  }
+]

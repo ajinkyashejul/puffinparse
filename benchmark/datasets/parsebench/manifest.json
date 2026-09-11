@@ -1,0 +1,789 @@
+{
+  "name": "parsebench",
+  "version": "1.0.0",
+  "description": "Curated, redistributable subset of LlamaIndex ParseBench: table pages with markdown ground truth (kind=transcript, scored with table_score) and text pages with machine-checkable assertions (kind=rules). Built by `python -m benchmark.adapters parsebench`.",
+  "license": "Apache-2.0",
+  "generator": "benchmark/adapters/parsebench.py",
+  "upstream": {
+    "repo_id": "llamaindex/ParseBench",
+    "revision": "2805a1d940f95a203e0ae4b88be9934f7765b3fc",
+    "url": "https://huggingface.co/datasets/llamaindex/ParseBench",
+    "repo_type": "dataset"
+  },
+  "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0.",
+  "notes": [
+    "kind=transcript documents carry a table only, not the whole page: score them with table_score, and read char_similarity/CER as a table-content proxy.",
+    "kind=rules documents have no markdown truth and are skipped by scorers that only understand transcripts; `truth` is the empty string so the manifest still deserialises into the current Rust ManifestDoc.",
+    "Upstream revision 2805a1d940f95a203e0ae4b88be9934f7765b3fc of llamaindex/ParseBench."
+  ],
+  "documents": [
+    {
+      "id": "1653739079_page2",
+      "file": "docs/1653739079_page2.pdf",
+      "truth": "truth/1653739079_page2.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "1653739079_page2",
+      "upstream_path": "docs/table/1653739079_page2.pdf",
+      "sha256": "b6e78af59b811036d59dd4263ebe98277cac00647bf6e6b5ba14d686a2651466",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "222876fb_page2",
+      "file": "docs/222876fb_page2.pdf",
+      "truth": "truth/222876fb_page2.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "222876fb_page2",
+      "upstream_path": "docs/table/222876fb_page2.pdf",
+      "sha256": "277cb833db85ab0711a6feb167524eb47ce5b5099d7a38f04f09d9ff7ca6f796",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "245804406_cv_nevers_signe_ex_page10",
+      "file": "docs/245804406_cv_nevers_signe_ex_page10.pdf",
+      "truth": "truth/245804406_cv_nevers_signe_ex_page10.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "245804406-CV-Nevers-signé-EX_page10",
+      "upstream_path": "docs/table/245804406-CV-Nevers-signé-EX_page10.pdf",
+      "sha256": "67aadf54b040e7619fd94fdbeb862b1ebfe97b8e51f970ec250a4f1480881a89",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1",
+      "file": "docs/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.pdf",
+      "truth": "truth/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1",
+      "upstream_path": "docs/table/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.pdf",
+      "sha256": "0adddec3f7662792d69cefad45c26d9d0941068b6c32d54d315708d1312e6aac",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1",
+      "file": "docs/7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1.pdf",
+      "truth": "truth/7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "7b9c8208-d2be-2a81-8a15-215a9a5a26e8_page1",
+      "upstream_path": "docs/table/7b9c8208-d2be-2a81-8a15-215a9a5a26e8_page1.pdf",
+      "sha256": "cea3ed8daabdc656283653a78e79045855fd6f57081a2d658d2bdd0e639f3f7c",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "apple_10_k_page1",
+      "file": "docs/apple_10_k_page1.pdf",
+      "truth": "truth/apple_10_k_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "Apple 10-k_page1",
+      "upstream_path": "docs/table/Apple 10-k_page1.pdf",
+      "sha256": "e2c0c500996a8433217e9d274b3f8dee4d7d4e60d3d8c413e97fbebc333c6665",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "az_lic_rate_tables_2_0_v2_page47",
+      "file": "docs/az_lic_rate_tables_2_0_v2_page47.pdf",
+      "truth": "truth/az_lic_rate_tables_2_0_v2_page47.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "AZ LIC Rate Tables 2.0.v2_page47",
+      "upstream_path": "docs/table/AZ LIC Rate Tables 2.0.v2_page47.pdf",
+      "sha256": "5c81a50fcbe8ec4122c924bf0adb61537eaa65cf7ce15ea375a0e55aa863d7f1",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "blackrock_funds_i_icav_annual_report_2022_page13",
+      "file": "docs/blackrock_funds_i_icav_annual_report_2022_page13.pdf",
+      "truth": "truth/blackrock_funds_i_icav_annual_report_2022_page13.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "blackrock-funds-i-icav-annual-report-2022_page13",
+      "upstream_path": "docs/table/blackrock-funds-i-icav-annual-report-2022_page13.pdf",
+      "sha256": "ee8ba1593472f452dc51d43613dbe2fd6b24d9c9e364fbe383e87256cfdfff66",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "bls_feb_2026_page14",
+      "file": "docs/bls_feb_2026_page14.pdf",
+      "truth": "truth/bls_feb_2026_page14.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "bls-Feb-2026_page14",
+      "upstream_path": "docs/table/bls-Feb-2026_page14.pdf",
+      "sha256": "c005cc79b03dd77a585e24a167939c8586f15bf85047e24b7ca6128014683e69",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "cinf_2006_page_93_pdf_140594_page1",
+      "file": "docs/cinf_2006_page_93_pdf_140594_page1.pdf",
+      "truth": "truth/cinf_2006_page_93_pdf_140594_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "CINF.2006.page_93.pdf_140594_page1",
+      "upstream_path": "docs/table/CINF.2006.page_93.pdf_140594_page1.pdf",
+      "sha256": "5022c5b12930f45a63e12e7a8106ba70799fb8439b9c25ad428b9c8f805391a3",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "earnings_presentation_fy26_q2_page22",
+      "file": "docs/earnings_presentation_fy26_q2_page22.pdf",
+      "truth": "truth/earnings_presentation_fy26_q2_page22.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "Earnings Presentation (FY26 Q2)_page22",
+      "upstream_path": "docs/table/Earnings Presentation (FY26 Q2)_page22.pdf",
+      "sha256": "0f240b9484878e4fad98533f3774ff18cb99b37e89702f86a5ce1104c011dfe5",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "home_depot_10_k_unrestricted_page106",
+      "file": "docs/home_depot_10_k_unrestricted_page106.pdf",
+      "truth": "truth/home_depot_10_k_unrestricted_page106.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "Home Depot 10-k unrestricted_page106",
+      "upstream_path": "docs/table/Home Depot 10-k unrestricted_page106.pdf",
+      "sha256": "ee9fee8a92769a788043ea9467df0d70b0bb2a44754b7fde323cf9e0ceda9985",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "it_2009_page_74_pdf_78635_page1",
+      "file": "docs/it_2009_page_74_pdf_78635_page1.pdf",
+      "truth": "truth/it_2009_page_74_pdf_78635_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "IT.2009.page_74.pdf_78635_page1",
+      "upstream_path": "docs/table/IT.2009.page_74.pdf_78635_page1.pdf",
+      "sha256": "e34b6a5f9d8175e283c268b8d9574dfd2200ca292adf7ee35f561fa0699d5e1f",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "jnpr_2010_page_167_pdf_111113_page1",
+      "file": "docs/jnpr_2010_page_167_pdf_111113_page1.pdf",
+      "truth": "truth/jnpr_2010_page_167_pdf_111113_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "JNPR.2010.page_167.pdf_111113_page1",
+      "upstream_path": "docs/table/JNPR.2010.page_167.pdf_111113_page1.pdf",
+      "sha256": "e16253797891ffb81573bd90a79c23e94fdd37054060622224e461df6ed13c30",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "jnpr_2011_page_82_pdf_110673_page1",
+      "file": "docs/jnpr_2011_page_82_pdf_110673_page1.pdf",
+      "truth": "truth/jnpr_2011_page_82_pdf_110673_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "JNPR.2011.page_82.pdf_110673_page1",
+      "upstream_path": "docs/table/JNPR.2011.page_82.pdf_110673_page1.pdf",
+      "sha256": "cb956bf00c7efb0a2639667121f9d240e31c3f6c2a17e940c00af065b34135bc",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "jnpr_2018_page_212_pdf_110717_page1",
+      "file": "docs/jnpr_2018_page_212_pdf_110717_page1.pdf",
+      "truth": "truth/jnpr_2018_page_212_pdf_110717_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "JNPR.2018.page_212.pdf_110717_page1",
+      "upstream_path": "docs/table/JNPR.2018.page_212.pdf_110717_page1.pdf",
+      "sha256": "604effa798683d16acf37b6ad137cfff8dd05433f491c741202ce85e2864bc75",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "llama_page18",
+      "file": "docs/llama_page18.pdf",
+      "truth": "truth/llama_page18.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "llama_page18",
+      "upstream_path": "docs/table/llama_page18.pdf",
+      "sha256": "0c152a2c4f3fecce4ce822d262ecae0d4440810412b9ad218f1bd8760aba5c5d",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "printablerulessection_page17",
+      "file": "docs/printablerulessection_page17.pdf",
+      "truth": "truth/printablerulessection_page17.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "PrintableRulesSection_page17",
+      "upstream_path": "docs/table/PrintableRulesSection_page17.pdf",
+      "sha256": "4643abfa967b5be8adfd1fbc2655692a5d195bbc44361bed3b9834490d3e0b01",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "pub_derivatives_quarterly_qtr1_2019_page6",
+      "file": "docs/pub_derivatives_quarterly_qtr1_2019_page6.pdf",
+      "truth": "truth/pub_derivatives_quarterly_qtr1_2019_page6.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "pub-derivatives-quarterly-qtr1-2019_page6",
+      "upstream_path": "docs/table/pub-derivatives-quarterly-qtr1-2019_page6.pdf",
+      "sha256": "36be85a3fec2d48504d40bb71f5a99d080ec7a5719b99a8c2e85704f5e973b26",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "serff_ca_random_pages_1_page1020",
+      "file": "docs/serff_ca_random_pages_1_page1020.pdf",
+      "truth": "truth/serff_ca_random_pages_1_page1020.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "SERFF_CA_random_pages 1_page1020",
+      "upstream_path": "docs/table/SERFF_CA_random_pages 1_page1020.pdf",
+      "sha256": "165f54ddbf6c07a0e6a6fd49446071f902e8fc9a6e308b0686e1db5684c6ffa9",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "serff_interstate_random_pages_1_page174",
+      "file": "docs/serff_interstate_random_pages_1_page174.pdf",
+      "truth": "truth/serff_interstate_random_pages_1_page174.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "SERFF_Interstate_random_pages 1_page174",
+      "upstream_path": "docs/table/SERFF_Interstate_random_pages 1_page174.pdf",
+      "sha256": "907b4bacc0e999c4012d353d1fda6b03d55dab0b8a135fd7c16ba2e3db7a7bf8",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "sizingchart_page1",
+      "file": "docs/sizingchart_page1.pdf",
+      "truth": "truth/sizingchart_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "sizingchart_page1",
+      "upstream_path": "docs/table/sizingchart_page1.pdf",
+      "sha256": "ad51e39df0968d23775e5fc72deba19eb38dcf2d84fdbd02f6aa2719114e0cec",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "teds_paper_page6",
+      "file": "docs/teds_paper_page6.pdf",
+      "truth": "truth/teds_paper_page6.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "TEDS Paper_page6",
+      "upstream_path": "docs/table/TEDS Paper_page6.pdf",
+      "sha256": "87e5e4bc65caa0b5ea519c419da8b467cc9c5097775eafb541af893214b3a0c0",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_dense_legalnotices",
+      "file": "docs/text_dense_legalnotices.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dense",
+        "hard",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_dense_legalnotices.json",
+      "source_id": "text_dense__legalnotices",
+      "upstream_path": "docs/text/text_dense__legalnotices.pdf",
+      "sha256": "0d664588aedc35270d688f05f556c91871579c3ba5aac515363f1fdf56c9f79c",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_handwritting_address",
+      "file": "docs/text_handwritting_address.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "handwritting",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_handwritting_address.json",
+      "source_id": "text_handwritting__address",
+      "upstream_path": "docs/text/text_handwritting__address.pdf",
+      "sha256": "036d4ede7796c9678e322523bd891472415dd85bcc6dbdf9a7de14b37f6f8b63",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_handwritting_math2",
+      "file": "docs/text_handwritting_math2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "handwritting",
+        "hard",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_handwritting_math2.json",
+      "source_id": "text_handwritting__math2",
+      "upstream_path": "docs/text/text_handwritting__math2.pdf",
+      "sha256": "7eadc0d97381067c464eb2b967358ba3638f77b60be3dd3ff6b27e94b5917584",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_misc_mark2",
+      "file": "docs/text_misc_mark2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "misc",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_misc_mark2.json",
+      "source_id": "text_misc__mark2",
+      "upstream_path": "docs/text/text_misc__mark2.pdf",
+      "sha256": "d79260da52319364f014730e6fb158bbcb0eef510be653cf40f8b6bbd6da5e20",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_misc_missing",
+      "file": "docs/text_misc_missing.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "misc",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_misc_missing.json",
+      "source_id": "text_misc__missing",
+      "upstream_path": "docs/text/text_misc__missing.pdf",
+      "sha256": "f09098d852a12959ec15c3697d007860581bf06c7a8817a7d549035b5252ddcc",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_multicolumns_2col",
+      "file": "docs/text_multicolumns_2col.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multicolumns",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_multicolumns_2col.json",
+      "source_id": "text_multicolumns__2col",
+      "upstream_path": "docs/text/text_multicolumns__2col.pdf",
+      "sha256": "08b3e3a7011f6451eda81b8163ce208e178e7ae050a2877d7869f03a3bf3acd6",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_multicolumns_anual_2col",
+      "file": "docs/text_multicolumns_anual_2col.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multicolumns",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_multicolumns_anual_2col.json",
+      "source_id": "text_multicolumns__anual_2col",
+      "upstream_path": "docs/text/text_multicolumns__anual_2col.pdf",
+      "sha256": "df566084758cb61eacb0fc66f9e5b677b0e6f8972d8f4b5f0966ae7509908bae",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_multilang_bengali",
+      "file": "docs/text_multilang_bengali.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multilang",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_multilang_bengali.json",
+      "source_id": "text_multilang__bengali",
+      "upstream_path": "docs/text/text_multilang__bengali.pdf",
+      "sha256": "e52e4ead1e00aedd6ab88028406faaabe3b10bfb20abbf7bae6810db0a169080",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_multilang_french2",
+      "file": "docs/text_multilang_french2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multilang",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_multilang_french2.json",
+      "source_id": "text_multilang__french2",
+      "upstream_path": "docs/text/text_multilang__french2.pdf",
+      "sha256": "5d80ea1050034be5ee680051c9962a33f4e6127c2e204c57a40a7e14b00d91be",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_ocr_clearmont",
+      "file": "docs/text_ocr_clearmont.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "ocr",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_ocr_clearmont.json",
+      "source_id": "text_ocr__clearmont",
+      "upstream_path": "docs/text/text_ocr__clearmont.pdf",
+      "sha256": "8cf16944d06c5f9bdb653c49f99cec9db83967a88170b2bbae57010e29295fe0",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_ocr_russina2",
+      "file": "docs/text_ocr_russina2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "ocr",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_ocr_russina2.json",
+      "source_id": "text_ocr__russina2",
+      "upstream_path": "docs/text/text_ocr__russina2.pdf",
+      "sha256": "70ff42e1bf7db8f5e7893d5ba60fc1760e6d62c0ff0c6a2c9a0f8f7246115024",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_simple_agreement",
+      "file": "docs/text_simple_agreement.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_simple_agreement.json",
+      "source_id": "text_simple__agreement",
+      "upstream_path": "docs/text/text_simple__agreement.pdf",
+      "sha256": "c563e471664735e3313085d679be9b4f5eff91b3f4ff3427387e77de39a5865f",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_simple_predictive",
+      "file": "docs/text_simple_predictive.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_simple_predictive.json",
+      "source_id": "text_simple__predictive",
+      "upstream_path": "docs/text/text_simple__predictive.pdf",
+      "sha256": "93dd5c1fc732dbc490101651cc2ede421c8ef01131edcc4d73b533061d1ad401",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_simple_wordforwords",
+      "file": "docs/text_simple_wordforwords.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_simple_wordforwords.json",
+      "source_id": "text_simple__wordForwords",
+      "upstream_path": "docs/text/text_simple__wordForwords.pdf",
+      "sha256": "c096ff3a6bb089f81341d1b21bc56309f5caadf341214fdc76e79d5a4df82c4b",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "text_sparse_note",
+      "file": "docs/text_sparse_note.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "sparse"
+      ],
+      "kind": "rules",
+      "rules": "rules/text_sparse_note.json",
+      "source_id": "text_sparse__note",
+      "upstream_path": "docs/text/text_sparse__note.pdf",
+      "sha256": "8cbc365f504c9d4e948725329dcec5d0c347ac7130c641104ed0c3f27f892069",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "victoria_secret_10_k_page1",
+      "file": "docs/victoria_secret_10_k_page1.pdf",
+      "truth": "truth/victoria_secret_10_k_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "Victoria Secret 10-k_page1",
+      "upstream_path": "docs/table/Victoria Secret 10-k_page1.pdf",
+      "sha256": "0f45691c6f4c8e4af015b5f384969b86633db54f11326760e59d8b13e416c31e",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "walmart_earnings_release_fy24_q4_page4",
+      "file": "docs/walmart_earnings_release_fy24_q4_page4.pdf",
+      "truth": "truth/walmart_earnings_release_fy24_q4_page4.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "walmart-earnings-release-fy24-q4_page4",
+      "upstream_path": "docs/table/walmart-earnings-release-fy24-q4_page4.pdf",
+      "sha256": "a2bc0664d56d6fca05e2ee0a10a3f6bc5234b919f08f263cf3354c5edc6a3242",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    }
+  ]
+}

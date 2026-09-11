@@ -1,0 +1,44 @@
+| (In millions) | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, | Calendar year ended December 31, |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | 1996 | 1997 | 1998 | 1999 | 2000 | 2001 | 2002 | 2003 | 2004 | 2005 | 2006 |
+| A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: | A. Originally reported reserves for unpaid loss and loss expenses: |
+| Gross of reinsurance | $ 1,824 | $ 1,889 | $ 1,978 | $ 2,093 | $ 2,401 | $ 2,865 | $ 3,150 | $ 3,386 | $ 3,514 | $ 3,629 | $ 3,860 |
+| Reinsurance recoverable | 122 | 112 | 138 | 161 | 219 | 513 | 542 | 541 | 537 | 518 | 504 |
+| Net of reinsurance | $ 1,702 | $ 1,777 | $ 1,840 | $ 1,932 | $ 2,182 | $ 2,352 | $ 2,608 | $ 2,845 | $ 2,977 | $ 3,111 | $ 3,356 |
+| B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: | B. Cumulative net paid as of: |
+| One year later | $ 453 | $ 499 | $ 522 | $ 591 | $ 697 | $ 758 | $ 799 | $ 817 | $ 907 | $ 944 |  |
+| Two years later | 732 | 761 | 833 | 943 | 1,116 | 1,194 | 1,235 | 1,293 | 1,426 |  |  |
+| Three years later | 884 | 965 | 1,067 | 1,195 | 1,378 | 1,455 | 1,519 | 1,626 |  |  |  |
+| Four years later | 992 | 1,075 | 1,207 | 1,327 | 1,526 | 1,614 | 1,716 |  |  |  |  |
+| Five years later | 1,049 | 1,152 | 1,283 | 1,412 | 1,623 | 1,717 |  |  |  |  |  |
+| Six years later | 1,093 | 1,205 | 1,333 | 1,464 | 1,680 |  |  |  |  |  |  |
+| Seven years later | 1,123 | 1,239 | 1,366 | 1,496 |  |  |  |  |  |  |  |
+| Eight years later | 1,146 | 1,260 | 1,390 |  |  |  |  |  |  |  |  |
+| Nine years later | 1,159 | 1,279 |  |  |  |  |  |  |  |  |  |
+| Ten years later | 1,175 |  |  |  |  |  |  |  |  |  |  |
+| C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: | C. Net reserves re-estimated as of: |
+| One year later | $ 1,582 | $ 1,623 | $ 1,724 | $ 1,912 | $ 2,120 | $ 2,307 | $ 2,528 | $ 2,649 | $ 2,817 | $ 2,995 |  |
+| Two years later | 1,470 | 1,551 | 1,728 | 1,833 | 2,083 | 2,263 | 2,377 | 2,546 | 2,743 |  |  |
+| Three years later | 1,405 | 1,520 | 1,636 | 1,802 | 2,052 | 2,178 | 2,336 | 2,489 |  |  |  |
+| Four years later | 1,380 | 1,465 | 1,615 | 1,771 | 2,010 | 2,153 | 2,299 |  |  |  |  |
+| Five years later | 1,326 | 1,466 | 1,608 | 1,757 | 1,999 | 2,127 |  |  |  |  |  |
+| Six years later | 1,333 | 1,463 | 1,602 | 1,733 | 1,992 |  |  |  |  |  |  |
+| Seven years later | 1,333 | 1,460 | 1,577 | 1,739 |  |  |  |  |  |  |  |
+| Eight years later | 1,332 | 1,435 | 1,593 |  |  |  |  |  |  |  |  |
+| Nine years later | 1,305 | 1,456 |  |  |  |  |  |  |  |  |  |
+| Ten years later | 1,323 |  |  |  |  |  |  |  |  |  |  |
+| D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: | D. Cumulative net redundancy as of: |
+| One year later | $ (120) | $ (154) | $ (116) | $ (20) | $ (62) | $ (45) | $ (80) | $ (196) | $ (160) | $ (116) |  |
+| Two years later | (232) | (226) | (112) | (99) | (99) | (89) | (231) | (299) | (234) |  |  |
+| Three years later | (297) | (257) | (204) | (130) | (130) | (174) | (272) | (356) |  |  |  |
+| Four years later | (322) | (312) | (225) | (161) | (172) | (199) | (309) |  |  |  |  |
+| Five years later | (376) | (311) | (232) | (175) | (183) | (225) |  |  |  |  |  |
+| Six years later | (369) | (314) | (238) | (199) | (190) |  |  |  |  |  |  |
+| Seven years later | (369) | (317) | (263) | (193) |  |  |  |  |  |  |  |
+| Eight years later | (370) | (342) | (247) |  |  |  |  |  |  |  |  |
+| Nine years later | (397) | (321) |  |  |  |  |  |  |  |  |  |
+| Ten years later | (379) |  |  |  |  |  |  |  |  |  |  |
+| Net liability re-estimated—latest | $ 1,323 | $ 1,456 | $ 1,593 | $ 1,739 | $ 1,992 | $ 2,127 | $ 2,299 | $ 2,489 | $ 2,743 | $ 2,995 |  |
+| Re-estimated recoverable—latest | 183 | 198 | 224 | 230 | 259 | 532 | 568 | 547 | 551 | 517 |  |
+| Gross liability re-estimated—latest | $ 1,506 | $ 1,654 | $ 1,817 | $ 1,969 | $ 2,251 | $ 2,659 | $ 2,867 | $ 3,036 | $ 3,294 | $ 3,512 |  |
+| Cumulative gross redundancy | $ (318) | $ (235) | $ (161) | $ (124) | $ (150) | $ (206) | $ (283) | $ (350) | $ (220) | $ (117) |  |

@@ -1,0 +1,155 @@
+[
+  {
+    "id": "text_handwritting_math2_missing_sentence_percent_0",
+    "type": "bag_of_sentences",
+    "sentences": [
+      "Platí: Af(x,y)dxdy=Ag(,)dd",
+      "Pomocí substituce x= a y= dostaneme pro spojitou funkci z=f(x,y)=f(,)=g",
+      "Výpočet dvojného integrálu v polárních souřadnicích"
+    ],
+    "threshold": 1.0,
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_sentence_percent_0"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_6",
+    "type": "present",
+    "text": "af",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_6"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_7",
+    "type": "present",
+    "text": "ag",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_7"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_8",
+    "type": "present",
+    "text": "dd",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_8"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_9",
+    "type": "present",
+    "text": "dostaneme",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_9"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_10",
+    "type": "present",
+    "text": "dvojného",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_10"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_11",
+    "type": "present",
+    "text": "dxdy",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_11"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_12",
+    "type": "present",
+    "text": "funkci",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_12"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_13",
+    "type": "present",
+    "text": "integrálu",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_13"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_14",
+    "type": "present",
+    "text": "platí",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_14"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_15",
+    "type": "present",
+    "text": "polárních",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_15"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_16",
+    "type": "present",
+    "text": "pomocí",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_16"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_17",
+    "type": "present",
+    "text": "pro",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_17"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_18",
+    "type": "present",
+    "text": "souřadnicích",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_18"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_19",
+    "type": "present",
+    "text": "spojitou",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_19"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_20",
+    "type": "present",
+    "text": "substituce",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_20"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_word_21",
+    "type": "present",
+    "text": "výpočet",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_word_21"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_sentence_22",
+    "type": "present",
+    "text": "Platí: Af(x,y)dxdy=Ag(,)dd",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_sentence_22"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_sentence_23",
+    "type": "present",
+    "text": "Pomocí substituce x= a y= dostaneme pro spojitou funkci z=f(x,y)=f(,)=g",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_sentence_23"
+  },
+  {
+    "id": "text_handwritting_math2_missing_specific_sentence_24",
+    "type": "present",
+    "text": "Výpočet dvojného integrálu v polárních souřadnicích",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_missing_specific_sentence_24"
+  },
+  {
+    "id": "text_handwritting_math2_order_25",
+    "type": "order",
+    "before": "Výpočet dvojného integrálu v polárních souřadnicích",
+    "after": "Pomocí substituce x= a y= dostaneme pro spojitou funkci z=f(x,y)=f(,)=g(,).",
+    "case_sensitive": false,
+    "source": "text_handwritting__math2_order_25"
+  }
+]

@@ -62,12 +62,15 @@ or from Python: `liteocr.score(prediction, truth)`.
 | Dataset | Docs | Categories | Source |
 |---|---|---|---|
 | [`synthetic-v1`](datasets/synthetic-v1/README.md) | 39 | plain, invoice, table, two_column, headings, noisy_scan, low_res, multipage, skewed, dense, faded, receipt, complex_table | generated, CC0 |
+| [`parsebench`](datasets/parsebench/README.md) | 40 committed (1,009 indexed) | tables (transcript, `table-only`), text pages as rule assertions (`kind: rules`) | LlamaIndex ParseBench, Apache-2.0, pinned upstream commit |
+| [`combined-v1`](datasets/combined-v1/README.md) | 79 | union of the above with source-prefixed ids | per source |
 
 Adding a dataset: create `benchmark/datasets/<name>/manifest.json` with
 `{name, version, description, license, documents:[{id, file, truth, pages, category, tags}]}`,
-put inputs under `docs/` and truth markdown under `truth/`. Adapters for public sets
-(olmOCR-bench, OmniDocBench) are planned; those datasets are downloaded by the user and
-converted into this manifest format.
+put inputs under `docs/` and truth markdown under `truth/`. Public benchmarks are converted by
+adapters (`python -m benchmark.adapters <name>`; see [`docs/benchmarks/adapters.md`](../docs/benchmarks/adapters.md)),
+which also introduce `kind: rules` documents scored by machine-checkable assertions instead of a
+transcript. olmOCR-bench and OmniDocBench adapters are next.
 
 ## Caveats
 
