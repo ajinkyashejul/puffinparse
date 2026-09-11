@@ -1,0 +1,48 @@
+{
+  "extraction": {
+    "invoice": {
+      "number": "1234",
+      "total": 56.78
+    },
+    "items": [
+      {
+        "description": "Widget",
+        "amount": "$56.78"
+      }
+    ]
+  },
+  "extraction_metadata": {
+    "invoice": {
+      "number": {
+        "value": "1234",
+        "references": ["0777dc07-855b-4b83-b422-5e8063405249"]
+      },
+      "total": {
+        "value": 56.78,
+        "references": ["1-5"]
+      }
+    },
+    "items": [
+      {
+        "description": {
+          "value": "Widget",
+          "references": ["1-4"]
+        },
+        "amount": {
+          "value": "$56.78",
+          "references": ["1-5"]
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "filename": "multipage_001.pdf",
+    "org_id": null,
+    "duration_ms": 2143,
+    "credit_usage": 1.0,
+    "job_id": "job_01HZY0EXTRACT",
+    "version": "extract-20260314",
+    "schema_violation_error": null,
+    "warnings": []
+  }
+}

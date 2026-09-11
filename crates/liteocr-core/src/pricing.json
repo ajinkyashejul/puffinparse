@@ -45,5 +45,12 @@
   "datalab/accurate": { "parse": 0.010, "ocr": 0.010, "source": "https://www.datalab.to/pricing (Convert accurate: $10/1k pages)", "updated": "2026-09-11" },
   "unstructured/hi_res": { "parse": 0.015, "ocr": 0.015, "source": "https://unstructured.io/pricing (Pay-As-You-Go $0.015/page, flat across strategies)", "updated": "2026-09-11" },
   "unstructured/fast": { "parse": 0.015, "ocr": 0.015, "source": "https://unstructured.io/pricing (Pay-As-You-Go $0.015/page, flat across strategies)", "updated": "2026-09-11" },
-  "unstructured/auto": { "parse": 0.015, "ocr": 0.015, "source": "https://unstructured.io/pricing (Pay-As-You-Go $0.015/page, flat across strategies)", "updated": "2026-09-11" }
+  "unstructured/auto": { "parse": 0.015, "ocr": 0.015, "source": "https://unstructured.io/pricing (Pay-As-You-Go $0.015/page, flat across strategies)", "updated": "2026-09-11" },
+  "upstage/document-parse": { "parse": 0.01, "ocr": 0.01, "source": "https://www.upstage.ai/pricing (Document Parse standard $0.01/page; enhanced mode is $0.03/page)", "updated": "2026-09-11" },
+  "upstage/document-parse-nightly": { "parse": 0.01, "ocr": 0.01, "source": "https://www.upstage.ai/pricing (billed as Document Parse standard)", "updated": "2026-09-11" },
+  "landingai/dpt-2": { "parse": 0.03, "ocr": 0.03, "extract": 0.04, "source": "https://docs.landing.ai/ade/ade-credit-consumption (parse 3 credits/page; extract ~1 credit per page of markdown; 1 credit = $0.01)", "updated": "2026-09-11" },
+  "google_documentai/ocr": { "parse": 0.0015, "ocr": 0.0015, "source": "https://cloud.google.com/document-ai/pricing (Enterprise Document OCR $1.50/1k pages)", "updated": "2026-09-11" },
+  "google_documentai/layout": { "parse": 0.01, "ocr": 0.01, "source": "https://cloud.google.com/document-ai/pricing (Layout Parser $10/1k pages)", "updated": "2026-09-11" },
+  "google_documentai/form": { "parse": 0.03, "ocr": 0.03, "extract": 0.03, "source": "https://cloud.google.com/document-ai/pricing (Form Parser $30/1k pages)", "updated": "2026-09-11" },
+  "google_documentai/prebuilt": { "parse": 0.03, "ocr": 0.03, "extract": 0.03, "source": "https://cloud.google.com/document-ai/pricing (Custom Extractor / specialized processors $30/1k pages)", "updated": "2026-09-11" }
 }

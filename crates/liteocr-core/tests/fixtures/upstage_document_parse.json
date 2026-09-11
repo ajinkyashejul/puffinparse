@@ -1,0 +1,77 @@
+{
+  "apiVersion": "1.1",
+  "model": "document-parse-260630",
+  "elements": [
+    {
+      "id": 0,
+      "category": "heading1",
+      "page": 1,
+      "content": {
+        "html": "<h1 id='0' style='font-size:20px'>Hello LiteOCR</h1>",
+        "markdown": "# Hello LiteOCR",
+        "text": "Hello LiteOCR"
+      },
+      "coordinates": [
+        { "x": 0.125, "y": 0.0525 },
+        { "x": 0.425, "y": 0.0525 },
+        { "x": 0.425, "y": 0.1052 },
+        { "x": 0.125, "y": 0.1052 }
+      ]
+    },
+    {
+      "id": 1,
+      "category": "paragraph",
+      "page": 1,
+      "content": {
+        "html": "<p id='1' data-category='paragraph'>Invoice #1234<br>Total: $56.78<br>Date: 2026-09-11</p>",
+        "markdown": "Invoice #1234\nTotal: $56.78\nDate: 2026-09-11",
+        "text": "Invoice #1234\nTotal: $56.78\nDate: 2026-09-11"
+      },
+      "coordinates": [
+        { "x": 0.1247, "y": 0.1503 },
+        { "x": 0.6031, "y": 0.1503 },
+        { "x": 0.6031, "y": 0.2264 },
+        { "x": 0.1247, "y": 0.2264 }
+      ]
+    },
+    {
+      "id": 2,
+      "category": "table",
+      "page": 2,
+      "content": {
+        "html": "<table id='2'><tr><th>Item</th><th>Amount</th></tr><tr><td>Widget</td><td>$56.78</td></tr></table>",
+        "markdown": "| Item | Amount |\n| --- | --- |\n| Widget | $56.78 |",
+        "text": "Item Amount Widget $56.78"
+      },
+      "coordinates": [
+        { "x": 0.0721, "y": 0.2179 },
+        { "x": 0.5683, "y": 0.2179 },
+        { "x": 0.5683, "y": 0.3336 },
+        { "x": 0.0721, "y": 0.3336 }
+      ]
+    },
+    {
+      "id": 3,
+      "category": "figure",
+      "sub_category": "stamp",
+      "page": 2,
+      "content": {
+        "html": "<figure id='3' data-category='figure'><img data-coord=\"top-left:(74,1084); bottom-right:(320,1268)\" /></figure>",
+        "markdown": "![figure](figure)",
+        "text": "PAID"
+      },
+      "coordinates": [
+        { "x": 0.0596, "y": 0.617 },
+        { "x": 0.2578, "y": 0.617 },
+        { "x": 0.2578, "y": 0.7216 },
+        { "x": 0.0596, "y": 0.7216 }
+      ]
+    }
+  ],
+  "content": {
+    "html": "<h1 id='0' style='font-size:20px'>Hello LiteOCR</h1><p id='1' data-category='paragraph'>Invoice #1234<br>Total: $56.78<br>Date: 2026-09-11</p><table id='2'><tr><th>Item</th><th>Amount</th></tr><tr><td>Widget</td><td>$56.78</td></tr></table><figure id='3' data-category='figure'><img data-coord=\"top-left:(74,1084); bottom-right:(320,1268)\" /></figure>",
+    "markdown": "# Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78\nDate: 2026-09-11\n\n| Item | Amount |\n| --- | --- |\n| Widget | $56.78 |\n\n![figure](figure)",
+    "text": "Hello LiteOCR\nInvoice #1234\nTotal: $56.78\nDate: 2026-09-11\nItem Amount Widget $56.78\nPAID"
+  },
+  "usage": { "pages": 2, "standard": [1, 2] }
+}

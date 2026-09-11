@@ -1,0 +1,282 @@
+{
+  "document": {
+    "mimeType": "application/pdf",
+    "text": "Invoice #1234\nItem\nAmount\nWidget\n$56.78\nPage 2 notes\n",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "dimension": { "width": 612, "height": 792, "unit": "points" },
+        "layout": { "textAnchor": { "textSegments": [{ "endIndex": "40" }] } },
+        "paragraphs": [
+          {
+            "layout": {
+              "textAnchor": { "textSegments": [{ "endIndex": "13" }] },
+              "confidence": 0.99,
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.1, "y": 0.05 },
+                  { "x": 0.6, "y": 0.05 },
+                  { "x": 0.6, "y": 0.12 },
+                  { "x": 0.1, "y": 0.12 }
+                ]
+              }
+            }
+          },
+          {
+            "layout": {
+              "textAnchor": { "textSegments": [{ "startIndex": "14", "endIndex": "18" }] },
+              "confidence": 0.98,
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.08, "y": 0.22 },
+                  { "x": 0.3, "y": 0.22 },
+                  { "x": 0.3, "y": 0.26 },
+                  { "x": 0.08, "y": 0.26 }
+                ]
+              }
+            }
+          },
+          {
+            "layout": {
+              "textAnchor": { "textSegments": [{ "startIndex": "19", "endIndex": "25" }] },
+              "confidence": 0.98,
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.32, "y": 0.22 },
+                  { "x": 0.56, "y": 0.22 },
+                  { "x": 0.56, "y": 0.26 },
+                  { "x": 0.32, "y": 0.26 }
+                ]
+              }
+            }
+          },
+          {
+            "layout": {
+              "textAnchor": { "textSegments": [{ "startIndex": "26", "endIndex": "32" }] },
+              "confidence": 0.975,
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.08, "y": 0.28 },
+                  { "x": 0.3, "y": 0.28 },
+                  { "x": 0.3, "y": 0.33 },
+                  { "x": 0.08, "y": 0.33 }
+                ]
+              }
+            }
+          },
+          {
+            "layout": {
+              "textAnchor": { "textSegments": [{ "startIndex": "33", "endIndex": "39" }] },
+              "confidence": 0.972,
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.32, "y": 0.28 },
+                  { "x": 0.56, "y": 0.28 },
+                  { "x": 0.56, "y": 0.33 },
+                  { "x": 0.32, "y": 0.33 }
+                ]
+              }
+            }
+          }
+        ],
+        "tables": [
+          {
+            "layout": {
+              "textAnchor": { "textSegments": [{ "startIndex": "14", "endIndex": "39" }] },
+              "confidence": 0.95,
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.07, "y": 0.21 },
+                  { "x": 0.57, "y": 0.21 },
+                  { "x": 0.57, "y": 0.34 },
+                  { "x": 0.07, "y": 0.34 }
+                ]
+              }
+            },
+            "headerRows": [
+              {
+                "cells": [
+                  {
+                    "layout": { "textAnchor": { "textSegments": [{ "startIndex": "14", "endIndex": "18" }] } },
+                    "rowSpan": 1,
+                    "colSpan": 1
+                  },
+                  {
+                    "layout": { "textAnchor": { "textSegments": [{ "startIndex": "19", "endIndex": "25" }] } },
+                    "rowSpan": 1,
+                    "colSpan": 1
+                  }
+                ]
+              }
+            ],
+            "bodyRows": [
+              {
+                "cells": [
+                  {
+                    "layout": { "textAnchor": { "textSegments": [{ "startIndex": "26", "endIndex": "32" }] } },
+                    "rowSpan": 1,
+                    "colSpan": 1
+                  },
+                  {
+                    "layout": { "textAnchor": { "textSegments": [{ "startIndex": "33", "endIndex": "39" }] } },
+                    "rowSpan": 1,
+                    "colSpan": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "pageNumber": 2,
+        "dimension": { "width": 612, "height": 792, "unit": "points" },
+        "layout": { "textAnchor": { "textSegments": [{ "startIndex": "40", "endIndex": "53" }] } },
+        "paragraphs": [
+          {
+            "layout": {
+              "textAnchor": { "textSegments": [{ "startIndex": "40", "endIndex": "52" }] },
+              "confidence": 0.97,
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.1, "y": 0.06 },
+                  { "x": 0.52, "y": 0.06 },
+                  { "x": 0.52, "y": 0.11 },
+                  { "x": 0.1, "y": 0.11 }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "entities": [
+      {
+        "textAnchor": { "textSegments": [{ "startIndex": "9", "endIndex": "13" }], "content": "1234" },
+        "type": "invoice_id",
+        "mentionText": "1234",
+        "confidence": 0.96,
+        "id": "0",
+        "pageAnchor": {
+          "pageRefs": [
+            {
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.36, "y": 0.05 },
+                  { "x": 0.6, "y": 0.05 },
+                  { "x": 0.6, "y": 0.12 },
+                  { "x": 0.36, "y": 0.12 }
+                ]
+              },
+              "confidence": 0.96
+            }
+          ]
+        }
+      },
+      {
+        "textAnchor": { "textSegments": [{ "startIndex": "33", "endIndex": "39" }], "content": "$56.78" },
+        "type": "total_amount",
+        "mentionText": "$56.78",
+        "confidence": 0.94,
+        "id": "1",
+        "normalizedValue": {
+          "text": "56.78",
+          "moneyValue": { "currencyCode": "USD", "units": "56", "nanos": 780000000 }
+        },
+        "pageAnchor": {
+          "pageRefs": [
+            {
+              "page": "0",
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.32, "y": 0.28 },
+                  { "x": 0.56, "y": 0.28 },
+                  { "x": 0.56, "y": 0.33 },
+                  { "x": 0.32, "y": 0.33 }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "line_item",
+        "confidence": 0.91,
+        "id": "2",
+        "pageAnchor": {
+          "pageRefs": [
+            {
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.08, "y": 0.28 },
+                  { "x": 0.56, "y": 0.28 },
+                  { "x": 0.56, "y": 0.33 },
+                  { "x": 0.08, "y": 0.33 }
+                ]
+              }
+            }
+          ]
+        },
+        "properties": [
+          {
+            "textAnchor": { "textSegments": [{ "startIndex": "26", "endIndex": "32" }] },
+            "type": "line_item/description",
+            "mentionText": "Widget",
+            "confidence": 0.93,
+            "id": "2/0"
+          },
+          {
+            "textAnchor": { "textSegments": [{ "startIndex": "33", "endIndex": "39" }] },
+            "type": "line_item/amount",
+            "mentionText": "$56.78",
+            "confidence": 0.9,
+            "id": "2/1",
+            "normalizedValue": {
+              "text": "56.78",
+              "moneyValue": { "currencyCode": "USD", "units": "56", "nanos": 780000000 }
+            }
+          }
+        ]
+      },
+      {
+        "type": "line_item",
+        "confidence": 0.88,
+        "id": "3",
+        "pageAnchor": {
+          "pageRefs": [
+            {
+              "page": "1",
+              "boundingPoly": {
+                "normalizedVertices": [
+                  { "x": 0.08, "y": 0.06 },
+                  { "x": 0.56, "y": 0.06 },
+                  { "x": 0.56, "y": 0.11 },
+                  { "x": 0.08, "y": 0.11 }
+                ]
+              }
+            }
+          ]
+        },
+        "properties": [
+          {
+            "type": "line_item/description",
+            "mentionText": "Gadget",
+            "confidence": 0.86,
+            "id": "3/0"
+          },
+          {
+            "type": "line_item/amount",
+            "mentionText": "$10.00",
+            "confidence": 0.84,
+            "id": "3/1",
+            "normalizedValue": {
+              "text": "10.00",
+              "moneyValue": { "currencyCode": "USD", "units": "10", "nanos": 0 }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "humanReviewStatus": { "state": "SKIPPED", "stateMessage": "Human review skipped" }
+}

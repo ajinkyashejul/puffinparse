@@ -1,0 +1,161 @@
+{
+  "document": {
+    "mimeType": "application/pdf",
+    "text": "Hello LiteOCR\nInvoice\nInvoice #1234\nNet 30\nItem Amount\nWidget $56.78\n",
+    "documentLayout": {
+      "blocks": [
+        {
+          "blockId": "1",
+          "pageSpan": { "pageStart": 1, "pageEnd": 1 },
+          "boundingBox": {
+            "normalizedVertices": [
+              { "x": 0.1, "y": 0.05 },
+              { "x": 0.5, "y": 0.05 },
+              { "x": 0.5, "y": 0.12 },
+              { "x": 0.1, "y": 0.12 }
+            ]
+          },
+          "textBlock": { "text": "Hello LiteOCR", "type": "heading-1", "blocks": [] }
+        },
+        {
+          "blockId": "2",
+          "pageSpan": { "pageStart": 1, "pageEnd": 1 },
+          "boundingBox": {
+            "normalizedVertices": [
+              { "x": 0.1, "y": 0.15 },
+              { "x": 0.45, "y": 0.15 },
+              { "x": 0.45, "y": 0.19 },
+              { "x": 0.1, "y": 0.19 }
+            ]
+          },
+          "textBlock": {
+            "text": "Invoice",
+            "type": "heading-2",
+            "blocks": [
+              {
+                "blockId": "3",
+                "pageSpan": { "pageStart": 1, "pageEnd": 1 },
+                "boundingBox": {
+                  "normalizedVertices": [
+                    { "x": 0.1, "y": 0.2 },
+                    { "x": 0.62, "y": 0.2 },
+                    { "x": 0.62, "y": 0.25 },
+                    { "x": 0.1, "y": 0.25 }
+                  ]
+                },
+                "textBlock": { "text": "Invoice #1234", "type": "paragraph", "blocks": [] }
+              }
+            ]
+          }
+        },
+        {
+          "blockId": "4",
+          "pageSpan": { "pageStart": 1, "pageEnd": 1 },
+          "boundingBox": {
+            "normalizedVertices": [
+              { "x": 0.1, "y": 0.27 },
+              { "x": 0.4, "y": 0.27 },
+              { "x": 0.4, "y": 0.31 },
+              { "x": 0.1, "y": 0.31 }
+            ]
+          },
+          "listBlock": {
+            "type": "unordered",
+            "listEntries": [
+              {
+                "blocks": [
+                  {
+                    "blockId": "5",
+                    "pageSpan": { "pageStart": 1, "pageEnd": 1 },
+                    "textBlock": { "text": "Net 30", "type": "paragraph", "blocks": [] }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "blockId": "6",
+          "pageSpan": { "pageStart": 2, "pageEnd": 2 },
+          "boundingBox": {
+            "normalizedVertices": [
+              { "x": 0.07, "y": 0.21 },
+              { "x": 0.57, "y": 0.21 },
+              { "x": 0.57, "y": 0.34 },
+              { "x": 0.07, "y": 0.34 }
+            ]
+          },
+          "tableBlock": {
+            "caption": "",
+            "headerRows": [
+              {
+                "cells": [
+                  {
+                    "rowSpan": 1,
+                    "colSpan": 1,
+                    "blocks": [
+                      {
+                        "blockId": "7",
+                        "pageSpan": { "pageStart": 2, "pageEnd": 2 },
+                        "textBlock": { "text": "Item", "type": "paragraph", "blocks": [] }
+                      }
+                    ]
+                  },
+                  {
+                    "rowSpan": 1,
+                    "colSpan": 1,
+                    "blocks": [
+                      {
+                        "blockId": "8",
+                        "pageSpan": { "pageStart": 2, "pageEnd": 2 },
+                        "textBlock": { "text": "Amount", "type": "paragraph", "blocks": [] }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "bodyRows": [
+              {
+                "cells": [
+                  {
+                    "rowSpan": 1,
+                    "colSpan": 1,
+                    "blocks": [
+                      {
+                        "blockId": "9",
+                        "pageSpan": { "pageStart": 2, "pageEnd": 2 },
+                        "textBlock": { "text": "Widget", "type": "paragraph", "blocks": [] }
+                      }
+                    ]
+                  },
+                  {
+                    "rowSpan": 1,
+                    "colSpan": 1,
+                    "blocks": [
+                      {
+                        "blockId": "10",
+                        "pageSpan": { "pageStart": 2, "pageEnd": 2 },
+                        "textBlock": { "text": "$56.78", "type": "paragraph", "blocks": [] }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chunkedDocument": {
+      "chunks": [
+        {
+          "chunkId": "c1",
+          "content": "Hello LiteOCR\n\nInvoice\n\nInvoice #1234\n\n- Net 30",
+          "pageSpan": { "pageStart": 1, "pageEnd": 1 }
+        }
+      ]
+    }
+  },
+  "humanReviewStatus": { "state": "SKIPPED", "stateMessage": "Human review skipped" }
+}

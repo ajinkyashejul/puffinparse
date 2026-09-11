@@ -36,6 +36,9 @@ pub fn build(name: &str) -> Result<Arc<dyn Provider>> {
         "mathpix" => Ok(Arc::new(mathpix::Mathpix)),
         "datalab" => Ok(Arc::new(datalab::Datalab)),
         "unstructured" => Ok(Arc::new(unstructured::Unstructured)),
+        "upstage" => Ok(Arc::new(upstage::Upstage)),
+        "landingai" => Ok(Arc::new(landingai::LandingAi)),
+        "google_documentai" => Ok(Arc::new(google_documentai::GoogleDocumentAi)),
         other => Err(Error::unsupported_model(format!("unknown provider '{other}'"))),
     }
 }

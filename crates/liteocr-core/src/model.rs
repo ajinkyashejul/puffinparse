@@ -474,6 +474,81 @@ pub const PROVIDERS: &[ProviderInfo] = &[
             },
         ],
     },
+    ProviderInfo {
+        name: "upstage",
+        display_name: "Upstage Document Parse",
+        env_var: "UPSTAGE_API_KEY",
+        base_url: "https://api.upstage.ai",
+        docs: "https://console.upstage.ai/docs/capabilities/document-digitization/document-parsing",
+        models: &[
+            ModelInfo {
+                provider: "upstage",
+                model: "document-parse",
+                description: "Upstage Document Parse (layout to HTML/Markdown; 100 pages sync, 1000 async)",
+                default: true,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "upstage",
+                model: "document-parse-nightly",
+                description: "Upstage Document Parse nightly build (newest layout model, may change without notice)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+        ],
+    },
+    ProviderInfo {
+        name: "landingai",
+        display_name: "Landing AI (Agentic Document Extraction)",
+        env_var: "LANDINGAI_API_KEY",
+        base_url: "https://api.va.landing.ai",
+        docs: "https://docs.landing.ai/ade/ade-overview",
+        models: &[ModelInfo {
+            provider: "landingai",
+            model: "dpt-2",
+            description: "Landing AI ADE DPT-2; extract runs parse then /v1/ade/extract with the JSON schema",
+            default: true,
+            modes: Mode::ALL,
+        }],
+    },
+    ProviderInfo {
+        name: "google_documentai",
+        display_name: "Google Cloud Document AI",
+        // Also reads GOOGLE_DOCUMENTAI_PROJECT, GOOGLE_DOCUMENTAI_LOCATION and GOOGLE_DOCUMENTAI_PROCESSOR_ID.
+        env_var: "GOOGLE_DOCUMENTAI_ACCESS_TOKEN",
+        base_url: "https://{location}-documentai.googleapis.com",
+        docs: "https://cloud.google.com/document-ai/docs",
+        models: &[
+            ModelInfo {
+                provider: "google_documentai",
+                model: "ocr",
+                description: "Document OCR processor: native text + word boxes (processor id from config)",
+                default: true,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "google_documentai",
+                model: "layout",
+                description: "Layout Parser processor: documentLayout blocks (headings, tables, lists)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "google_documentai",
+                model: "form",
+                description: "Form Parser processor: paragraphs + tables, entities as extraction",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "google_documentai",
+                model: "prebuilt",
+                description: "Prebuilt or custom extractor (invoice, W2, ...): entities as extraction",
+                default: false,
+                modes: Mode::ALL,
+            },
+        ],
+    },
 ];
 
 /// A parsed, validated model reference.
@@ -509,6 +584,8 @@ impl ModelRef {
             "llama" | "llama_parse" | "llama-parse" | "llamacloud" | "llama_cloud" => "llamaparse".to_string(),
             "gpt" | "oai" => "openai".to_string(),
             "claude" => "anthropic".to_string(),
+            "googledocumentai" | "google-documentai" | "docai" | "documentai" => "google_documentai".to_string(),
+            "landing" | "landing_ai" | "landing-ai" | "ade" => "landingai".to_string(),
             other => other.to_string(),
         };
         let info = provider_info(&prov).ok_or_else(|| {
@@ -616,6 +693,6 @@ mod tests {
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 46);
+        assert_eq!(m.len(), 53);
     }
 }
