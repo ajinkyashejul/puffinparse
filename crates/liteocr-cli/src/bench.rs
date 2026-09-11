@@ -3,7 +3,9 @@
 use anyhow::{bail, Context, Result};
 use clap::Subcommand;
 use futures::stream::{self, StreamExt};
-use liteocr_core::bench::{score, summarize, Metrics, NormalizeOptions, Summary};
+use liteocr_core::bench::{
+    metrics_from_rules, score, score_rules, summarize_with, Metrics, NormalizeOptions, Rule, Summary,
+};
 use liteocr_core::{DocumentRequest, OutputFormat};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -82,7 +84,17 @@ pub struct Manifest {
 pub struct ManifestDoc {
     pub id: String,
     pub file: String,
+    /// Ground-truth markdown, relative to the dataset directory. Empty (and unused) for
+    /// `kind: "rules"` documents, so it must tolerate being absent.
+    #[serde(default)]
     pub truth: String,
+    /// How the document is scored: `"transcript"` (default) or `"rules"`.
+    /// See `docs/benchmarks/adapters.md`.
+    #[serde(default = "kind_transcript")]
+    pub kind: String,
+    /// For `kind: "rules"`: the assertion file, relative to the dataset directory.
+    #[serde(default)]
+    pub rules: Option<String>,
     #[serde(default = "one")]
     pub pages: u32,
     #[serde(default)]
@@ -93,6 +105,26 @@ pub struct ManifestDoc {
 
 fn one() -> u32 {
     1
+}
+
+fn kind_transcript() -> String {
+    KIND_TRANSCRIPT.to_string()
+}
+
+const KIND_TRANSCRIPT: &str = "transcript";
+const KIND_RULES: &str = "rules";
+/// Tag marking a document whose truth is only the page's table, so `table_score` is its
+/// primary metric (ParseBench's table split; see `docs/benchmarks/adapters.md`).
+const TAG_TABLE_ONLY: &str = "table-only";
+
+impl ManifestDoc {
+    fn is_rules(&self) -> bool {
+        self.kind == KIND_RULES
+    }
+
+    fn table_only(&self) -> bool {
+        self.tags.iter().any(|t| t == TAG_TABLE_ONLY)
+    }
 }
 
 // ---- result file ---------------------------------------------------------------------------------
@@ -126,6 +158,12 @@ pub struct ModelResult {
 pub struct DocResult {
     pub id: String,
     pub category: String,
+    /// How this document was scored (`"transcript"` or `"rules"`); absent in pre-rules results.
+    #[serde(default = "kind_transcript")]
+    pub kind: String,
+    /// Headlined by `table_score` instead of `char_similarity` (the `table-only` tag).
+    #[serde(default)]
+    pub table_only: bool,
     pub pages: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub metrics: Option<Metrics>,
@@ -167,13 +205,18 @@ fn load_manifest(dir: &Path) -> Result<(Manifest, String)> {
     let path = dir.join("manifest.json");
     let raw = std::fs::read(&path).with_context(|| format!("reading {}", path.display()))?;
     let manifest: Manifest = serde_json::from_slice(&raw).with_context(|| format!("parsing {}", path.display()))?;
-    // Hash manifest + truth files so results are tied to an exact dataset revision.
+    // Hash manifest + truth + rule files so results are tied to an exact dataset revision.
     use sha2::{Digest, Sha256};
     let mut h = Sha256::new();
     h.update(&raw);
     for d in &manifest.documents {
         if let Ok(t) = std::fs::read(dir.join(&d.truth)) {
             h.update(&t);
+        }
+        if let Some(rules) = &d.rules {
+            if let Ok(r) = std::fs::read(dir.join(rules)) {
+                h.update(&r);
+            }
         }
         if let Ok(f) = std::fs::read(dir.join(&d.file)) {
             h.update(&f);
@@ -287,6 +330,42 @@ fn cache_busting_options(model: &str) -> Option<serde_json::Value> {
     }
 }
 
+/// What a document is scored against: a reference transcript or a set of assertions.
+#[derive(Debug)]
+enum Scoring {
+    Transcript(String),
+    Rules(Vec<Rule>),
+}
+
+/// Read a document's ground truth: the truth markdown, or the rule file for `kind: "rules"`.
+/// The error string is what lands in [`DocResult::error`], so no provider call is made.
+fn load_scoring(dataset: &Path, doc: &ManifestDoc) -> Result<Scoring, String> {
+    if doc.is_rules() {
+        let rel = doc.rules.as_deref().ok_or_else(|| "rules unreadable: no `rules` path in manifest".to_string())?;
+        let raw = std::fs::read_to_string(dataset.join(rel)).map_err(|e| format!("rules unreadable: {e}"))?;
+        let rules: Vec<Rule> = serde_json::from_str(&raw).map_err(|e| format!("rules unreadable: {e}"))?;
+        Ok(Scoring::Rules(rules))
+    } else {
+        let truth = std::fs::read_to_string(dataset.join(&doc.truth)).map_err(|e| format!("truth unreadable: {e}"))?;
+        Ok(Scoring::Transcript(truth))
+    }
+}
+
+/// A `DocResult` that recorded a failure (no metrics), preserving the document's identity.
+fn failed_doc(doc: &ManifestDoc, error: String) -> DocResult {
+    DocResult {
+        id: doc.id.clone(),
+        category: doc.category.clone(),
+        kind: doc.kind.clone(),
+        table_only: doc.table_only(),
+        pages: doc.pages,
+        metrics: None,
+        latency_ms: 0,
+        cost_usd: None,
+        error: Some(error),
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 async fn run_doc(
     dataset: &Path,
@@ -297,19 +376,9 @@ async fn run_doc(
     save: Option<&Path>,
     allow_cache: bool,
 ) -> DocResult {
-    let truth = match std::fs::read_to_string(dataset.join(&doc.truth)) {
-        Ok(t) => t,
-        Err(e) => {
-            return DocResult {
-                id: doc.id.clone(),
-                category: doc.category.clone(),
-                pages: doc.pages,
-                metrics: None,
-                latency_ms: 0,
-                cost_usd: None,
-                error: Some(format!("truth unreadable: {e}")),
-            }
-        }
+    let scoring = match load_scoring(dataset, doc) {
+        Ok(s) => s,
+        Err(e) => return failed_doc(doc, e),
     };
     let mut req = DocumentRequest::from_path(dataset.join(&doc.file))
         .model(model)
@@ -323,29 +392,31 @@ async fn run_doc(
     match liteocr_core::parse(req).await {
         Ok(resp) => {
             if let Some(dir) = save {
-                let d = dir.join(model.replace('/', "_"));
-                let _ = std::fs::create_dir_all(&d);
-                let _ = std::fs::write(d.join(format!("{}.md", doc.id)), &resp.markdown);
+                // Combined datasets prefix ids with their source (`synthetic/plain_001`), so the
+                // output path can have a directory component.
+                let path = dir.join(model.replace('/', "_")).join(format!("{}.md", doc.id));
+                if let Some(parent) = path.parent() {
+                    let _ = std::fs::create_dir_all(parent);
+                }
+                let _ = std::fs::write(path, &resp.markdown);
             }
+            let metrics = match &scoring {
+                Scoring::Transcript(truth) => score(&resp.markdown, truth, norm),
+                Scoring::Rules(rules) => metrics_from_rules(&score_rules(&resp.markdown, rules, norm)),
+            };
             DocResult {
                 id: doc.id.clone(),
                 category: doc.category.clone(),
+                kind: doc.kind.clone(),
+                table_only: doc.table_only(),
                 pages: resp.usage.pages,
-                metrics: Some(score(&resp.markdown, &truth, norm)),
+                metrics: Some(metrics),
                 latency_ms: resp.latency_ms,
                 cost_usd: resp.cost_usd,
                 error: None,
             }
         }
-        Err(e) => DocResult {
-            id: doc.id.clone(),
-            category: doc.category.clone(),
-            pages: doc.pages,
-            metrics: None,
-            latency_ms: 0,
-            cost_usd: None,
-            error: Some(e.to_string()),
-        },
+        Err(e) => failed_doc(doc, e.to_string()),
     }
 }
 
@@ -357,16 +428,23 @@ fn percentile(sorted: &[u64], p: f64) -> u64 {
     sorted[idx.min(sorted.len() - 1)]
 }
 
+/// Aggregate a set of documents, taking each one's primary metric from its `table_only` flag.
+fn summarize_docs<'a>(docs: impl IntoIterator<Item = &'a DocResult>) -> Summary {
+    let (metrics, table_only): (Vec<Option<Metrics>>, Vec<bool>) =
+        docs.into_iter().map(|d| (d.metrics, d.table_only)).unzip();
+    summarize_with(&metrics, &table_only)
+}
+
 fn summarize_model(docs: &[DocResult]) -> ModelSummary {
-    let accuracy = summarize(&docs.iter().map(|d| d.metrics).collect::<Vec<_>>());
+    let accuracy = summarize_docs(docs);
     let mut lat: Vec<u64> = docs.iter().filter(|d| d.error.is_none()).map(|d| d.latency_ms).collect();
     lat.sort_unstable();
     let total_pages: u32 = docs.iter().filter(|d| d.error.is_none()).map(|d| d.pages).sum();
     let total_latency: u64 = lat.iter().sum();
     let total_cost: f64 = docs.iter().filter_map(|d| d.cost_usd).sum();
-    let mut by_cat: BTreeMap<String, Vec<Option<Metrics>>> = BTreeMap::new();
+    let mut by_cat: BTreeMap<String, Vec<&DocResult>> = BTreeMap::new();
     for d in docs {
-        by_cat.entry(d.category.clone()).or_default().push(d.metrics);
+        by_cat.entry(d.category.clone()).or_default().push(d);
     }
     ModelSummary {
         accuracy,
@@ -376,7 +454,7 @@ fn summarize_model(docs: &[DocResult]) -> ModelSummary {
         total_pages,
         total_cost_usd: total_cost,
         cost_per_1k_pages_usd: if total_pages == 0 { None } else { Some(total_cost / f64::from(total_pages) * 1000.0) },
-        by_category: by_cat.into_iter().map(|(k, v)| (k, summarize(&v))).collect(),
+        by_category: by_cat.into_iter().map(|(k, v)| (k, summarize_docs(v))).collect(),
     }
 }
 
@@ -401,13 +479,14 @@ fn render_markdown(runs: &[RunResult]) -> String {
         b.1.summary.accuracy.overall.partial_cmp(&a.1.summary.accuracy.overall).unwrap_or(std::cmp::Ordering::Equal)
     });
     let mut out = String::new();
-    out.push_str("| Rank | Model | Overall | Char sim | CER | WER | Word F1 | Order | Table | p50 latency | p95 latency | ms/page | $/1k pages | Failed | Dataset |\n");
-    out.push_str("|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|\n");
+    out.push_str("| Rank | Model | Overall | Char sim | CER | WER | Word F1 | Order | Table | Rules | p50 latency | p95 latency | ms/page | $/1k pages | Failed | Dataset |\n");
+    out.push_str("|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|\n");
     for (i, (r, m)) in rows.iter().enumerate() {
         let s = &m.summary;
         let opt = |v: Option<f64>| v.map(|x| format!("{x:.3}")).unwrap_or_else(|| "–".into());
+        let pct = |v: Option<f64>| v.map(|x| format!("{:.1}%", 100.0 * x)).unwrap_or_else(|| "–".into());
         out.push_str(&format!(
-            "| {} | `{}` | **{:.2}** | {:.3} | {:.3} | {:.3} | {:.3} | {} | {} | {} ms | {} ms | {:.0} | {} | {}/{} | {} v{} |\n",
+            "| {} | `{}` | **{:.2}** | {:.3} | {:.3} | {:.3} | {:.3} | {} | {} | {} | {} ms | {} ms | {:.0} | {} | {}/{} | {} v{} |\n",
             i + 1,
             m.model,
             s.accuracy.overall,
@@ -417,6 +496,7 @@ fn render_markdown(runs: &[RunResult]) -> String {
             s.accuracy.word_f1,
             opt(s.accuracy.order_score),
             opt(s.accuracy.table_score),
+            pct(s.accuracy.rule_pass_rate),
             s.latency_p50_ms,
             s.latency_p95_ms,
             s.latency_per_page_ms,
@@ -431,17 +511,30 @@ fn render_markdown(runs: &[RunResult]) -> String {
     let cats: std::collections::BTreeSet<&String> =
         rows.iter().flat_map(|(_, m)| m.summary.by_category.keys()).collect();
     if cats.len() > 1 {
+        // With several datasets in one report the same model appears once per dataset, so the
+        // rows need to say which run they came from.
+        let datasets: std::collections::BTreeSet<&str> = rows.iter().map(|(r, _)| r.dataset.name.as_str()).collect();
+        let multi = datasets.len() > 1;
         out.push_str("\n### Overall score by category\n\n| Model |");
+        if multi {
+            out.push_str(" Dataset |");
+        }
         for c in &cats {
             out.push_str(&format!(" {c} |"));
         }
         out.push_str("\n|---|");
+        if multi {
+            out.push_str("---|");
+        }
         for _ in &cats {
             out.push_str("---:|");
         }
         out.push('\n');
-        for (_, m) in &rows {
+        for (r, m) in &rows {
             out.push_str(&format!("| `{}` |", m.model));
+            if multi {
+                out.push_str(&format!(" {} |", r.dataset.name));
+            }
             for c in &cats {
                 match m.summary.by_category.get(*c) {
                     Some(s) => out.push_str(&format!(" {:.1} |", s.overall)),
@@ -451,5 +544,144 @@ fn render_markdown(runs: &[RunResult]) -> String {
             out.push('\n');
         }
     }
+    for run in runs {
+        out.push_str(&render_by_source(run));
+    }
     out
+}
+
+/// The source a combined-dataset id came from: everything before the first `/`
+/// (`synthetic/plain_001` → `synthetic`). `None` for a plain id.
+fn source_of(id: &str) -> Option<&str> {
+    id.split_once('/').map(|(source, _)| source)
+}
+
+/// Per-source breakdown of one run, for datasets whose ids carry a `source/` prefix
+/// (`combined-v1`). Empty for single-source datasets, where it would just restate the main table.
+fn render_by_source(run: &RunResult) -> String {
+    let sources: std::collections::BTreeSet<&str> =
+        run.models.iter().flat_map(|m| m.docs.iter()).filter_map(|d| source_of(&d.id)).collect();
+    if sources.len() < 2 {
+        return String::new();
+    }
+    let mut out =
+        format!("\n### `{}` by source\n\n| Source | Docs | Model | Overall |\n|---|---:|---|---:|\n", run.dataset.name);
+    for source in &sources {
+        let mut rows: Vec<(&str, usize, f64)> = run
+            .models
+            .iter()
+            .map(|m| {
+                let s = summarize_docs(m.docs.iter().filter(|d| source_of(&d.id) == Some(*source)));
+                (m.model.as_str(), s.documents, s.overall)
+            })
+            .collect();
+        rows.sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap_or(std::cmp::Ordering::Equal));
+        for (model, documents, overall) in rows {
+            out.push_str(&format!("| {source} | {documents} | `{model}` | {overall:.2} |\n"));
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn manifest_doc_defaults_to_a_transcript() {
+        let docs: Vec<ManifestDoc> = serde_json::from_str(
+            r#"[{"id": "a", "file": "docs/a.png", "truth": "truth/a.md"},
+                {"id": "b", "file": "docs/b.pdf", "truth": "", "kind": "rules",
+                 "rules": "rules/b.json", "tags": ["table-only"], "future_key": 1}]"#,
+        )
+        .expect("manifest documents deserialise");
+        assert_eq!(docs[0].kind, "transcript");
+        assert!(!docs[0].is_rules() && !docs[0].table_only());
+        assert!(docs[0].rules.is_none());
+        assert!(docs[1].is_rules() && docs[1].table_only());
+        assert_eq!(docs[1].rules.as_deref(), Some("rules/b.json"));
+    }
+
+    #[test]
+    fn rules_documents_need_no_truth_key() {
+        let doc: ManifestDoc =
+            serde_json::from_str(r#"{"id": "b", "file": "docs/b.pdf", "kind": "rules", "rules": "r.json"}"#)
+                .expect("a missing `truth` is not fatal");
+        assert_eq!(doc.truth, "");
+        assert_eq!(doc.pages, 1);
+    }
+
+    #[test]
+    fn missing_rules_file_fails_before_the_provider_call() {
+        let doc = ManifestDoc {
+            id: "b".into(),
+            file: "docs/b.pdf".into(),
+            truth: String::new(),
+            kind: KIND_RULES.into(),
+            rules: Some("does/not/exist.json".into()),
+            pages: 1,
+            category: "text".into(),
+            tags: vec![],
+        };
+        let err = load_scoring(Path::new("/nonexistent-dataset"), &doc).expect_err("unreadable");
+        assert!(err.starts_with("rules unreadable: "), "{err}");
+        let no_path = ManifestDoc { rules: None, ..doc };
+        assert!(load_scoring(Path::new("/nonexistent-dataset"), &no_path)
+            .expect_err("no path")
+            .starts_with("rules unreadable: "));
+    }
+
+    /// A `table-only` document is headlined by `table_score`, everything else by `char_similarity`.
+    #[test]
+    fn table_only_documents_are_headlined_by_table_score() {
+        let doc = |id: &str, table_only: bool, metrics: Option<Metrics>| DocResult {
+            id: id.into(),
+            category: "table".into(),
+            kind: KIND_TRANSCRIPT.into(),
+            table_only,
+            pages: 1,
+            metrics,
+            latency_ms: 1,
+            cost_usd: None,
+            error: None,
+        };
+        let m = Metrics { char_similarity: 0.3, table_score: Some(0.9), ..Metrics::default() };
+        let docs = vec![doc("a/x", true, Some(m)), doc("b/y", false, Some(m))];
+        let summary = summarize_docs(&docs);
+        assert!((summary.overall - 60.0).abs() < 1e-9, "{}", summary.overall);
+        assert!((summarize_docs(&docs[..1]).overall - 90.0).abs() < 1e-9);
+        assert!((summarize_docs(&docs[1..]).overall - 30.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn source_prefix_of_a_combined_id() {
+        assert_eq!(source_of("synthetic/plain_001"), Some("synthetic"));
+        assert_eq!(source_of("parsebench/text_a/b"), Some("parsebench"));
+        assert_eq!(source_of("plain_001"), None);
+    }
+
+    /// A result file written before rules existed must still load and render.
+    #[test]
+    fn pre_rules_result_files_still_load() {
+        let raw = r#"{"run_id": "run-1", "created_at": "2026-01-01T00:00:00Z", "liteocr_version": "0.1.0",
+            "dataset": {"name": "synthetic-v1", "version": "1.1.0", "documents": 1, "sha256": "ab"},
+            "normalize": {"case_insensitive": true, "strip_markdown": true, "strip_punctuation": false},
+            "models": [{"model": "reducto/standard",
+                "docs": [{"id": "plain_001", "category": "plain", "pages": 1, "latency_ms": 10,
+                          "metrics": {"char_similarity": 1.0, "cer": 0.0, "wer": 0.0, "word_recall": 1.0,
+                                      "word_precision": 1.0, "word_f1": 1.0, "pred_chars": 3, "truth_chars": 3}}],
+                "summary": {"documents": 1, "failed": 0, "char_similarity": 1.0, "cer": 0.0, "wer": 0.0,
+                            "word_f1": 1.0, "overall": 100.0, "latency_p50_ms": 10, "latency_p95_ms": 10,
+                            "latency_per_page_ms": 10.0, "total_pages": 1, "total_cost_usd": 0.0,
+                            "cost_per_1k_pages_usd": 15.0, "by_category": {}}}]}"#;
+        let run: RunResult = serde_json::from_str(raw).expect("old result files stay loadable");
+        let doc = &run.models[0].docs[0];
+        assert_eq!(doc.kind, "transcript");
+        assert!(!doc.table_only);
+        let md = render_markdown(&[run]);
+        assert!(md.contains("| Rules |"), "the report has a Rules column");
+        // No rule documents and a single source: `–` in Rules, no per-source table.
+        assert!(md.contains(" – |"));
+        assert!(!md.contains("by source"));
+    }
 }

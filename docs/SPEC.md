@@ -541,6 +541,13 @@ truth file, so a result is tied to an exact dataset revision.
 
 `LEADERBOARD.md` is regenerated from committed results and links to each run.
 
+Document kinds: a manifest document is `kind: "transcript"` (default; `truth` markdown, scored by
+the text metrics) or `kind: "rules"` (a `rules` file of machine-checkable assertions — `present`,
+`absent`, `order`, `table_cell`, `bag_of_sentences` — scored by `liteocr_core::bench::score_rules`,
+reported as `rule_pass_rate` / `rules_passed` / `rules_total` in `Metrics` and `rule_pass_rate` in
+`Summary`). Documents tagged `table-only` are headlined by `table_score`. Result JSON documents
+carry `kind` and `table_only`; rule files are included in the dataset `sha256`.
+
 ---
 
 ## 11. Python SDK details

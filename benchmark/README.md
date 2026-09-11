@@ -31,6 +31,28 @@ separator rows), curly quotes and dashes straightened, whitespace collapsed, low
 | `word_recall`, `word_precision`, `word_f1` | bag-of-words overlap |
 | `order_score` | Kendall-τ-style fraction of concordant pairs among lines present in both texts (reading order) |
 | `table_score` | `char_similarity` restricted to markdown table rows (only when the truth has tables) |
+| `rule_pass_rate` | `passed / total` over a rule-scored document's assertions (only for `kind: rules`) |
+
+## Document kinds
+
+A dataset document declares how it is scored (`kind` in the manifest, default `transcript`;
+see [`docs/benchmarks/adapters.md`](../docs/benchmarks/adapters.md)):
+
+| `kind` | Truth | Scored by |
+|---|---|---|
+| `transcript` | `truth`, a markdown file | the metrics above, headlined by `char_similarity` |
+| `rules` | `rules`, a JSON list of machine-checkable assertions (`present`, `absent`, `order`, `table_cell`, `bag_of_sentences`) | `rule_pass_rate = passed / total`, which takes the place of `char_similarity` so the document aggregates with the rest |
+
+Two per-document adjustments follow from that:
+
+- A **`rules` document has no markdown truth.** The runner reads its rule file instead, and a
+  document whose rules cannot be read or parsed fails with `rules unreadable: …` — without
+  spending a provider call.
+- A **`table-only` document** (ParseBench's table split: the truth is the page's table, the
+  prediction is the whole page) is headlined by `table_score` instead of `char_similarity`, so
+  `Overall` means the same thing for it as for every other document. `char_similarity`, `cer`
+  and `wer` are still recorded, and are still systematically bad on those documents by
+  construction.
 
 ## Running
 
@@ -47,7 +69,13 @@ cargo build --release -p liteocr-cli
 `--save-outputs` writes each model's markdown per document so mistakes can be inspected. Committed
 runs keep them under `results/outputs/<run_id>/<model>/<doc_id>.md`; the static site under
 `site/` renders them next to the input and the truth with a word-level diff.
-`--filter <substring>` and `--limit N` select a subset of documents.
+`--filter <substring>` and `--limit N` select a subset of documents. Ids of a combined dataset
+carry their source (`synthetic/plain_001`), so the saved output path keeps that directory level
+and `--filter synthetic` runs one source.
+
+`bench report` renders the leaderboard table (a **Rules** column shows the mean rule pass rate,
+`–` for datasets with no rule documents), then the per-category breakdown, and — for datasets
+whose ids carry a `<source>/` prefix — a per-source breakdown of documents and `Overall`.
 
 Scoring a single pair without any network access:
 
@@ -79,3 +107,13 @@ transcript. olmOCR-bench and OmniDocBench adapters are next.
 - Latency is measured from the client through the public API and includes upload, queueing and
   polling. Run from a different region or under load and numbers will move.
 - Prices are list prices. Volume discounts, batch queues and cache hits change real cost.
+- **A rule pass rate is a floor, not an accuracy.** ParseBench's assertions are generated from its
+  own reference extraction, so a rule's text can carry that extraction's artifacts: punctuation
+  spaced as separate tokens (`this " agreement "`), or two lines of the page concatenated into one
+  "sentence". Matching is exact substring after normalisation, so such a rule fails on output that
+  is in fact correct, and an `order` rule whose `before` never matches fails with it. The effect is
+  the same for every model, so it moves the absolute number far more than the ranking. The one
+  `bag_of_sentences` rule per ParseBench document asks for *every* sentence of the page at
+  `threshold: 1.0` and therefore fails almost always.
+- **A combined score mixes datasets, licences and document kinds.** Read `combined-v1` next to the
+  per-source table under the leaderboard, not instead of it.

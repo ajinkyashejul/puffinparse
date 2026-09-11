@@ -51,7 +51,7 @@ the id.
 
 1. **64 of 79 documents are `kind: "transcript"`, 15 are `kind: "rules"`.** The current Rust
    scorer only understands transcripts and reports each rules document as
-   `truth unreadable: Is a directory`, counting it as a failure. Until a rules scorer lands,
+   `(historical note: before the rules scorer landed these failed with "truth unreadable"; they are now scored by rule assertions)`, counting it as a failure. Until a rules scorer lands,
    run with `--filter synthetic` or `--filter _page` for a clean number, or read the per-document
    results and ignore the `text_*` entries. See
    [`docs/benchmarks/adapters.md`](../../../docs/benchmarks/adapters.md).

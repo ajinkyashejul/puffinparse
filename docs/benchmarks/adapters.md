@@ -277,12 +277,4 @@ Rules for any future adapter:
 
 ## Known gaps in the Rust side
 
-The manifests here load and run in the current CLI, but two things are still missing. Both are
-tracked in the hand-off, not worked around in the data:
-
-1. **No rules scorer.** `kind: "rules"` documents are not skipped — the CLI tries to read
-   `truth`, which is `""`, and reports
-   `truth unreadable: Is a directory (os error 21)`, counting the document as a failure. Use
-   `--filter` to exclude them until a scorer lands.
-2. **No per-document primary metric.** `table-only` documents need `table_score`, not
-   `char_similarity`, and nothing expresses that today beyond the tag.
+Both gaps are closed: `ManifestDoc` carries `kind` / `rules`, rule files are hashed into the dataset SHA, `kind: rules` documents are scored with `liteocr_core::bench::score_rules`, and `table-only` documents are headlined by `table_score` (`summarize_with`).
