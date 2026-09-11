@@ -2,13 +2,19 @@
 //!
 //! The Python package (`python/liteocr`) wraps these functions with a typed, idiomatic API.
 //! All heavy lifting stays in `liteocr-core`; this layer only converts values and bridges runtimes.
+//!
+//! Everything is organised around the three **modes** of the core — `parse` (layout-aware
+//! markdown + blocks), `ocr` (plain text + word/line boxes) and `extract` (JSON schema →
+//! structured data). A model can only serve the modes it declares, so each entry point below
+//! resolves the model string against its own mode.
 
 use liteocr_core::router::{Router as CoreRouter, RouterConfig, Strategy};
-use liteocr_core::{DocumentInput, OcrRequest};
+use liteocr_core::{DocumentInput, DocumentRequest, ExtractRequest, Mode};
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyDict};
 use pythonize::{depythonize, pythonize};
+use serde::Serialize;
 use std::sync::Arc;
 
 pyo3::create_exception!(_core, CoreError, PyException, "Raised by the core; args[0] is a JSON-encoded error.");
@@ -17,36 +23,85 @@ fn to_py_err(e: liteocr_core::Error) -> PyErr {
     CoreError::new_err(serde_json::to_string(&e).unwrap_or_else(|_| e.to_string()))
 }
 
-fn build_request(request: &Bound<'_, PyDict>, data: Option<&Bound<'_, PyBytes>>) -> PyResult<OcrRequest> {
-    let mut req: OcrRequest = depythonize(request.as_any())
+/// Parse a mode string (`"parse" | "ocr" | "extract"`), surfacing a typed core error.
+fn parse_mode(mode: &str) -> PyResult<Mode> {
+    mode.parse::<Mode>().map_err(to_py_err)
+}
+
+/// Replace the document input with the separately-passed bytes, keeping the declared filename.
+fn attach_bytes(input: &mut DocumentInput, bytes: &Bound<'_, PyBytes>) {
+    let filename = match &input {
+        DocumentInput::Bytes { filename, .. } => filename.clone(),
+        other => other.filename(),
+    };
+    *input = DocumentInput::Bytes { data: bytes::Bytes::copy_from_slice(bytes.as_bytes()), filename };
+}
+
+fn build_request(request: &Bound<'_, PyDict>, data: Option<&Bound<'_, PyBytes>>) -> PyResult<DocumentRequest> {
+    let mut req: DocumentRequest = depythonize(request.as_any())
         .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("invalid request: {e}")))?;
     if let Some(bytes) = data {
-        let filename = match &req.input {
-            DocumentInput::Bytes { filename, .. } => filename.clone(),
-            other => other.filename(),
-        };
-        req.input = DocumentInput::Bytes { data: bytes::Bytes::copy_from_slice(bytes.as_bytes()), filename };
+        attach_bytes(&mut req.input, bytes);
     }
     Ok(req)
 }
 
-fn response_to_py(py: Python<'_>, resp: liteocr_core::OcrResponse) -> PyResult<Py<PyAny>> {
-    Ok(pythonize(py, &resp)?.unbind())
+/// Build an [`ExtractRequest`] from a flattened dict (document fields plus `schema`,
+/// `instructions`, `citations`).
+fn build_extract_request(request: &Bound<'_, PyDict>, data: Option<&Bound<'_, PyBytes>>) -> PyResult<ExtractRequest> {
+    let mut req: ExtractRequest = depythonize(request.as_any())
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("invalid extract request: {e}")))?;
+    if let Some(bytes) = data {
+        attach_bytes(&mut req.document.input, bytes);
+    }
+    Ok(req)
 }
 
-/// Run an OCR request synchronously. `request` is a dict matching `OcrRequest`; `data` optionally
-/// supplies the document bytes (avoids base64-encoding large files through the dict).
+fn to_py<T: Serialize>(py: Python<'_>, value: &T) -> PyResult<Py<PyAny>> {
+    Ok(pythonize(py, value)?.unbind())
+}
+
+// ---- parse mode ----------------------------------------------------------------------------------
+
+/// Run a `parse`-mode request synchronously. `request` is a dict matching `DocumentRequest`; `data`
+/// optionally supplies the document bytes (avoids base64-encoding large files through the dict).
+#[pyfunction]
+#[pyo3(signature = (request, data=None))]
+fn parse(py: Python<'_>, request: &Bound<'_, PyDict>, data: Option<&Bound<'_, PyBytes>>) -> PyResult<Py<PyAny>> {
+    let req = build_request(request, data)?;
+    let rt = pyo3_async_runtimes::tokio::get_runtime();
+    let resp = py.detach(|| rt.block_on(liteocr_core::parse(req))).map_err(to_py_err)?;
+    to_py(py, &resp)
+}
+
+/// Async variant of [`parse`] returning an awaitable.
+#[pyfunction]
+#[pyo3(signature = (request, data=None))]
+fn aparse<'py>(
+    py: Python<'py>,
+    request: &Bound<'py, PyDict>,
+    data: Option<&Bound<'py, PyBytes>>,
+) -> PyResult<Bound<'py, PyAny>> {
+    let req = build_request(request, data)?;
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
+        let resp = liteocr_core::parse(req).await.map_err(to_py_err)?;
+        Python::attach(|py| to_py(py, &resp))
+    })
+}
+
+// ---- ocr mode ------------------------------------------------------------------------------------
+
+/// Run an `ocr`-mode request synchronously; returns a `TextResponse` dict (plain text + boxes).
 #[pyfunction]
 #[pyo3(signature = (request, data=None))]
 fn ocr(py: Python<'_>, request: &Bound<'_, PyDict>, data: Option<&Bound<'_, PyBytes>>) -> PyResult<Py<PyAny>> {
     let req = build_request(request, data)?;
     let rt = pyo3_async_runtimes::tokio::get_runtime();
-    let result = py.detach(|| rt.block_on(liteocr_core::ocr(req)));
-    let resp = result.map_err(to_py_err)?;
-    response_to_py(py, resp)
+    let resp = py.detach(|| rt.block_on(liteocr_core::ocr(req))).map_err(to_py_err)?;
+    to_py(py, &resp)
 }
 
-/// Async variant returning an awaitable.
+/// Async variant of [`ocr`] returning an awaitable.
 #[pyfunction]
 #[pyo3(signature = (request, data=None))]
 fn aocr<'py>(
@@ -57,11 +112,40 @@ fn aocr<'py>(
     let req = build_request(request, data)?;
     pyo3_async_runtimes::tokio::future_into_py(py, async move {
         let resp = liteocr_core::ocr(req).await.map_err(to_py_err)?;
-        Python::attach(|py| response_to_py(py, resp))
+        Python::attach(|py| to_py(py, &resp))
     })
 }
 
-/// Multi-model router with fallbacks.
+// ---- extract mode --------------------------------------------------------------------------------
+
+/// Run an `extract`-mode request synchronously; returns an `ExtractResponse` dict.
+#[pyfunction]
+#[pyo3(signature = (request, data=None))]
+fn extract(py: Python<'_>, request: &Bound<'_, PyDict>, data: Option<&Bound<'_, PyBytes>>) -> PyResult<Py<PyAny>> {
+    let req = build_extract_request(request, data)?;
+    let rt = pyo3_async_runtimes::tokio::get_runtime();
+    let resp = py.detach(|| rt.block_on(liteocr_core::extract(req))).map_err(to_py_err)?;
+    to_py(py, &resp)
+}
+
+/// Async variant of [`extract`] returning an awaitable.
+#[pyfunction]
+#[pyo3(signature = (request, data=None))]
+fn aextract<'py>(
+    py: Python<'py>,
+    request: &Bound<'py, PyDict>,
+    data: Option<&Bound<'py, PyBytes>>,
+) -> PyResult<Bound<'py, PyAny>> {
+    let req = build_extract_request(request, data)?;
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
+        let resp = liteocr_core::extract(req).await.map_err(to_py_err)?;
+        Python::attach(|py| to_py(py, &resp))
+    })
+}
+
+// ---- router --------------------------------------------------------------------------------------
+
+/// Multi-model router with fallbacks. All models must support the router's mode.
 #[pyclass(name = "Router", module = "liteocr._core")]
 struct PyRouter {
     inner: Arc<CoreRouter>,
@@ -70,10 +154,10 @@ struct PyRouter {
 #[pymethods]
 impl PyRouter {
     #[new]
-    #[pyo3(signature = (models, strategy="ordered", fallback_on=None))]
-    fn new(models: Vec<String>, strategy: &str, fallback_on: Option<Vec<String>>) -> PyResult<Self> {
+    #[pyo3(signature = (models, mode="parse", strategy="ordered", fallback_on=None))]
+    fn new(models: Vec<String>, mode: &str, strategy: &str, fallback_on: Option<Vec<String>>) -> PyResult<Self> {
         let strategy: Strategy = strategy.parse().map_err(to_py_err)?;
-        let mut config = RouterConfig::new(models);
+        let mut config = RouterConfig::new(models).mode(parse_mode(mode)?);
         config.strategy = strategy;
         if let Some(kinds) = fallback_on {
             config.fallback_on = kinds
@@ -89,8 +173,41 @@ impl PyRouter {
         self.inner.models()
     }
 
+    fn mode(&self) -> &'static str {
+        self.inner.mode().as_str()
+    }
+
     fn plan(&self) -> Vec<String> {
         self.inner.plan()
+    }
+
+    #[pyo3(signature = (request, data=None))]
+    fn parse(
+        &self,
+        py: Python<'_>,
+        request: &Bound<'_, PyDict>,
+        data: Option<&Bound<'_, PyBytes>>,
+    ) -> PyResult<Py<PyAny>> {
+        let req = build_request(request, data)?;
+        let router = self.inner.clone();
+        let rt = pyo3_async_runtimes::tokio::get_runtime();
+        let resp = py.detach(|| rt.block_on(router.parse(&req))).map_err(to_py_err)?;
+        to_py(py, &resp)
+    }
+
+    #[pyo3(signature = (request, data=None))]
+    fn aparse<'py>(
+        &self,
+        py: Python<'py>,
+        request: &Bound<'py, PyDict>,
+        data: Option<&Bound<'py, PyBytes>>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        let req = build_request(request, data)?;
+        let router = self.inner.clone();
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
+            let resp = router.parse(&req).await.map_err(to_py_err)?;
+            Python::attach(|py| to_py(py, &resp))
+        })
     }
 
     #[pyo3(signature = (request, data=None))]
@@ -103,8 +220,8 @@ impl PyRouter {
         let req = build_request(request, data)?;
         let router = self.inner.clone();
         let rt = pyo3_async_runtimes::tokio::get_runtime();
-        let result = py.detach(|| rt.block_on(router.ocr(&req)));
-        response_to_py(py, result.map_err(to_py_err)?)
+        let resp = py.detach(|| rt.block_on(router.ocr(&req))).map_err(to_py_err)?;
+        to_py(py, &resp)
     }
 
     #[pyo3(signature = (request, data=None))]
@@ -118,37 +235,81 @@ impl PyRouter {
         let router = self.inner.clone();
         pyo3_async_runtimes::tokio::future_into_py(py, async move {
             let resp = router.ocr(&req).await.map_err(to_py_err)?;
-            Python::attach(|py| response_to_py(py, resp))
+            Python::attach(|py| to_py(py, &resp))
+        })
+    }
+
+    #[pyo3(signature = (request, data=None))]
+    fn extract(
+        &self,
+        py: Python<'_>,
+        request: &Bound<'_, PyDict>,
+        data: Option<&Bound<'_, PyBytes>>,
+    ) -> PyResult<Py<PyAny>> {
+        let req = build_extract_request(request, data)?;
+        let router = self.inner.clone();
+        let rt = pyo3_async_runtimes::tokio::get_runtime();
+        let resp = py.detach(|| rt.block_on(router.extract(&req))).map_err(to_py_err)?;
+        to_py(py, &resp)
+    }
+
+    #[pyo3(signature = (request, data=None))]
+    fn aextract<'py>(
+        &self,
+        py: Python<'py>,
+        request: &Bound<'py, PyDict>,
+        data: Option<&Bound<'py, PyBytes>>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        let req = build_extract_request(request, data)?;
+        let router = self.inner.clone();
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
+            let resp = router.extract(&req).await.map_err(to_py_err)?;
+            Python::attach(|py| to_py(py, &resp))
         })
     }
 
     fn stats(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        Ok(pythonize(py, &self.inner.stats())?.unbind())
+        to_py(py, &self.inner.stats())
     }
 
     fn __repr__(&self) -> String {
-        format!("Router(models={:?})", self.inner.models())
+        format!("Router(models={:?}, mode={:?})", self.inner.models(), self.inner.mode().as_str())
     }
 }
 
+// ---- registry, pricing, helpers ------------------------------------------------------------------
+
+/// All fully-qualified model names, optionally restricted to the ones serving `mode`.
 #[pyfunction]
-fn list_models() -> Vec<String> {
-    liteocr_core::list_models()
+#[pyo3(signature = (mode=None))]
+fn list_models(mode: Option<&str>) -> PyResult<Vec<String>> {
+    match mode {
+        Some(m) => Ok(liteocr_core::list_models_for(parse_mode(m)?)),
+        None => Ok(liteocr_core::list_models()),
+    }
+}
+
+/// The known modes, in order.
+#[pyfunction]
+fn modes() -> Vec<&'static str> {
+    Mode::ALL.iter().map(Mode::as_str).collect()
 }
 
 #[pyfunction]
 fn providers(py: Python<'_>) -> PyResult<Py<PyAny>> {
-    Ok(pythonize(py, liteocr_core::PROVIDERS)?.unbind())
+    to_py(py, &liteocr_core::PROVIDERS)
 }
 
 #[pyfunction]
 fn pricing(py: Python<'_>) -> PyResult<Py<PyAny>> {
-    Ok(pythonize(py, &liteocr_core::pricing::all_prices())?.unbind())
+    to_py(py, &liteocr_core::pricing::all_prices())
 }
 
 #[pyfunction]
-fn set_pricing(prices: std::collections::BTreeMap<String, f64>) {
-    liteocr_core::pricing::set_prices(prices);
+#[pyo3(signature = (prices, mode="parse"))]
+fn set_pricing(prices: std::collections::BTreeMap<String, f64>, mode: &str) -> PyResult<()> {
+    liteocr_core::pricing::set_prices(prices, parse_mode(mode)?);
+    Ok(())
 }
 
 #[pyfunction]
@@ -157,14 +318,21 @@ fn reset_pricing() {
 }
 
 #[pyfunction]
-fn estimate_cost(model: &str, pages: u32) -> Option<f64> {
-    liteocr_core::pricing::estimate_cost(model, pages)
+#[pyo3(signature = (model, mode, pages))]
+fn estimate_cost(model: &str, mode: &str, pages: u32) -> PyResult<Option<f64>> {
+    Ok(liteocr_core::pricing::estimate_cost(model, parse_mode(mode)?, pages))
 }
 
-/// Validate and canonicalise a model string ("reducto" -> "reducto/standard").
+/// Validate and canonicalise a model string ("reducto" -> "reducto/standard"). With `mode`, the
+/// model must support it and a bare provider resolves to its default model for that mode.
 #[pyfunction]
-fn resolve_model(model: &str) -> PyResult<String> {
-    liteocr_core::ModelRef::parse(model).map(|m| m.qualified()).map_err(to_py_err)
+#[pyo3(signature = (model, mode=None))]
+fn resolve_model(model: &str, mode: Option<&str>) -> PyResult<String> {
+    let parsed = match mode {
+        Some(m) => liteocr_core::ModelRef::parse_for(model, parse_mode(m)?),
+        None => liteocr_core::ModelRef::parse(model),
+    };
+    parsed.map(|m| m.qualified()).map_err(to_py_err)
 }
 
 /// Benchmark metrics between a prediction and ground truth.
@@ -180,7 +348,7 @@ fn score(
 ) -> PyResult<Py<PyAny>> {
     let opts = liteocr_core::bench::NormalizeOptions { case_insensitive, strip_markdown, strip_punctuation };
     let m = py.detach(|| liteocr_core::bench::score(prediction, truth, opts));
-    Ok(pythonize(py, &m)?.unbind())
+    to_py(py, &m)
 }
 
 #[pyfunction]
@@ -209,9 +377,14 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", liteocr_core::VERSION)?;
     m.add("CoreError", m.py().get_type::<CoreError>())?;
     m.add_class::<PyRouter>()?;
+    m.add_function(wrap_pyfunction!(parse, m)?)?;
+    m.add_function(wrap_pyfunction!(aparse, m)?)?;
     m.add_function(wrap_pyfunction!(ocr, m)?)?;
     m.add_function(wrap_pyfunction!(aocr, m)?)?;
+    m.add_function(wrap_pyfunction!(extract, m)?)?;
+    m.add_function(wrap_pyfunction!(aextract, m)?)?;
     m.add_function(wrap_pyfunction!(list_models, m)?)?;
+    m.add_function(wrap_pyfunction!(modes, m)?)?;
     m.add_function(wrap_pyfunction!(providers, m)?)?;
     m.add_function(wrap_pyfunction!(pricing, m)?)?;
     m.add_function(wrap_pyfunction!(set_pricing, m)?)?;

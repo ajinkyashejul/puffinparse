@@ -1,9 +1,25 @@
-"""Unified response types. These mirror the Rust structs in ``liteocr-core`` 1:1."""
+"""Unified response types. These mirror the Rust structs in ``liteocr-core`` 1:1.
+
+There is one response type per **mode**:
+
+==========  ==========================  ===================================================
+Mode        Response                    Contents
+==========  ==========================  ===================================================
+``parse``   :class:`ParseResponse`      markdown + typed :class:`Block` s with boxes
+``ocr``     :class:`TextResponse`       plain text + :class:`Line` / :class:`Word` boxes
+``extract`` :class:`ExtractResponse`    a JSON object shaped by your schema, + citations
+==========  ==========================  ===================================================
+"""
 
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Union
+
+#: What a call asks a provider to do. Providers can only be swapped within a mode.
+Mode = Literal["parse", "ocr", "extract"]
+
+MODES: tuple[Mode, ...] = ("parse", "ocr", "extract")
 
 BlockType = Literal[
     "text",
@@ -48,6 +64,13 @@ class BBox:
         )
 
 
+def _bbox(d: Optional[dict[str, Any]]) -> Optional[BBox]:
+    return BBox(**d) if d else None
+
+
+# ---- parse mode ----------------------------------------------------------------------------------
+
+
 @dataclass
 class Block:
     type: BlockType
@@ -59,13 +82,12 @@ class Block:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Block:
-        bbox = d.get("bbox")
         return cls(
             type=d.get("type", "other"),
             content=d.get("content", ""),
             page_number=int(d.get("page_number", 1)),
             text=d.get("text"),
-            bbox=BBox(**bbox) if bbox else None,
+            bbox=_bbox(d.get("bbox")),
             confidence=d.get("confidence"),
         )
 
@@ -114,8 +136,8 @@ class Usage:
 
 
 @dataclass
-class OcrResponse:
-    """The unified result of an OCR call, identical across providers."""
+class ParseResponse:
+    """Result of a ``parse``-mode call: layout-aware markdown and typed blocks."""
 
     id: str
     provider: str
@@ -132,7 +154,7 @@ class OcrResponse:
     raw: Any = None
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> OcrResponse:
+    def from_dict(cls, d: dict[str, Any]) -> ParseResponse:
         return cls(
             id=d["id"],
             provider=d["provider"],
@@ -168,6 +190,194 @@ class OcrResponse:
         return self.markdown
 
 
+# ---- ocr mode ------------------------------------------------------------------------------------
+
+
+@dataclass
+class Word:
+    """A recognised word with its box and confidence."""
+
+    text: str
+    bbox: Optional[BBox] = None
+    confidence: Optional[float] = None
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> Word:
+        return cls(text=d.get("text", ""), bbox=_bbox(d.get("bbox")), confidence=d.get("confidence"))
+
+
+@dataclass
+class Line:
+    """A recognised line of text (a run of words on one baseline)."""
+
+    text: str
+    bbox: Optional[BBox] = None
+    confidence: Optional[float] = None
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> Line:
+        return cls(text=d.get("text", ""), bbox=_bbox(d.get("bbox")), confidence=d.get("confidence"))
+
+
+@dataclass
+class TextPage:
+    page_number: int
+    text: str
+    lines: list[Line] = field(default_factory=list)
+    words: list[Word] = field(default_factory=list)
+    width: Optional[float] = None
+    height: Optional[float] = None
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> TextPage:
+        return cls(
+            page_number=int(d.get("page_number", 1)),
+            text=d.get("text", ""),
+            lines=[Line.from_dict(x) for x in d.get("lines", [])],
+            words=[Word.from_dict(x) for x in d.get("words", [])],
+            width=d.get("width"),
+            height=d.get("height"),
+        )
+
+
+@dataclass
+class TextResponse:
+    """Result of an ``ocr``-mode call: plain text with word/line geometry, no layout semantics."""
+
+    id: str
+    provider: str
+    model: str
+    pages: list[TextPage]
+    text: str
+    usage: Usage
+    latency_ms: int
+    created_at: str
+    provider_job_id: Optional[str] = None
+    cost_usd: Optional[float] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    raw: Any = None
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> TextResponse:
+        return cls(
+            id=d["id"],
+            provider=d["provider"],
+            model=d["model"],
+            pages=[TextPage.from_dict(p) for p in d.get("pages", [])],
+            text=d.get("text", ""),
+            usage=Usage.from_dict(d.get("usage", {})),
+            latency_ms=int(d.get("latency_ms", 0)),
+            created_at=d.get("created_at", ""),
+            provider_job_id=d.get("provider_job_id"),
+            cost_usd=d.get("cost_usd"),
+            metadata=dict(d.get("metadata", {}) or {}),
+            raw=d.get("raw"),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @property
+    def num_pages(self) -> int:
+        return len(self.pages)
+
+    @property
+    def lines(self) -> list[Line]:
+        return [line for p in self.pages for line in p.lines]
+
+    @property
+    def words(self) -> list[Word]:
+        return [w for p in self.pages for w in p.words]
+
+    def __str__(self) -> str:
+        return self.text
+
+
+# ---- extract mode --------------------------------------------------------------------------------
+
+
+@dataclass
+class Citation:
+    """Where an extracted value came from."""
+
+    page_number: int
+    bbox: Optional[BBox] = None
+    text: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> Citation:
+        return cls(page_number=int(d.get("page_number", 1)), bbox=_bbox(d.get("bbox")), text=d.get("text"))
+
+
+@dataclass
+class FieldInfo:
+    """Per-field confidence and citations, keyed in :attr:`ExtractResponse.fields` by JSON pointer."""
+
+    confidence: Optional[float] = None
+    citations: list[Citation] = field(default_factory=list)
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> FieldInfo:
+        return cls(
+            confidence=d.get("confidence"),
+            citations=[Citation.from_dict(c) for c in d.get("citations", [])],
+        )
+
+
+@dataclass
+class ExtractResponse:
+    """Result of an ``extract``-mode call: the object your schema asked for, plus provenance."""
+
+    id: str
+    provider: str
+    model: str
+    data: Any
+    usage: Usage
+    latency_ms: int
+    created_at: str
+    provider_job_id: Optional[str] = None
+    fields: dict[str, FieldInfo] = field(default_factory=dict)
+    cost_usd: Optional[float] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    raw: Any = None
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> ExtractResponse:
+        return cls(
+            id=d["id"],
+            provider=d["provider"],
+            model=d["model"],
+            data=d.get("data"),
+            usage=Usage.from_dict(d.get("usage", {})),
+            latency_ms=int(d.get("latency_ms", 0)),
+            created_at=d.get("created_at", ""),
+            provider_job_id=d.get("provider_job_id"),
+            fields={k: FieldInfo.from_dict(v) for k, v in (d.get("fields") or {}).items()},
+            cost_usd=d.get("cost_usd"),
+            metadata=dict(d.get("metadata", {}) or {}),
+            raw=d.get("raw"),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def field_info(self, pointer: str) -> Optional[FieldInfo]:
+        """Confidence / citations for a JSON pointer into :attr:`data`, e.g. ``"/invoice/total"``."""
+        return self.fields.get(pointer)
+
+    def citations(self, pointer: str) -> list[Citation]:
+        """Citations for one field, or an empty list if the provider reported none."""
+        info = self.fields.get(pointer)
+        return list(info.citations) if info else []
+
+    def __str__(self) -> str:
+        return str(self.data)
+
+
+#: Any mode's response.
+Response = Union[ParseResponse, TextResponse, ExtractResponse]
+
+
 @dataclass
 class Metrics:
     """Benchmark metrics between a prediction and a ground truth (see ``liteocr.score``)."""
@@ -199,4 +409,22 @@ class Metrics:
         )
 
 
-__all__ = ["BBox", "Block", "BlockType", "Metrics", "OcrResponse", "Page", "Usage"]
+__all__ = [
+    "MODES",
+    "BBox",
+    "Block",
+    "BlockType",
+    "Citation",
+    "ExtractResponse",
+    "FieldInfo",
+    "Line",
+    "Metrics",
+    "Mode",
+    "Page",
+    "ParseResponse",
+    "Response",
+    "TextPage",
+    "TextResponse",
+    "Usage",
+    "Word",
+]

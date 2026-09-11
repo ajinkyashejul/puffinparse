@@ -4,7 +4,7 @@ use anyhow::{bail, Context, Result};
 use clap::Subcommand;
 use futures::stream::{self, StreamExt};
 use liteocr_core::bench::{score, summarize, Metrics, NormalizeOptions, Summary};
-use liteocr_core::{OcrRequest, OutputFormat};
+use liteocr_core::{DocumentRequest, OutputFormat};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -196,8 +196,9 @@ async fn run_bench(args: RunArgs) -> Result<()> {
     if docs.is_empty() {
         bail!("no documents selected");
     }
+    // The benchmark scores `parse` output, so every model must serve that mode.
     for m in &args.models {
-        liteocr_core::ModelRef::parse(m)?;
+        liteocr_core::ModelRef::parse_for(m, liteocr_core::Mode::Parse)?;
     }
     let norm = NormalizeOptions { case_insensitive: !args.case_sensitive, ..NormalizeOptions::default() };
     eprintln!("dataset {} v{} ({} docs, sha256 {}…)", manifest.name, manifest.version, docs.len(), &sha[..12]);
@@ -310,7 +311,7 @@ async fn run_doc(
             }
         }
     };
-    let mut req = OcrRequest::from_path(dataset.join(&doc.file))
+    let mut req = DocumentRequest::from_path(dataset.join(&doc.file))
         .model(model)
         .timeout_secs(timeout)
         .output(OutputFormat::Markdown);
@@ -319,7 +320,7 @@ async fn run_doc(
             req = req.provider_options(opts);
         }
     }
-    match liteocr_core::ocr(req).await {
+    match liteocr_core::parse(req).await {
         Ok(resp) => {
             if let Some(dir) = save {
                 let d = dir.join(model.replace('/', "_"));

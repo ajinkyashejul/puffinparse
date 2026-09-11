@@ -11,9 +11,10 @@ Status: `v0.1` — providers: **Reducto**, **Extend**, **LlamaParse**.
 
 ### Goals
 
-1. **Single call, any provider.** `liteocr.ocr("invoice.pdf", model="reducto/standard")`
-   returns the same `OcrResponse` shape whether the backend is Reducto, Extend,
-   LlamaParse, or anything added later. Switching provider is a one-string change.
+1. **Single call, any provider.** `liteocr.parse("invoice.pdf", model="reducto/standard")`
+   returns the same `ParseResponse` shape whether the backend is Reducto, Extend,
+   LlamaParse, or anything added later. Switching provider is a one-string change,
+   within a mode (§3.1).
 2. **Fast and lite.** The core is a Rust library (`liteocr-core`) with a small
    dependency set. Python only wraps it (PyO3). No provider SDKs are vendored;
    every provider is talked to over plain HTTPS with `reqwest`.
@@ -32,8 +33,10 @@ Status: `v0.1` — providers: **Reducto**, **Extend**, **LlamaParse**.
   crate can sit on top of `Router`).
 - Running local/open-weight OCR models (Tesseract, PaddleOCR). The provider
   trait allows it later; v0.1 is API providers only.
-- Structured extraction / classification products of the providers. LiteOCR
-  covers *parsing* (document → text/markdown/blocks). Extraction is out of scope.
+- A parsing-only scope. v0.1 specifies and wires three modes end to end (§3.1); which models
+  serve `extract` is a registry fact reported by `list_models("extract")`, and the three
+  original providers serve `parse` and `ocr` only. Classification and other vendor products
+  remain out of scope.
 
 ---
 
@@ -42,15 +45,18 @@ Status: `v0.1` — providers: **Reducto**, **Extend**, **LlamaParse**.
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │  Python SDK (python/liteocr)         CLI (crates/liteocr-cli)      │
-│  liteocr.ocr / aocr / Router         liteocr parse | bench | ...   │
+│  parse / ocr / extract (+ a*)        liteocr parse | ocr | extract │
+│  Router(models, mode=...)            liteocr providers | bench     │
 └───────────────┬────────────────────────────────┬───────────────────┘
                 │ PyO3 (crates/liteocr-python)   │
 ┌───────────────▼────────────────────────────────▼───────────────────┐
 │  liteocr-core (Rust)                                               │
-│  ├─ types        OcrRequest / OcrResponse / Page / Block / Usage    │
-│  ├─ providers    trait OcrProvider  { reducto, extend, llamaparse } │
+│  ├─ modes        parse → Parse / ocr → Text / extract → Extract     │
+│  ├─ types        DocumentRequest / ParseResponse / TextResponse /   │
+│  │               ExtractResponse / Page / Block / Line / Word       │
+│  ├─ providers    trait Provider     { reducto, extend, llamaparse } │
 │  ├─ router       fallbacks, retries, strategy (ordered/round-robin) │
-│  ├─ pricing      embedded price table → cost_usd                    │
+│  ├─ pricing      embedded per-mode price table → cost_usd           │
 │  ├─ input        path | bytes | url  → DocumentInput                │
 │  └─ bench        text normalisation + metrics (CER, WER, similarity)│
 └────────────────────────────────────────────────────────────────────┘
@@ -61,27 +67,63 @@ Crates:
 | Crate | Purpose |
 |---|---|
 | `crates/liteocr-core` | Library. All provider logic, types, router, pricing, benchmark metrics. `#![forbid(unsafe_code)]`. |
-| `crates/liteocr-cli` | `liteocr` binary: `parse`, `providers`, `bench run`, `bench report`. |
+| `crates/liteocr-cli` | `liteocr` binary: `parse`, `ocr`, `extract`, `providers`, `bench run`, `bench report`. |
 | `crates/liteocr-python` | PyO3 extension module `liteocr._core`, built with maturin. |
 | `python/liteocr` | Pure-Python public API, dataclasses, callbacks, typing. |
 | `benchmark/` | Datasets, manifests, ground truth, results, leaderboard generator. |
 
 ---
 
-## 3. Model naming
+## 3. Modes and model naming
 
-Like LiteLLM, the `model` string selects provider and mode: `"<provider>/<model>"`.
+### 3.1 Modes
 
-| Provider | Models (v0.1) | Maps to |
-|---|---|---|
-| `reducto` | `reducto/standard` (default), `reducto/r-1`, `reducto/agentic` | default settings / `settings.model="r-1"` / `enhance.agentic=[{scope:text},{scope:table}]` |
-| `extend` | `extend/parse_performance` (default), `extend/parse_light`, `extend/parse_auto` | `config.engine` |
-| `llamaparse` | `llamaparse/fast`, `llamaparse/cost_effective` (default), `llamaparse/agentic`, `llamaparse/agentic_plus` | `tier` form field (+ `version=latest`) |
+Document-AI vendors sell three different products, and they are not interchangeable. LiteOCR
+makes that explicit: every call names a **mode**, and the mode decides both which providers can
+serve it and what comes back.
+
+| Mode | Entry point | Response | What it is for |
+|---|---|---|---|
+| `parse` | `liteocr.parse` / `liteocr_core::parse` | `ParseResponse` (§5.1) | layout-aware markdown + typed blocks: RAG chunks, tables, structure |
+| `ocr` | `liteocr.ocr` / `liteocr_core::ocr` | `TextResponse` (§5.2) | plain text with line/word boxes: search, redaction, overlays |
+| `extract` | `liteocr.extract` / `liteocr_core::extract` | `ExtractResponse` (§5.3) | a JSON object shaped by a schema, with per-field citations |
+
+**Providers are swappable only within a mode.** A one-string provider switch is only honest
+between models that do the same job: a markdown parse and a schema extraction are not
+substitutes for each other, and a router that silently fell back from one to the other would
+change the shape of the answer. So each model in the registry declares `modes: &[Mode]`, and
+`ModelRef::parse_for(model, mode)` rejects a model that does not serve the requested mode —
+before any network call, with a message naming the mode and the models that do serve it.
+
+`Mode` is a Rust enum (`Mode::{Parse, Ocr, Extract}`) with `FromStr` (`"ocr"`/`"text"`,
+`"extract"`/`"extraction"`, case-insensitive), `as_str`, and `Mode::ALL`. In Python it is the
+string literal type `liteocr.Mode = Literal["parse", "ocr", "extract"]`. `list_models(mode)`
+(`list_models_for` in Rust) lists the models for one mode; with no mode it lists all of them.
+
+A provider that has no native OCR endpoint serves `ocr` from its own parse output (the default
+`Provider::ocr` implementation): lines come from block text, words from lines, and the response
+is tagged `metadata["liteocr_derived_from"] = "parse"` so callers can tell native OCR geometry
+from derived geometry. Nothing is derived across any other mode pair.
+
+### 3.2 Model naming
+
+Like LiteLLM, the `model` string selects provider and model: `"<provider>/<model>"`.
+
+| Provider | Models (v0.1) | Modes | Maps to |
+|---|---|---|---|
+| `reducto` | `reducto/standard` (default), `reducto/r-1`, `reducto/agentic` | parse, ocr | default settings / `settings.model="r-1"` / `enhance.agentic=[{scope:text},{scope:table}]` |
+| `extend` | `extend/parse_performance` (default), `extend/parse_light`, `extend/parse_auto` | parse, ocr | `config.engine` |
+| `llamaparse` | `llamaparse/fast`, `llamaparse/cost_effective` (default), `llamaparse/agentic`, `llamaparse/agentic_plus` | parse, ocr | `tier` form field (+ `version=latest`) |
+
+The three providers above serve `parse` and `ocr` only. `list_models("extract")` reports which
+models (if any) serve extraction; calling `extract` with a parse-only model raises
+`UnsupportedModelError` before any network call.
 
 Aliases: `llama`, `llama_parse`, `llamacloud` → `llamaparse`. Matching is case-insensitive.
 
-`model="reducto"` (no slash) selects the provider default. Unknown providers or
-models raise `UnsupportedModelError` before any network call.
+`model="reducto"` (no slash) selects the provider's default model **for the mode being called**.
+Unknown providers or models raise `UnsupportedModelError` before any network call, as does a
+known model asked for a mode it does not declare.
 
 Provider-specific knobs that do not fit the common request are passed through
 `provider_options` (a JSON object) and merged into the provider request body
@@ -91,15 +133,22 @@ verbatim. This is the escape hatch; it never changes the response shape.
 
 ## 4. Unified request
 
+### 4.1 The common document request
+
+Every mode takes the same document request; `parse` and `ocr` take nothing else.
+
 ```python
-liteocr.ocr(
+liteocr.parse(
     input,                       # str path | pathlib.Path | bytes | "https://..." URL
-    model: str = "reducto",      # "<provider>/<model>"
+    model: str = "reducto",      # "<provider>/<model>", must support this mode
     *,
     filename: str | None = None, # required when input is bytes
     pages: str | None = None,    # "1-3,7" 1-based page selection (best effort per provider)
     language: str | None = None, # BCP-47 hint, forwarded if provider supports it
-    output: Literal["markdown", "text"] = "markdown",   # preferred `content` of blocks
+    output: Literal["markdown", "text"] = "markdown",   # preferred `content` of blocks (parse only)
+    output_format: str | None = None,   # "reducto" | "extend" | "llamaparse": return that vendor's
+                                        # native JSON shape instead of the unified response
+                                        # (docs/COMPAT.md, ADR-13); None = unified
     provider_options: dict | None = None,
     include_raw: bool = False,   # attach the provider's raw JSON to response.raw
     timeout: float = 300.0,      # seconds, whole call including polling
@@ -107,12 +156,41 @@ liteocr.ocr(
     api_key: str | None = None,  # overrides env var
     base_url: str | None = None, # overrides provider base URL
     metadata: dict | None = None # echoed back, useful for callbacks/logging
-) -> OcrResponse
+) -> ParseResponse
 ```
 
-`aocr(...)` is the `async def` equivalent.
+`aparse(...)` is the `async def` equivalent. In Rust this is `DocumentRequest`, a builder over
+the same fields.
 
-Input handling (`DocumentInput`):
+### 4.2 `ocr`
+
+```python
+liteocr.ocr(input, model="reducto", *, ...same keywords, minus `output`...) -> TextResponse
+```
+
+`ocr` always returns plain text, so `output` does not apply; `aocr(...)` is the async form.
+
+### 4.3 `extract`
+
+```python
+liteocr.extract(
+    input,
+    schema: dict,                # JSON Schema (draft 2020-12 subset) object for the result
+    *,
+    model: str = "reducto",      # must support the `extract` mode
+    instructions: str | None = None,  # extra natural-language guidance, forwarded if supported
+    citations: bool = False,     # ask for per-field page/box/source-text citations
+    ...same common keywords as §4.1...
+) -> ExtractResponse
+```
+
+`aextract(...)` is the async form. In Rust this is `ExtractRequest { document: DocumentRequest
+(flattened when serialised), schema, instructions, citations }`. A `schema` that is not a JSON
+object is rejected before any network call (`TypeError` in Python, `InputError` in the core).
+
+### 4.4 Input handling
+
+Input handling (`DocumentInput`) is identical in all three modes:
 
 - **Path** → read bytes, sniff MIME from extension (`mime_guess`), upload.
 - **Bytes** → require `filename` (used for MIME + provider upload).
@@ -124,11 +202,17 @@ pre-validate beyond a non-empty body.
 
 ---
 
-## 5. Unified response
+## 5. Unified responses
+
+One response type per mode. All three carry the same envelope — `id`, `provider`, `model`,
+`provider_job_id`, `usage`, `cost_usd`, `latency_ms`, `created_at`, `metadata`, `raw` — and
+differ only in the payload.
+
+### 5.1 `parse` → `ParseResponse`
 
 ```python
 @dataclass
-class OcrResponse:
+class ParseResponse:
     id: str                    # liteocr-generated uuid
     provider: str              # "reducto"
     model: str                 # "reducto/standard"
@@ -179,6 +263,77 @@ Rules:
 - `bbox` is normalised so consumers can draw overlays without knowing the
   page size. Providers reporting absolute coordinates are divided by page dims.
 
+### 5.2 `ocr` → `TextResponse`
+
+```python
+@dataclass
+class TextResponse:
+    id: str
+    provider: str
+    model: str
+    provider_job_id: str | None
+    pages: list[TextPage]
+    text: str                  # whole document, pages joined by "\n\n"
+    usage: Usage
+    cost_usd: float | None
+    latency_ms: int
+    created_at: str
+    metadata: dict             # "liteocr_derived_from": "parse" when derived (§3.1)
+    raw: Any | None
+
+@dataclass
+class TextPage:
+    page_number: int           # 1-based
+    width: float | None
+    height: float | None
+    text: str                  # plain text in reading order, lines separated by "\n"
+    lines: list[Line]
+    words: list[Word]
+
+@dataclass
+class Line:                    # and Word, identical shape
+    text: str
+    bbox: BBox | None          # normalised 0..1, origin top-left
+    confidence: float | None
+```
+
+No markdown, no block types: `ocr` is recognition, not layout analysis. When the result is
+derived from a parse (§3.1), lines carry their block's box and words carry none.
+
+### 5.3 `extract` → `ExtractResponse`
+
+```python
+@dataclass
+class ExtractResponse:
+    id: str
+    provider: str
+    model: str
+    provider_job_id: str | None
+    data: Any                  # the extracted object, shaped by the request schema
+    fields: dict[str, FieldInfo]   # keyed by JSON pointer into `data`, e.g. "/invoice/total"
+    usage: Usage
+    cost_usd: float | None
+    latency_ms: int
+    created_at: str
+    metadata: dict
+    raw: Any | None
+
+@dataclass
+class FieldInfo:
+    confidence: float | None
+    citations: list[Citation]
+
+@dataclass
+class Citation:
+    page_number: int           # 1-based
+    bbox: BBox | None          # normalised 0..1, origin top-left
+    text: str | None           # source text the value was read from, if reported
+```
+
+`fields` is empty when the provider reports no per-field metadata; `citations` is only populated
+when the request asked for them and the provider supports them. `ExtractResponse.field_info(p)`
+and `.citations(p)` are Python conveniences over the pointer map.
+
 ---
 
 ## 6. Errors
@@ -192,11 +347,15 @@ All errors derive from `liteocr.LiteOCRError`:
 | `BadRequestError` | 4xx other than auth/rate limit |
 | `ProviderError` | 5xx or provider-reported job failure |
 | `TimeoutError` | overall timeout (upload + poll) exceeded |
-| `UnsupportedModelError` | bad `model` string |
-| `InputError` | unreadable file, bytes without filename, empty body |
+| `UnsupportedModelError` | bad `model` string, or a model that does not serve the requested mode |
+| `InputError` | unreadable file, bytes without filename, empty body, bad mode name, router asked for another mode |
 
 Every error carries `provider`, `status_code` (if any), `message`, and
 `request_id`/`job_id` when available.
+
+Mode errors are raised before any network call. `UnsupportedModelError` from a mode mismatch
+names the offending model, the modes it does serve, and the models that serve the mode you
+asked for.
 
 ---
 
@@ -205,17 +364,26 @@ Every error carries `provider`, `status_code` (if any), `message`, and
 ```python
 router = liteocr.Router(
     models=["reducto/standard", "llamaparse/agentic", "extend/parse_light"],
+    mode="parse",                # "parse" (default) | "ocr" | "extract"
     strategy="ordered",          # "ordered" (fallback order) | "round_robin"
-    max_retries=2,
-    fallback_on=("ProviderError", "RateLimitError", "TimeoutError"),
+    fallback_on=("ProviderError", "RateLimitError", "TimeoutError", "NetworkError"),
 )
-resp = router.ocr("doc.pdf")     # tries each in turn / rotates
+resp = router.parse("doc.pdf")   # tries each in turn / rotates
 ```
+
+A router is bound to one mode. Every model is validated against it at construction
+(`UnsupportedModelError` otherwise), and calling a method for a different mode — say
+`Router([...], mode="parse").ocr(...)` — raises `InputError` rather than answering with a
+different shape. `router.mode` reports it; `parse`/`ocr`/`extract` (and `aparse`/`aocr`/
+`aextract`) are the per-mode calls, each taking the same arguments as the module-level function
+minus `model`.
 
 Semantics: `ordered` → try `models[0]`, on a fallback-eligible error move on.
 `round_robin` → rotate the starting index per call, then fallback in order.
 The router records per-model success/failure counts and average latency,
 exposed as `router.stats()`. Auth/BadRequest/Input errors never trigger fallback.
+When a fallback served the call, the response metadata carries `liteocr_fallback_index` and
+`liteocr_fallback_from_error`.
 
 ---
 
@@ -293,10 +461,14 @@ the captured payloads live in `crates/liteocr-core/tests/fixtures/` and drive un
 ## 9. Pricing
 
 `crates/liteocr-core/pricing.json` (embedded via `include_str!`) maps
-`"<provider>/<model>"` → `{ "per_page_usd": float, "source": url, "updated": date }`.
-`cost_usd = usage.pages * per_page_usd` unless the provider reports credits with
-a known credit price, in which case `credits * per_credit_usd` is used.
-Users can override with `liteocr.set_pricing({"reducto/standard": 0.01})`.
+`"<provider>/<model>"` → `{ "parse": float, "ocr": float, "extract": float, "source": url,
+"updated": date }` — a per-page price **per mode**, each optional, since vendors price parsing,
+OCR and extraction differently. `cost_usd = usage.pages * price_per_page(model, mode)` unless the
+provider reports credits with a known credit price, in which case `credits * per_credit_usd` is
+used. A mode with no price yields `cost_usd = None`.
+Users can override one mode at a time with
+`liteocr.set_pricing({"reducto/standard": 0.01}, "parse")`, and ask for an estimate with
+`liteocr.estimate_cost("reducto/standard", 1000, "ocr")`.
 Prices are best-effort public list prices; the benchmark reports them as such.
 
 ---
@@ -373,18 +545,31 @@ truth file, so a result is tied to an exact dataset revision.
 
 ## 11. Python SDK details
 
-- `python/liteocr/__init__.py` exports `ocr`, `aocr`, `Router`, `OcrResponse`,
-  `Page`, `Block`, `BBox`, `Usage`, errors, `set_pricing`, `list_models`,
-  `register_callback`.
-- Callbacks: `liteocr.success_callback: list[Callable[[OcrResponse], None]]`,
-  `liteocr.failure_callback` — invoked after each call; awaitables returned by a
-  callback are awaited (on the caller's loop for `aocr`, on a private loop for `ocr`).
+- `python/liteocr/__init__.py` exports the three modes — `parse`/`aparse`, `ocr`/`aocr`,
+  `extract`/`aextract` — plus `Router`, the response dataclasses (`ParseResponse`, `Page`,
+  `Block`, `BBox`, `Usage`, `TextResponse`, `TextPage`, `Line`, `Word`, `ExtractResponse`,
+  `FieldInfo`, `Citation`), the `Mode` literal (`"parse" | "ocr" | "extract"`), errors,
+  `set_pricing`, `estimate_cost`, `list_models`, `resolve_model`, `providers`, `modes`
+  and the callback lists.
+- Mode arguments are plain strings everywhere (`list_models("ocr")`,
+  `Router([...], mode="ocr")`, `set_pricing({...}, "ocr")`, `estimate_cost(m, 1000, "ocr")`),
+  typed as `liteocr.Mode`.
+- Callbacks: `liteocr.success_callback: list[Callable[[Response], None]]` where `Response` is
+  the union of the three response types, and `liteocr.failure_callback` — both fire for every
+  mode, sync and async; awaitables returned by a callback are awaited (on the caller's loop for
+  `a*` calls, on a private loop otherwise).
 - Bytes never cross the FFI boundary as base64: the Python layer passes the document
-  as a separate `bytes` argument and the extension builds `DocumentInput::Bytes`.
+  as a separate `bytes` argument and the extension builds `DocumentInput::Bytes`. `extract`
+  follows the same convention — the request dict is `ExtractRequest` with the document fields
+  flattened into it.
+- Errors from a mode mismatch are enriched in Python: an `UnsupportedModelError` from
+  `extract`/`ocr` names the mode *and* the models that serve it (`list_models(mode)`), so a
+  user who passes a parse-only model to `extract` is told what to use instead. Passing a
+  non-dict `schema` raises `TypeError` before any FFI call.
 - `liteocr.score`, `normalize_text`, `markdown_to_text` expose the benchmark metrics.
 - Logging: `LITEOCR_LOG=debug` enables tracing in the core; Python uses
   `logging.getLogger("liteocr")`.
-- Typing: fully typed, `py.typed` shipped.
+- Typing: fully typed, `py.typed` shipped; dataclasses mirror the Rust structs 1:1.
 - Build: maturin, `abi3-py39` wheels, `pip install liteocr`.
 
 ---
@@ -392,12 +577,29 @@ truth file, so a result is tied to an exact dataset revision.
 ## 12. CLI
 
 ```
-liteocr parse <file|url> [--model reducto/standard] [--format markdown|text|json] [--raw]
-liteocr providers                          # lists providers, models, pricing, key status
-liteocr bench run|report|score             # see §10
+liteocr parse   <file|url> [--model reducto/standard] [--format markdown|text|json] [--raw]
+liteocr ocr     <file|url> [--model reducto/standard] [--format text|json]
+liteocr extract <file|url> --schema <file.json|inline JSON> [--instructions TEXT] [--citations]
+liteocr providers [--mode parse|ocr|extract] [--json]   # models, modes, per-mode pricing, key status
+liteocr bench run|report|score                          # see §10 (parse mode)
 ```
 
-Exit code 0 on success, 1 on provider error, 2 on usage/config error.
+One subcommand per mode; `--model` must name a model that serves that subcommand's mode, and a
+bare provider name resolves to its default model *for that mode*. All three share the common
+options (`--pages`, `--language`, `--options`, `--timeout`, `--max-retries`, `--api-key`,
+`--base-url`, `--raw`).
+
+- `parse` prints markdown (default), plain text, or the whole `ParseResponse` as JSON.
+- `ocr` prints the plain text (default) or the whole `TextResponse` as JSON, which includes
+  per-page `lines[]` and `words[]` with boxes.
+- `extract` always prints the `ExtractResponse` as JSON. `--schema` is either a path to a JSON
+  file or inline JSON starting with `{`.
+- `providers` lists every model with the modes it serves and its price in each mode; `--mode`
+  filters the table to one mode and shows a single price column.
+
+Non-JSON output prints a one-line summary to stderr (`[model] N page(s) in T ms, est. $X`).
+Exit code 0 on success, 1 on provider error, 2 on usage/config error (including a model that
+does not serve the requested mode).
 
 ---
 

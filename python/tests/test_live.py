@@ -15,7 +15,7 @@ MODELS = [
 
 @pytest.mark.parametrize("model", MODELS)
 def test_parse_sample_pdf(model: str) -> None:
-    resp = liteocr.ocr(SAMPLE_PDF, model=model, timeout=240)
+    resp = liteocr.parse(SAMPLE_PDF, model=model, timeout=240)
     assert resp.model == model
     assert resp.usage.pages == 2
     assert len(resp.pages) == 2
@@ -27,8 +27,32 @@ def test_parse_sample_pdf(model: str) -> None:
 
 
 @pytest.mark.parametrize("model", MODELS)
+def test_ocr_sample_pdf(model: str) -> None:
+    resp = liteocr.ocr(SAMPLE_PDF, model=model, timeout=240)
+    assert resp.model == model
+    assert resp.usage.pages == 2
+    assert len(resp.pages) == 2
+    assert resp.text.strip(), "expected plain text"
+    assert resp.pages[0].lines, "expected recognised lines"
+    assert resp.pages[0].lines[0].text.strip()
+    assert resp.pages[0].words, "expected recognised words"
+    assert resp.cost_usd is not None and resp.cost_usd > 0
+    # the ocr result must not carry layout markdown: it is text only
+    assert not hasattr(resp, "markdown")
+
+
+@pytest.mark.parametrize("model", MODELS)
+async def test_aparse_bytes_input(model: str) -> None:
+    data = SAMPLE_PDF.read_bytes()
+    resp = await liteocr.aparse(data, model=model, filename="multipage_001.pdf", pages="1", timeout=240)
+    assert resp.usage.pages >= 1
+    assert resp.pages[0].markdown.strip()
+
+
+@pytest.mark.parametrize("model", MODELS)
 async def test_aocr_bytes_input(model: str) -> None:
     data = SAMPLE_PDF.read_bytes()
     resp = await liteocr.aocr(data, model=model, filename="multipage_001.pdf", pages="1", timeout=240)
     assert resp.usage.pages >= 1
-    assert resp.pages[0].markdown.strip()
+    assert resp.pages[0].text.strip()
+    assert resp.pages[0].lines

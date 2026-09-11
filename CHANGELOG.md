@@ -9,6 +9,35 @@ Python package `liteocr` share a single version.
 
 ## [Unreleased]
 
+### Added
+
+- **Native-format compatibility (`output_format`).** A response can be rendered in a
+  provider's own JSON shape instead of the unified one, so an integration already written
+  against Reducto, Extend or LlamaParse can switch the underlying provider without
+  rewriting its parsing code: `ParseResponse::to_format("reducto")` in Rust
+  (`liteocr_core::compat::{Format, render_parse, render_extract}`), with
+  `DocumentRequest.output_format` carrying and validating the choice. What is guaranteed
+  is structural fidelity — key set, chunk/page and block counts, content strings, block-type
+  vocabulary, coordinate units and billed pages — not byte equality; the always-null fields
+  and the lossy type mappings are enumerated in [`docs/COMPAT.md`](docs/COMPAT.md), and each
+  provider's fixture is round-tripped through its own renderer in the test suite. Extract-mode
+  rendering is best effort. See ADR-13.
+
+### Changed
+
+- **Modes.** Every call now names a mode — `parse` (markdown + typed blocks), `ocr`
+  (plain text with line/word boxes) or `extract` (a JSON object from a schema, with
+  per-field confidence and citations) — and providers can only be swapped within a
+  mode. The Python SDK exposes `parse`/`aparse`, `ocr`/`aocr` (now plain text, not
+  markdown) and `extract`/`aextract`, the new `TextResponse` / `ExtractResponse`
+  dataclasses, a mode-bound `Router(models, mode=...)`, and mode arguments on
+  `list_models`, `resolve_model`, `set_pricing` and `estimate_cost`; pricing is now
+  per page *per mode*. The CLI gains `liteocr ocr` and `liteocr extract`, and
+  `liteocr providers` shows modes, per-mode prices and a `--mode` filter. The old
+  `liteocr.ocr` (which returned markdown) is now `liteocr.parse`, and `OcrResponse`
+  is now `ParseResponse`. Which models serve which mode is reported by
+  `liteocr.list_models(mode)` and `liteocr providers --mode <mode>`.
+
 ## [0.1.0] - 2026-09-11
 
 Initial release.

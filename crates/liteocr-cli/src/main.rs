@@ -4,7 +4,7 @@ mod bench;
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
-use liteocr_core::{OcrRequest, OutputFormat};
+use liteocr_core::{DocumentRequest, ExtractRequest, Mode, OutputFormat};
 
 #[derive(Parser, Debug)]
 #[command(name = "liteocr", version, about = "One API for every OCR provider", long_about = None)]
@@ -15,29 +15,36 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Command {
-    /// Parse a document (path or URL) with a provider and print the result.
+    /// `parse` mode: layout-aware markdown + typed blocks.
     Parse(ParseArgs),
-    /// List providers, models, pricing, and whether an API key is configured.
+    /// `ocr` mode: plain text with line/word boxes.
+    Ocr(OcrArgs),
+    /// `extract` mode: pull a JSON object out of a document with a schema.
+    Extract(ExtractArgs),
+    /// List providers, models, modes, pricing, and whether an API key is configured.
     Providers {
+        /// Only show models that serve this mode (parse | ocr | extract).
+        #[arg(long)]
+        mode: Option<String>,
         /// Emit JSON instead of a table.
         #[arg(long)]
         json: bool,
     },
-    /// Run and report the open OCR benchmark.
+    /// Run and report the open OCR benchmark (uses `parse` mode).
     #[command(subcommand)]
     Bench(bench::BenchCommand),
 }
 
+/// Options shared by every mode.
 #[derive(clap::Args, Debug)]
-struct ParseArgs {
+struct CommonArgs {
     /// Local file path or http(s) URL.
     input: String,
-    /// Model as "<provider>/<model>" (e.g. reducto/standard, extend/parse_performance, llamaparse/agentic).
+    /// Model as "<provider>/<model>", e.g. reducto/standard. It must support this subcommand's
+    /// mode (parse | ocr | extract); `liteocr providers --mode <mode>` lists the candidates.
+    /// A bare provider name (e.g. "reducto") picks its default model for the mode.
     #[arg(short, long, default_value = "reducto")]
     model: String,
-    /// Output format.
-    #[arg(short, long, value_enum, default_value_t = Format::Markdown)]
-    format: Format,
     /// 1-based page selection, e.g. "1-3,7".
     #[arg(short, long)]
     pages: Option<String>,
@@ -47,7 +54,7 @@ struct ParseArgs {
     /// Provider-specific options as a JSON object.
     #[arg(long, value_name = "JSON")]
     options: Option<String>,
-    /// Include the provider's raw payload (json format only).
+    /// Include the provider's raw payload (json output only).
     #[arg(long)]
     raw: bool,
     /// Whole-call timeout in seconds.
@@ -64,9 +71,76 @@ struct ParseArgs {
     base_url: Option<String>,
 }
 
+impl CommonArgs {
+    fn into_request(self, output: OutputFormat) -> Result<DocumentRequest> {
+        let mut req = DocumentRequest::from_str_input(&self.input)
+            .model(&self.model)
+            .timeout_secs(self.timeout)
+            .max_retries(self.max_retries)
+            .include_raw(self.raw)
+            .output(output);
+        if let Some(p) = self.pages {
+            req = req.pages(p);
+        }
+        if let Some(l) = self.language {
+            req = req.language(l);
+        }
+        if let Some(o) = self.options {
+            let v: serde_json::Value = serde_json::from_str(&o).context("--options must be a JSON object")?;
+            req = req.provider_options(v);
+        }
+        if let Some(k) = self.api_key {
+            req = req.api_key(k);
+        }
+        if let Some(b) = self.base_url {
+            req = req.base_url(b);
+        }
+        Ok(req)
+    }
+}
+
+#[derive(clap::Args, Debug)]
+struct ParseArgs {
+    #[command(flatten)]
+    common: CommonArgs,
+    /// Output format.
+    #[arg(short, long, value_enum, default_value_t = ParseFormat::Markdown)]
+    format: ParseFormat,
+}
+
+#[derive(clap::Args, Debug)]
+struct OcrArgs {
+    #[command(flatten)]
+    common: CommonArgs,
+    /// Output format: plain text, or the full TextResponse as JSON (text + lines + words).
+    #[arg(short, long, value_enum, default_value_t = OcrFormat::Text)]
+    format: OcrFormat,
+}
+
+#[derive(clap::Args, Debug)]
+struct ExtractArgs {
+    #[command(flatten)]
+    common: CommonArgs,
+    /// JSON Schema for the object to extract: a path to a .json file, or inline JSON.
+    #[arg(short, long, value_name = "FILE|JSON")]
+    schema: String,
+    /// Extra natural-language guidance for the extractor.
+    #[arg(long)]
+    instructions: Option<String>,
+    /// Ask for per-field citations (page, box, source text) when the provider supports them.
+    #[arg(long)]
+    citations: bool,
+}
+
 #[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
-enum Format {
+enum ParseFormat {
     Markdown,
+    Text,
+    Json,
+}
+
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
+enum OcrFormat {
     Text,
     Json,
 }
@@ -104,54 +178,79 @@ async fn main() {
 async fn run(cli: Cli) -> Result<()> {
     match cli.command {
         Command::Parse(args) => parse(args).await,
-        Command::Providers { json } => providers(json),
+        Command::Ocr(args) => ocr(args).await,
+        Command::Extract(args) => extract(args).await,
+        Command::Providers { mode, json } => providers(mode.as_deref(), json),
         Command::Bench(cmd) => bench::run(cmd).await,
     }
 }
 
 async fn parse(args: ParseArgs) -> Result<()> {
-    let mut req = OcrRequest::from_str_input(&args.input)
-        .model(&args.model)
-        .timeout_secs(args.timeout)
-        .max_retries(args.max_retries)
-        .include_raw(args.raw)
-        .output(if args.format == Format::Text { OutputFormat::Text } else { OutputFormat::Markdown });
-    if let Some(p) = args.pages {
-        req = req.pages(p);
-    }
-    if let Some(l) = args.language {
-        req = req.language(l);
-    }
-    if let Some(o) = args.options {
-        let v: serde_json::Value = serde_json::from_str(&o).context("--options must be a JSON object")?;
-        req = req.provider_options(v);
-    }
-    if let Some(k) = args.api_key {
-        req = req.api_key(k);
-    }
-    if let Some(b) = args.base_url {
-        req = req.base_url(b);
-    }
-    let resp = liteocr_core::ocr(req).await?;
+    let output = if args.format == ParseFormat::Text { OutputFormat::Text } else { OutputFormat::Markdown };
+    let req = args.common.into_request(output)?;
+    let resp = liteocr_core::parse(req).await?;
     match args.format {
-        Format::Markdown => println!("{}", resp.markdown),
-        Format::Text => println!("{}", resp.text),
-        Format::Json => println!("{}", serde_json::to_string_pretty(&resp)?),
+        ParseFormat::Markdown => println!("{}", resp.markdown),
+        ParseFormat::Text => println!("{}", resp.text),
+        ParseFormat::Json => println!("{}", serde_json::to_string_pretty(&resp)?),
     }
-    if args.format != Format::Json {
-        eprintln!(
-            "[{}] {} page(s) in {} ms{}",
-            resp.model,
-            resp.usage.pages,
-            resp.latency_ms,
-            resp.cost_usd.map(|c| format!(", est. ${c:.4}")).unwrap_or_default()
-        );
+    if args.format != ParseFormat::Json {
+        summary(&resp.model, resp.usage.pages, resp.latency_ms, resp.cost_usd);
     }
     Ok(())
 }
 
-fn providers(json: bool) -> Result<()> {
+async fn ocr(args: OcrArgs) -> Result<()> {
+    let req = args.common.into_request(OutputFormat::Text)?;
+    let resp = liteocr_core::ocr(req).await?;
+    match args.format {
+        OcrFormat::Text => {
+            println!("{}", resp.text);
+            summary(&resp.model, resp.usage.pages, resp.latency_ms, resp.cost_usd);
+        }
+        OcrFormat::Json => println!("{}", serde_json::to_string_pretty(&resp)?),
+    }
+    Ok(())
+}
+
+async fn extract(args: ExtractArgs) -> Result<()> {
+    let schema = load_schema(&args.schema)?;
+    let document = args.common.into_request(OutputFormat::Markdown)?;
+    let mut req = ExtractRequest::new(document, schema).citations(args.citations);
+    if let Some(i) = args.instructions {
+        req = req.instructions(i);
+    }
+    let resp = liteocr_core::extract(req).await?;
+    println!("{}", serde_json::to_string_pretty(&resp)?);
+    Ok(())
+}
+
+/// `--schema` is either inline JSON (starts with `{`) or a path to a JSON file.
+fn load_schema(arg: &str) -> Result<serde_json::Value> {
+    let trimmed = arg.trim();
+    if trimmed.starts_with('{') {
+        return serde_json::from_str(trimmed).context("--schema is not valid inline JSON");
+    }
+    let text = std::fs::read_to_string(trimmed).with_context(|| format!("cannot read schema file '{trimmed}'"))?;
+    serde_json::from_str(&text).with_context(|| format!("schema file '{trimmed}' is not valid JSON"))
+}
+
+fn summary(model: &str, pages: u32, latency_ms: u64, cost_usd: Option<f64>) {
+    eprintln!(
+        "[{model}] {pages} page(s) in {latency_ms} ms{}",
+        cost_usd.map(|c| format!(", est. ${c:.4}")).unwrap_or_default()
+    );
+}
+
+fn providers(mode: Option<&str>, json: bool) -> Result<()> {
+    let mode: Option<Mode> = match mode {
+        Some(m) => Some(m.parse::<Mode>()?),
+        None => None,
+    };
     let prices = liteocr_core::pricing::all_prices();
+    let price_of = |model: &str, m: Mode| prices.get(model).and_then(|e| e.for_mode(m));
+    let keep = |mi: &liteocr_core::ModelInfo| mode.map(|m| mi.supports(m)).unwrap_or(true);
+
     if json {
         let v: Vec<serde_json::Value> = liteocr_core::PROVIDERS
             .iter()
@@ -160,31 +259,51 @@ fn providers(json: bool) -> Result<()> {
                     "name": p.name,
                     "display_name": p.display_name,
                     "env_var": p.env_var,
-                    "key_configured": std::env::var(p.env_var).map(|v| !v.is_empty()).unwrap_or(false),
+                    "key_configured": key_configured(p.env_var),
                     "base_url": p.base_url,
                     "docs": p.docs,
-                    "models": p.models.iter().map(|m| serde_json::json!({
-                        "model": m.qualified(),
-                        "default": m.default,
-                        "description": m.description,
-                        "per_page_usd": prices.get(&m.qualified()).map(|e| e.per_page_usd),
-                    })).collect::<Vec<_>>(),
+                    "models": p.models.iter().filter(|m| keep(m)).map(|m| {
+                        let q = m.qualified();
+                        serde_json::json!({
+                            "model": q,
+                            "default": m.default,
+                            "description": m.description,
+                            "modes": m.modes,
+                            "per_page_usd": m.modes.iter()
+                                .filter_map(|md| price_of(&q, *md).map(|p| (md.as_str().to_string(), serde_json::json!(p))))
+                                .collect::<serde_json::Map<String, serde_json::Value>>(),
+                        })
+                    }).collect::<Vec<_>>(),
                 })
             })
             .collect();
         println!("{}", serde_json::to_string_pretty(&v)?);
         return Ok(());
     }
+
     let mut table = comfy_table::Table::new();
     table.load_style(comfy_table::presets::UTF8_FULL_CONDENSED);
-    table.set_header(["Model", "Default", "Key", "$/page", "Description"]);
+    table.set_header(["Model", "Modes", "Default", "Key", "$/page", "Description"]);
     for p in liteocr_core::PROVIDERS {
-        let key = if std::env::var(p.env_var).map(|v| !v.is_empty()).unwrap_or(false) { "✓" } else { "✗" };
-        for m in p.models {
-            let price =
-                prices.get(&m.qualified()).map(|e| format!("{:.5}", e.per_page_usd)).unwrap_or_else(|| "?".into());
+        let key = if key_configured(p.env_var) { "✓" } else { "✗" };
+        for m in p.models.iter().filter(|m| keep(m)) {
+            let q = m.qualified();
+            // With a --mode filter one number is enough; otherwise list the price of every mode.
+            let price = match mode {
+                Some(md) => price_of(&q, md).map(|p| format!("{p:.5}")).unwrap_or_else(|| "?".into()),
+                None => m
+                    .modes
+                    .iter()
+                    .map(|md| {
+                        let p = price_of(&q, *md).map(|p| format!("{p:.5}")).unwrap_or_else(|| "?".into());
+                        format!("{} {p}", md.as_str())
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n"),
+            };
             table.add_row([
-                m.qualified(),
+                q,
+                m.modes.iter().map(|md| md.as_str()).collect::<Vec<_>>().join(", "),
                 if m.default { "*".into() } else { String::new() },
                 key.into(),
                 price,
@@ -193,9 +312,18 @@ fn providers(json: bool) -> Result<()> {
         }
     }
     println!("{table}");
+    if let Some(m) = mode {
+        println!("\nShowing models for mode '{m}'. Drop --mode to see every model.");
+    } else {
+        println!("\nModes: parse (markdown + blocks), ocr (plain text + boxes), extract (JSON schema).");
+    }
     println!(
-        "\nKeys are read from: {}",
+        "Keys are read from: {}",
         liteocr_core::PROVIDERS.iter().map(|p| p.env_var).collect::<Vec<_>>().join(", ")
     );
     Ok(())
+}
+
+fn key_configured(env_var: &str) -> bool {
+    std::env::var(env_var).map(|v| !v.is_empty()).unwrap_or(false)
 }

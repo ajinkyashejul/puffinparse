@@ -8,7 +8,7 @@ path = sys.argv[1] if len(sys.argv) > 1 else "benchmark/datasets/synthetic-v1/do
 
 for model in ["reducto/standard", "extend/parse_light", "llamaparse/cost_effective"]:
     try:
-        resp = liteocr.ocr(path, model=model)
+        resp = liteocr.parse(path, model=model)
     except liteocr.AuthenticationError as e:
         print(f"{model}: skipped ({e.message})")
         continue
