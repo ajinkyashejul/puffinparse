@@ -114,3 +114,41 @@ run time with the upstream revision pinned in the manifest.
 **Consequences.** The site is the verification surface; the CLI is the reproduction surface.
 Some benchmarks (olmOCR-bench) need their own scorer implemented rather than transcript
 similarity.
+
+## ADR-11: Modes — providers are only interchangeable within a mode
+
+**Context.** "OCR provider" covers different products: plain text recognition (Textract
+DetectDocumentText, Azure Read, Google Document OCR), layout-aware parsing to markdown and typed
+blocks (Reducto, Extend, LlamaParse, Mistral OCR, Datalab, Unstructured, Upstage, Landing AI),
+and schema-driven structured extraction (Reducto Extract, Extend Extract, LlamaExtract, Azure
+prebuilt models, Textract Queries/Forms, vision LLMs with structured output). Swapping a parse
+model for an extract model is not a like-for-like switch.
+
+**Decision.** The core defines `Mode::{Parse, Ocr, Extract}` with its own request/response
+type per mode (`DocumentRequest → ParseResponse`, `DocumentRequest → TextResponse`,
+`ExtractRequest → ExtractResponse`) and its own entry point (`parse`, `ocr`, `extract`).
+Every registry model declares the modes it supports; resolution (`ModelRef::parse_for`) and
+the `Router` reject models outside the requested mode. Pricing is per model *and* mode.
+A layout provider serves `ocr` by deriving lines/words from its parse output (marked with
+`liteocr_derived_from = "parse"`), so plain-text callers can still use it, but native OCR
+endpoints override that when they exist.
+
+**Consequences.** The Python API becomes `liteocr.parse` / `liteocr.ocr` / `liteocr.extract`
+(the pre-release `liteocr.ocr` that meant parse is renamed; nothing was published). Vision
+LLMs (Gemini, OpenAI, Anthropic) fit as parse/extract models without geometry, which the
+response makes explicit by returning blocks without boxes. Adding a fourth mode (classify,
+split) is additive: a new enum variant, types, trait method and entry point.
+
+## ADR-12: Provider fan-out rules
+
+**Decision.** Each provider lives in one file (`crates/liteocr-core/src/providers/<name>.rs`),
+is declared up front in `providers/mod.rs`, and is implemented independently against the
+`Provider` trait. Shared registration points (`model.rs` registry, `pricing.json`,
+`build()`, README table, `.env.example`) are edited only by the integrator after a provider
+lands, from snippets in the provider's hand-off. Providers without a key in the environment are
+implemented from official docs with fixtures built from documented responses and `#[ignore]`
+live tests; the task board records which ones have been verified live.
+
+**Consequences.** Many providers can be built in parallel without merge conflicts; the cost is a
+short integration step per provider and, for unverified providers, a "docs-only" label until
+someone with a key runs the live tests.
