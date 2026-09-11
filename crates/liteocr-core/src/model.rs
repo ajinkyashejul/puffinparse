@@ -323,6 +323,157 @@ pub const PROVIDERS: &[ProviderInfo] = &[
             },
         ],
     },
+    ProviderInfo {
+        name: "openai",
+        display_name: "OpenAI",
+        env_var: "OPENAI_API_KEY",
+        base_url: "https://api.openai.com",
+        docs: "https://developers.openai.com/api/docs",
+        models: &[
+            ModelInfo {
+                provider: "openai",
+                model: "gpt-5.6-luna",
+                description: "OpenAI Responses API, gpt-5.6-luna (cheapest current vision model)",
+                default: true,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "openai",
+                model: "gpt-5.6-terra",
+                description: "OpenAI Responses API, gpt-5.6-terra (balanced capability/price)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "openai",
+                model: "gpt-5.6-sol",
+                description: "OpenAI Responses API, gpt-5.6-sol (flagship GPT-5.6)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "openai",
+                model: "gpt-6-astra",
+                description: "OpenAI Responses API, gpt-6-astra (most capable, most expensive)",
+                default: false,
+                modes: Mode::ALL,
+            },
+        ],
+    },
+    ProviderInfo {
+        name: "anthropic",
+        display_name: "Anthropic (Claude)",
+        env_var: "ANTHROPIC_API_KEY",
+        base_url: "https://api.anthropic.com",
+        docs: "https://platform.claude.com/docs",
+        models: &[
+            ModelInfo {
+                provider: "anthropic",
+                model: "claude-sonnet-5",
+                description: "Claude Messages API, claude-sonnet-5 (balanced vision transcription)",
+                default: true,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "anthropic",
+                model: "claude-haiku-4-5",
+                description: "Claude Messages API, claude-haiku-4-5 (cheapest, 200K context)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "anthropic",
+                model: "claude-opus-5",
+                description: "Claude Messages API, claude-opus-5 (highest accuracy)",
+                default: false,
+                modes: Mode::ALL,
+            },
+        ],
+    },
+    ProviderInfo {
+        name: "mathpix",
+        display_name: "Mathpix",
+        // Also requires MATHPIX_APP_ID (read by the provider, or provider_options.app_id).
+        env_var: "MATHPIX_APP_KEY",
+        base_url: "https://api.mathpix.com",
+        docs: "https://docs.mathpix.com",
+        models: &[
+            ModelInfo {
+                provider: "mathpix",
+                model: "pdf",
+                description: "Mathpix v3/pdf document OCR (image inputs auto-routed to v3/text); MMD + line polygons",
+                default: true,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "mathpix",
+                model: "text",
+                description: "Mathpix v3/text single-image OCR (line + word polygons, per-image billing)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+        ],
+    },
+    ProviderInfo {
+        name: "datalab",
+        display_name: "Datalab (Marker)",
+        env_var: "DATALAB_API_KEY",
+        base_url: "https://www.datalab.to",
+        docs: "https://documentation.datalab.to",
+        models: &[
+            ModelInfo {
+                provider: "datalab",
+                model: "fast",
+                description: "Datalab Convert mode=fast (lowest latency, digital-native documents)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "datalab",
+                model: "balanced",
+                description: "Datalab Convert mode=balanced (Datalab's recommended default)",
+                default: true,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "datalab",
+                model: "accurate",
+                description: "Datalab Convert mode=accurate (scans, dense layouts, complex tables)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+        ],
+    },
+    ProviderInfo {
+        name: "unstructured",
+        display_name: "Unstructured",
+        env_var: "UNSTRUCTURED_API_KEY",
+        base_url: "https://api.unstructuredapp.io",
+        docs: "https://docs.unstructured.io/api-reference/partition/overview",
+        models: &[
+            ModelInfo {
+                provider: "unstructured",
+                model: "hi_res",
+                description: "Unstructured strategy=hi_res (layout model + OCR; coordinates, table HTML, confidence)",
+                default: true,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "unstructured",
+                model: "fast",
+                description: "Unstructured strategy=fast (text-layer extraction, no OCR, rejects images)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "unstructured",
+                model: "auto",
+                description: "Unstructured strategy=auto (routes each page to fast / hi_res / VLM)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+        ],
+    },
 ];
 
 /// A parsed, validated model reference.
@@ -356,6 +507,8 @@ impl ModelRef {
         };
         let prov = match prov.as_str() {
             "llama" | "llama_parse" | "llama-parse" | "llamacloud" | "llama_cloud" => "llamaparse".to_string(),
+            "gpt" | "oai" => "openai".to_string(),
+            "claude" => "anthropic".to_string(),
             other => other.to_string(),
         };
         let info = provider_info(&prov).ok_or_else(|| {
@@ -463,6 +616,6 @@ mod tests {
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 31);
+        assert_eq!(m.len(), 46);
     }
 }

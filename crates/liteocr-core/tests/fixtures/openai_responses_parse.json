@@ -1,0 +1,56 @@
+{
+  "id": "resp_68f0a1b2c3d4e5f60123456789abcdef",
+  "object": "response",
+  "created_at": 1789171200,
+  "status": "completed",
+  "background": false,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": 32000,
+  "model": "gpt-5.6-luna",
+  "output": [
+    {
+      "id": "rs_68f0a1b2c3d4e5f6011111111111111",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_68f0a1b2c3d4e5f6022222222222222",
+      "type": "message",
+      "status": "completed",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "{\"pages\":[{\"page_number\":1,\"markdown\":\"# Hello LiteOCR\\n\\nInvoice #1234\\n\\nTotal: $56.78\"},{\"page_number\":2,\"markdown\":\"## Line Items\\n\\n| Item | Qty | Price |\\n| --- | --- | --- |\\n| Widget | 2 | $10.00 |\\n\\n*Figure: bar chart of quarterly revenue.*\"}]}"
+        }
+      ]
+    }
+  ],
+  "parallel_tool_calls": true,
+  "previous_response_id": null,
+  "reasoning": { "effort": "low", "summary": null },
+  "store": false,
+  "text": {
+    "format": {
+      "type": "json_schema",
+      "name": "liteocr_pages",
+      "strict": true
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tools": [],
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 3120,
+    "input_tokens_details": { "cached_tokens": 0 },
+    "output_tokens": 412,
+    "output_tokens_details": { "reasoning_tokens": 64 },
+    "total_tokens": 3532
+  },
+  "metadata": {}
+}

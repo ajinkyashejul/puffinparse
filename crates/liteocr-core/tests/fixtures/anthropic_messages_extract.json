@@ -1,0 +1,32 @@
+{
+  "id": "msg_01Qf3nR7dK2sVuYbN8xTzWpA",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-5",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_01B27r41tw22mp028946mr0",
+      "name": "record_extraction",
+      "input": {
+        "invoice_number": "INV-1234",
+        "total": 56.78,
+        "currency": "USD",
+        "due_date": null,
+        "line_items": [
+          { "description": "Widget", "qty": 2, "unit_price": 10.0 }
+        ]
+      }
+    }
+  ],
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "stop_details": null,
+  "usage": {
+    "input_tokens": 3080,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 104,
+    "service_tier": "standard"
+  }
+}

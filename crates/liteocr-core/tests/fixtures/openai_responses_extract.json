@@ -1,0 +1,47 @@
+{
+  "id": "resp_68f0a1b2c3d4e5f6fedcba9876543210",
+  "object": "response",
+  "created_at": 1789171320,
+  "status": "completed",
+  "error": null,
+  "incomplete_details": null,
+  "model": "gpt-5.6-luna",
+  "output": [
+    {
+      "id": "rs_68f0a1b2c3d4e5f6033333333333333",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_68f0a1b2c3d4e5f6044444444444444",
+      "type": "message",
+      "status": "completed",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "{\"invoice_number\":\"INV-1234\",\"total\":56.78,\"currency\":\"USD\",\"due_date\":null,\"line_items\":[{\"description\":\"Widget\",\"qty\":2,\"unit_price\":10.0}]}"
+        }
+      ]
+    }
+  ],
+  "reasoning": { "effort": "low", "summary": null },
+  "store": false,
+  "text": {
+    "format": {
+      "type": "json_schema",
+      "name": "liteocr_extraction",
+      "strict": true
+    }
+  },
+  "usage": {
+    "input_tokens": 2980,
+    "input_tokens_details": { "cached_tokens": 0 },
+    "output_tokens": 96,
+    "output_tokens_details": { "reasoning_tokens": 32 },
+    "total_tokens": 3076
+  },
+  "metadata": {}
+}

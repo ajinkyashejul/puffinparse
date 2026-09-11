@@ -1,0 +1,35 @@
+{
+  "id": "msg_01XhT9Eq8bQ7vPz2kKcM4dLp",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-5",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_01A09q90qw90lq917835lq9",
+      "name": "emit_pages",
+      "input": {
+        "pages": [
+          {
+            "page_number": 1,
+            "markdown": "# Hello LiteOCR\n\nInvoice #1234\n\nTotal: $56.78"
+          },
+          {
+            "page_number": 2,
+            "markdown": "## Line Items\n\n| Item | Qty | Price |\n| --- | --- | --- |\n| Widget | 2 | $10.00 |\n\n*Figure: bar chart of quarterly revenue.*"
+          }
+        ]
+      }
+    }
+  ],
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "stop_details": null,
+  "usage": {
+    "input_tokens": 3210,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 389,
+    "service_tier": "standard"
+  }
+}

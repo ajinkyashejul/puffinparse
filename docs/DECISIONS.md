@@ -152,3 +152,39 @@ live tests; the task board records which ones have been verified live.
 **Consequences.** Many providers can be built in parallel without merge conflicts; the cost is a
 short integration step per provider and, for unverified providers, a "docs-only" label until
 someone with a key runs the live tests.
+
+## ADR-13: Native-format compatibility is a renderer over the unified response
+
+**Context.** The unified response is the product, but it is also the migration cost: a team already
+parsing Reducto's `result.chunks[].blocks[].bbox.left` cannot try another provider without
+rewriting the code that reads the result. The one thing that would make switching free is getting
+answers back in the shape they already parse.
+
+**Decision.** Add `crates/liteocr-core/src/compat/`: a pure, infallible renderer
+`render_parse(&ParseResponse, Format) -> serde_json::Value` (plus a best-effort `render_extract`)
+with one module per vendor shape — `Format::{Liteocr, Reducto, Extend, LlamaParse}`. It is applied
+*after* a call, not inside it: `parse`/`ocr`/`extract` keep returning the unified structs,
+`DocumentRequest.output_format` only records and validates the caller's choice
+(`validate_output_format`), and the SDK/CLI call `ParseResponse::to_format(&str)` on the result.
+So routing, retries, pricing, fallbacks and every existing test are untouched.
+
+What is promised is **structural fidelity, not semantic identity**: the vendor's key set, nesting,
+chunk/page and block counts, content strings, block-type vocabulary and coordinate units. Fields
+LiteOCR does not model are rendered `null`/empty and enumerated in `docs/COMPAT.md`, never invented.
+Extend and LlamaParse need a page size for their unit boxes; when the source provider reports none
+(Reducto, vision LLMs) the renderer assumes a 1000×1000 page and, for Extend, records
+`metadata.liteocr_synthetic_page_dims = true` in the run's free-form metadata map.
+
+The claim is enforced rather than asserted: for each provider, `compat/roundtrip.rs` runs
+`fixture → provider::normalize → render_parse(same format)` and compares against the original
+fixture with a `skeleton_diff` (key sets, counts, contents, types up to the provider's own forward
+mapping, boxes within 1e-6, billed pages), plus cross-format and no-geometry cases. The tests live
+in the crate because the `normalize` functions are `pub(crate)`.
+
+**Consequences.** Adding a fourth shape is one module plus one enum variant. Lossy edges are real
+and documented: type mappings are not injective (Extend's `key_value` returns as `text`), the
+Reducto render uses a reduced vocabulary (`footnote`/`caption`/`formula`/`other` → `Text`), and
+`render_extract` is explicitly weaker than the parse path until extract fixtures exist for all
+three providers. Because the renderer only reads the unified types, any provider added later gets
+all three native shapes for free — and any unified field a new provider cannot fill shows up as a
+`null` in someone's vendor-shaped payload, which is the honest outcome.

@@ -9,6 +9,7 @@ without asking around is linked from this page; if something is missing, add it 
 | [`SPEC.md`](SPEC.md) | Product and architecture specification: goals, unified request/response, errors, router, provider mappings, benchmark design, quality bar. Update it when behaviour changes. |
 | [`TASKS.md`](TASKS.md) | **Live task board.** Claim work here before starting; move items as they progress. |
 | [`DECISIONS.md`](DECISIONS.md) | Architecture decision records. Read before proposing a change to something listed there; add an ADR when you change direction. |
+| [`COMPAT.md`](COMPAT.md) | Native-format compatibility (`output_format="reducto"\|"extend"\|"llamaparse"`): what the vendor-shaped renders guarantee, which fields are always null, the coordinate-units rule, and migration examples. |
 | [`providers/`](providers/README.md) | Per-provider reference: endpoints, request flow, response mapping, errors, gotchas, passthrough options. |
 | [`benchmarks/`](benchmarks/) | Survey of public OCR benchmarks and adapter notes for the combined dataset. |
 | [`../benchmark/README.md`](../benchmark/README.md) | Benchmark methodology, metrics, how to run, dataset format. |
@@ -38,6 +39,7 @@ crates/liteocr-core/src/
   http.rs         shared client, retry/backoff, deadline, polling helper
   provider.rs     OcrProvider trait + helpers (keys, base URLs, multipart)
   providers/      reducto.rs, extend.rs, llamaparse.rs (+ mod.rs build())
+  compat/         render a unified response in a vendor's native JSON shape (docs/COMPAT.md)
   router.rs       ordered / round-robin fallbacks, stats
   bench.rs        normalisation + metrics + summaries
   util.rs         deep_merge, page-range parsing

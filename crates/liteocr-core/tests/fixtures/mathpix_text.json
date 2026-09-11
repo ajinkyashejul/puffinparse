@@ -1,0 +1,77 @@
+{
+  "request_id": "2026_09_11_redacted_image_request",
+  "version": "SuperNet-200",
+  "image_width": 850,
+  "image_height": 332,
+  "is_printed": true,
+  "is_handwritten": false,
+  "auto_rotate_confidence": 0.0012,
+  "auto_rotate_degrees": 0,
+  "confidence": 0.9985,
+  "confidence_rate": 0.9985,
+  "text": "# Quadratic Formula\n\n$f(x)=a x^{2}+b x+c$",
+  "line_data": [
+    {
+      "id": "0",
+      "type": "title",
+      "cnt": [[40, 20], [500, 20], [500, 70], [40, 70]],
+      "included": true,
+      "conversion_output": true,
+      "is_printed": true,
+      "is_handwritten": false,
+      "text": "# Quadratic Formula",
+      "confidence": 0.99,
+      "confidence_rate": 0.992
+    },
+    {
+      "id": "1",
+      "type": "math",
+      "cnt": [[40, 120], [620, 120], [620, 210], [40, 210]],
+      "included": true,
+      "conversion_output": true,
+      "is_printed": true,
+      "is_handwritten": false,
+      "text": "$f(x)=a x^{2}+b x+c$",
+      "confidence": 0.97,
+      "confidence_rate": 0.98
+    },
+    {
+      "id": "2",
+      "type": "text",
+      "subtype": "vertical",
+      "cnt": [[700, 120], [740, 120], [740, 300], [700, 300]],
+      "included": false,
+      "conversion_output": false,
+      "error_id": "math_confidence",
+      "is_printed": false,
+      "is_handwritten": true,
+      "text": "scribble",
+      "confidence": 0.12,
+      "confidence_rate": 0.3
+    }
+  ],
+  "word_data": [
+    {
+      "type": "text",
+      "cnt": [[40, 20], [260, 20], [260, 70], [40, 70]],
+      "text": "Quadratic",
+      "confidence": 0.99,
+      "confidence_rate": 0.99
+    },
+    {
+      "type": "text",
+      "cnt": [[270, 20], [500, 20], [500, 70], [270, 70]],
+      "text": "Formula",
+      "confidence": 0.99,
+      "confidence_rate": 0.99
+    },
+    {
+      "type": "math",
+      "cnt": [[40, 120], [620, 120], [620, 210], [40, 210]],
+      "text": "$f(x)=a x^{2}+b x+c$",
+      "latex": "f(x)=a x^{2}+b x+c",
+      "confidence": 0.97,
+      "confidence_rate": 0.98
+    }
+  ]
+}

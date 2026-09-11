@@ -134,6 +134,16 @@ pub struct DocumentRequest {
     pub language: Option<String>,
     #[serde(default)]
     pub output: OutputFormat,
+    /// Render the response in a provider's *native* JSON shape instead of the unified one:
+    /// `"reducto"`, `"extend"`, `"llamaparse"` (aliases `"llama"`, `"llama_parse"`), or
+    /// `"liteocr"`/`None` for the unified shape. Independent of [`OutputFormat`], which selects
+    /// markdown vs plain text inside block `content`.
+    ///
+    /// The core never changes the type it returns: validate the string with
+    /// [`DocumentRequest::validate_output_format`] when building the request, then call
+    /// [`ParseResponse::to_format`] on the result. See `docs/COMPAT.md`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub output_format: Option<String>,
     /// Provider-specific options merged verbatim into the provider request.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub provider_options: Option<serde_json::Value>,
@@ -173,6 +183,7 @@ impl DocumentRequest {
             pages: None,
             language: None,
             output: OutputFormat::Markdown,
+            output_format: None,
             provider_options: None,
             include_raw: false,
             timeout_secs: default_timeout(),
@@ -222,6 +233,29 @@ impl DocumentRequest {
     pub fn output(mut self, output: OutputFormat) -> Self {
         self.output = output;
         self
+    }
+
+    /// Ask for the response in a provider's native shape (`"reducto"`, `"extend"`, `"llamaparse"`).
+    pub fn output_format(mut self, format: impl Into<String>) -> Self {
+        self.output_format = Some(format.into());
+        self
+    }
+
+    /// Fail fast on an unknown `output_format` at request-build time, before any provider call.
+    /// `None` (the unified shape) is always valid.
+    pub fn validate_output_format(&self) -> crate::error::Result<()> {
+        match &self.output_format {
+            None => Ok(()),
+            Some(s) => s.parse::<crate::compat::Format>().map(|_| ()),
+        }
+    }
+
+    /// The validated [`crate::compat::Format`] this request asks for, defaulting to the unified shape.
+    pub fn compat_format(&self) -> crate::error::Result<crate::compat::Format> {
+        match &self.output_format {
+            None => Ok(crate::compat::Format::Liteocr),
+            Some(s) => s.parse(),
+        }
     }
 
     pub fn provider_options(mut self, options: serde_json::Value) -> Self {
@@ -424,6 +458,16 @@ impl ParseResponse {
 
     pub fn page_count(&self) -> usize {
         self.pages.len()
+    }
+
+    /// Render this response in a provider's native JSON shape.
+    ///
+    /// `format` is one of `"liteocr"`, `"reducto"`, `"extend"`, `"llamaparse"` (aliases `"llama"`,
+    /// `"llama_parse"`); unknown values are an [`crate::ErrorKind::Input`] error. This is what the
+    /// SDK and CLI call when the caller set [`DocumentRequest::output_format`].
+    /// See `docs/COMPAT.md` for the exact guarantees.
+    pub fn to_format(&self, format: &str) -> crate::error::Result<serde_json::Value> {
+        Ok(crate::compat::render_parse(self, format.parse()?))
     }
 }
 
@@ -842,6 +886,12 @@ impl ExtractResponse {
             metadata: BTreeMap::new(),
             raw: None,
         }
+    }
+
+    /// Render this response in a provider's native extract JSON shape (best effort — see
+    /// `docs/COMPAT.md`). Accepts the same names as [`ParseResponse::to_format`].
+    pub fn to_format(&self, format: &str) -> crate::error::Result<serde_json::Value> {
+        Ok(crate::compat::render_extract(self, format.parse()?))
     }
 }
 

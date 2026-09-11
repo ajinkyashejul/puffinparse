@@ -1,0 +1,156 @@
+{
+  "pages": [
+    {
+      "image-id": "2026_09_11_redacted-1",
+      "page": 1,
+      "page_width": 1700,
+      "page_height": 2200,
+      "lines": [
+        {
+          "id": "1.0",
+          "type": "title",
+          "line": 1,
+          "text": "Hello LiteOCR",
+          "text_display": "# Hello LiteOCR",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "region": { "top_left_x": 170, "top_left_y": 110, "width": 850, "height": 66 },
+          "cnt": [[170, 110], [1020, 110], [1020, 176], [170, 176]],
+          "confidence": 0.998,
+          "confidence_rate": 0.999
+        },
+        {
+          "id": "1.1",
+          "type": "text",
+          "line": 2,
+          "text": "Invoice #1234",
+          "text_display": "Invoice #1234",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "region": { "top_left_x": 170, "top_left_y": 260, "width": 590, "height": 50 },
+          "cnt": [[170, 260], [760, 260], [760, 310], [170, 310]],
+          "confidence": 0.991,
+          "confidence_rate": 0.994
+        },
+        {
+          "id": "1.2",
+          "type": "text",
+          "line": 3,
+          "text": "Total: $56.78",
+          "text_display": "Total: $56.78",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "region": { "top_left_x": 170, "top_left_y": 330, "width": 530, "height": 50 },
+          "cnt": [[170, 330], [700, 330], [700, 380], [170, 380]],
+          "confidence": 0.987,
+          "confidence_rate": 0.99
+        },
+        {
+          "id": "1.3",
+          "type": "equation_number",
+          "line": 4,
+          "text": "(1)",
+          "text_display": "(1)",
+          "conversion_output": false,
+          "is_printed": true,
+          "is_handwritten": false,
+          "cnt": [[1560, 330], [1620, 330], [1620, 372], [1560, 372]],
+          "confidence": 0.95,
+          "confidence_rate": 0.96
+        }
+      ]
+    },
+    {
+      "image-id": "2026_09_11_redacted-2",
+      "page": 2,
+      "page_width": 1700,
+      "page_height": 2200,
+      "lines": [
+        {
+          "id": "2.0",
+          "type": "section_header",
+          "line": 1,
+          "text": "Line Items",
+          "text_display": "## Line Items",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "cnt": [[170, 120], [640, 120], [640, 170], [170, 170]],
+          "confidence": 0.996,
+          "confidence_rate": 0.997
+        },
+        {
+          "id": "2.1",
+          "type": "table",
+          "line": 2,
+          "children_ids": ["2.2", "2.3"],
+          "text": "Item Qty Widget 2",
+          "text_display": "| Item | Qty |\n| :--- | :--- |\n| Widget | 2 |",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "cnt": [[168, 240], [1530, 240], [1530, 520], [168, 520]],
+          "confidence": 0.974,
+          "confidence_rate": 0.981
+        },
+        {
+          "id": "2.2",
+          "parent_id": "2.1",
+          "type": "table_cell",
+          "line": 3,
+          "text": "Item",
+          "text_display": "Item",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "cnt": [[168, 240], [700, 240], [700, 300], [168, 300]],
+          "confidence": 0.99,
+          "confidence_rate": 0.99
+        },
+        {
+          "id": "2.3",
+          "parent_id": "2.1",
+          "type": "table_cell",
+          "line": 4,
+          "text": "Widget",
+          "text_display": "Widget",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "cnt": [[168, 320], [700, 320], [700, 380], [168, 380]],
+          "confidence": 0.988,
+          "confidence_rate": 0.99
+        },
+        {
+          "id": "2.4",
+          "type": "math",
+          "line": 5,
+          "text": "E = mc^2",
+          "text_display": "$$E=m c^{2}$$",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "cnt": [[170, 600], [560, 600], [560, 700], [170, 700]],
+          "confidence": 0.964,
+          "confidence_rate": 0.972
+        },
+        {
+          "id": "2.5",
+          "type": "page_info",
+          "line": 6,
+          "text": "2",
+          "text_display": "2",
+          "conversion_output": true,
+          "is_printed": true,
+          "is_handwritten": false,
+          "cnt": [[820, 2100], [880, 2100], [880, 2140], [820, 2140]],
+          "confidence": 0.999,
+          "confidence_rate": 0.999
+        }
+      ]
+    }
+  ]
+}

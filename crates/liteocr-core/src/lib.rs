@@ -15,6 +15,7 @@
 #![warn(missing_debug_implementations)]
 
 pub mod bench;
+pub mod compat;
 pub mod error;
 pub mod http;
 pub mod model;
@@ -25,6 +26,7 @@ pub mod router;
 pub mod types;
 pub mod util;
 
+pub use compat::{render_extract, render_parse, Format as OutputShape};
 pub use error::{Error, ErrorKind, Result};
 pub use model::{list_models, list_models_for, model_info, ModelInfo, ModelRef, ProviderInfo, PROVIDERS};
 pub use provider::Provider;

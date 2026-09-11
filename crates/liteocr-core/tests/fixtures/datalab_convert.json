@@ -1,0 +1,487 @@
+{
+  "status": "complete",
+  "success": true,
+  "error": null,
+  "output_format": "json,markdown",
+  "markdown": "\n\n{0}------------------------------------------------\n\n# Hello LiteOCR\n\nInvoice #1234\n\nTotal: $56.78\n\n{1}------------------------------------------------\n\n## Line Items\n\n| Item | Qty | Price |\n| --- | --- | --- |\n| Widget | 2 | $10.00 |\n\n- Delivery within 5 business days\n\nLiteOCR sample document\n",
+  "json": {
+    "id": "/page/0/Document/0",
+    "block_type": "Document",
+    "children": [
+      {
+        "id": "/page/0/Page/0",
+        "block_type": "Page",
+        "html": "<content-ref src='/page/0/SectionHeader/0'></content-ref><content-ref src='/page/0/Text/1'></content-ref><content-ref src='/page/0/Text/2'></content-ref>",
+        "polygon": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            612.0,
+            0.0
+          ],
+          [
+            612.0,
+            792.0
+          ],
+          [
+            0.0,
+            792.0
+          ]
+        ],
+        "bbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "children": [
+          {
+            "id": "/page/0/SectionHeader/0",
+            "block_type": "SectionHeader",
+            "html": "<h1>Hello LiteOCR</h1>",
+            "polygon": [
+              [
+                61.2,
+                39.6
+              ],
+              [
+                400.0,
+                39.6
+              ],
+              [
+                400.0,
+                110.0
+              ],
+              [
+                61.2,
+                110.0
+              ]
+            ],
+            "bbox": [
+              61.2,
+              39.6,
+              400.0,
+              110.0
+            ],
+            "children": null,
+            "section_hierarchy": {
+              "1": "/page/0/SectionHeader/0"
+            },
+            "images": {}
+          },
+          {
+            "id": "/page/0/Text/1",
+            "block_type": "Text",
+            "html": "<p>Invoice #1234</p>",
+            "polygon": [
+              [
+                61.0,
+                140.0
+              ],
+              [
+                300.0,
+                140.0
+              ],
+              [
+                300.0,
+                168.0
+              ],
+              [
+                61.0,
+                168.0
+              ]
+            ],
+            "bbox": [
+              61.0,
+              140.0,
+              300.0,
+              168.0
+            ],
+            "children": null,
+            "section_hierarchy": {
+              "1": "/page/0/SectionHeader/0"
+            },
+            "images": {}
+          },
+          {
+            "id": "/page/0/Text/2",
+            "block_type": "Text",
+            "html": "<p>Total: $56.78</p>",
+            "polygon": [
+              [
+                61.0,
+                178.0
+              ],
+              [
+                290.0,
+                178.0
+              ],
+              [
+                290.0,
+                206.0
+              ],
+              [
+                61.0,
+                206.0
+              ]
+            ],
+            "bbox": [
+              61.0,
+              178.0,
+              290.0,
+              206.0
+            ],
+            "children": null,
+            "section_hierarchy": {},
+            "images": {}
+          }
+        ],
+        "section_hierarchy": {},
+        "images": {}
+      },
+      {
+        "id": "/page/1/Page/12",
+        "block_type": "Page",
+        "html": "<content-ref src='/page/1/SectionHeader/0'></content-ref><content-ref src='/page/1/TableGroup/1'></content-ref><content-ref src='/page/1/ListGroup/3'></content-ref><content-ref src='/page/1/PageFooter/5'></content-ref>",
+        "polygon": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            612.0,
+            0.0
+          ],
+          [
+            612.0,
+            792.0
+          ],
+          [
+            0.0,
+            792.0
+          ]
+        ],
+        "bbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "children": [
+          {
+            "id": "/page/1/SectionHeader/0",
+            "block_type": "SectionHeader",
+            "html": "<h2>Line Items</h2>",
+            "polygon": [
+              [
+                61.0,
+                40.0
+              ],
+              [
+                260.0,
+                40.0
+              ],
+              [
+                260.0,
+                78.0
+              ],
+              [
+                61.0,
+                78.0
+              ]
+            ],
+            "bbox": [
+              61.0,
+              40.0,
+              260.0,
+              78.0
+            ],
+            "children": null,
+            "section_hierarchy": {
+              "2": "/page/1/SectionHeader/0"
+            },
+            "images": {}
+          },
+          {
+            "id": "/page/1/TableGroup/1",
+            "block_type": "TableGroup",
+            "html": "<content-ref src='/page/1/Table/2'></content-ref>",
+            "polygon": [
+              [
+                60.0,
+                100.0
+              ],
+              [
+                552.0,
+                100.0
+              ],
+              [
+                552.0,
+                240.0
+              ],
+              [
+                60.0,
+                240.0
+              ]
+            ],
+            "bbox": [
+              60.0,
+              100.0,
+              552.0,
+              240.0
+            ],
+            "children": [
+              {
+                "id": "/page/1/Table/2",
+                "block_type": "Table",
+                "html": "<table><thead><tr><th>Item</th><th>Qty</th><th>Price</th></tr></thead><tbody><tr><td>Widget</td><td>2</td><td>$10.00</td></tr></tbody></table>",
+                "polygon": [
+                  [
+                    60.0,
+                    100.0
+                  ],
+                  [
+                    552.0,
+                    100.0
+                  ],
+                  [
+                    552.0,
+                    240.0
+                  ],
+                  [
+                    60.0,
+                    240.0
+                  ]
+                ],
+                "bbox": [
+                  60.0,
+                  100.0,
+                  552.0,
+                  240.0
+                ],
+                "children": null,
+                "section_hierarchy": {
+                  "2": "/page/1/SectionHeader/0"
+                },
+                "images": {}
+              }
+            ],
+            "section_hierarchy": {
+              "2": "/page/1/SectionHeader/0"
+            },
+            "images": {}
+          },
+          {
+            "id": "/page/1/ListGroup/3",
+            "block_type": "ListGroup",
+            "html": "<content-ref src='/page/1/ListItem/4'></content-ref>",
+            "polygon": [
+              [
+                61.0,
+                260.0
+              ],
+              [
+                400.0,
+                260.0
+              ],
+              [
+                400.0,
+                288.0
+              ],
+              [
+                61.0,
+                288.0
+              ]
+            ],
+            "bbox": [
+              61.0,
+              260.0,
+              400.0,
+              288.0
+            ],
+            "children": [
+              {
+                "id": "/page/1/ListItem/4",
+                "block_type": "ListItem",
+                "html": "<p><li>Delivery within 5 business days</li></p>",
+                "polygon": [
+                  [
+                    61.0,
+                    260.0
+                  ],
+                  [
+                    400.0,
+                    260.0
+                  ],
+                  [
+                    400.0,
+                    288.0
+                  ],
+                  [
+                    61.0,
+                    288.0
+                  ]
+                ],
+                "bbox": [
+                  61.0,
+                  260.0,
+                  400.0,
+                  288.0
+                ],
+                "children": null,
+                "section_hierarchy": {},
+                "images": {}
+              }
+            ],
+            "section_hierarchy": {},
+            "images": {}
+          },
+          {
+            "id": "/page/1/PageFooter/5",
+            "block_type": "PageFooter",
+            "html": "<p>LiteOCR sample document</p>",
+            "polygon": [
+              [
+                61.0,
+                730.0
+              ],
+              [
+                320.0,
+                730.0
+              ],
+              [
+                320.0,
+                752.0
+              ],
+              [
+                61.0,
+                752.0
+              ]
+            ],
+            "bbox": [
+              61.0,
+              730.0,
+              320.0,
+              752.0
+            ],
+            "children": null,
+            "section_hierarchy": {},
+            "images": {}
+          }
+        ],
+        "section_hierarchy": {},
+        "images": {}
+      }
+    ],
+    "metadata": {}
+  },
+  "images": {},
+  "metadata": {
+    "table_of_contents": [
+      {
+        "title": "Hello LiteOCR",
+        "heading_level": 1,
+        "page_id": 0,
+        "polygon": [
+          [
+            61.2,
+            39.6
+          ],
+          [
+            400.0,
+            39.6
+          ],
+          [
+            400.0,
+            110.0
+          ],
+          [
+            61.2,
+            110.0
+          ]
+        ]
+      }
+    ],
+    "page_stats": [
+      {
+        "page_id": 0,
+        "text_extraction_method": "pdftext",
+        "block_counts": [
+          [
+            "Span",
+            42
+          ],
+          [
+            "Line",
+            9
+          ],
+          [
+            "Text",
+            2
+          ],
+          [
+            "SectionHeader",
+            1
+          ]
+        ],
+        "block_metadata": {
+          "llm_request_count": 0,
+          "llm_error_count": 0,
+          "llm_tokens_used": 0
+        }
+      },
+      {
+        "page_id": 1,
+        "text_extraction_method": "pdftext",
+        "block_counts": [
+          [
+            "Span",
+            55
+          ],
+          [
+            "Line",
+            11
+          ],
+          [
+            "Table",
+            1
+          ],
+          [
+            "ListItem",
+            1
+          ],
+          [
+            "SectionHeader",
+            1
+          ],
+          [
+            "PageFooter",
+            1
+          ]
+        ],
+        "block_metadata": {
+          "llm_request_count": 0,
+          "llm_error_count": 0,
+          "llm_tokens_used": 0
+        }
+      }
+    ],
+    "failed_pages": [],
+    "debug_data_path": null
+  },
+  "page_count": 2,
+  "parse_quality_score": 4.5,
+  "cost_breakdown": {
+    "list_cost_cents": 1,
+    "final_cost_cents": 1,
+    "convert": 1
+  },
+  "runtime": 4.7,
+  "checkpoint_id": null,
+  "versions": {
+    "marker": "1.10.2",
+    "surya": "0.18.0"
+  }
+}
