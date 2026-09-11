@@ -1,0 +1,262 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2026-09-11T07:31:12Z",
+  "lastUpdatedDateTime": "2026-09-11T07:31:18Z",
+  "analyzeResult": {
+    "apiVersion": "2024-11-30",
+    "modelId": "prebuilt-invoice",
+    "stringIndexType": "unicodeCodePoint",
+    "contentFormat": "text",
+    "content": "LiteOCR Supplies Ltd\nInvoice #1234\nDate: 09/11/2026\nWidget $56.78\nInvoice Total: $56.78",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "angle": 0.0,
+        "width": 8.5,
+        "height": 11.0,
+        "unit": "inch",
+        "words": [],
+        "lines": [],
+        "spans": [
+          {
+            "offset": 0,
+            "length": 87
+          }
+        ]
+      }
+    ],
+    "tables": [],
+    "documents": [
+      {
+        "docType": "invoice",
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              0.0,
+              0.0,
+              8.5,
+              0.0,
+              8.5,
+              11.0,
+              0.0,
+              11.0
+            ]
+          }
+        ],
+        "spans": [
+          {
+            "offset": 0,
+            "length": 87
+          }
+        ],
+        "confidence": 0.978,
+        "fields": {
+          "VendorName": {
+            "type": "string",
+            "valueString": "LiteOCR Supplies Ltd",
+            "content": "LiteOCR Supplies Ltd",
+            "confidence": 0.944,
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  1.0,
+                  4.0,
+                  1.0,
+                  4.0,
+                  1.3,
+                  1.0,
+                  1.3
+                ]
+              }
+            ],
+            "spans": [
+              {
+                "offset": 0,
+                "length": 20
+              }
+            ]
+          },
+          "InvoiceId": {
+            "type": "string",
+            "valueString": "1234",
+            "content": "1234",
+            "confidence": 0.981,
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  1.6,
+                  2.0,
+                  1.6,
+                  2.0,
+                  1.9,
+                  1.0,
+                  1.9
+                ]
+              }
+            ],
+            "spans": [
+              {
+                "offset": 30,
+                "length": 4
+              }
+            ]
+          },
+          "InvoiceDate": {
+            "type": "date",
+            "valueDate": "2026-09-11",
+            "content": "09/11/2026",
+            "confidence": 0.97,
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  2.1,
+                  2.4,
+                  2.1,
+                  2.4,
+                  2.4,
+                  1.0,
+                  2.4
+                ]
+              }
+            ],
+            "spans": [
+              {
+                "offset": 41,
+                "length": 10
+              }
+            ]
+          },
+          "InvoiceTotal": {
+            "type": "currency",
+            "valueCurrency": {
+              "amount": 56.78,
+              "currencyCode": "USD",
+              "currencySymbol": "$"
+            },
+            "content": "$56.78",
+            "confidence": 0.962,
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  5.0,
+                  7.0,
+                  6.2,
+                  7.0,
+                  6.2,
+                  7.3,
+                  5.0,
+                  7.3
+                ]
+              }
+            ],
+            "spans": [
+              {
+                "offset": 81,
+                "length": 6
+              }
+            ]
+          },
+          "Items": {
+            "type": "array",
+            "valueArray": [
+              {
+                "type": "object",
+                "valueObject": {
+                  "Description": {
+                    "type": "string",
+                    "valueString": "Widget",
+                    "content": "Widget",
+                    "confidence": 0.95,
+                    "boundingRegions": [
+                      {
+                        "pageNumber": 1,
+                        "polygon": [
+                          1.0,
+                          5.0,
+                          2.6,
+                          5.0,
+                          2.6,
+                          5.3,
+                          1.0,
+                          5.3
+                        ]
+                      }
+                    ],
+                    "spans": [
+                      {
+                        "offset": 52,
+                        "length": 6
+                      }
+                    ]
+                  },
+                  "Amount": {
+                    "type": "currency",
+                    "valueCurrency": {
+                      "amount": 56.78,
+                      "currencyCode": "USD",
+                      "currencySymbol": "$"
+                    },
+                    "content": "$56.78",
+                    "confidence": 0.93,
+                    "boundingRegions": [
+                      {
+                        "pageNumber": 1,
+                        "polygon": [
+                          5.0,
+                          5.0,
+                          6.2,
+                          5.0,
+                          6.2,
+                          5.3,
+                          5.0,
+                          5.3
+                        ]
+                      }
+                    ],
+                    "spans": [
+                      {
+                        "offset": 59,
+                        "length": 6
+                      }
+                    ]
+                  }
+                },
+                "content": "Widget $56.78",
+                "confidence": 0.94,
+                "boundingRegions": [
+                  {
+                    "pageNumber": 1,
+                    "polygon": [
+                      1.0,
+                      5.0,
+                      6.2,
+                      5.0,
+                      6.2,
+                      5.3,
+                      1.0,
+                      5.3
+                    ]
+                  }
+                ],
+                "spans": [
+                  {
+                    "offset": 52,
+                    "length": 13
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

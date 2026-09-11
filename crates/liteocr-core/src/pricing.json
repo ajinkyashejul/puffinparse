@@ -13,5 +13,12 @@
   "mistral/ocr-latest": { "parse": 0.004, "ocr": 0.004, "extract": 0.005, "source": "https://docs.mistral.ai/models/ocr-4-1 ($4/1k pages, $5/1k annotated pages)", "updated": "2026-09-11" },
   "mistral/ocr-4-1": { "parse": 0.004, "ocr": 0.004, "extract": 0.005, "source": "https://docs.mistral.ai/models/ocr-4-1 ($4/1k pages, $5/1k annotated pages)", "updated": "2026-09-11" },
   "mistral/ocr-4-0": { "parse": 0.004, "ocr": 0.004, "extract": 0.005, "source": "https://docs.mistral.ai/models/ocr-4-0 ($4/1k pages, $5/1k annotated pages)", "updated": "2026-09-11" },
-  "mistral/ocr-2512": { "parse": 0.002, "ocr": 0.002, "extract": 0.003, "source": "https://docs.mistral.ai/models/ocr-3-25-12 (OCR 3: $2/1k pages, $3/1k annotated pages)", "updated": "2026-09-11" }
+  "mistral/ocr-2512": { "parse": 0.002, "ocr": 0.002, "extract": 0.003, "source": "https://docs.mistral.ai/models/ocr-3-25-12 (OCR 3: $2/1k pages, $3/1k annotated pages)", "updated": "2026-09-11" },
+  "azure/read": { "ocr": 0.0015, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (Read: $1.50/1k pages)", "updated": "2026-09-11" },
+  "azure/layout": { "parse": 0.01, "ocr": 0.01, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (Layout: $10/1k pages)", "updated": "2026-09-11" },
+  "azure/invoice": { "extract": 0.01, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (prebuilt models: $10/1k pages)", "updated": "2026-09-11" },
+  "azure/receipt": { "extract": 0.01, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (prebuilt models: $10/1k pages)", "updated": "2026-09-11" },
+  "azure/id_document": { "extract": 0.01, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (prebuilt models: $10/1k pages)", "updated": "2026-09-11" },
+  "azure/tax_us_w2": { "extract": 0.01, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (prebuilt models: $10/1k pages)", "updated": "2026-09-11" },
+  "azure/custom": { "parse": 0.03, "ocr": 0.03, "extract": 0.03, "source": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/ (custom extraction: $30/1k pages)", "updated": "2026-09-11" }
 }

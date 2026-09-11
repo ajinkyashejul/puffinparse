@@ -173,6 +173,66 @@ pub const PROVIDERS: &[ProviderInfo] = &[
             },
         ],
     },
+    ProviderInfo {
+        name: "azure",
+        display_name: "Azure AI Document Intelligence",
+        env_var: "AZURE_DOCUMENT_INTELLIGENCE_KEY",
+        // Display only: Azure endpoints are per resource. The provider reads the real endpoint from
+        // AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT, or `base_url` on the request, and errors without one.
+        base_url: "https://<resource>.cognitiveservices.azure.com",
+        docs: "https://learn.microsoft.com/azure/ai-services/document-intelligence/",
+        models: &[
+            ModelInfo {
+                provider: "azure",
+                model: "read",
+                description: "Azure prebuilt-read: native OCR, words/lines with confidence (cheapest)",
+                default: true,
+                modes: &[Mode::Ocr],
+            },
+            ModelInfo {
+                provider: "azure",
+                model: "layout",
+                description: "Azure prebuilt-layout: markdown, paragraphs with roles, tables, polygons",
+                default: true,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "azure",
+                model: "invoice",
+                description: "Azure prebuilt-invoice: fixed invoice schema",
+                default: true,
+                modes: &[Mode::Extract],
+            },
+            ModelInfo {
+                provider: "azure",
+                model: "receipt",
+                description: "Azure prebuilt-receipt: fixed receipt schema",
+                default: false,
+                modes: &[Mode::Extract],
+            },
+            ModelInfo {
+                provider: "azure",
+                model: "id_document",
+                description: "Azure prebuilt-idDocument: fixed ID document schema",
+                default: false,
+                modes: &[Mode::Extract],
+            },
+            ModelInfo {
+                provider: "azure",
+                model: "tax_us_w2",
+                description: "Azure prebuilt-tax.us.w2: fixed W-2 schema",
+                default: false,
+                modes: &[Mode::Extract],
+            },
+            ModelInfo {
+                provider: "azure",
+                model: "custom",
+                description: "Azure custom model, id via provider_options.model_id",
+                default: false,
+                modes: Mode::ALL,
+            },
+        ],
+    },
 ];
 
 /// A parsed, validated model reference.
@@ -295,7 +355,11 @@ mod tests {
         let e = ModelRef::parse_for("reducto/standard", Mode::Extract).unwrap_err();
         assert!(e.to_string().contains("does not support mode 'extract'"), "{e}");
         assert!(ModelRef::parse_for("extend", Mode::Extract).is_err());
-        assert_eq!(list_models_for(Mode::Parse).len(), list_models().len());
+        assert!(list_models_for(Mode::Parse).len() < list_models().len());
+        assert!(!list_models_for(Mode::Parse).contains(&"azure/read".to_string()));
+        assert_eq!(ModelRef::parse_for("azure", Mode::Ocr).unwrap().qualified(), "azure/read");
+        assert_eq!(ModelRef::parse_for("azure", Mode::Parse).unwrap().qualified(), "azure/layout");
+        assert_eq!(ModelRef::parse_for("azure", Mode::Extract).unwrap().qualified(), "azure/invoice");
         assert!(list_models_for(Mode::Extract).iter().all(|m| model_info(
             m.split('/').next().unwrap(),
             m.split('/').nth(1).unwrap()
@@ -309,6 +373,6 @@ mod tests {
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 14);
+        assert_eq!(m.len(), 21);
     }
 }

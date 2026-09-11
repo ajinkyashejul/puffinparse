@@ -1,0 +1,1021 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2026-09-11T07:21:04Z",
+  "lastUpdatedDateTime": "2026-09-11T07:21:09Z",
+  "analyzeResult": {
+    "apiVersion": "2024-11-30",
+    "modelId": "prebuilt-layout",
+    "stringIndexType": "unicodeCodePoint",
+    "contentFormat": "markdown",
+    "content": "<!-- PageHeader=\"LiteOCR sample\" -->\n\n# Hello LiteOCR\n\nInvoice #1234\n\nTotal: $56.78\n\nDate: 2026-09-11\n\n\n<table>\n<tr><th>Item</th><th>Amount</th></tr>\n<tr><td>Widget</td><td>$56.78</td></tr>\n</table>\n\n\n<!-- PageFooter=\"Page 1\" -->\n\n<!-- PageBreak -->\n\n## Page Two\n\nReference: ABC-9876",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "angle": 0.0,
+        "width": 8.5,
+        "height": 11.0,
+        "unit": "inch",
+        "words": [
+          {
+            "content": "LiteOCR",
+            "polygon": [
+              1.0,
+              0.5,
+              1.5,
+              0.5,
+              1.5,
+              0.7,
+              1.0,
+              0.7
+            ],
+            "span": {
+              "offset": 17,
+              "length": 7
+            },
+            "confidence": 0.97
+          },
+          {
+            "content": "sample",
+            "polygon": [
+              1.6,
+              0.5,
+              2.1,
+              0.5,
+              2.1,
+              0.7,
+              1.6,
+              0.7
+            ],
+            "span": {
+              "offset": 25,
+              "length": 6
+            },
+            "confidence": 0.97
+          },
+          {
+            "content": "Hello",
+            "polygon": [
+              1.0,
+              1.0,
+              1.8,
+              1.0,
+              1.8,
+              1.5,
+              1.0,
+              1.5
+            ],
+            "span": {
+              "offset": 40,
+              "length": 5
+            },
+            "confidence": 0.99
+          },
+          {
+            "content": "LiteOCR",
+            "polygon": [
+              1.9,
+              1.0,
+              3.5,
+              1.0,
+              3.5,
+              1.5,
+              1.9,
+              1.5
+            ],
+            "span": {
+              "offset": 46,
+              "length": 7
+            },
+            "confidence": 0.989
+          },
+          {
+            "content": "Invoice",
+            "polygon": [
+              1.0,
+              2.0,
+              1.5,
+              2.0,
+              1.5,
+              2.2,
+              1.0,
+              2.2
+            ],
+            "span": {
+              "offset": 55,
+              "length": 7
+            },
+            "confidence": 0.982
+          },
+          {
+            "content": "#1234",
+            "polygon": [
+              1.6,
+              2.0,
+              2.1,
+              2.0,
+              2.1,
+              2.2,
+              1.6,
+              2.2
+            ],
+            "span": {
+              "offset": 63,
+              "length": 5
+            },
+            "confidence": 0.982
+          },
+          {
+            "content": "Total:",
+            "polygon": [
+              1.0,
+              2.5,
+              1.5,
+              2.5,
+              1.5,
+              2.7,
+              1.0,
+              2.7
+            ],
+            "span": {
+              "offset": 70,
+              "length": 6
+            },
+            "confidence": 0.984
+          },
+          {
+            "content": "$56.78",
+            "polygon": [
+              1.6,
+              2.5,
+              2.1,
+              2.5,
+              2.1,
+              2.7,
+              1.6,
+              2.7
+            ],
+            "span": {
+              "offset": 77,
+              "length": 6
+            },
+            "confidence": 0.984
+          },
+          {
+            "content": "Date:",
+            "polygon": [
+              1.0,
+              3.0,
+              1.5,
+              3.0,
+              1.5,
+              3.2,
+              1.0,
+              3.2
+            ],
+            "span": {
+              "offset": 85,
+              "length": 5
+            },
+            "confidence": 0.986
+          },
+          {
+            "content": "2026-09-11",
+            "polygon": [
+              1.6,
+              3.0,
+              2.1,
+              3.0,
+              2.1,
+              3.2,
+              1.6,
+              3.2
+            ],
+            "span": {
+              "offset": 91,
+              "length": 10
+            },
+            "confidence": 0.986
+          },
+          {
+            "content": "Item",
+            "polygon": [
+              1.0,
+              4.0,
+              1.5,
+              4.0,
+              1.5,
+              4.2,
+              1.0,
+              4.2
+            ],
+            "span": {
+              "offset": 120,
+              "length": 4
+            },
+            "confidence": 0.97
+          },
+          {
+            "content": "Amount",
+            "polygon": [
+              1.0,
+              4.0,
+              1.5,
+              4.0,
+              1.5,
+              4.2,
+              1.0,
+              4.2
+            ],
+            "span": {
+              "offset": 133,
+              "length": 6
+            },
+            "confidence": 0.97
+          },
+          {
+            "content": "Widget",
+            "polygon": [
+              1.0,
+              4.4,
+              1.5,
+              4.4,
+              1.5,
+              4.6000000000000005,
+              1.0,
+              4.6000000000000005
+            ],
+            "span": {
+              "offset": 158,
+              "length": 6
+            },
+            "confidence": 0.97
+          },
+          {
+            "content": "$56.78",
+            "polygon": [
+              1.0,
+              4.4,
+              1.5,
+              4.4,
+              1.5,
+              4.6000000000000005,
+              1.0,
+              4.6000000000000005
+            ],
+            "span": {
+              "offset": 173,
+              "length": 6
+            },
+            "confidence": 0.97
+          },
+          {
+            "content": "Page",
+            "polygon": [
+              1.0,
+              10.2,
+              1.5,
+              10.2,
+              1.5,
+              10.399999999999999,
+              1.0,
+              10.399999999999999
+            ],
+            "span": {
+              "offset": 206,
+              "length": 4
+            },
+            "confidence": 0.95
+          },
+          {
+            "content": "1",
+            "polygon": [
+              1.6,
+              10.2,
+              2.1,
+              10.2,
+              2.1,
+              10.399999999999999,
+              1.6,
+              10.399999999999999
+            ],
+            "span": {
+              "offset": 223,
+              "length": 1
+            },
+            "confidence": 0.95
+          }
+        ],
+        "selectionMarks": [],
+        "lines": [
+          {
+            "content": "LiteOCR sample",
+            "polygon": [
+              1.0,
+              0.5,
+              3.5,
+              0.5,
+              3.5,
+              0.8,
+              1.0,
+              0.8
+            ],
+            "spans": [
+              {
+                "offset": 17,
+                "length": 14
+              }
+            ]
+          },
+          {
+            "content": "Hello LiteOCR",
+            "polygon": [
+              1.0,
+              1.0,
+              3.5,
+              1.0,
+              3.5,
+              1.3,
+              1.0,
+              1.3
+            ],
+            "spans": [
+              {
+                "offset": 40,
+                "length": 13
+              }
+            ]
+          },
+          {
+            "content": "Invoice #1234",
+            "polygon": [
+              1.0,
+              2.0,
+              3.5,
+              2.0,
+              3.5,
+              2.3,
+              1.0,
+              2.3
+            ],
+            "spans": [
+              {
+                "offset": 55,
+                "length": 13
+              }
+            ]
+          },
+          {
+            "content": "Total: $56.78",
+            "polygon": [
+              1.0,
+              2.5,
+              3.5,
+              2.5,
+              3.5,
+              2.8,
+              1.0,
+              2.8
+            ],
+            "spans": [
+              {
+                "offset": 70,
+                "length": 13
+              }
+            ]
+          },
+          {
+            "content": "Date: 2026-09-11",
+            "polygon": [
+              1.0,
+              3.0,
+              3.5,
+              3.0,
+              3.5,
+              3.3,
+              1.0,
+              3.3
+            ],
+            "spans": [
+              {
+                "offset": 85,
+                "length": 16
+              }
+            ]
+          },
+          {
+            "content": "Page 1",
+            "polygon": [
+              1.0,
+              10.2,
+              3.5,
+              10.2,
+              3.5,
+              10.5,
+              1.0,
+              10.5
+            ],
+            "spans": [
+              {
+                "offset": 218,
+                "length": 6
+              }
+            ]
+          }
+        ],
+        "spans": [
+          {
+            "offset": 0,
+            "length": 249
+          }
+        ]
+      },
+      {
+        "pageNumber": 2,
+        "angle": 0.0,
+        "width": 8.5,
+        "height": 11.0,
+        "unit": "inch",
+        "words": [
+          {
+            "content": "Page",
+            "polygon": [
+              1.0,
+              1.0,
+              1.5,
+              1.0,
+              1.5,
+              1.2,
+              1.0,
+              1.2
+            ],
+            "span": {
+              "offset": 254,
+              "length": 4
+            },
+            "confidence": 0.988
+          },
+          {
+            "content": "Two",
+            "polygon": [
+              1.6,
+              1.0,
+              2.1,
+              1.0,
+              2.1,
+              1.2,
+              1.6,
+              1.2
+            ],
+            "span": {
+              "offset": 259,
+              "length": 3
+            },
+            "confidence": 0.988
+          },
+          {
+            "content": "Reference:",
+            "polygon": [
+              1.0,
+              1.8,
+              1.5,
+              1.8,
+              1.5,
+              2.0,
+              1.0,
+              2.0
+            ],
+            "span": {
+              "offset": 264,
+              "length": 10
+            },
+            "confidence": 0.983
+          },
+          {
+            "content": "ABC-9876",
+            "polygon": [
+              1.6,
+              1.8,
+              2.1,
+              1.8,
+              2.1,
+              2.0,
+              1.6,
+              2.0
+            ],
+            "span": {
+              "offset": 275,
+              "length": 8
+            },
+            "confidence": 0.983
+          }
+        ],
+        "selectionMarks": [],
+        "lines": [
+          {
+            "content": "Page Two",
+            "polygon": [
+              1.0,
+              1.0,
+              3.5,
+              1.0,
+              3.5,
+              1.3,
+              1.0,
+              1.3
+            ],
+            "spans": [
+              {
+                "offset": 254,
+                "length": 8
+              }
+            ]
+          },
+          {
+            "content": "Reference: ABC-9876",
+            "polygon": [
+              1.0,
+              1.8,
+              3.5,
+              1.8,
+              3.5,
+              2.1,
+              1.0,
+              2.1
+            ],
+            "spans": [
+              {
+                "offset": 264,
+                "length": 19
+              }
+            ]
+          }
+        ],
+        "spans": [
+          {
+            "offset": 251,
+            "length": 32
+          }
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "rowCount": 2,
+        "columnCount": 2,
+        "cells": [
+          {
+            "kind": "columnHeader",
+            "rowIndex": 0,
+            "columnIndex": 0,
+            "content": "Item",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  4.0,
+                  2.8,
+                  4.0,
+                  2.8,
+                  4.3,
+                  1.0,
+                  4.3
+                ]
+              }
+            ],
+            "spans": [
+              {
+                "offset": 120,
+                "length": 4
+              }
+            ]
+          },
+          {
+            "kind": "columnHeader",
+            "rowIndex": 0,
+            "columnIndex": 1,
+            "content": "Amount",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  3.0,
+                  4.0,
+                  4.8,
+                  4.0,
+                  4.8,
+                  4.3,
+                  3.0,
+                  4.3
+                ]
+              }
+            ],
+            "spans": [
+              {
+                "offset": 133,
+                "length": 6
+              }
+            ]
+          },
+          {
+            "kind": "content",
+            "rowIndex": 1,
+            "columnIndex": 0,
+            "content": "Widget",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  4.4,
+                  2.8,
+                  4.4,
+                  2.8,
+                  4.7,
+                  1.0,
+                  4.7
+                ]
+              }
+            ],
+            "spans": [
+              {
+                "offset": 158,
+                "length": 6
+              }
+            ]
+          },
+          {
+            "kind": "content",
+            "rowIndex": 1,
+            "columnIndex": 1,
+            "content": "$56.78",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  3.0,
+                  4.4,
+                  4.8,
+                  4.4,
+                  4.8,
+                  4.7,
+                  3.0,
+                  4.7
+                ]
+              }
+            ],
+            "spans": [
+              {
+                "offset": 173,
+                "length": 6
+              }
+            ]
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              3.9,
+              4.8,
+              3.9,
+              4.8,
+              4.8,
+              1.0,
+              4.8
+            ]
+          }
+        ],
+        "spans": [
+          {
+            "offset": 104,
+            "length": 94
+          }
+        ]
+      }
+    ],
+    "paragraphs": [
+      {
+        "spans": [
+          {
+            "offset": 17,
+            "length": 14
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              0.5,
+              3.5,
+              0.5,
+              3.5,
+              1.0,
+              1.0,
+              1.0
+            ]
+          }
+        ],
+        "content": "LiteOCR sample",
+        "role": "pageHeader"
+      },
+      {
+        "spans": [
+          {
+            "offset": 40,
+            "length": 13
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              1.0,
+              3.5,
+              1.0,
+              3.5,
+              1.5,
+              1.0,
+              1.5
+            ]
+          }
+        ],
+        "role": "title",
+        "content": "Hello LiteOCR"
+      },
+      {
+        "spans": [
+          {
+            "offset": 55,
+            "length": 13
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              2.0,
+              3.5,
+              2.0,
+              3.5,
+              2.5,
+              1.0,
+              2.5
+            ]
+          }
+        ],
+        "content": "Invoice #1234"
+      },
+      {
+        "spans": [
+          {
+            "offset": 70,
+            "length": 13
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              2.5,
+              3.5,
+              2.5,
+              3.5,
+              3.0,
+              1.0,
+              3.0
+            ]
+          }
+        ],
+        "content": "Total: $56.78"
+      },
+      {
+        "spans": [
+          {
+            "offset": 85,
+            "length": 16
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              3.0,
+              3.5,
+              3.0,
+              3.5,
+              3.5,
+              1.0,
+              3.5
+            ]
+          }
+        ],
+        "content": "Date: 2026-09-11"
+      },
+      {
+        "spans": [
+          {
+            "offset": 120,
+            "length": 4
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              4.0,
+              2.0,
+              4.0,
+              2.0,
+              4.3,
+              1.0,
+              4.3
+            ]
+          }
+        ],
+        "content": "Item"
+      },
+      {
+        "spans": [
+          {
+            "offset": 133,
+            "length": 6
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              4.0,
+              2.0,
+              4.0,
+              2.0,
+              4.3,
+              1.0,
+              4.3
+            ]
+          }
+        ],
+        "content": "Amount"
+      },
+      {
+        "spans": [
+          {
+            "offset": 158,
+            "length": 6
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              4.0,
+              2.0,
+              4.0,
+              2.0,
+              4.3,
+              1.0,
+              4.3
+            ]
+          }
+        ],
+        "content": "Widget"
+      },
+      {
+        "spans": [
+          {
+            "offset": 173,
+            "length": 6
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              4.0,
+              2.0,
+              4.0,
+              2.0,
+              4.3,
+              1.0,
+              4.3
+            ]
+          }
+        ],
+        "content": "$56.78"
+      },
+      {
+        "spans": [
+          {
+            "offset": 218,
+            "length": 6
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              1.0,
+              10.2,
+              3.5,
+              10.2,
+              3.5,
+              10.7,
+              1.0,
+              10.7
+            ]
+          }
+        ],
+        "content": "Page 1",
+        "role": "pageFooter"
+      },
+      {
+        "spans": [
+          {
+            "offset": 254,
+            "length": 8
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 2,
+            "polygon": [
+              1.0,
+              1.0,
+              3.5,
+              1.0,
+              3.5,
+              1.5,
+              1.0,
+              1.5
+            ]
+          }
+        ],
+        "content": "Page Two",
+        "role": "sectionHeading"
+      },
+      {
+        "spans": [
+          {
+            "offset": 264,
+            "length": 19
+          }
+        ],
+        "boundingRegions": [
+          {
+            "pageNumber": 2,
+            "polygon": [
+              1.0,
+              1.8,
+              3.5,
+              1.8,
+              3.5,
+              2.3,
+              1.0,
+              2.3
+            ]
+          }
+        ],
+        "content": "Reference: ABC-9876"
+      }
+    ],
+    "figures": [],
+    "sections": [
+      {
+        "spans": [
+          {
+            "offset": 0,
+            "length": 283
+          }
+        ],
+        "elements": [
+          "/paragraphs/0",
+          "/sections/1"
+        ]
+      },
+      {
+        "spans": [
+          {
+            "offset": 251,
+            "length": 32
+          }
+        ],
+        "elements": [
+          "/paragraphs/10",
+          "/paragraphs/11"
+        ]
+      }
+    ],
+    "styles": []
+  }
+}

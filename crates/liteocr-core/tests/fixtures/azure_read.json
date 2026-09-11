@@ -1,0 +1,292 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2026-09-11T07:24:41Z",
+  "lastUpdatedDateTime": "2026-09-11T07:24:43Z",
+  "analyzeResult": {
+    "apiVersion": "2024-11-30",
+    "modelId": "prebuilt-read",
+    "stringIndexType": "unicodeCodePoint",
+    "contentFormat": "text",
+    "content": "Hello LiteOCR\nInvoice #1234\nPage Two\nReference: ABC-9876",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "angle": 0.0,
+        "width": 1700.0,
+        "height": 2200.0,
+        "unit": "pixel",
+        "words": [
+          {
+            "content": "Hello",
+            "polygon": [
+              100.0,
+              150.0,
+              300.0,
+              150.0,
+              300.0,
+              210.0,
+              100.0,
+              210.0
+            ],
+            "span": {
+              "offset": 0,
+              "length": 5
+            },
+            "confidence": 0.995
+          },
+          {
+            "content": "LiteOCR",
+            "polygon": [
+              340.0,
+              150.0,
+              540.0,
+              150.0,
+              540.0,
+              210.0,
+              340.0,
+              210.0
+            ],
+            "span": {
+              "offset": 6,
+              "length": 7
+            },
+            "confidence": 0.988
+          },
+          {
+            "content": "Invoice",
+            "polygon": [
+              100.0,
+              260.0,
+              300.0,
+              260.0,
+              300.0,
+              320.0,
+              100.0,
+              320.0
+            ],
+            "span": {
+              "offset": 14,
+              "length": 7
+            },
+            "confidence": 0.99
+          },
+          {
+            "content": "#1234",
+            "polygon": [
+              340.0,
+              260.0,
+              540.0,
+              260.0,
+              540.0,
+              320.0,
+              340.0,
+              320.0
+            ],
+            "span": {
+              "offset": 22,
+              "length": 5
+            },
+            "confidence": 0.987
+          }
+        ],
+        "lines": [
+          {
+            "content": "Hello LiteOCR",
+            "polygon": [
+              100.0,
+              150.0,
+              560.0,
+              150.0,
+              560.0,
+              210.0,
+              100.0,
+              210.0
+            ],
+            "spans": [
+              {
+                "offset": 0,
+                "length": 13
+              }
+            ]
+          },
+          {
+            "content": "Invoice #1234",
+            "polygon": [
+              100.0,
+              260.0,
+              560.0,
+              260.0,
+              560.0,
+              320.0,
+              100.0,
+              320.0
+            ],
+            "spans": [
+              {
+                "offset": 14,
+                "length": 13
+              }
+            ]
+          }
+        ],
+        "spans": [
+          {
+            "offset": 0,
+            "length": 27
+          }
+        ]
+      },
+      {
+        "pageNumber": 2,
+        "angle": 0.3,
+        "width": 1700.0,
+        "height": 2200.0,
+        "unit": "pixel",
+        "words": [
+          {
+            "content": "Page",
+            "polygon": [
+              100.0,
+              150.0,
+              300.0,
+              150.0,
+              300.0,
+              210.0,
+              100.0,
+              210.0
+            ],
+            "span": {
+              "offset": 28,
+              "length": 4
+            },
+            "confidence": 0.994
+          },
+          {
+            "content": "Two",
+            "polygon": [
+              340.0,
+              150.0,
+              540.0,
+              150.0,
+              540.0,
+              210.0,
+              340.0,
+              210.0
+            ],
+            "span": {
+              "offset": 33,
+              "length": 3
+            },
+            "confidence": 0.991
+          },
+          {
+            "content": "Reference:",
+            "polygon": [
+              100.0,
+              260.0,
+              300.0,
+              260.0,
+              300.0,
+              320.0,
+              100.0,
+              320.0
+            ],
+            "span": {
+              "offset": 37,
+              "length": 10
+            },
+            "confidence": 0.985
+          },
+          {
+            "content": "ABC-9876",
+            "polygon": [
+              380.0,
+              260.0,
+              580.0,
+              260.0,
+              580.0,
+              320.0,
+              380.0,
+              320.0
+            ],
+            "span": {
+              "offset": 48,
+              "length": 8
+            },
+            "confidence": 0.979
+          }
+        ],
+        "lines": [
+          {
+            "content": "Page Two",
+            "polygon": [
+              100.0,
+              150.0,
+              560.0,
+              150.0,
+              560.0,
+              210.0,
+              100.0,
+              210.0
+            ],
+            "spans": [
+              {
+                "offset": 28,
+                "length": 8
+              }
+            ]
+          },
+          {
+            "content": "Reference: ABC-9876",
+            "polygon": [
+              100.0,
+              260.0,
+              700.0,
+              260.0,
+              700.0,
+              320.0,
+              100.0,
+              320.0
+            ],
+            "spans": [
+              {
+                "offset": 37,
+                "length": 19
+              }
+            ]
+          }
+        ],
+        "spans": [
+          {
+            "offset": 28,
+            "length": 28
+          }
+        ]
+      }
+    ],
+    "styles": [
+      {
+        "confidence": 0.95,
+        "spans": [
+          {
+            "offset": 0,
+            "length": 27
+          }
+        ],
+        "isHandwritten": false
+      }
+    ],
+    "languages": [
+      {
+        "locale": "en",
+        "confidence": 0.99,
+        "spans": [
+          {
+            "offset": 0,
+            "length": 56
+          }
+        ]
+      }
+    ]
+  }
+}
