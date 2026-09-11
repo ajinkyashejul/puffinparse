@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LiteOCR Benchmark</title>
+    <meta
+      name="description"
+      content="Open, reproducible OCR / document-parsing benchmark: accuracy, latency and cost for every provider, with every document, output and score inspectable."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Inline SVG favicon: the site must load no external resources. -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%232f6feb'/%3E%3Cpath d='M4 4h3v8H4zM9 4h3v2H9zm0 3h3v2H9zm0 3h3v2H9z' fill='%23fff'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href="#/leaderboard">
+          <span class="brand-mark" aria-hidden="true">◧</span>
+          <span class="brand-text">
+            <strong>LiteOCR Benchmark</strong>
+            <span class="brand-sub">open OCR provider leaderboard</span>
+          </span>
+        </a>
+        <nav class="site-nav" aria-label="Main">
+          <a id="nav-leaderboard" href="#/leaderboard">Leaderboard</a>
+          <a id="nav-documents" href="#/documents">Documents</a>
+          <a
+            class="external"
+            href="https://github.com/ajinkyashejul/liteocr"
+            rel="noopener noreferrer"
+            >GitHub<span aria-hidden="true"> ↗</span></a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="wrap" tabindex="-1">
+      <div id="view" aria-busy="true">
+        <p class="loading">Loading benchmark data…</p>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          Dataset <code id="footer-dataset">synthetic-v1</code> is published under
+          <span id="footer-license">CC0-1.0</span>. Ground truth is exact by construction: the
+          documents are rendered from the same source the truth markdown is written from.
+        </p>
+        <p>
+          Latency is <strong>client-measured</strong> through each provider's public API — it
+          includes upload, queueing and polling, and every run is made with provider result caches
+          disabled. Prices are public pay-as-you-go list prices.
+        </p>
+        <p class="footer-links">
+          <a href="https://github.com/ajinkyashejul/liteocr" rel="noopener noreferrer">LiteOCR</a>
+          ·
+          <a
+            href="https://github.com/ajinkyashejul/liteocr/blob/main/benchmark/README.md"
+            rel="noopener noreferrer"
+            >Benchmark methodology</a
+          >
+          ·
+          <a
+            href="https://github.com/ajinkyashejul/liteocr/blob/main/LICENSE"
+            rel="noopener noreferrer"
+            >MIT licensed</a
+          >
+          · <span id="footer-generated"></span>
+        </p>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

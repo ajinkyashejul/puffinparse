@@ -1,0 +1,69 @@
+name: Pages
+
+# Publishes the static benchmark results viewer (benchmark/site) to GitHub Pages.
+#
+# SETUP (one time, by a maintainer): in the repository settings open
+# Settings -> Pages and set "Source" to "GitHub Actions". Until that is done this
+# workflow builds fine but the deploy step fails with "Pages is not enabled".
+#
+# TODO: the viewer is moving to a React app (Extend UI) under benchmark/site/app/.
+# When that lands, add an `npm ci && npm run build` stage before the Python build
+# (or after it, feeding it `site-dist/data/`) and upload the app's bundle together
+# with the generated `data/` directory. `build.py` already writes everything the
+# front-end needs under `<out>/data/`, so no data changes are required.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time; let a newer commit finish rather than
+# cancelling an in-flight deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # build.py is stdlib-only; Pillow is optional and only used to render page 1
+      # of PDF inputs into a preview PNG.
+      - name: Install Pillow (PDF page previews)
+        run: python -m pip install --upgrade pip pillow
+
+      - name: Build the benchmark site
+        run: python benchmark/site/build.py --out site-dist
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site-dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
