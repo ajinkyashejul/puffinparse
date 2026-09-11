@@ -45,10 +45,14 @@ Initial release.
   dataclasses (`OcrResponse`, `Page`, `Block`, `BBox`, `Usage`), the full error
   hierarchy, `set_pricing()`, `list_models()`, and success/failure callbacks.
   Fully typed, ships `py.typed`, distributed as abi3 wheels for CPython 3.9+.
-- **`synthetic-v1` benchmark dataset** — deterministically generated documents
-  (plain, headings, invoice, table, two-column, noisy scan, low resolution and
-  multi-page PDFs) with exact markdown ground truth, plus the generator that
-  produces them.
+- **`synthetic-v1` benchmark dataset** (v1.1.0) — 39 deterministically generated
+  documents across 13 categories (plain, headings, invoice, table, two-column,
+  noisy scan, low resolution, multi-page PDF, skewed, dense, faded, receipt,
+  complex table) with exact markdown ground truth, plus the generator that
+  produces them byte-for-byte.
+- **First leaderboard** (`benchmark/LEADERBOARD.md`) from a run over seven models
+  across the three providers; `bench run` disables provider result caches by
+  default (`--allow-cache` to opt out) so latency reflects real work.
 
 [Unreleased]: https://github.com/ajinkyashejul/liteocr/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/ajinkyashejul/liteocr/releases/tag/v0.1.0

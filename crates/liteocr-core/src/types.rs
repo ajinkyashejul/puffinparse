@@ -449,8 +449,38 @@ pub fn pages_from_blocks(blocks: Vec<Block>, page_dims: &BTreeMap<u32, (f64, f64
         .collect()
 }
 
+/// Remove simple inline HTML tags (`<b>`, `</i>`, `<br/>`, …) that some providers embed in markdown.
+pub fn strip_html_tags(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '<' {
+            // Only treat it as a tag if it looks like one: `<tag`, `</tag`, `<tag/>`.
+            let mut probe = chars.clone();
+            let looks_like_tag = matches!(probe.next(), Some(n) if n.is_ascii_alphabetic() || n == '/');
+            if looks_like_tag {
+                let mut closed = false;
+                for n in chars.by_ref() {
+                    if n == '>' {
+                        closed = true;
+                        break;
+                    }
+                }
+                if closed {
+                    // `<br>` acts as a line break.
+                    out.push(' ');
+                    continue;
+                }
+            }
+        }
+        out.push(c);
+    }
+    out
+}
+
 /// Very small markdown → plain text conversion, used when a provider only gives markdown.
 pub fn markdown_to_text(md: &str) -> String {
+    let md = strip_html_tags(md);
     let mut out = String::with_capacity(md.len());
     for line in md.lines() {
         let l = line.trim_end();
@@ -524,6 +554,13 @@ mod tests {
     fn markdown_to_text_strips_syntax() {
         let md = "# Title\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n- **bold** item";
         assert_eq!(markdown_to_text(md), "Title\n\na b\n1 2\n\nbold item");
+    }
+
+    #[test]
+    fn strips_inline_html() {
+        assert_eq!(strip_html_tags("<b>Bold</b> and <i>it</i><br/>x"), " Bold  and  it  x");
+        assert_eq!(strip_html_tags("a < b and c > d"), "a < b and c > d");
+        assert_eq!(markdown_to_text("# <b>Title</b>\n\n| <b>ID</b> | x |\n|-|-|\n| 1 | 2 |"), "Title\n\nID x\n1 2");
     }
 
     #[test]

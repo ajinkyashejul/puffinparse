@@ -48,6 +48,10 @@ pub struct RunArgs {
     /// Score case-sensitively.
     #[arg(long)]
     case_sensitive: bool,
+    /// Allow provider-side result caches (LlamaParse re-parses within 48 h are cached and near-instant).
+    /// Off by default so latency reflects real work.
+    #[arg(long)]
+    allow_cache: bool,
 }
 
 #[derive(clap::Args, Debug)]
@@ -215,8 +219,9 @@ async fn run_bench(args: RunArgs) -> Result<()> {
                 let bar = bar.clone();
                 let save = args.save_outputs.clone();
                 let timeout = args.timeout;
+                let allow_cache = args.allow_cache;
                 async move {
-                    let r = run_doc(&dataset, &doc, &model, timeout, norm, save.as_deref()).await;
+                    let r = run_doc(&dataset, &doc, &model, timeout, norm, save.as_deref(), allow_cache).await;
                     bar.inc(1);
                     r
                 }
@@ -273,6 +278,15 @@ fn uuid_like(now: &chrono::DateTime<chrono::Utc>) -> String {
     format!("run-{}", now.format("%Y%m%dT%H%M%SZ"))
 }
 
+/// Provider options that defeat server-side result caches, so measured latency is real work.
+fn cache_busting_options(model: &str) -> Option<serde_json::Value> {
+    match model.split('/').next() {
+        Some("llamaparse") => Some(serde_json::json!({ "do_not_cache": true, "invalidate_cache": true })),
+        _ => None,
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
 async fn run_doc(
     dataset: &Path,
     doc: &ManifestDoc,
@@ -280,6 +294,7 @@ async fn run_doc(
     timeout: f64,
     norm: NormalizeOptions,
     save: Option<&Path>,
+    allow_cache: bool,
 ) -> DocResult {
     let truth = match std::fs::read_to_string(dataset.join(&doc.truth)) {
         Ok(t) => t,
@@ -295,10 +310,15 @@ async fn run_doc(
             }
         }
     };
-    let req = OcrRequest::from_path(dataset.join(&doc.file))
+    let mut req = OcrRequest::from_path(dataset.join(&doc.file))
         .model(model)
         .timeout_secs(timeout)
         .output(OutputFormat::Markdown);
+    if !allow_cache {
+        if let Some(opts) = cache_busting_options(model) {
+            req = req.provider_options(opts);
+        }
+    }
     match liteocr_core::ocr(req).await {
         Ok(resp) => {
             if let Some(dir) = save {

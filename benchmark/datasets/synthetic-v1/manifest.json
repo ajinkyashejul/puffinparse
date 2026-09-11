@@ -1,0 +1,477 @@
+{
+  "name": "synthetic-v1",
+  "version": "1.1.0",
+  "description": "Deterministically generated documents (plain text, invoices, tables, two-column layouts, headings, noisy scans, low resolution pages, multi-page PDFs, skewed pages, dense small-print pages, faded scans, thermal receipts and wide complex tables) with exact markdown ground truth.",
+  "license": "CC0-1.0",
+  "generator": "benchmark/generate_synthetic.py",
+  "documents": [
+    {
+      "id": "complex_table_001",
+      "file": "docs/complex_table_001.png",
+      "truth": "truth/complex_table_001.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "table",
+        "wide_table"
+      ]
+    },
+    {
+      "id": "complex_table_002",
+      "file": "docs/complex_table_002.png",
+      "truth": "truth/complex_table_002.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "table",
+        "wide_table"
+      ]
+    },
+    {
+      "id": "complex_table_003",
+      "file": "docs/complex_table_003.png",
+      "truth": "truth/complex_table_003.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "table",
+        "wide_table"
+      ]
+    },
+    {
+      "id": "dense_001",
+      "file": "docs/dense_001.png",
+      "truth": "truth/dense_001.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "small_print",
+        "long"
+      ]
+    },
+    {
+      "id": "dense_002",
+      "file": "docs/dense_002.png",
+      "truth": "truth/dense_002.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "small_print",
+        "long"
+      ]
+    },
+    {
+      "id": "dense_003",
+      "file": "docs/dense_003.png",
+      "truth": "truth/dense_003.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "small_print",
+        "long"
+      ]
+    },
+    {
+      "id": "faded_001",
+      "file": "docs/faded_001.png",
+      "truth": "truth/faded_001.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "degraded",
+        "low_contrast",
+        "jpeg",
+        "blur"
+      ]
+    },
+    {
+      "id": "faded_002",
+      "file": "docs/faded_002.png",
+      "truth": "truth/faded_002.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "degraded",
+        "low_contrast",
+        "jpeg",
+        "blur"
+      ]
+    },
+    {
+      "id": "faded_003",
+      "file": "docs/faded_003.png",
+      "truth": "truth/faded_003.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "degraded",
+        "low_contrast",
+        "jpeg",
+        "blur"
+      ]
+    },
+    {
+      "id": "headings_001",
+      "file": "docs/headings_001.png",
+      "truth": "truth/headings_001.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "structure",
+        "list"
+      ]
+    },
+    {
+      "id": "headings_002",
+      "file": "docs/headings_002.png",
+      "truth": "truth/headings_002.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "structure",
+        "list"
+      ]
+    },
+    {
+      "id": "headings_003",
+      "file": "docs/headings_003.png",
+      "truth": "truth/headings_003.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "structure",
+        "list"
+      ]
+    },
+    {
+      "id": "invoice_001",
+      "file": "docs/invoice_001.png",
+      "truth": "truth/invoice_001.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "table",
+        "key_value"
+      ]
+    },
+    {
+      "id": "invoice_002",
+      "file": "docs/invoice_002.png",
+      "truth": "truth/invoice_002.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "table",
+        "key_value"
+      ]
+    },
+    {
+      "id": "invoice_003",
+      "file": "docs/invoice_003.png",
+      "truth": "truth/invoice_003.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "table",
+        "key_value"
+      ]
+    },
+    {
+      "id": "low_res_001",
+      "file": "docs/low_res_001.png",
+      "truth": "truth/low_res_001.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res"
+      ]
+    },
+    {
+      "id": "low_res_002",
+      "file": "docs/low_res_002.png",
+      "truth": "truth/low_res_002.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res"
+      ]
+    },
+    {
+      "id": "low_res_003",
+      "file": "docs/low_res_003.png",
+      "truth": "truth/low_res_003.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res"
+      ]
+    },
+    {
+      "id": "multipage_001",
+      "file": "docs/multipage_001.pdf",
+      "truth": "truth/multipage_001.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "table",
+        "structure"
+      ]
+    },
+    {
+      "id": "multipage_002",
+      "file": "docs/multipage_002.pdf",
+      "truth": "truth/multipage_002.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "table",
+        "structure"
+      ]
+    },
+    {
+      "id": "multipage_003",
+      "file": "docs/multipage_003.pdf",
+      "truth": "truth/multipage_003.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "table",
+        "structure"
+      ]
+    },
+    {
+      "id": "noisy_scan_001",
+      "file": "docs/noisy_scan_001.png",
+      "truth": "truth/noisy_scan_001.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "degraded",
+        "noise",
+        "blur"
+      ]
+    },
+    {
+      "id": "noisy_scan_002",
+      "file": "docs/noisy_scan_002.png",
+      "truth": "truth/noisy_scan_002.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "degraded",
+        "noise",
+        "blur"
+      ]
+    },
+    {
+      "id": "noisy_scan_003",
+      "file": "docs/noisy_scan_003.png",
+      "truth": "truth/noisy_scan_003.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "degraded",
+        "noise",
+        "blur"
+      ]
+    },
+    {
+      "id": "plain_001",
+      "file": "docs/plain_001.png",
+      "truth": "truth/plain_001.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "text"
+      ]
+    },
+    {
+      "id": "plain_002",
+      "file": "docs/plain_002.png",
+      "truth": "truth/plain_002.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "text"
+      ]
+    },
+    {
+      "id": "plain_003",
+      "file": "docs/plain_003.png",
+      "truth": "truth/plain_003.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "text"
+      ]
+    },
+    {
+      "id": "receipt_001",
+      "file": "docs/receipt_001.png",
+      "truth": "truth/receipt_001.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "receipt",
+        "table",
+        "monospace"
+      ]
+    },
+    {
+      "id": "receipt_002",
+      "file": "docs/receipt_002.png",
+      "truth": "truth/receipt_002.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "receipt",
+        "table",
+        "monospace"
+      ]
+    },
+    {
+      "id": "receipt_003",
+      "file": "docs/receipt_003.png",
+      "truth": "truth/receipt_003.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "receipt",
+        "table",
+        "monospace"
+      ]
+    },
+    {
+      "id": "skewed_001",
+      "file": "docs/skewed_001.png",
+      "truth": "truth/skewed_001.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "rotation",
+        "layout"
+      ]
+    },
+    {
+      "id": "skewed_002",
+      "file": "docs/skewed_002.png",
+      "truth": "truth/skewed_002.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "rotation",
+        "layout"
+      ]
+    },
+    {
+      "id": "skewed_003",
+      "file": "docs/skewed_003.png",
+      "truth": "truth/skewed_003.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "rotation",
+        "layout"
+      ]
+    },
+    {
+      "id": "table_001",
+      "file": "docs/table_001.png",
+      "truth": "truth/table_001.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "table"
+      ]
+    },
+    {
+      "id": "table_002",
+      "file": "docs/table_002.png",
+      "truth": "truth/table_002.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "table"
+      ]
+    },
+    {
+      "id": "table_003",
+      "file": "docs/table_003.png",
+      "truth": "truth/table_003.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "table"
+      ]
+    },
+    {
+      "id": "two_column_001",
+      "file": "docs/two_column_001.png",
+      "truth": "truth/two_column_001.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order"
+      ]
+    },
+    {
+      "id": "two_column_002",
+      "file": "docs/two_column_002.png",
+      "truth": "truth/two_column_002.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order"
+      ]
+    },
+    {
+      "id": "two_column_003",
+      "file": "docs/two_column_003.png",
+      "truth": "truth/two_column_003.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order"
+      ]
+    }
+  ]
+}
