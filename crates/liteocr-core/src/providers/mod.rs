@@ -27,6 +27,7 @@ pub fn build(name: &str) -> Result<Arc<dyn Provider>> {
         "reducto" => Ok(Arc::new(reducto::Reducto)),
         "extend" => Ok(Arc::new(extend::Extend)),
         "llamaparse" => Ok(Arc::new(llamaparse::LlamaParse)),
+        "mistral" => Ok(Arc::new(mistral::Mistral)),
         other => Err(Error::unsupported_model(format!("unknown provider '{other}'"))),
     }
 }

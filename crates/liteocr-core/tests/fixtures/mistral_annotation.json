@@ -1,0 +1,19 @@
+{
+  "pages": [
+    {
+      "index": 0,
+      "markdown": "# Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78\n\n| Item | Amount |\n| :-- | --: |\n| Widget | $56.78 |",
+      "images": [],
+      "tables": [],
+      "hyperlinks": [],
+      "header": null,
+      "footer": null,
+      "dimensions": { "dpi": 200, "height": 2200, "width": 1700 },
+      "confidence_scores": null,
+      "blocks": null
+    }
+  ],
+  "model": "mistral-ocr-latest",
+  "document_annotation": "{\"invoice_number\": \"INV-1234\", \"total\": 56.78, \"currency\": \"USD\", \"line_items\": [{\"description\": \"Widget\", \"amount\": 56.78}]}",
+  "usage_info": { "pages_processed": 1, "doc_size_bytes": 15310 }
+}

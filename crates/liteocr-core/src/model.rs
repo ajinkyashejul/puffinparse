@@ -136,6 +136,43 @@ pub const PROVIDERS: &[ProviderInfo] = &[
             },
         ],
     },
+    ProviderInfo {
+        name: "mistral",
+        display_name: "Mistral Document AI",
+        env_var: "MISTRAL_API_KEY",
+        base_url: "https://api.mistral.ai",
+        docs: "https://docs.mistral.ai/capabilities/OCR/basic_ocr",
+        models: &[
+            ModelInfo {
+                provider: "mistral",
+                model: "ocr-latest",
+                description: "Mistral OCR, latest alias (mistral-ocr-latest; currently OCR 4.1)",
+                default: true,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "mistral",
+                model: "ocr-4-1",
+                description: "Mistral OCR 4.1 pinned (mistral-ocr-4-1; blocks + block confidence scores)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "mistral",
+                model: "ocr-4-0",
+                description: "Mistral OCR 4.0 pinned (mistral-ocr-4-0; paragraph blocks, no block confidence)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "mistral",
+                model: "ocr-2512",
+                description: "Mistral OCR 3 pinned (mistral-ocr-2512; cheaper, no paragraph blocks)",
+                default: false,
+                modes: Mode::ALL,
+            },
+        ],
+    },
 ];
 
 /// A parsed, validated model reference.
@@ -259,13 +296,14 @@ mod tests {
         assert!(e.to_string().contains("does not support mode 'extract'"), "{e}");
         assert!(ModelRef::parse_for("extend", Mode::Extract).is_err());
         assert_eq!(list_models_for(Mode::Parse).len(), list_models().len());
-        assert!(list_models_for(Mode::Extract).is_empty());
+        assert!(list_models_for(Mode::Extract).iter().all(|m| model_info(m.split('/').next().unwrap(), m.split('/').nth(1).unwrap()).unwrap().supports(Mode::Extract)));
+        assert!(list_models_for(Mode::Extract).contains(&"mistral/ocr-latest".to_string()));
     }
 
     #[test]
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 10);
+        assert_eq!(m.len(), 14);
     }
 }

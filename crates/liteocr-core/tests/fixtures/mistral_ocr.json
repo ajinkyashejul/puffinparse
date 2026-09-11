@@ -1,0 +1,41 @@
+{
+  "pages": [
+    {
+      "index": 0,
+      "markdown": "# Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78\n\n| Item | Amount |\n| :-- | --: |\n| Widget | $56.78 |\n\nAcme Corporation, 123 Main Street",
+      "images": [],
+      "tables": [],
+      "hyperlinks": [],
+      "header": null,
+      "footer": null,
+      "dimensions": { "dpi": 200, "height": 2200, "width": 1700 },
+      "confidence_scores": null,
+      "blocks": null
+    },
+    {
+      "index": 1,
+      "markdown": "![img-0.jpeg](img-0.jpeg)\n\nFigure 1: Quarterly revenue by segment.\n\nReference: ABC-9876",
+      "images": [
+        {
+          "id": "img-0.jpeg",
+          "top_left_x": 292,
+          "top_left_y": 217,
+          "bottom_right_x": 1405,
+          "bottom_right_y": 649,
+          "image_base64": "data:image/jpeg;base64,REDACTED",
+          "image_annotation": null
+        }
+      ],
+      "tables": [],
+      "hyperlinks": [],
+      "header": null,
+      "footer": null,
+      "dimensions": { "dpi": 200, "height": 2200, "width": 1700 },
+      "confidence_scores": null,
+      "blocks": null
+    }
+  ],
+  "model": "mistral-ocr-latest",
+  "document_annotation": null,
+  "usage_info": { "pages_processed": 2, "doc_size_bytes": 30021 }
+}
