@@ -296,7 +296,12 @@ mod tests {
         assert!(e.to_string().contains("does not support mode 'extract'"), "{e}");
         assert!(ModelRef::parse_for("extend", Mode::Extract).is_err());
         assert_eq!(list_models_for(Mode::Parse).len(), list_models().len());
-        assert!(list_models_for(Mode::Extract).iter().all(|m| model_info(m.split('/').next().unwrap(), m.split('/').nth(1).unwrap()).unwrap().supports(Mode::Extract)));
+        assert!(list_models_for(Mode::Extract).iter().all(|m| model_info(
+            m.split('/').next().unwrap(),
+            m.split('/').nth(1).unwrap()
+        )
+        .unwrap()
+        .supports(Mode::Extract)));
         assert!(list_models_for(Mode::Extract).contains(&"mistral/ocr-latest".to_string()));
     }
 
