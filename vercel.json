@@ -34,5 +34,162 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/getting-started/",
+      "destination": "/docs/getting-started/",
+      "permanent": true
+    },
+    {
+      "source": "/python/",
+      "destination": "/docs/python/",
+      "permanent": true
+    },
+    {
+      "source": "/cli/",
+      "destination": "/docs/cli/",
+      "permanent": true
+    },
+    {
+      "source": "/rust/",
+      "destination": "/docs/rust/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/",
+      "destination": "/docs/providers/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/reducto/",
+      "destination": "/docs/providers/reducto/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/extend/",
+      "destination": "/docs/providers/extend/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/llamaparse/",
+      "destination": "/docs/providers/llamaparse/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/mistral/",
+      "destination": "/docs/providers/mistral/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/azure/",
+      "destination": "/docs/providers/azure/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/textract/",
+      "destination": "/docs/providers/textract/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/gemini/",
+      "destination": "/docs/providers/gemini/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/openai/",
+      "destination": "/docs/providers/openai/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/anthropic/",
+      "destination": "/docs/providers/anthropic/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/mathpix/",
+      "destination": "/docs/providers/mathpix/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/datalab/",
+      "destination": "/docs/providers/datalab/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/unstructured/",
+      "destination": "/docs/providers/unstructured/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/upstage/",
+      "destination": "/docs/providers/upstage/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/landingai/",
+      "destination": "/docs/providers/landingai/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/google-documentai/",
+      "destination": "/docs/providers/google-documentai/",
+      "permanent": true
+    },
+    {
+      "source": "/benchmark/",
+      "destination": "/docs/benchmark/",
+      "permanent": true
+    },
+    {
+      "source": "/benchmark/leaderboard/",
+      "destination": "/docs/benchmark/leaderboard/",
+      "permanent": true
+    },
+    {
+      "source": "/benchmark/vendor-benchmarks/",
+      "destination": "/docs/benchmark/vendor-benchmarks/",
+      "permanent": true
+    },
+    {
+      "source": "/project/spec/",
+      "destination": "/docs/project/spec/",
+      "permanent": true
+    },
+    {
+      "source": "/project/compat/",
+      "destination": "/docs/project/compat/",
+      "permanent": true
+    },
+    {
+      "source": "/project/decisions/",
+      "destination": "/docs/project/decisions/",
+      "permanent": true
+    },
+    {
+      "source": "/project/tasks/",
+      "destination": "/docs/project/tasks/",
+      "permanent": true
+    },
+    {
+      "source": "/project/contributing/",
+      "destination": "/docs/project/contributing/",
+      "permanent": true
+    },
+    {
+      "source": "/project/changelog/",
+      "destination": "/docs/project/changelog/",
+      "permanent": true
+    },
+    {
+      "source": "/project/security/",
+      "destination": "/docs/project/security/",
+      "permanent": true
+    },
+    {
+      "source": "/project/for-agents/",
+      "destination": "/docs/project/for-agents/",
+      "permanent": true
+    }
   ]
 }

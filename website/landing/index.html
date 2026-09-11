@@ -1,0 +1,289 @@
+<!doctype html>
+<!--
+  LiteOCR landing page template.
+
+  Rendered by website/build.py: every {{ NAME }} placeholder is replaced with live repository data
+  (the provider registry in crates/liteocr-core/src/model.rs, the committed benchmark results,
+  and the doc URLs derived from website/nav.json). Never edit website/dist/index.html.
+-->
+<html lang="en" data-base="{{BASE}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LiteOCR — one API for every OCR provider</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<link rel="canonical" href="{{CANONICAL}}">
+<link rel="icon" href="{{FAVICON}}">
+<link rel="stylesheet" href="{{BASE}}style.css">
+<link rel="stylesheet" href="{{BASE}}landing.css">
+<script>(function(){try{var t=localStorage.getItem('liteocr-theme');
+if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body class="lp">
+
+<header class="top"><div class="topin">
+<a class="brand" href="{{BASE}}"><span class="lp-mark" aria-hidden="true"></span>LiteOCR</a>
+<div class="spacer"></div>
+<a class="plain" href="{{URL_DOCS}}">Docs</a>
+<a class="plain" href="{{URL_LEADERBOARD}}">Benchmark</a>
+<a class="plain" href="{{REPO}}">GitHub</a>
+{{THEME_BUTTON}}
+</div></header>
+
+<main>
+
+<!-- ------------------------------------------------------------------ hero -->
+<section class="lp-hero">
+  <div class="lp-wrap lp-hero-grid">
+    <div class="lp-hero-copy">
+      <p class="lp-eyebrow">Rust core · Python SDK · CLI · open benchmark</p>
+      <h1>One API for<br>every OCR provider.</h1>
+      <p class="lp-lede">Three modes — <b>parse</b>, <b>ocr</b> and <b>extract</b> — across
+        {{N_PROVIDERS}} providers and {{N_MODELS}} models. One request, one response shape, one set
+        of errors, and an <a href="{{URL_BENCH}}">open benchmark</a> that ranks every provider on
+        accuracy, latency and cost.</p>
+
+      <div class="lp-install">
+        <code>pip install liteocr</code>
+        <button class="lp-copybtn" type="button" data-copy="pip install liteocr">Copy</button>
+      </div>
+
+      <div class="lp-code lp-hero-code">
+        <pre><code class="language-python">import liteocr
+
+doc = liteocr.parse("invoice.pdf", model="<span class="lp-slot" data-model-slot>{{DEFAULT_MODEL}}</span>")
+print(doc.markdown, doc.pages[0].blocks[0].bbox)
+print(doc.usage.pages, doc.cost_usd)</code></pre>
+      </div>
+
+      <div class="lp-cta">
+        <a class="lp-btn lp-btn-primary" href="{{URL_START}}">Get started</a>
+        <a class="lp-btn" href="{{URL_DOCS}}">Documentation</a>
+        <a class="lp-btn" href="{{REPO}}">GitHub</a>
+      </div>
+    </div>
+
+    <div class="lp-hero-demo">
+      <div class="lp-scan" id="lp-scan" data-models="{{MODELS}}" data-lines="{{SCAN_LINES}}">
+        <div class="lp-scan-head">
+          <span class="lp-scan-file">invoice.pdf</span>
+          <span class="lp-scan-model" data-model-slot>{{DEFAULT_MODEL}}</span>
+        </div>
+        <div class="lp-scan-body">
+          <div class="lp-paper" aria-hidden="true">
+            <div class="lp-sweep"></div>
+            <div class="lp-blk lp-blk-title" style="--i:0"></div>
+            <div class="lp-blk lp-blk-line" style="--i:1;--w:94%"></div>
+            <div class="lp-blk lp-blk-line" style="--i:2;--w:78%"></div>
+            <div class="lp-blk lp-blk-table" style="--i:3">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="lp-blk lp-blk-line" style="--i:4;--w:88%"></div>
+            <div class="lp-blk lp-blk-split" style="--i:5">
+              <span class="lp-blk-fig"></span>
+              <span class="lp-blk-stack"><i style="--w:100%"></i><i style="--w:82%"></i><i style="--w:64%"></i></span>
+            </div>
+            <div class="lp-blk lp-blk-line" style="--i:6;--w:52%"></div>
+          </div>
+          <div class="lp-out">
+            <pre><code id="lp-out">{{SCAN_STATIC}}</code></pre>
+          </div>
+        </div>
+        <div class="lp-scan-foot">
+          <span>markdown</span><span>typed blocks + boxes</span><span>usage &amp; cost</span>
+        </div>
+      </div>
+      <p class="lp-demo-note">Any provider in, the same typed response out.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------------- stats -->
+<section class="lp-stats">
+  <div class="lp-wrap lp-stats-row">
+    <div><b>{{N_PROVIDERS}}</b><span>providers</span></div>
+    <div><b>{{N_MODELS}}</b><span>models</span></div>
+    <div><b>{{N_MODES}}</b><span>modes</span></div>
+    <div><b>1</b><span>response shape</span></div>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------------- switch -->
+<section class="lp-sec" id="switch">
+  <div class="lp-wrap">
+    <p class="lp-kicker">Switch in one line</p>
+    <h2>Change the string. Nothing else moves.</h2>
+    <p class="lp-sub">Every provider has its own upload flow, polling loop, block vocabulary,
+      coordinate system and billing unit. LiteOCR hides all of it. Pick a tab: only the
+      highlighted model string changes.</p>
+    {{SWITCH_TABS}}
+    <p class="lp-note"><b>Providers are only interchangeable within a mode.</b> A model that cannot
+      serve the mode you asked for raises <code>UnsupportedModelError</code> before any network
+      call — never a quietly different response shape.</p>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------- providers -->
+<section class="lp-sec lp-sec-alt" id="providers">
+  <div class="lp-wrap">
+    <p class="lp-kicker">The registry</p>
+    <h2>{{N_PROVIDERS}} providers, {{N_MODELS}} models, one client.</h2>
+    <p class="lp-sub">Read straight out of the Rust registry at build time, so this grid cannot
+      drift from the code — {{N_VERIFIED}} of them verified against live API responses, the rest
+      implemented from the official reference with fixture-backed tests.</p>
+    <div class="lp-grid">{{PROVIDER_CARDS}}</div>
+    <p class="lp-note"><a href="{{URL_PROVIDERS}}">Provider reference →</a> exactly what LiteOCR
+      sends, what comes back, and how every field is mapped.</p>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------------- modes -->
+<section class="lp-sec" id="modes">
+  <div class="lp-wrap">
+    <p class="lp-kicker">Three products, not one</p>
+    <h2>Document AI vendors sell three different things.</h2>
+    <p class="lp-sub">A call picks one mode, and the mode decides the response type. Providers are
+      only interchangeable within a mode.</p>
+    <div class="lp-modecards">
+      <article class="lp-mode">
+        <h3><span class="lp-chip lp-chip-parse">parse</span></h3>
+        <p>Layout-aware markdown plus typed blocks with normalised boxes. For RAG chunks, tables
+          and document structure.</p>
+        <pre><code>{
+  "markdown": "# Invoice …",
+  "pages": [{"blocks": [
+    {"type": "table",
+     "bbox": [0.08, 0.41, 0.92, 0.63]}
+  ]}]
+}</code></pre>
+      </article>
+      <article class="lp-mode">
+        <h3><span class="lp-chip lp-chip-ocr">ocr</span></h3>
+        <p>Plain text in reading order with line and word boxes. For search indexes, redaction and
+          overlays.</p>
+        <pre><code>{
+  "text": "ACME Industries …",
+  "pages": [{
+    "lines": [{"text": "Total due",
+               "bbox": [0.6, 0.8, 0.8, 0.83]}],
+    "words": [{"text": "Total", "bbox": […]}]
+  }]
+}</code></pre>
+      </article>
+      <article class="lp-mode">
+        <h3><span class="lp-chip lp-chip-extract">extract</span></h3>
+        <p>A JSON object shaped by your schema, with per-field confidence and citations back to the
+          page. For invoices, forms, anything with fields.</p>
+        <pre><code>{
+  "data": {"invoice_number": "INV-4182",
+           "total": 1280.5},
+  "fields": {"/total": {"confidence": 0.98}},
+  "citations": {"/total": [{"page": 2,
+                            "bbox": […]}]}
+}</code></pre>
+      </article>
+    </div>
+    <p class="lp-note"><code>liteocr.list_models("extract")</code> or
+      <code>liteocr providers --mode extract</code> lists the models that serve a mode — it is a
+      registry fact, not a guess.</p>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------------- compat -->
+<section class="lp-sec lp-sec-alt" id="compat">
+  <div class="lp-wrap lp-two">
+    <div>
+      <p class="lp-kicker">Native-format compatibility</p>
+      <h2>Already on Reducto, Extend or LlamaParse? Keep your code.</h2>
+      <p class="lp-sub">Ask for a vendor's own JSON shape and LiteOCR renders the unified response
+        into it — whatever provider actually produced it. Key set, nesting, block vocabulary,
+        coordinate convention and billed page count, all in the vendor's units.</p>
+      <p class="lp-wit">Your parser is loyal to a vendor. Your code doesn't have to be.</p>
+      <p class="lp-note"><a href="{{URL_COMPAT}}">How the compatibility layer works →</a> including
+        exactly what is guaranteed and what is rendered as <code>null</code>.</p>
+    </div>
+    <div class="lp-code">
+      <pre><code class="language-python">doc = liteocr.parse("invoice.pdf",
+                    model="gemini/2.5-flash",
+                    output_format=<mark class="lp-diff">"reducto"</mark>)
+# -> Reducto's own parse JSON, from Gemini
+doc.raw["result"]["chunks"][0]["blocks"][0]["bbox"]["left"]</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------- benchmark -->
+<section class="lp-sec" id="benchmark">
+  <div class="lp-wrap">
+    <p class="lp-kicker">Open benchmark</p>
+    <h2>Pick a provider on evidence, not marketing.</h2>
+    <p class="lp-sub">Ground truth is exact by construction — the documents are rendered from the
+      same source as the truth files. The metrics are deterministic text comparisons with no LLM
+      judge, provider result caches are disabled, and every per-document output is committed next
+      to the run so you can verify any number yourself.</p>
+    <div class="lp-board">
+      <table>
+        <thead><tr><th>#</th><th>Model</th><th class="lp-num">Overall</th><th class="lp-num">p50 latency</th><th class="lp-num">$/1k pages</th></tr></thead>
+        <tbody id="lp-board-body">{{LEADERBOARD_ROWS}}</tbody>
+      </table>
+    </div>
+    <p class="lp-caption">{{LEADERBOARD_DATASET}} · higher Overall is better (100 = character-exact
+      after normalisation)</p>
+    <div class="lp-code">
+      <pre><code class="language-bash">liteocr bench run --dataset benchmark/datasets/synthetic-v1 \
+    --models reducto/r-1 extend/parse_light llamaparse/cost_effective
+liteocr bench report benchmark/results/*.json</code></pre>
+    </div>
+    <p class="lp-note"><a href="{{URL_LEADERBOARD}}">Full leaderboard →</a> ·
+      <a href="{{URL_BENCH}}">methodology and caveats →</a> ·
+      <a href="{{RESULTS}}">raw result files on GitHub →</a></p>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------------- agents -->
+<section class="lp-sec lp-sec-alt" id="agents">
+  <div class="lp-wrap lp-two">
+    <div>
+      <p class="lp-kicker">For agents</p>
+      <h2>The docs are readable without a browser.</h2>
+      <p class="lp-sub">Every page on this site is also served as plain markdown, linked from the
+        HTML with <code>&lt;link rel="alternate" type="text/markdown"&gt;</code>. No JavaScript is
+        needed to read anything. There is no MCP server yet — the markdown endpoints are the
+        interface.</p>
+    </div>
+    <ul class="lp-agents">
+      <li><a href="{{BASE}}llms.txt"><code>/llms.txt</code></a><span>the site map, one line per
+        page</span></li>
+      <li><a href="{{BASE}}llms-full.txt"><code>/llms-full.txt</code></a><span>every page
+        concatenated, in nav order</span></li>
+      <li><a href="{{URL_PYTHON}}index.md"><code>/docs/&lt;page&gt;/index.md</code></a><span>the raw
+        markdown behind any page</span></li>
+      <li><a href="{{URL_SPEC}}"><code>/docs/project/spec/</code></a><span>the contract both
+        implementations follow</span></li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="lp-footer">
+  <div class="lp-wrap lp-footer-in">
+    <div>
+      <p class="lp-footer-brand"><span class="lp-mark" aria-hidden="true"></span>LiteOCR</p>
+      <p class="lp-footer-note">Built with the Rust core (<code>liteocr-core</code>) and the typed
+        Python SDK. MIT licensed.</p>
+    </div>
+    <nav class="lp-footer-links">
+      <a href="{{URL_DOCS}}">Documentation</a>
+      <a href="{{URL_START}}">Getting started</a>
+      <a href="{{URL_PROVIDERS}}">Providers</a>
+      <a href="{{URL_LEADERBOARD}}">Benchmark</a>
+      <a href="{{REPO}}">GitHub</a>
+      <a href="{{REPO}}/blob/main/LICENSE">MIT licence</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="{{BASE}}app.js" defer></script>
+</body>
+</html>

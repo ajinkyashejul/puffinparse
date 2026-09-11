@@ -37,7 +37,8 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .topin { display: flex; align-items: center; gap: .75rem; height: 100%;
   max-width: 84rem; margin: 0 auto; padding: 0 1.25rem; }
 .brand { font-weight: 640; letter-spacing: -.02em; color: var(--fg); font-size: 1rem; }
-.brand span { color: var(--fg-faint); font-weight: 400; margin-left: .45rem; font-size: .8rem; }
+.brand-sub { color: var(--fg-faint); font-weight: 400; margin-left: -.45rem; font-size: .8rem; }
+.brand-sub:hover { color: var(--fg-dim); }
 .top .spacer { flex: 1; }
 .top a.plain, .iconbtn { color: var(--fg-dim); font-size: .82rem; }
 .iconbtn { display: flex; align-items: center; background: none; border: 1px solid transparent;

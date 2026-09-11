@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""Build the LiteOCR documentation site.
+"""Build the LiteOCR product website.
 
-Reads the site map in ``website/nav.json``, renders every listed markdown file (existing repo
-docs plus the pages under ``website/pages/``) into ``website/dist/`` as pretty URLs, and emits the
-agent-friendly companions: a ``index.md`` next to every page, ``llms.txt``, ``llms-full.txt``,
-``search.json``, ``sitemap.xml``, ``robots.txt`` and ``404.html``.
+The site has two halves:
+
+* the **landing page** at ``/``, rendered from the template in ``website/landing/index.html`` with
+  live repository data (the provider registry in ``crates/liteocr-core/src/model.rs`` and the
+  committed benchmark results) injected at build time;
+* the **documentation** under ``/docs/``, driven by the site map in ``website/nav.json``: every
+  listed markdown file (existing repo docs plus the pages under ``website/pages/``) is rendered to
+  a pretty URL, with the agent-friendly companions ``<page>/index.md``, ``llms.txt``,
+  ``llms-full.txt``, ``search.json``, ``sitemap.xml``, ``robots.txt`` and ``404.html``.
 
     python website/build.py                     # -> website/dist, base URL "/"
-    python website/build.py --base-url /docs/   # hosted under a subpath
+    python website/build.py --base-url /preview # hosted under a subpath
     python website/build.py --check             # build, then verify every internal link
+    python website/build.py --write-redirects   # refresh the /<slug> -> /docs/<slug> map in vercel.json
 
 The only third-party dependency is ``markdown`` (``pip install markdown``); everything else is
 standard library. No syntax highlighter is used, so code blocks stay plain ``<pre><code>``.
@@ -86,13 +92,19 @@ class Site:
     license: str
     base: str
     site_url: str
+    docs_prefix: str = "docs"
+
+    @property
+    def docs_base(self) -> str:
+        """Where the documentation lives. The landing page owns ``base`` itself."""
+        return f"{self.base}{self.docs_prefix}/" if self.docs_prefix else self.base
 
     def blob(self, path: str, tree: bool = False) -> str:
         kind = "tree" if tree else "blob"
         return f"{self.repo}/{kind}/{self.branch}/{path}"
 
     def url(self, slug: str, md: bool = False) -> str:
-        u = self.base if not slug else f"{self.base}{slug}/"
+        u = self.docs_base if not slug else f"{self.docs_base}{slug}/"
         return u + "index.md" if md else u
 
     def absolute(self, rel: str) -> str:
@@ -104,7 +116,7 @@ class Site:
         return f"{self.site_url.rstrip('/')}/{path}"
 
 
-def load_nav(path: Path, base: str, site_url: str) -> tuple[Site, list[Page]]:
+def load_nav(path: Path, base: str, site_url: str, docs_prefix: str = "docs") -> tuple[Site, list[Page]]:
     data = json.loads(path.read_text(encoding="utf-8"))
     s = data["site"]
     site = Site(
@@ -116,6 +128,7 @@ def load_nav(path: Path, base: str, site_url: str) -> tuple[Site, list[Page]]:
         license=s.get("license", "MIT"),
         base=base,
         site_url=site_url,
+        docs_prefix=docs_prefix.strip("/"),
     )
     pages: list[Page] = []
     for section in data["sections"]:
@@ -204,24 +217,83 @@ def flat_headings(tokens: list[dict[str, Any]]) -> list[list[str]]:
 # ------------------------------------------------------------------------------- generated bits
 
 
-def read_providers() -> list[dict[str, Any]]:
-    """Provider metadata straight from the Rust registry + price table, so it cannot drift."""
+MODES = ("parse", "ocr", "extract")
+
+RS_FIELDS = ("name", "display_name", "env_var", "base_url", "docs")
+RS_FIELD_RE = {n: re.compile(rf'\b{n}:\s*"([^"]*)"') for n in RS_FIELDS}
+RS_MODEL_RE = re.compile(
+    r'model:\s*"([^"]+)",\s*description:\s*"([^"]*)",\s*default:\s*(true|false),\s*modes:\s*([^,\n]+),'
+)
+STATUS_ROW_RE = re.compile(r"^\|.*?\[`(?P<file>[\w.-]+)\.md`\].*\|\s*(?P<status>[^|]+?)\s*\|\s*$", re.M)
+
+
+def _rs_modes(expr: str) -> list[str]:
+    """``PARSE_OCR`` / ``Mode::ALL`` / ``&[Mode::Extract]`` -> ordered lowercase mode names."""
+    expr = expr.strip()
+    if expr == "PARSE_OCR":
+        return ["parse", "ocr"]
+    if expr == "Mode::ALL":
+        return list(MODES)
+    found = {m.lower() for m in re.findall(r"Mode::(\w+)", expr)}
+    return [m for m in MODES if m in found]
+
+
+def read_provider_status() -> dict[str, str]:
+    """Verification status per provider, from the status column of ``docs/providers/README.md``."""
+    readme = ROOT / "docs/providers/README.md"
+    if not readme.exists():
+        return {}
+    return {m["file"]: m["status"] for m in STATUS_ROW_RE.finditer(readme.read_text(encoding="utf-8"))}
+
+
+def read_registry() -> list[dict[str, Any]]:
+    """Providers, models and modes parsed straight out of the Rust registry, so nothing can drift.
+
+    ``model.rs`` is regular enough to read with a small parser: one ``ProviderInfo`` block per
+    provider, each holding a list of ``ModelInfo`` entries with a ``modes`` expression.
+    """
     model_rs = ROOT / "crates/liteocr-core/src/model.rs"
-    pricing_json = ROOT / "crates/liteocr-core/src/pricing.json"
-    if not model_rs.exists() or not pricing_json.exists():
+    if not model_rs.exists():
         return []
-    prices = {k: v for k, v in json.loads(pricing_json.read_text(encoding="utf-8")).items() if "/" in k}
-    fields = ("name", "display_name", "env_var", "base_url", "docs")
+    _, _, body = model_rs.read_text(encoding="utf-8").partition("pub const PROVIDERS")
+    status = read_provider_status()
     found: list[dict[str, Any]] = []
-    for block in re.finditer(
-        r'name:\s*"(\w+)",\s*display_name:\s*"([^"]+)",\s*env_var:\s*"(\w+)",\s*'
-        r'base_url:\s*"([^"]+)",\s*docs:\s*"([^"]+)"',
-        model_rs.read_text(encoding="utf-8"),
-    ):
-        info = dict(zip(fields, block.groups()))
-        info["models"] = sorted(m for m in prices if m.startswith(info["name"] + "/"))
+    for chunk in body.split("ProviderInfo {")[1:]:
+        info: dict[str, Any] = {}
+        for key, pattern in RS_FIELD_RE.items():
+            m = pattern.search(chunk)
+            info[key] = m.group(1) if m else ""
+        if not info["name"]:
+            continue
+        info["slug"] = info["name"].replace("_", "-")  # google_documentai -> google-documentai
+        models = [
+            {
+                "model": model,
+                "qualified": f"{info['name']}/{model}",
+                "description": desc,
+                "default": default == "true",
+                "modes": _rs_modes(modes),
+            }
+            for model, desc, default, modes in RS_MODEL_RE.findall(chunk)
+        ]
+        info["models"] = models
+        info["modes"] = [m for m in MODES if any(m in mod["modes"] for mod in models)]
+        info["status"] = status.get(info["slug"], "")
+        info["verified"] = info["status"].startswith("live-verified")
         found.append(info)
     return found
+
+
+def read_providers() -> list[dict[str, Any]]:
+    """Registry providers with the priced model list used by the docs provider cards."""
+    pricing_json = ROOT / "crates/liteocr-core/src/pricing.json"
+    if not pricing_json.exists():
+        return []
+    prices = {k for k in json.loads(pricing_json.read_text(encoding="utf-8")) if "/" in k}
+    providers = read_registry()
+    for p in providers:
+        p["priced"] = sorted(m["qualified"] for m in p["models"] if m["qualified"] in prices)
+    return providers
 
 
 def read_leaderboard(limit: int = 5) -> tuple[list[dict[str, Any]], str]:
@@ -322,16 +394,151 @@ def provider_cards(site: Site, providers: list[dict[str, Any]], by_slug: dict[st
         return ""
     cards = []
     for p in providers:
-        slug = f"providers/{p['name']}"
+        slug = f"providers/{p['slug']}"
         if slug not in by_slug:
             continue
-        models = "".join(f"<code>{html.escape(m.split('/', 1)[1])}</code> " for m in p["models"])
+        models = "".join(f"<code>{html.escape(m.split('/', 1)[1])}</code> " for m in p["priced"])
         cards.append(
             f'<div class="card"><h3><a href="{site.url(slug)}">{html.escape(p["display_name"])}</a></h3>'
             f"<p><code>{html.escape(p['env_var'])}</code></p><p>{models}</p>"
             f'<p class="meta"><a href="{html.escape(p["docs"])}">Vendor docs</a></p></div>'
         )
     return f'<div class="grid3">{"".join(cards)}</div>' if cards else ""
+
+
+# -------------------------------------------------------------------------------------- landing
+
+# The four model strings the "switch in one line" tab strip offers. Only the string changes.
+SWITCH_MODELS = ("reducto/r-1", "extend/parse_performance", "mistral/ocr-latest", "gemini/2.5-flash")
+
+# What the hero animation "types out" once the scan bar has swept the document.
+SCAN_OUTPUT = (
+    "{",
+    '  "markdown": "# ACME Industries\\n\\n## Invoice …",',
+    '  "pages": [{"blocks": [',
+    '    {"type": "title",',
+    '     "bbox": [0.08, 0.07, 0.62, 0.11]},',
+    '    {"type": "table",',
+    '     "bbox": [0.08, 0.41, 0.92, 0.63]}',
+    "  ]}],",
+    '  "usage": {"pages": 2},',
+    '  "latency_ms": 2848,',
+    '  "cost_usd": 0.0300',
+    "}",
+)
+
+LANDING_SWITCH_CODE = """import liteocr
+
+doc = liteocr.parse(&quot;invoice.pdf&quot;, model={model})
+
+doc.markdown          # same unified markdown
+doc.pages[0].blocks   # same typed blocks, same normalised boxes
+doc.usage.pages       # same billed page count
+doc.cost_usd          # same field, priced from the model string"""
+
+
+def landing_switch_tabs() -> str:
+    """CSS-only tab strip. Panels are stacked in one grid cell, so switching shifts nothing."""
+    inputs, labels, panels = [], [], []
+    for i, model in enumerate(SWITCH_MODELS):
+        checked = " checked" if i == 0 else ""
+        inputs.append(f'<input class="lp-tabin" type="radio" name="lp-switch" id="lp-tab{i}"{checked}>')
+        labels.append(f'<label class="lp-tab" for="lp-tab{i}">{html.escape(model)}</label>')
+        code = LANDING_SWITCH_CODE.format(
+            model=f'<mark class="lp-diff">&quot;{html.escape(model)}&quot;</mark>'
+        )
+        panels.append(
+            f'<div class="lp-panel lp-code"><pre><code class="language-python">{code}</code></pre></div>'
+        )
+    return (
+        '<div class="lp-tabs">'
+        + "".join(inputs)
+        + f'<div class="lp-tablist" role="tablist">{"".join(labels)}</div>'
+        + f'<div class="lp-panels">{"".join(panels)}</div>'
+        + "</div>"
+    )
+
+
+def landing_providers(site: Site, providers: list[dict[str, Any]]) -> str:
+    cards = []
+    for p in providers:
+        chips = "".join(f'<span class="lp-chip lp-chip-{m}">{m}</span>' for m in p["modes"])
+        count = len(p["models"])
+        state = "live" if p["verified"] else "docs"
+        label = "live-verified" if p["verified"] else "docs-only"
+        cards.append(
+            f'<a class="lp-provider" href="{site.url("providers/" + p["slug"])}">'
+            f'<span class="lp-pid">{html.escape(p["name"])}</span>'
+            f'<span class="lp-pname">{html.escape(p["display_name"])}</span>'
+            f'<span class="lp-modes">{chips}</span>'
+            f'<span class="lp-pfoot"><span class="lp-count">{count} '
+            f"<span>model{'' if count == 1 else 's'}</span></span>"
+            f'<span class="lp-status lp-status-{state}">{label}</span></span></a>'
+        )
+    return "".join(cards)
+
+
+def landing_leaderboard(site: Site, limit: int = 7) -> tuple[str, str]:
+    rows, dataset = read_leaderboard(limit)
+    if not rows:
+        return "", ""
+    cells = "".join(
+        f'<tr style="--row:{i}">'
+        f'<td class="lp-rank">{i + 1}</td>'
+        f"<td><code>{html.escape(r['model'])}</code></td>"
+        f'<td class="lp-num"><strong>{r["overall"]:.2f}</strong></td>'
+        f'<td class="lp-num">{r["p50"]:,}<span class="lp-unit"> ms</span></td>'
+        f'<td class="lp-num">${r["cost"]:.2f}</td>'
+        "</tr>"
+        for i, r in enumerate(rows)
+    )
+    return cells, dataset
+
+
+def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
+    template = (WEB / "landing" / "index.html").read_text(encoding="utf-8")
+    models = [m["qualified"] for p in providers for m in p["models"]]
+    rows, dataset = landing_leaderboard(site)
+    description = (
+        f"{site.tagline} Parse, OCR and schema extraction across {len(providers)} providers and "
+        f"{len(models)} models with one Python call, one response shape, and an open benchmark."
+    )
+    values = {
+        "BASE": site.base,
+        "DOCS": site.docs_base,
+        "REPO": site.repo,
+        "RESULTS": site.blob("benchmark/results", tree=True),
+        "FAVICON": FAVICON,
+        "CANONICAL": site.absolute(site.base),
+        "DESCRIPTION": html.escape(description, quote=True),
+        "THEME_BUTTON": THEME_BUTTON,
+        "MODELS": html.escape(json.dumps(models), quote=True),
+        "SCAN_LINES": html.escape(json.dumps(list(SCAN_OUTPUT)), quote=True),
+        "SCAN_STATIC": html.escape("\n".join(SCAN_OUTPUT)),
+        "DEFAULT_MODEL": models[0] if models else "reducto/standard",
+        "N_PROVIDERS": str(len(providers)),
+        "N_MODELS": str(len(models)),
+        "N_MODES": str(len(MODES)),
+        "N_VERIFIED": str(sum(1 for p in providers if p["verified"])),
+        "SWITCH_TABS": landing_switch_tabs(),
+        "PROVIDER_CARDS": landing_providers(site, providers),
+        "LEADERBOARD_ROWS": rows,
+        "LEADERBOARD_DATASET": html.escape(dataset),
+        "URL_DOCS": site.docs_base,
+        "URL_START": site.url("getting-started"),
+        "URL_PROVIDERS": site.url("providers"),
+        "URL_BENCH": site.url("benchmark"),
+        "URL_LEADERBOARD": site.url("benchmark/leaderboard"),
+        "URL_COMPAT": site.url("project/compat"),
+        "URL_PYTHON": site.url("python"),
+        "URL_SPEC": site.url("project/spec"),
+    }
+    for key, value in values.items():
+        template = template.replace("{{" + key + "}}", value)
+    left = re.findall(r"\{\{(\w+)\}\}", template)
+    if left:
+        raise SystemExit(f"landing template: unsubstituted placeholder(s): {sorted(set(left))}")
+    return template
 
 
 # ------------------------------------------------------------------------------------- template
@@ -389,7 +596,8 @@ if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();<
 </head>
 <body>
 <header class="top"><div class="topin">
-<a class="brand" href="{site.base}">LiteOCR<span class="hide-sm">docs</span></a>
+<a class="brand" href="{site.base}">LiteOCR</a>
+<a class="brand-sub hide-sm" href="{site.docs_base}">docs</a>
 <div class="spacer"></div>
 <div class="searchwrap">
 <input id="search" type="search" placeholder="Search docs" autocomplete="off"
@@ -461,12 +669,12 @@ def resolve_fragments(content: str, self_url: str, ids: dict[str, set[str]], pat
     return pattern.sub(repl, content)
 
 
-def build(base: str, out_dir: Path, site_url: str) -> tuple[Site, list[Page]]:
-    site, pages = load_nav(WEB / "nav.json", base, site_url)
+def build(base: str, out_dir: Path, site_url: str, docs_prefix: str = "docs") -> tuple[Site, list[Page]]:
+    site, pages = load_nav(WEB / "nav.json", base, site_url, docs_prefix)
     by_source = {p.source: p for p in pages}
     by_slug = {p.slug: p for p in pages}
     providers = read_providers()
-    models = [m for p in providers for m in p["models"]]
+    models = [m["qualified"] for p in providers for m in p["models"]]
     md = make_md()
 
     if out_dir.exists():
@@ -510,17 +718,18 @@ def build(base: str, out_dir: Path, site_url: str) -> tuple[Site, list[Page]]:
     for page in pages:
         page.body_html = resolve_fragments(page.body_html, site.url(page.slug), ids, HTML_FRAG_RE)
         page.text = resolve_fragments(page.text, site.url(page.slug, md=True), ids, MD_FRAG_RE)
-        target = out_dir if not page.slug else out_dir / page.slug
+        target = out_dir / site.url(page.slug)[len(site.base) :]
         target.mkdir(parents=True, exist_ok=True)
         (target / "index.html").write_text(page_html(site, page, pages), encoding="utf-8")
         (target / "index.md").write_text(page.text.rstrip() + "\n", encoding="utf-8")
 
+    (out_dir / "index.html").write_text(landing_html(site, providers), encoding="utf-8")
     write_extras(site, pages, out_dir)
     return site, pages
 
 
 def write_extras(site: Site, pages: list[Page], out: Path) -> None:
-    for asset in ("style.css", "app.js"):
+    for asset in ("style.css", "landing.css", "app.js"):
         shutil.copyfile(WEB / "assets" / asset, out / asset)
 
     index = [{"t": p.title, "u": site.url(p.slug), "h": flat_headings(p.toc)} for p in pages]
@@ -536,8 +745,8 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         "",
         f"> {site.summary}",
         "",
-        f"Source: {site.repo} ({site.license}). Every page below is also available as HTML at the same "
-        "URL without the trailing `index.md`.",
+        f"Source: {site.repo} ({site.license}). The documentation lives under `{site.docs_base}`; every "
+        "page below is also available as HTML at the same URL without the trailing `index.md`.",
         "",
         "## Docs",
         "",
@@ -566,7 +775,8 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         ]
     (out / "llms-full.txt").write_text("\n".join(full), encoding="utf-8")
 
-    urls = "".join(f"<url><loc>{site.absolute(site.url(p.slug))}</loc></url>" for p in pages)
+    locs = [site.absolute(site.base), *(site.absolute(site.url(p.slug)) for p in pages)]
+    urls = "".join(f"<url><loc>{loc}</loc></url>" for loc in locs)
     (out / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n',
@@ -584,13 +794,61 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         section="",
         has_md=False,
         body_html=(
-            "<h1>Page not found</h1><p>That URL is not part of the LiteOCR documentation.</p>"
-            f'<p><a href="{site.base}">Back to the home page</a> · '
+            "<h1>Page not found</h1><p>That URL is not part of the LiteOCR site. The documentation "
+            f'moved under <a href="{site.docs_base}"><code>{site.docs_base}</code></a>.</p>'
+            f'<p><a href="{site.base}">Home</a> · '
+            f'<a href="{site.docs_base}">Documentation</a> · '
             f'<a href="{site.url("getting-started")}">Getting started</a> · '
             f'<a href="{site.base}llms.txt">llms.txt</a></p>'
         ),
     )
     (out / "404.html").write_text(page_html(site, notfound, pages), encoding="utf-8")
+
+
+# ------------------------------------------------------------------------------------ redirects
+
+VERCEL_JSON = ROOT / "vercel.json"
+
+
+def redirect_map(site: Site, pages: list[Page]) -> list[dict[str, Any]]:
+    """Old root URLs -> their new home under the docs prefix.
+
+    ``/`` is excluded: it belongs to the landing page now. ``/llms.txt`` and ``/llms-full.txt``
+    stay at the site root and are not redirected either.
+    """
+    prefix = site.docs_prefix
+    return [
+        {"source": f"/{p.slug}/", "destination": f"/{prefix}/{p.slug}/", "permanent": True}
+        for p in pages
+        if p.slug
+    ]
+
+
+def write_redirects(site: Site, pages: list[Page], path: Path = VERCEL_JSON) -> int:
+    """Rewrite the ``redirects`` array in vercel.json. Every other key is left untouched."""
+    config = json.loads(path.read_text(encoding="utf-8"))
+    config["redirects"] = redirect_map(site, pages)
+    path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+    return len(config["redirects"])
+
+
+def check_redirects(site: Site, pages: list[Page], out: Path, path: Path = VERCEL_JSON) -> list[str]:
+    """The committed redirects must cover every docs slug and land on a page that exists."""
+    if not path.exists():
+        return [f"{path.name} is missing"]
+    current = json.loads(path.read_text(encoding="utf-8")).get("redirects", [])
+    expected = redirect_map(site, pages)
+    problems = []
+    if current != expected:
+        problems.append(
+            f"{path.name}: redirects are stale ({len(current)} entries, expected {len(expected)}) "
+            "— run `python website/build.py --write-redirects`"
+        )
+    for r in expected:
+        target = out / r["destination"].strip("/") / "index.html"
+        if not target.exists():
+            problems.append(f"{path.name}: redirect {r['source']} -> missing {r['destination']}")
+    return problems
 
 
 # ---------------------------------------------------------------------------------- link check
@@ -600,11 +858,19 @@ HREF_RE = re.compile(r'(?:href|src)="([^"]+)"')
 ID_RE = re.compile(r'id="([^"]+)"')
 
 
-def check(site: Site, out: Path) -> int:
-    """Verify that every internal link (and fragment) resolves to something in dist/."""
+def check(site: Site, pages: list[Page], out: Path) -> int:
+    """Verify every internal link (and fragment) in the landing page and the docs, plus the
+    redirect map that keeps the pre-``/docs/`` URLs working."""
     ids: dict[Path, set[str]] = {}
     problems: list[str] = []
     files = sorted(out.rglob("*.html"))
+    landing = out / "index.html"
+    if not landing.exists():
+        problems.append("index.html: the landing page was not generated")
+    elif f'href="{site.docs_base}"' not in landing.read_text(encoding="utf-8"):
+        problems.append(f"index.html: the landing page does not link to {site.docs_base}")
+    if site.base == "/":
+        problems.extend(check_redirects(site, pages, out))
     for f in files:
         ids[f] = set(ID_RE.findall(f.read_text(encoding="utf-8")))
     for f in files:
@@ -647,17 +913,32 @@ def main(argv: Optional[list[str]] = None) -> int:
         default="https://ajinkyashejul.github.io/liteocr",
         help="public base URL of the deployed site, used for canonical links and the sitemap",
     )
+    ap.add_argument(
+        "--docs-prefix",
+        default="docs",
+        help="path the documentation is served under, below --base-url (default: docs)",
+    )
     ap.add_argument("--check", action="store_true", help="verify every internal link after building")
+    ap.add_argument(
+        "--write-redirects",
+        action="store_true",
+        help="rewrite the old-URL -> /docs/ redirect map in vercel.json, then exit",
+    )
     args = ap.parse_args(argv)
 
     base = "/" + args.base_url.strip("/") + "/" if args.base_url.strip("/") else "/"
     out = Path(args.out).resolve()
-    site, pages = build(base, out, args.site_url.rstrip("/"))
+    site, pages = build(base, out, args.site_url.rstrip("/"), args.docs_prefix)
 
     files = sum(1 for f in out.rglob("*") if f.is_file())
     size = f"{dir_size(out) / 1024:.0f} KB"
-    print(f"built {len(pages)} pages ({files} files, {size}) -> {os.path.relpath(out, ROOT)}")
-    return check(site, out) if args.check else 0
+    print(
+        f"built the landing page + {len(pages)} docs pages under {site.docs_base} "
+        f"({files} files, {size}) -> {os.path.relpath(out, ROOT)}"
+    )
+    if args.write_redirects:
+        print(f"vercel.json: wrote {write_redirects(site, pages)} redirects")
+    return check(site, pages, out) if args.check else 0
 
 
 if __name__ == "__main__":

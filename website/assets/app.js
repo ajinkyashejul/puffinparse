@@ -19,8 +19,32 @@
     });
   }
 
-  /* ---- copy button on every code block ---- */
-  document.querySelectorAll("article pre > code").forEach(function (code) {
+  var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- copy to clipboard, with the plain-http fallback ---- */
+  function copyText(text, btn) {
+    var done = function () {
+      btn.textContent = "Copied";
+      btn.classList.add("done");
+      setTimeout(function () { btn.textContent = "Copy"; btn.classList.remove("done"); }, 1400);
+    };
+    var fallback = function () {            // clipboard API is unavailable over plain http
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (e) { /* nothing else to try */ }
+      document.body.removeChild(ta);
+      done();
+    };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+
+  /* ---- copy button on every code block (docs prose + landing samples) ---- */
+  document.querySelectorAll("article pre > code, .lp-code pre > code").forEach(function (code) {
     var pre = code.parentNode;
     var wrap = document.createElement("div");
     wrap.className = "codewrap";
@@ -30,32 +54,18 @@
     btn.className = "copy";
     btn.type = "button";
     btn.textContent = "Copy";
-    btn.addEventListener("click", function () {
-      var done = function () {
-        btn.textContent = "Copied";
-        btn.classList.add("done");
-        setTimeout(function () { btn.textContent = "Copy"; btn.classList.remove("done"); }, 1400);
-      };
-      var fallback = function () {          // clipboard API is unavailable over plain http
-        var ta = document.createElement("textarea");
-        ta.value = code.textContent;
-        ta.setAttribute("readonly", "");
-        ta.style.cssText = "position:fixed;top:0;left:-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand("copy"); } catch (e) { /* nothing else to try */ }
-        document.body.removeChild(ta);
-        done();
-      };
-      if (navigator.clipboard) navigator.clipboard.writeText(code.textContent).then(done, fallback);
-      else fallback();
-    });
+    btn.addEventListener("click", function () { copyText(code.textContent, btn); });
     wrap.appendChild(btn);
   });
 
-  /* ---- animated model swap in the hero ---- */
+  /* ---- standalone copy buttons (the landing's `pip install` pill) ---- */
+  document.querySelectorAll("button[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () { copyText(btn.getAttribute("data-copy"), btn); });
+  });
+
+  /* ---- animated model swap in the docs hero ---- */
   var swap = document.getElementById("swap");
-  if (swap && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (swap && !REDUCED) {
     var models = JSON.parse(swap.getAttribute("data-models") || "[]");
     var i = 0;
     setInterval(function () {
@@ -66,6 +76,63 @@
         swap.classList.remove("fade");
       }, 190);
     }, 2200);
+  }
+
+  /* ---- landing hero: scan the document, type the response, switch provider ---- */
+  var scan = document.getElementById("lp-scan");
+  if (scan) {
+    var slots = [].slice.call(document.querySelectorAll("[data-model-slot]"));
+    var out = document.getElementById("lp-out");
+    var scanModels = JSON.parse(scan.getAttribute("data-models") || "[]");
+    var text = JSON.parse(scan.getAttribute("data-lines") || "[]").join("\n");
+    var cursor = document.createElement("span");
+    cursor.className = "lp-cursor";
+    var at = 0, timer = null;
+
+    var setModel = function (name) {
+      slots.forEach(function (el) {
+        el.classList.add("fade");
+        setTimeout(function () { el.textContent = name; el.classList.remove("fade"); }, 160);
+      });
+    };
+    var type = function (done) {            // ~4 characters a frame keeps it brisk, never frantic
+      var n = 0;
+      timer = setInterval(function () {
+        n = Math.min(n + 4, text.length);
+        out.textContent = text.slice(0, n);
+        out.appendChild(cursor);
+        if (n >= text.length) { clearInterval(timer); setTimeout(done, 1500); }
+      }, 16);
+    };
+    var cycle = function () {
+      at = (at + 1) % (scanModels.length || 1);
+      setModel(scanModels[at] || "");
+      out.textContent = "";
+      scan.classList.remove("is-scanning");
+      void scan.offsetWidth;                // restart the CSS sweep from the top
+      scan.classList.add("is-scanning");
+      setTimeout(function () { type(cycle); }, 1150);
+    };
+
+    if (!REDUCED && scanModels.length && out) {
+      at = -1;
+      setTimeout(cycle, 600);
+    }
+  }
+
+  /* ---- leaderboard rows fade in once the table is on screen ---- */
+  var board = document.querySelector(".lp-board");
+  if (board && !REDUCED && "IntersectionObserver" in window) {
+    board.classList.add("is-armed");        // hidden only once we know we can reveal them again
+    var rows = [].slice.call(board.querySelectorAll("tbody tr"));
+    var reveal = function () { rows.forEach(function (tr) { tr.classList.add("in"); }); };
+    var boardIo = new IntersectionObserver(function (entries, obs) {
+      if (!entries.some(function (e) { return e.isIntersecting; })) return;
+      reveal();
+      obs.disconnect();
+    }, { rootMargin: "0px 0px -12% 0px" });
+    boardIo.observe(board);
+    setTimeout(reveal, 4000);               // never leave the table blank, whatever happens
   }
 
   /* ---- "On this page" scroll highlighting ---- */
