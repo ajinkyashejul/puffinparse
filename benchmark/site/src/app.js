@@ -1,7 +1,10 @@
 /* LiteOCR benchmark results viewer.
  *
- * Vanilla ES2018, no framework, no external requests: everything is fetched with
- * relative URLs from the `data/` directory written by benchmark/site/build.py.
+ * Vanilla ES2018, no framework, no external requests: everything is fetched from the
+ * `data/` directory written by benchmark/site/build.py, through `url()` below. The
+ * prefix comes from `<meta name="liteocr-base">`, which build.py rewrites with
+ * `--base-url`; it defaults to `./`, so the viewer also works unchanged at any path
+ * (routing is hash based, so no server rewrite rules are needed either).
  *
  * Routes (hash based):
  *   #/leaderboard?run=<run_id>&sort=<col>&dir=asc|desc
@@ -14,14 +17,27 @@
   var REPO = "https://github.com/ajinkyashejul/liteocr";
   var METHODOLOGY = REPO + "/blob/main/benchmark/README.md";
   var DIFF_CELL_CAP = 6000000; // LCS table cells we are willing to allocate
+  var RULE_SENTENCE_CAP = 6; // sentences shown per bag_of_sentences rule before "+N more"
+
+  var BASE = (function () {
+    var meta = document.querySelector('meta[name="liteocr-base"]');
+    var value = (meta && meta.getAttribute("content")) || "./";
+    return value.charAt(value.length - 1) === "/" ? value : value + "/";
+  })();
 
   var INDEX = null;
   var runCache = {};
   var textCache = {};
   var manifestCache = {};
+  var rulesCache = {};
   var lastPath = null;
 
   var view = document.getElementById("view");
+
+  /** Absolute-or-relative URL of a file written by build.py, under the site's base. */
+  function url(path) {
+    return BASE + path;
+  }
 
   /* ------------------------------------------------------------------ utils */
 
@@ -50,6 +66,32 @@
     return String(model).replace(/\//g, "_");
   }
 
+  /** Join and collapse `.`/`..` segments, so combined-dataset paths stay readable. */
+  function joinPath(base, rel) {
+    var parts = (String(base) + String(rel == null ? "" : rel)).split("/");
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i];
+      if (part === ".") continue;
+      if (part === ".." && out.length > 1 && out[out.length - 1] !== "..") {
+        out.pop();
+        continue;
+      }
+      out.push(part);
+    }
+    return out.join("/");
+  }
+
+  /** Display form of a manifest-relative path: `../parsebench/x.pdf` -> `parsebench/x.pdf`. */
+  function pathLabel(rel) {
+    return String(rel == null ? "" : rel).replace(/^(?:\.\.\/)+/, "");
+  }
+
+  /** A `kind: "rules"` document asserts facts about the output instead of transcribing it. */
+  function isRulesDoc(entry) {
+    return !!entry && (entry.kind === "rules" || (!entry.truth && !!entry.rules));
+  }
+
   function getJSON(url) {
     return fetch(url, { cache: "no-cache" }).then(function (resp) {
       if (!resp.ok) throw new Error("Could not load " + url + " (HTTP " + resp.status + ")");
@@ -70,7 +112,7 @@
 
   function getRun(runId) {
     if (runCache[runId]) return Promise.resolve(runCache[runId]);
-    return getJSON("data/runs/" + encodeURIComponent(runId) + ".json").then(function (data) {
+    return getJSON(url("data/runs/" + encodeURIComponent(runId) + ".json")).then(function (data) {
       runCache[runId] = data;
       return data;
     });
@@ -78,10 +120,26 @@
 
   function getManifest(name) {
     if (manifestCache[name]) return Promise.resolve(manifestCache[name]);
-    return getJSON("data/datasets/" + encodeURIComponent(name) + "/manifest.json").then(function (data) {
+    return getJSON(url("data/datasets/" + encodeURIComponent(name) + "/manifest.json")).then(function (data) {
       manifestCache[name] = data;
       return data;
     });
+  }
+
+  /** Assertion file of a `kind: "rules"` document. Never fatal: null means "cannot show". */
+  function getRules(rulesUrl) {
+    if (rulesCache[rulesUrl] !== undefined) return Promise.resolve(rulesCache[rulesUrl]);
+    return getJSON(rulesUrl).then(
+      function (data) {
+        var list = Array.isArray(data) ? data : (data && data.rules) || null;
+        rulesCache[rulesUrl] = list;
+        return list;
+      },
+      function () {
+        rulesCache[rulesUrl] = null;
+        return null;
+      }
+    );
   }
 
   /* ----------------------------------------------------------------- router */
@@ -534,6 +592,37 @@
     },
   ];
 
+  /* Only ParseBench-style runs carry rule-scored documents, so the column is optional. */
+  var RULES_COLUMN = {
+    key: "rule_pass_rate",
+    label: "Rules",
+    num: true,
+    title: "Mean assertion pass rate (%) over this run's rule-scored documents",
+    value: function (row) {
+      return row.summary.rule_pass_rate;
+    },
+    cell: function (row) {
+      if (typeof row.summary.rule_pass_rate !== "number") return { html: "—", cls: "muted" };
+      return { html: esc(fixed(row.summary.rule_pass_rate * 100, 1)) };
+    },
+  };
+
+  function hasRules(run) {
+    return (run.models || []).some(function (model) {
+      return typeof (model.summary || {}).rule_pass_rate === "number";
+    });
+  }
+
+  function leaderboardColumns(run) {
+    if (!hasRules(run)) return LEADERBOARD_COLUMNS;
+    var columns = [];
+    LEADERBOARD_COLUMNS.forEach(function (column) {
+      columns.push(column);
+      if (column.key === "table_score") columns.push(RULES_COLUMN);
+    });
+    return columns;
+  }
+
   function categoryHeatmap(run) {
     var categories = run.categories || [];
     if (!categories.length) return "";
@@ -630,7 +719,7 @@
       "</div>" +
       runMeta(run) +
       sortableTable({
-        columns: LEADERBOARD_COLUMNS,
+        columns: leaderboardColumns(run),
         rows: run.models,
         sortKey: sortKey,
         sortDir: sortDir,
@@ -659,6 +748,11 @@
       "<li><strong>CER / WER</strong> are edit rates over characters and whitespace tokens.</li>" +
       "<li><strong>Order</strong> is Kendall-τ-style agreement on the order of lines present in both texts.</li>" +
       "<li><strong>Table</strong> is character similarity restricted to markdown table rows.</li>" +
+      (hasRules(run)
+        ? '<li><strong>Rules</strong> — documents with <code>kind: "rules"</code> carry ' +
+          "machine-checkable assertions instead of a reference transcript. They score " +
+          "<code>passed / total</code>, which takes the place of character similarity in Overall.</li>"
+        : "") +
       "<li><strong>Latency</strong> is measured from the client and includes upload, queueing and polling; " +
       "<strong>$/1k pages</strong> uses public list prices.</li></ul>" +
       '<p>Full definitions and caveats: <a href="' +
@@ -771,7 +865,8 @@
                 esc(href("/doc/" + encodeURIComponent(row.doc.id), {})) +
                 '">' +
                 esc(row.doc.id) +
-                "</a>",
+                "</a>" +
+                (isRulesDoc(row.doc) ? ' <span class="tag">rules</span>' : ""),
               cls: "doc",
             };
           },
@@ -1032,6 +1127,62 @@
     return out;
   }
 
+  /* ------------------------------------------------------------- rule panel */
+
+  /** One rule as a single readable line: the assertion it makes about the output. */
+  function ruleText(rule) {
+    if (rule.type === "order") {
+      return String(rule.before == null ? "?" : rule.before) + "  →  " + String(rule.after == null ? "?" : rule.after);
+    }
+    if (rule.type === "bag_of_sentences") {
+      var sentences = rule.sentences || [];
+      var shown = sentences.slice(0, RULE_SENTENCE_CAP).join("\n");
+      var rest = sentences.length - RULE_SENTENCE_CAP;
+      return rest > 0 ? shown + "\n… " + rest + " more sentence" + (rest === 1 ? "" : "s") : shown;
+    }
+    if (rule.text != null) return String(rule.text);
+    return JSON.stringify(rule);
+  }
+
+  function ruleCounts(list) {
+    var counts = {};
+    list.forEach(function (rule) {
+      var type = rule.type || "?";
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    return Object.keys(counts)
+      .sort()
+      .map(function (type) {
+        return counts[type] + " × " + type;
+      })
+      .join(" · ");
+  }
+
+  function rulesPanel(list) {
+    if (!list) {
+      return '<p class="empty">The assertion file for this document could not be loaded.</p>';
+    }
+    if (!list.length) return '<p class="empty">This document has no assertions.</p>';
+    var items = list
+      .map(function (rule) {
+        var meta =
+          rule.type === "bag_of_sentences" && typeof rule.threshold === "number"
+            ? '<span class="rule-meta">threshold ' + esc(fixed(rule.threshold, 2)) + "</span>"
+            : "";
+        return (
+          '<li><span class="rule-type">' +
+          esc(rule.type || "?") +
+          "</span>" +
+          meta +
+          '<span class="rule-text">' +
+          esc(ruleText(rule)) +
+          "</span></li>"
+        );
+      })
+      .join("");
+    return '<ol class="rules">' + items + "</ol>";
+  }
+
   /* ---------------------------------------------------------- document view */
 
   function metricTile(label, value, title) {
@@ -1078,23 +1229,31 @@
 
       document.title = docId + " · LiteOCR Benchmark";
 
-      var datasetBase = "data/datasets/" + datasetName + "/";
-      var truthUrl = datasetBase + entry.truth;
-      var inputUrl = datasetBase + entry.file;
-      var previewUrl = entry.preview ? datasetBase + entry.preview : null;
-      var predUrl =
-        "data/outputs/" + run.run_id + "/" + slugOf(model.model) + "/" + docId + ".md";
-      var isPdf = /\.pdf$/i.test(entry.file);
+      // Paths in a manifest are relative to it; the combined dataset points at `../<source>/…`.
+      var datasetBase = url("data/datasets/" + datasetName + "/");
+      var rulesDoc = isRulesDoc(entry);
+      var truthUrl = entry.truth ? joinPath(datasetBase, entry.truth) : null;
+      var rulesUrl = entry.rules ? joinPath(datasetBase, entry.rules) : null;
+      var inputUrl = joinPath(datasetBase, entry.file);
+      var previewUrl = entry.preview ? joinPath(datasetBase, entry.preview) : null;
+      var predUrl = url(
+        "data/outputs/" + run.run_id + "/" + slugOf(model.model) + "/" + docId + ".md"
+      );
+      var isPdf = /\.pdf$/i.test(entry.file || "");
       var diffMode = params.get("diff") === "unified" ? "unified" : "split";
 
+      var nothing = function () {
+        return null;
+      };
+
       return Promise.all([
-        getText(truthUrl),
-        getText(predUrl).catch(function () {
-          return null;
-        }),
+        truthUrl ? getText(truthUrl).catch(nothing) : Promise.resolve(null),
+        getText(predUrl).catch(nothing),
+        rulesUrl ? getRules(rulesUrl) : Promise.resolve(null),
       ]).then(function (texts) {
         var truth = texts[0];
         var pred = texts[1];
+        var ruleList = texts[2];
 
         var modelOptions = models
           .map(function (candidate) {
@@ -1117,18 +1276,33 @@
           .join("");
 
         var metrics = (docRecord && docRecord.metrics) || {};
+        var ruleScored = typeof metrics.rule_pass_rate === "number";
         var tiles =
           metricTile(
             "Overall",
             typeof metrics.char_similarity === "number" ? fixed(metrics.char_similarity * 100, 2) : "—",
-            "100 × character similarity for this document"
+            ruleScored
+              ? "100 × assertion pass rate for this document"
+              : "100 × character similarity for this document"
           ) +
-          metricTile("Char sim", fixed(metrics.char_similarity, 4)) +
-          metricTile("CER", fixed(metrics.cer, 4)) +
-          metricTile("WER", fixed(metrics.wer, 4)) +
-          metricTile("Word F1", fixed(metrics.word_f1, 4)) +
-          metricTile("Word recall", fixed(metrics.word_recall, 4)) +
-          metricTile("Word precision", fixed(metrics.word_precision, 4)) +
+          (ruleScored
+            ? metricTile(
+                "Rule pass rate",
+                fixed(metrics.rule_pass_rate * 100, 1),
+                "Share of this document's assertions the output satisfies"
+              ) +
+              metricTile(
+                "Rules passed",
+                (metrics.rules_passed != null ? metrics.rules_passed : "—") +
+                  " / " +
+                  (metrics.rules_total != null ? metrics.rules_total : "—")
+              )
+            : metricTile("Char sim", fixed(metrics.char_similarity, 4)) +
+              metricTile("CER", fixed(metrics.cer, 4)) +
+              metricTile("WER", fixed(metrics.wer, 4)) +
+              metricTile("Word F1", fixed(metrics.word_f1, 4)) +
+              metricTile("Word recall", fixed(metrics.word_recall, 4)) +
+              metricTile("Word precision", fixed(metrics.word_precision, 4))) +
           metricTile("Order", fixed(metrics.order_score, 4)) +
           metricTile("Table", fixed(metrics.table_score, 4)) +
           metricTile("Latency", docRecord ? msFmt(docRecord.latency_ms) : "—", "Client-measured, caches disabled") +
@@ -1137,16 +1311,19 @@
             docRecord && typeof docRecord.cost_usd === "number" ? "$" + docRecord.cost_usd.toFixed(4) : "—",
             "List price for this document"
           ) +
-          metricTile(
-            "Chars",
-            (metrics.pred_chars != null ? metrics.pred_chars : "—") +
-              " / " +
-              (metrics.truth_chars != null ? metrics.truth_chars : "—"),
-            "Predicted / ground-truth characters after normalisation"
-          );
+          (ruleScored
+            ? ""
+            : metricTile(
+                "Chars",
+                (metrics.pred_chars != null ? metrics.pred_chars : "—") +
+                  " / " +
+                  (metrics.truth_chars != null ? metrics.truth_chars : "—"),
+                "Predicted / ground-truth characters after normalisation"
+              ));
 
         var diffHtml;
         var diffStats = "";
+        var diffable = pred !== null && truth !== null;
         if (pred === null) {
           diffHtml =
             '<p class="empty">No saved output for <code>' +
@@ -1154,6 +1331,23 @@
             "</code> on this document" +
             (docRecord && docRecord.error ? " — the call failed: " + esc(docRecord.error) : "") +
             ".</p>";
+        } else if (truth === null) {
+          // Rule-scored (or truth-less) document: there is nothing to diff against, so the
+          // output is shown on its own next to the assertions it was checked with.
+          diffStats = rulesDoc
+            ? "Checked against " +
+              (ruleList ? ruleList.length + " assertions" : "the document's assertions") +
+              " — a rule-scored document has no reference transcript to diff against."
+            : "No ground truth is published for this document, so there is no diff.";
+          diffHtml =
+            '<div class="pane-head"><h3>' +
+            esc(model.model) +
+            ' output</h3><span class="hint"><a href="' +
+            esc(predUrl) +
+            '" rel="noopener">raw .md</a></span></div>' +
+            '<div class="pane" tabindex="0" role="region" aria-label="Model output">' +
+            esc(pred) +
+            "</div>";
         } else {
           var truthParsed = tokenize(truth);
           var predParsed = tokenize(pred);
@@ -1213,23 +1407,27 @@
           }
         }
 
+        var repoBase = "benchmark/datasets/" + datasetName + "/";
+        var predFile = docId.replace(/\//g, "_") + ".pred.md";
         var parseCommand =
-          "liteocr parse benchmark/datasets/" +
-          datasetName +
-          "/" +
-          entry.file +
+          "liteocr parse " +
+          joinPath(repoBase, entry.file) +
           " -m " +
           model.model +
           " > " +
-          docId +
-          ".pred.md";
-        var scoreCommand =
-          "liteocr bench score " +
-          docId +
-          ".pred.md benchmark/datasets/" +
-          datasetName +
-          "/" +
-          entry.truth;
+          predFile;
+        // `bench score` only compares transcripts; assertions are checked by `bench run`.
+        var scoreCommand = rulesDoc
+          ? "liteocr bench run \\\n" +
+            "    --dataset benchmark/datasets/" +
+            datasetName +
+            " \\\n" +
+            "    --models " +
+            model.model +
+            " \\\n" +
+            "    --filter " +
+            docId
+          : "liteocr bench score " + predFile + " " + joinPath(repoBase, entry.truth);
 
         var preview = previewUrl
           ? '<img class="doc-preview" src="' +
@@ -1241,6 +1439,36 @@
             '<a href="' +
             esc(inputUrl) +
             '" rel="noopener">Open the file</a>.</p>';
+
+        // A rule-scored document has assertions where a transcript document has truth.
+        var truthPanel = rulesDoc
+          ? '<section class="panel"><div class="panel-title"><h2>Assertions</h2>' +
+            '<span class="hint">' +
+            (rulesUrl
+              ? '<a href="' + esc(rulesUrl) + '" rel="noopener">' + esc(pathLabel(entry.rules)) + "</a>"
+              : "no rule file") +
+            "</span></div>" +
+            (ruleList && ruleList.length
+              ? '<p class="hint" style="margin-bottom:8px">' + esc(ruleCounts(ruleList)) + "</p>"
+              : "") +
+            rulesPanel(ruleList) +
+            '<p class="hint" style="margin-top:8px">This page ships machine-checkable assertions ' +
+            "instead of a reference transcript: the score is the share of them the output satisfies.</p>" +
+            "</section>"
+          : '<section class="panel"><div class="panel-title"><h2>Ground truth</h2>' +
+            '<span class="hint">' +
+            (truthUrl
+              ? '<a href="' + esc(truthUrl) + '" rel="noopener">' + esc(pathLabel(entry.truth)) + "</a>"
+              : "none published") +
+            "</span></div>" +
+            (truth === null
+              ? '<p class="empty">The ground-truth file for this document could not be loaded.</p>'
+              : '<div class="pane" tabindex="0" role="region" aria-label="Ground truth markdown source">' +
+                esc(truth) +
+                "</div>" +
+                '<p class="hint" style="margin-top:8px">Shown as markdown <em>source</em>, not rendered ' +
+                "HTML — this is the exact text the metrics compare against.</p>") +
+            "</section>";
 
         view.innerHTML =
           '<a class="back-link" href="' +
@@ -1270,13 +1498,16 @@
           '<li class="badge">run ' +
           esc(run.run_id) +
           "</li>" +
+          (rulesDoc ? '<li class="badge strong">rule-scored</li>' : "") +
+          (entry.license ? '<li class="badge">' + esc(entry.license) + "</li>" : "") +
           "</ul>" +
+          (entry.attribution ? '<p class="hint">' + esc(entry.attribution) + "</p>" : "") +
           '<div class="grid-2">' +
           '<section class="panel"><div class="panel-title"><h2>Input</h2>' +
           '<span class="hint"><a href="' +
           esc(inputUrl) +
           '" rel="noopener">' +
-          esc(entry.file) +
+          esc(pathLabel(entry.file)) +
           (isPdf ? " (PDF)" : "") +
           "</a></span></div>" +
           preview +
@@ -1289,33 +1520,24 @@
               '" rel="noopener">Download the PDF</a>.</p>'
             : "") +
           "</section>" +
-          '<section class="panel"><div class="panel-title"><h2>Ground truth</h2>' +
-          '<span class="hint"><a href="' +
-          esc(truthUrl) +
-          '" rel="noopener">' +
-          esc(entry.truth) +
-          "</a></span></div>" +
-          '<div class="pane" tabindex="0" role="region" aria-label="Ground truth markdown source">' +
-          esc(truth) +
-          "</div>" +
-          '<p class="hint" style="margin-top:8px">Shown as markdown <em>source</em>, not rendered HTML — ' +
-          "this is the exact text the metrics compare against.</p>" +
-          "</section>" +
+          truthPanel +
           "</div>" +
           '<section class="panel">' +
           '<div class="toolbar" style="margin-bottom:12px">' +
           '<div class="field"><label for="model-select">Model</label><select id="model-select">' +
           modelOptions +
           "</select></div>" +
-          '<div class="field"><label id="diff-label">Diff view</label>' +
-          '<div class="seg" role="group" aria-labelledby="diff-label">' +
-          '<button type="button" data-diff="split" aria-pressed="' +
-          (diffMode === "split") +
-          '">Side by side</button>' +
-          '<button type="button" data-diff="unified" aria-pressed="' +
-          (diffMode === "unified") +
-          '">Unified</button>' +
-          "</div></div>" +
+          (diffable
+            ? '<div class="field"><label id="diff-label">Diff view</label>' +
+              '<div class="seg" role="group" aria-labelledby="diff-label">' +
+              '<button type="button" data-diff="split" aria-pressed="' +
+              (diffMode === "split") +
+              '">Side by side</button>' +
+              '<button type="button" data-diff="unified" aria-pressed="' +
+              (diffMode === "unified") +
+              '">Unified</button>' +
+              "</div></div>"
+            : "") +
           '<p class="hint">' +
           esc(diffStats) +
           "</p>" +
@@ -1323,23 +1545,34 @@
           '<dl class="metrics-grid">' +
           tiles +
           "</dl>" +
-          '<div class="diff-legend" style="margin-top:14px">' +
-          '<span><span class="swatch del"></span>in the ground truth, missing from the output</span>' +
-          '<span><span class="swatch ins"></span>in the output, not in the ground truth</span>' +
-          "<span>word-level LCS diff, compared after the same case/markdown normalisation the scorer uses</span>" +
-          "</div>" +
+          (diffable
+            ? '<div class="diff-legend" style="margin-top:14px">' +
+              '<span><span class="swatch del"></span>in the ground truth, missing from the output</span>' +
+              '<span><span class="swatch ins"></span>in the output, not in the ground truth</span>' +
+              "<span>word-level LCS diff, compared after the same case/markdown normalisation the " +
+              "scorer uses</span>" +
+              "</div>"
+            : "") +
           diffHtml +
           "</section>" +
           '<section class="panel"><h2>Verify it yourself</h2>' +
-          "<p>Run the same document through the same model and score it locally — no benchmark harness " +
-          "involved, just the CLI:</p>" +
+          (rulesDoc
+            ? "<p>Parse the same page with the same model, then re-check the assertions — " +
+              "<code>bench score</code> only compares transcripts, so the rules are checked by " +
+              "<code>bench run</code> on this one document:</p>"
+            : "<p>Run the same document through the same model and score it locally — no benchmark " +
+              "harness involved, just the CLI:</p>") +
           codeBlock(parseCommand) +
           codeBlock(scoreCommand) +
           '<p class="hint">' +
-          "The truth file and this model's saved output are served straight from this site: " +
-          '<a href="' +
-          esc(truthUrl) +
-          '" rel="noopener">ground truth</a>' +
+          "Everything the score was computed from is served straight from this site: " +
+          (rulesDoc
+            ? rulesUrl
+              ? '<a href="' + esc(rulesUrl) + '" rel="noopener">assertions</a>'
+              : "the assertion file is missing"
+            : truthUrl
+              ? '<a href="' + esc(truthUrl) + '" rel="noopener">ground truth</a>'
+              : "no ground truth is published") +
           (pred !== null ? ' · <a href="' + esc(predUrl) + '" rel="noopener">model output</a>' : "") +
           ' · <a href="' +
           esc(inputUrl) +
@@ -1398,7 +1631,7 @@
   }
 
   function boot() {
-    getJSON("data/index.json").then(
+    getJSON(url("data/index.json")).then(
       function (data) {
         INDEX = data;
         var first = (data.runs || [])[0];
@@ -1408,6 +1641,19 @@
           var licenseEl = document.getElementById("footer-license");
           if (nameEl) nameEl.textContent = dataset.name + " v" + dataset.version;
           if (licenseEl) licenseEl.textContent = dataset.license || "see the repository";
+          // Only the synthetic dataset can claim exact-by-construction truth.
+          var truthEl = document.getElementById("footer-truth");
+          var rules = (dataset.kinds || {}).rules;
+          if (truthEl && (dataset.sources || rules)) {
+            truthEl.textContent =
+              "Each document keeps the ground truth its own source ships: an exact transcript, or " +
+              "machine-checkable assertions for the pages that have no reference transcript.";
+          }
+          var attrEl = document.getElementById("footer-attribution");
+          if (attrEl && dataset.attribution) {
+            attrEl.textContent = dataset.attribution;
+            attrEl.hidden = false;
+          }
         }
         var generated = document.getElementById("footer-generated");
         if (generated && data.generated_at) generated.textContent = "site built " + data.generated_at;

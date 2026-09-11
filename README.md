@@ -23,7 +23,7 @@ Switch providers by changing one string. Same request, same response shape, same
 
 Every document-parsing vendor has its own upload flow, polling loop, JSON layout, block vocabulary, coordinate system and billing unit. LiteOCR hides all of that behind one call, tracks cost per call, retries and falls back across providers, and ships a reproducible benchmark so you can pick a provider on evidence instead of marketing.
 
-Two things make switching real rather than aspirational. **Modes**: every call names `parse`, `ocr` or `extract`, models declare the modes they serve, and a model that cannot serve the one you asked for fails before any network call — so a provider swap can never quietly change the shape of your answer. **Native-format compatibility**: if you are already integrated with Reducto, Extend or LlamaParse, `output_format="reducto"` (and friends) renders *any* provider's result into that vendor's own JSON, so you can re-point a request without touching your parsing code — [see below](#keep-your-reducto--extend--llamaparse-code).
+Two things make switching real rather than aspirational. **Modes**: every call names `parse`, `ocr` or `extract`, models declare the modes they serve, and a model that cannot serve the one you asked for fails before any network call — so a provider swap can never quietly change the shape of your answer. **Native-format compatibility**: if you are already integrated with Reducto, Extend or LlamaParse, `output_format="reducto"` (and friends) renders *any* provider's result into that vendor's own JSON, so you can re-point a request without touching your parsing code — [see below](#keep-your-reducto-extend-llamaparse-code).
 
 | | |
 |---|---|

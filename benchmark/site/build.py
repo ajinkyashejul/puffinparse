@@ -5,20 +5,26 @@ Reads the committed benchmark artefacts (`benchmark/results/*.json`, the saved m
 outputs under `benchmark/results/outputs/`, and the datasets under `benchmark/datasets/`)
 and writes a completely static, dependency-free site into `benchmark/site/dist/`:
 
-    index.html  app.js  styles.css        copied verbatim from benchmark/site/src/
+    index.html  app.js  styles.css        copied from benchmark/site/src/
     data/index.json                       every run + dataset info + model summaries
     data/runs/<run_id>.json               the full result file for a run
     data/outputs/<run_id>/<model>/<doc>.md   each model's markdown output per document
     data/datasets/<name>/manifest.json    manifest (+ a `preview` path per document)
     data/datasets/<name>/truth/<doc>.md   ground truth markdown
+    data/datasets/<name>/rules/<doc>.json machine-checkable assertions (`kind: "rules"`)
     data/datasets/<name>/docs/<doc>.<ext> the input documents themselves
+
+A manifest may reference files outside its own directory (`combined-v1` points at
+`../synthetic-v1/...` and `../parsebench/...`). Those paths are resolved against the
+manifest and copied to the matching place under `data/datasets/`, so the very same
+relative path keeps working in the browser and no bytes are copied twice.
 
 The script uses only the standard library. Pillow is optional: when it is importable the
 first page of each PDF input is rendered to `<id>.p1.png` so the browser can show a
 preview; without it PDFs are still copied and the site links to them instead.
 
 Usage:
-    python benchmark/site/build.py [--out DIR]
+    python benchmark/site/build.py [--out DIR] [--base-url /benchmark-results/]
 """
 
 from __future__ import annotations
@@ -26,6 +32,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import os
 import re
 import shutil
 import sys
@@ -45,6 +52,16 @@ STATIC_FILES = ("index.html", "app.js", "styles.css")
 
 # Widest PDF page-1 preview we render; wider pages are downscaled to keep dist small.
 PREVIEW_MAX_WIDTH = 1240
+# Smallest embedded image we are willing to call "page 1". Third-party PDFs (ParseBench)
+# are vector text with a logo or a figure embedded: those are not the page, and showing
+# one as the input preview would be a lie, so anything below page size is refused.
+PREVIEW_MIN_WIDTH = 700
+PREVIEW_MIN_HEIGHT = 900
+
+# `<meta name="liteocr-base">` tells app.js what to prefix its `data/` URLs with; the
+# stylesheet and script tags are rewritten with the same prefix.
+BASE_META_RE = re.compile(r'(<meta\s+name="liteocr-base"\s+content=")[^"]*(")')
+ASSET_REF_RE = re.compile(r'((?:href|src)=")(styles\.css|app\.js)(")')
 
 
 # --------------------------------------------------------------------------------------
@@ -80,6 +97,40 @@ def copy_file(src: Path, dst: Path) -> None:
     shutil.copyfile(src, dst)
 
 
+def normalize_base(value: str) -> str:
+    """`/benchmark-results` -> `/benchmark-results/`; empty -> `./` (page-relative)."""
+    raw = (value or "").strip()
+    if not raw or raw in (".", "./"):
+        return "./"
+    if raw.startswith(("http://", "https://")):
+        return raw if raw.endswith("/") else raw + "/"
+    trimmed = raw.strip("/")
+    return f"/{trimmed}/" if trimmed else "/"
+
+
+def apply_base(html_text: str, base: str) -> str:
+    """Point the viewer's own asset and data URLs at `base`. `./` leaves them relative."""
+    if base == "./":
+        return html_text
+    text, found = BASE_META_RE.subn(lambda m: m.group(1) + base + m.group(2), html_text)
+    if not found:
+        print('  ! index.html has no <meta name="liteocr-base">: data URLs stay relative', file=sys.stderr)
+    return ASSET_REF_RE.sub(lambda m: m.group(1) + base + m.group(2) + m.group(3), text)
+
+
+def within(root: Path, candidate: Path) -> bool:
+    try:
+        candidate.relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
+def normalised(path: Path) -> Path:
+    """Collapse `..` segments textually (the paths need not exist yet)."""
+    return Path(os.path.normpath(str(path)))
+
+
 # --------------------------------------------------------------------------------------
 # PDF page-1 preview (optional, needs Pillow)
 # --------------------------------------------------------------------------------------
@@ -93,6 +144,8 @@ def _first_pdf_image(data: bytes) -> Optional[Any]:
     The benchmark PDFs are written by Pillow: every page is one full-page image XObject,
     laid out in page order, so the first image object is page 1. This keeps the preview
     path working with nothing but Pillow installed (Pillow itself cannot open PDFs).
+    Third-party PDFs (ParseBench) are mostly vector text: they either yield nothing or a
+    logo, which `render_pdf_preview` rejects on size.
     """
     from PIL import Image  # optional dependency, imported lazily
 
@@ -130,6 +183,8 @@ def render_pdf_preview(pdf_path: Path, out_png: Path) -> bool:
         image = _first_pdf_image(pdf_path.read_bytes())
         if image is None:
             return False
+        if image.width < PREVIEW_MIN_WIDTH or image.height < PREVIEW_MIN_HEIGHT:
+            return False  # a logo or a figure, not a rendered page
         if image.width > PREVIEW_MAX_WIDTH:
             height = round(image.height * PREVIEW_MAX_WIDTH / image.width)
             image = image.resize((PREVIEW_MAX_WIDTH, height))
@@ -154,7 +209,7 @@ def load_runs() -> list[dict[str, Any]]:
     for path in sorted(RESULTS_DIR.glob("*.json")):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
+        except (OSError, json.JSONDecodeError) as exc:
             print(f"  ! skipping {path.name}: {exc}", file=sys.stderr)
             continue
         if not isinstance(data, dict) or "run_id" not in data or "models" not in data:
@@ -167,7 +222,11 @@ def load_runs() -> list[dict[str, Any]]:
 
 
 def copy_outputs(run: dict[str, Any], dist: Path) -> int:
-    """Copy the saved per-document markdown outputs for one run."""
+    """Copy the saved per-document markdown outputs for one run.
+
+    Document ids may contain `/` (the combined dataset prefixes them with their source),
+    which `bench run --save-outputs` turns into a subdirectory; the layout is mirrored.
+    """
     run_id = str(run["run_id"])
     src_root = OUTPUTS_DIR / run_id
     if not src_root.is_dir():
@@ -181,49 +240,108 @@ def copy_outputs(run: dict[str, Any], dist: Path) -> int:
             print(f"  ! no outputs for {model['model']} in run {run_id}", file=sys.stderr)
             continue
         for doc in model.get("docs", []):
-            src = src_dir / f"{doc['id']}.md"
-            if not src.is_file():
+            rel = f"{doc['id']}.md"
+            src = normalised(src_dir / rel)
+            if not (within(src_dir, src) and src.is_file()):
                 continue
-            copy_file(src, dist / "data" / "outputs" / run_id / slug / src.name)
+            copy_file(src, dist / "data" / "outputs" / run_id / slug / rel)
             copied += 1
     return copied
 
 
-def copy_dataset(name: str, dist: Path) -> dict[str, Any]:
-    """Copy a dataset's manifest, truth files and inputs. Returns the dataset summary."""
-    dataset_dir = DATASETS_DIR / name
+def copy_dataset(name: str, dist: Path, seen: set[Path]) -> dict[str, Any]:
+    """Copy a dataset's manifest, truth/rule files and inputs. Returns the dataset summary.
+
+    Every per-document path is resolved against the manifest's own directory, so a
+    manifest that points outside itself (`combined-v1` -> `../parsebench/...`) works; the
+    destination keeps the same relative shape under `data/datasets/`, which both mirrors
+    the repository layout and lets the browser resolve the identical relative URL.
+    `seen` holds the destinations written so far, so shared files (and their PDF
+    previews) are copied exactly once even when several datasets reference them.
+    """
+    dataset_dir = (DATASETS_DIR / name).resolve()
     manifest_path = dataset_dir / "manifest.json"
     if not manifest_path.is_file():
         print(f"  ! dataset {name} not found at {dataset_dir}", file=sys.stderr)
-        return {"name": name, "missing": True, "documents": []}
+        return {"name": name, "missing": True, "documents": 0, "categories": []}
 
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    out_dir = dist / "data" / "datasets" / name
-    inputs = truths = previews = 0
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"  ! dataset {name}: unreadable manifest ({exc})", file=sys.stderr)
+        return {"name": name, "missing": True, "documents": 0, "categories": []}
+
+    data_root = (dist / "data").resolve()
+    out_dir = data_root / "datasets" / name
+    inputs = truths = rules = previews = 0
+    kinds: dict[str, int] = {}
+
+    def place(rel: str) -> Optional[tuple[Path, Path]]:
+        """(source, destination) for a manifest-relative path, or None if out of bounds."""
+        if not rel:
+            return None
+        src = normalised(dataset_dir / rel)
+        dst = normalised(out_dir / rel)
+        if not within(DATASETS_DIR.resolve(), src) or not within(data_root, dst):
+            print(f"  ! dataset {name}: path escapes the site: {rel}", file=sys.stderr)
+            return None
+        return src, dst
+
+    def take(rel: str, label: str, doc_id: str, quiet: bool = False) -> bool:
+        spot = place(rel)
+        if spot is None:
+            return False
+        src, dst = spot
+        if dst in seen:
+            return True
+        if not src.is_file():
+            if not quiet:
+                print(f"  ! missing {label} for {doc_id}: {src}", file=sys.stderr)
+            return False
+        copy_file(src, dst)
+        seen.add(dst)
+        return True
 
     for doc in manifest.get("documents", []):
-        rel_file = str(doc.get("file", ""))
-        rel_truth = str(doc.get("truth", ""))
+        doc_id = str(doc.get("id", "?"))
+        kind = str(doc.get("kind", "transcript") or "transcript")
+        kinds[kind] = kinds.get(kind, 0) + 1
 
-        truth_src = dataset_dir / rel_truth
-        if rel_truth and truth_src.is_file():
-            copy_file(truth_src, out_dir / rel_truth)
+        rel_truth = str(doc.get("truth", "") or "")
+        rel_rules = str(doc.get("rules", "") or "")
+        rel_file = str(doc.get("file", "") or "")
+
+        # `kind: "rules"` documents carry assertions instead of a reference transcript;
+        # their `truth` is an empty string, so do not complain about it.
+        if rel_truth and take(rel_truth, "truth", doc_id):
             truths += 1
-        else:
-            print(f"  ! missing truth for {doc.get('id')}: {truth_src}", file=sys.stderr)
+        elif not rel_truth and kind != "rules":
+            print(f"  ! missing truth for {doc_id}", file=sys.stderr)
+        if rel_rules and take(rel_rules, "rules", doc_id):
+            rules += 1
 
-        input_src = dataset_dir / rel_file
-        if not (rel_file and input_src.is_file()):
-            print(f"  ! missing input for {doc.get('id')}: {input_src}", file=sys.stderr)
+        spot = place(rel_file)
+        if spot is None or not spot[0].is_file():
+            print(f"  ! missing input for {doc_id}: {rel_file or '(no file)'}", file=sys.stderr)
             continue
-        copy_file(input_src, out_dir / rel_file)
+        input_src, input_dst = spot
+        if input_dst not in seen:
+            copy_file(input_src, input_dst)
+            seen.add(input_dst)
         inputs += 1
 
         if input_src.suffix.lower() == ".pdf":
             # PDFs cannot be shown inline, so render page 1 next to the PDF for preview.
             preview_rel = f"{rel_file[: -len(input_src.suffix)]}.p1.png"
-            if render_pdf_preview(input_src, out_dir / preview_rel):
+            preview_spot = place(preview_rel)
+            if preview_spot is None:
+                continue
+            preview_dst = preview_spot[1]
+            if preview_dst in seen:
+                doc["preview"] = preview_rel  # rendered while copying another dataset
+            elif render_pdf_preview(input_src, preview_dst):
                 doc["preview"] = preview_rel
+                seen.add(preview_dst)
                 previews += 1
         else:
             doc["preview"] = rel_file
@@ -231,7 +349,7 @@ def copy_dataset(name: str, dist: Path) -> dict[str, Any]:
     write_json(out_dir / "manifest.json", manifest)
     print(
         f"  dataset {name} v{manifest.get('version', '?')}: "
-        f"{inputs} inputs, {truths} truth files, {previews} PDF previews"
+        f"{inputs} inputs, {truths} truth files, {rules} rule files, {previews} PDF previews"
     )
     return {
         "name": manifest.get("name", name),
@@ -239,7 +357,10 @@ def copy_dataset(name: str, dist: Path) -> dict[str, Any]:
         "description": manifest.get("description"),
         "license": manifest.get("license"),
         "generator": manifest.get("generator"),
+        "sources": manifest.get("sources"),
+        "attribution": manifest.get("attribution"),
         "documents": len(manifest.get("documents", [])),
+        "kinds": kinds,
         "categories": sorted({str(d.get("category", "")) for d in manifest.get("documents", [])}),
     }
 
@@ -256,8 +377,8 @@ def run_index_entry(run: dict[str, Any]) -> dict[str, Any]:
             }
         )
     models.sort(key=lambda m: m["summary"].get("overall") or 0.0, reverse=True)
-    categories = (
-        sorted({str(d.get("category", "")) for d in run["models"][0].get("docs", [])}) if models else []
+    categories = sorted(
+        {str(d.get("category", "")) for m in run.get("models", []) for d in m.get("docs", [])}
     )
     return {
         "run_id": run["run_id"],
@@ -271,7 +392,7 @@ def run_index_entry(run: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def build(dist: Path) -> int:
+def build(dist: Path, base: str = "./") -> int:
     if not SRC_DIR.is_dir():
         print(f"error: missing source directory {SRC_DIR}", file=sys.stderr)
         return 1
@@ -280,14 +401,17 @@ def build(dist: Path) -> int:
         shutil.rmtree(dist)
     dist.mkdir(parents=True)
 
-    print(f"Building LiteOCR benchmark site -> {dist}")
+    print(f"Building LiteOCR benchmark site -> {dist} (base {base})")
 
     for name in STATIC_FILES:
         src = SRC_DIR / name
         if not src.is_file():
             print(f"error: missing {src}", file=sys.stderr)
             return 1
-        copy_file(src, dist / name)
+        if name == "index.html":
+            (dist / name).write_text(apply_base(src.read_text(encoding="utf-8"), base), encoding="utf-8")
+        else:
+            copy_file(src, dist / name)
     print(f"  static: {', '.join(STATIC_FILES)}")
 
     runs = load_runs()
@@ -296,6 +420,7 @@ def build(dist: Path) -> int:
         return 1
 
     datasets: dict[str, dict[str, Any]] = {}
+    seen: set[Path] = set()
     total_outputs = 0
     index_runs = []
 
@@ -311,7 +436,7 @@ def build(dist: Path) -> int:
 
         dataset_name = str(run.get("dataset", {}).get("name", ""))
         if dataset_name and dataset_name not in datasets:
-            datasets[dataset_name] = copy_dataset(dataset_name, dist)
+            datasets[dataset_name] = copy_dataset(dataset_name, dist, seen)
 
         index_runs.append(run_index_entry(run))
 
@@ -320,6 +445,7 @@ def build(dist: Path) -> int:
         {
             "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "repo": "https://github.com/ajinkyashejul/liteocr",
+            "base": base,
             "datasets": datasets,
             "runs": index_runs,
         },
@@ -344,8 +470,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         default=str(SITE_DIR / "dist"),
         help="output directory for the built site (default: benchmark/site/dist)",
     )
+    parser.add_argument(
+        "--base-url",
+        default="",
+        help=(
+            "URL prefix the viewer is served from, e.g. /benchmark-results/. "
+            "Default: page-relative URLs, which work at any path served with a trailing slash."
+        ),
+    )
     args = parser.parse_args(argv)
-    return build(Path(args.out).resolve())
+    return build(Path(args.out).resolve(), normalize_base(args.base_url))
 
 
 if __name__ == "__main__":

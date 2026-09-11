@@ -36,6 +36,7 @@ python website/build.py          # -> website/dist/
 | `--out <DIR>` | `website/dist` | Output directory. Wiped and rebuilt on every run. |
 | `--site-url <URL>` | `https://ajinkyashejul.github.io/liteocr` | Public base URL of the deployed site, used for `<link rel="canonical">` and `sitemap.xml`. Independent of `--base-url`. |
 | `--docs-prefix <PATH>` | `docs` | Where the documentation is mounted below `--base-url`. The landing page always owns `--base-url` itself. |
+| `--with-benchmark` / `--no-benchmark` | Also build the results viewer into `<out>/benchmark-results/` (default on) |
 | `--check` | off | After building, verify that every internal link and `#fragment` resolves — on the landing page as well as the docs — and that `vercel.json` still redirects every old docs URL. |
 | `--write-redirects` | off | Rewrite the `redirects` array in `vercel.json` from `nav.json`. Run it after adding, renaming or removing a page. |
 

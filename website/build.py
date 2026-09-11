@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import glob
 import html
+import importlib.util
 import json
 import os
 import posixpath
@@ -39,6 +40,11 @@ import markdown
 
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "website"
+
+# The benchmark results viewer is a second, self-contained static app (its own build
+# script, its own ~10 MB of data) mounted below the site at this path.
+BENCH_PREFIX = "benchmark-results"
+BENCH_BUILD = ROOT / "benchmark" / "site" / "build.py"
 
 FAVICON = (
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E"
@@ -93,11 +99,17 @@ class Site:
     base: str
     site_url: str
     docs_prefix: str = "docs"
+    nav_links: dict[str, list[dict[str, str]]] = field(default_factory=dict)
 
     @property
     def docs_base(self) -> str:
         """Where the documentation lives. The landing page owns ``base`` itself."""
         return f"{self.base}{self.docs_prefix}/" if self.docs_prefix else self.base
+
+    @property
+    def viewer_url(self) -> str:
+        """The benchmark results viewer, mounted beside the docs rather than inside them."""
+        return f"{self.base}{BENCH_PREFIX}/"
 
     def blob(self, path: str, tree: bool = False) -> str:
         kind = "tree" if tree else "blob"
@@ -132,6 +144,12 @@ def load_nav(path: Path, base: str, site_url: str, docs_prefix: str = "docs") ->
     )
     pages: list[Page] = []
     for section in data["sections"]:
+        # A section may carry plain links to things that are not docs pages (the benchmark
+        # results viewer). They appear in the sidebar only: no markdown, no llms.txt entry.
+        for link in section.get("links", []):
+            site.nav_links.setdefault(section["title"], []).append(
+                {"title": link["title"], "url": link["url"].lstrip("/")}
+            )
         for p in section["pages"]:
             pages.append(
                 Page(
@@ -346,7 +364,8 @@ deterministic metrics, no LLM judge.</p>
 <thead><tr><th>#</th><th>Model</th><th>Overall</th><th>p50 latency</th><th>$/1k pages</th></tr></thead>
 <tbody>{cells}</tbody></table></div>
 <p class="meta">{html.escape(dataset)} — <a href="{site.url("benchmark/leaderboard")}">full leaderboard</a>
-· <a href="{site.url("benchmark")}">methodology and caveats</a></p>
+· <a href="{site.url("benchmark")}">methodology and caveats</a>
+· <a href="{site.viewer_url}">results viewer</a></p>
 </section>"""
 
 
@@ -529,6 +548,7 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
         "URL_PROVIDERS": site.url("providers"),
         "URL_BENCH": site.url("benchmark"),
         "URL_LEADERBOARD": site.url("benchmark/leaderboard"),
+        "URL_VIEWER": site.viewer_url,
         "URL_COMPAT": site.url("project/compat"),
         "URL_PYTHON": site.url("python"),
         "URL_SPEC": site.url("project/spec"),
@@ -545,19 +565,24 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
 
 
 def nav_html(site: Site, pages: list[Page], current: str) -> str:
-    out: list[str] = ["<nav>"]
-    section = None
+    grouped: list[tuple[str, list[Page]]] = []
     for p in pages:
-        if p.section != section:
-            if section is not None:
-                out.append("</ul>")
-            section = p.section
-            if section:
-                out.append(f"<h4>{html.escape(section)}</h4>")
-            out.append("<ul>")
-        aria = ' aria-current="page"' if p.slug == current else ""
-        out.append(f'<li><a href="{site.url(p.slug)}"{aria}>{html.escape(p.nav_title)}</a></li>')
-    out.append("</ul></nav>")
+        if not grouped or grouped[-1][0] != p.section:
+            grouped.append((p.section, []))
+        grouped[-1][1].append(p)
+
+    out: list[str] = ["<nav>"]
+    for section, items in grouped:
+        if section:
+            out.append(f"<h4>{html.escape(section)}</h4>")
+        out.append("<ul>")
+        for p in items:
+            aria = ' aria-current="page"' if p.slug == current else ""
+            out.append(f'<li><a href="{site.url(p.slug)}"{aria}>{html.escape(p.nav_title)}</a></li>')
+        for link in site.nav_links.get(section, []):
+            out.append(f'<li><a href="{site.base}{link["url"]}">{html.escape(link["title"])}</a></li>')
+        out.append("</ul>")
+    out.append("</nav>")
     return "".join(out)
 
 
@@ -805,6 +830,38 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
     (out / "404.html").write_text(page_html(site, notfound, pages), encoding="utf-8")
 
 
+# ------------------------------------------------------------------ benchmark results viewer
+
+
+def build_benchmark_viewer(site: Site, out: Path) -> bool:
+    """Build ``benchmark/site`` into ``<out>/benchmark-results/``.
+
+    The viewer has its own stdlib-only build script; it is imported and called in-process
+    so the same interpreter (and the same optional Pillow) is used. A failure is reported
+    and skipped rather than failing the whole site build — the docs must still deploy.
+    """
+    if not BENCH_BUILD.is_file():
+        print(f"benchmark viewer: {BENCH_BUILD} not found, skipping", file=sys.stderr)
+        return False
+    spec = importlib.util.spec_from_file_location("liteocr_benchmark_site_build", BENCH_BUILD)
+    if spec is None or spec.loader is None:  # pragma: no cover - importlib contract
+        print(f"benchmark viewer: cannot load {BENCH_BUILD}, skipping", file=sys.stderr)
+        return False
+    module = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(module)
+        code = module.main(["--out", str(out / BENCH_PREFIX), "--base-url", site.viewer_url])
+    except Exception as exc:  # the viewer is optional; never take the site down with it
+        print(f"benchmark viewer: build failed ({exc}), skipping", file=sys.stderr)
+        shutil.rmtree(out / BENCH_PREFIX, ignore_errors=True)
+        return False
+    if code != 0:
+        print(f"benchmark viewer: build.py exited {code}, skipping", file=sys.stderr)
+        shutil.rmtree(out / BENCH_PREFIX, ignore_errors=True)
+        return False
+    return True
+
+
 # ------------------------------------------------------------------------------------ redirects
 
 VERCEL_JSON = ROOT / "vercel.json"
@@ -863,7 +920,10 @@ def check(site: Site, pages: list[Page], out: Path) -> int:
     redirect map that keeps the pre-``/docs/`` URLs working."""
     ids: dict[Path, set[str]] = {}
     problems: list[str] = []
-    files = sorted(out.rglob("*.html"))
+    # The results viewer is a separate application with its own hash router: its pages are
+    # not part of the docs link graph, so they are neither scanned nor followed into.
+    viewer = out / BENCH_PREFIX
+    files = [f for f in sorted(out.rglob("*.html")) if viewer not in f.parents]
     landing = out / "index.html"
     if not landing.exists():
         problems.append("index.html: the landing page was not generated")
@@ -885,6 +945,11 @@ def check(site: Site, pages: list[Page], out: Path) -> int:
                     problems.append(f"{rel}: link '{href}' does not start with base URL '{site.base}'")
                     continue
                 local = path[len(site.base) :]
+                if local.split("/", 1)[0] == BENCH_PREFIX:
+                    entry = out / (local + "index.html" if local.endswith("/") else local)
+                    if viewer.is_dir() and not entry.exists():
+                        problems.append(f"{rel}: link '{href}' -> missing {entry.relative_to(out)}")
+                    continue
                 target = out / (local + "index.html" if local.endswith("/") or not local else local)
                 if not target.exists():
                     problems.append(f"{rel}: link '{href}' -> missing {target.relative_to(out)}")
@@ -920,6 +985,19 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     ap.add_argument("--check", action="store_true", help="verify every internal link after building")
     ap.add_argument(
+        "--with-benchmark",
+        dest="with_benchmark",
+        action="store_true",
+        default=True,
+        help=f"also build benchmark/site into /{BENCH_PREFIX}/ (default)",
+    )
+    ap.add_argument(
+        "--no-benchmark",
+        dest="with_benchmark",
+        action="store_false",
+        help="skip the benchmark results viewer (docs and landing page only)",
+    )
+    ap.add_argument(
         "--write-redirects",
         action="store_true",
         help="rewrite the old-URL -> /docs/ redirect map in vercel.json, then exit",
@@ -929,12 +1007,14 @@ def main(argv: Optional[list[str]] = None) -> int:
     base = "/" + args.base_url.strip("/") + "/" if args.base_url.strip("/") else "/"
     out = Path(args.out).resolve()
     site, pages = build(base, out, args.site_url.rstrip("/"), args.docs_prefix)
+    viewer = build_benchmark_viewer(site, out) if args.with_benchmark else False
 
     files = sum(1 for f in out.rglob("*") if f.is_file())
-    size = f"{dir_size(out) / 1024:.0f} KB"
+    size = f"{dir_size(out) / 1024 / 1024:.1f} MB"
     print(
-        f"built the landing page + {len(pages)} docs pages under {site.docs_base} "
-        f"({files} files, {size}) -> {os.path.relpath(out, ROOT)}"
+        f"built the landing page + {len(pages)} docs pages under {site.docs_base}"
+        + (f" + the results viewer under {site.viewer_url}" if viewer else "")
+        + f" ({files} files, {size}) -> {os.path.relpath(out, ROOT)}"
     )
     if args.write_redirects:
         print(f"vercel.json: wrote {write_redirects(site, pages)} redirects")

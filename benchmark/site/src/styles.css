@@ -598,6 +598,73 @@ td.primary {
   margin: 0;
 }
 
+/* ---------- rule-scored documents (assertions instead of a transcript) ---------- */
+
+.rules {
+  margin: 0;
+  padding: 0 0 0 2px;
+  list-style: none;
+  counter-reset: rule;
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+}
+
+.rules li {
+  display: grid;
+  grid-template-columns: 8.5em 1fr;
+  gap: 4px 10px;
+  align-items: baseline;
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rules li:last-child {
+  border-bottom: 0;
+}
+
+.rule-type,
+.tag {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  justify-self: start;
+  white-space: nowrap;
+}
+
+.rule-meta {
+  grid-column: 1;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.rule-text {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .rules li {
+    grid-template-columns: 1fr;
+  }
+
+  .rule-text {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
 ins.d,
 del.d {
   text-decoration: none;

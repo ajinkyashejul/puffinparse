@@ -1,6 +1,9 @@
 name: Pages
 
-# Publishes the static benchmark results viewer (benchmark/site) to GitHub Pages.
+# Publishes the whole LiteOCR site to GitHub Pages: the landing page, the docs under
+# /docs/ and the benchmark results viewer under /benchmark-results/. This is the same
+# build Vercel runs (website/build.py, which invokes benchmark/site/build.py itself), so
+# Pages mirrors https://liteocr.vercel.app rather than publishing a different artefact.
 #
 # SETUP (one time, by a maintainer): in the repository settings open
 # Settings -> Pages and set "Source" to "GitHub Actions". Until that is done this
@@ -8,9 +11,10 @@ name: Pages
 #
 # TODO: the viewer is moving to a React app (Extend UI) under benchmark/site/app/.
 # When that lands, add an `npm ci && npm run build` stage before the Python build
-# (or after it, feeding it `site-dist/data/`) and upload the app's bundle together
-# with the generated `data/` directory. `build.py` already writes everything the
-# front-end needs under `<out>/data/`, so no data changes are required.
+# (or after it, feeding it `site-dist/benchmark-results/data/`) and upload the app's
+# bundle together with the generated `data/` directory. `benchmark/site/build.py`
+# already writes everything the front-end needs under `<out>/data/`, so no data changes
+# are required.
 
 on:
   push:
@@ -40,16 +44,25 @@ jobs:
         with:
           python-version: "3.12"
 
-      # build.py is stdlib-only; Pillow is optional and only used to render page 1
-      # of PDF inputs into a preview PNG.
-      - name: Install Pillow (PDF page previews)
-        run: python -m pip install --upgrade pip pillow
-
-      - name: Build the benchmark site
-        run: python benchmark/site/build.py --out site-dist
-
       - name: Configure Pages
+        id: pages
         uses: actions/configure-pages@v5
+
+      # markdown renders the docs; Pillow is optional and only used to render page 1
+      # of PDF inputs into a preview PNG for the results viewer.
+      - name: Install build dependencies
+        run: python -m pip install --upgrade pip markdown pillow
+
+      # A GitHub Pages project site is served from /<repo>/, so links and canonical URLs
+      # are built for that prefix. --with-benchmark is on by default, so this one command
+      # produces the landing page, /docs/ and /benchmark-results/.
+      - name: Build the site (landing + docs + benchmark results viewer)
+        run: |
+          python website/build.py \
+            --out site-dist \
+            --base-url "/${{ github.event.repository.name }}" \
+            --site-url "${{ steps.pages.outputs.base_url }}" \
+            --check
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

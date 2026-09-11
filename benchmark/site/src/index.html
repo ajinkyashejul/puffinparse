@@ -9,6 +9,8 @@
       content="Open, reproducible OCR / document-parsing benchmark: accuracy, latency and cost for every provider, with every document, output and score inspectable."
     />
     <meta name="color-scheme" content="light dark" />
+    <!-- URL prefix app.js loads its data from; rewritten by build.py --base-url. -->
+    <meta name="liteocr-base" content="./" />
     <!-- Inline SVG favicon: the site must load no external resources. -->
     <link
       rel="icon"
@@ -51,9 +53,13 @@
       <div class="wrap">
         <p>
           Dataset <code id="footer-dataset">synthetic-v1</code> is published under
-          <span id="footer-license">CC0-1.0</span>. Ground truth is exact by construction: the
-          documents are rendered from the same source the truth markdown is written from.
+          <span id="footer-license">CC0-1.0</span>.
+          <span id="footer-truth"
+            >Ground truth is exact by construction: the documents are rendered from the same source
+            the truth markdown is written from.</span
+          >
         </p>
+        <p id="footer-attribution" hidden></p>
         <p>
           Latency is <strong>client-measured</strong> through each provider's public API — it
           includes upload, queueing and polling, and every run is made with provider result caches

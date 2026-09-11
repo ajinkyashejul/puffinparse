@@ -175,6 +175,12 @@
           "source": "docs/benchmarks/vendor-benchmarks.md",
           "description": "Survey of public OCR benchmarks and vendor-published results, with adapter notes for the combined dataset."
         }
+      ],
+      "links": [
+        {
+          "title": "Results viewer",
+          "url": "/benchmark-results/"
+        }
       ]
     },
     {
