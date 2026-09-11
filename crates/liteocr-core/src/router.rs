@@ -269,7 +269,7 @@ mod tests {
         assert!(Router::new(RouterConfig::new(vec![])).is_err());
         assert!(Router::new(RouterConfig::new(vec!["nope/x".into()])).is_err());
         // every model must support the router's mode
-        assert!(Router::new(RouterConfig::new(vec!["reducto".into()]).mode(Mode::Extract)).is_err());
+        assert!(Router::new(RouterConfig::new(vec!["datalab".into()]).mode(Mode::Extract)).is_err());
     }
 
     #[tokio::test]

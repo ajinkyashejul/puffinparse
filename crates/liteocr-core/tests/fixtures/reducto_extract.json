@@ -1,0 +1,336 @@
+{
+  "response_type": "v3_extract",
+  "job_id": "33e0fac4-a1bc-42ed-9aab-9c9faab42e31",
+  "usage": {
+    "num_pages": 1,
+    "num_fields": 15,
+    "credits": 3.333333,
+    "extract_mode": "extract"
+  },
+  "studio_link": "https://studio.reducto.ai/job/33e0fac4-a1bc-42ed-9aab-9c9faab42e31",
+  "result": {
+    "invoice_number": {
+      "value": "INV-9865",
+      "citations": [
+        {
+          "type": "Key Value",
+          "bbox": {
+            "left": 0.15725806451612903,
+            "top": 0.2690992018244014,
+            "width": 0.09193548387096775,
+            "height": 0.01083238312428736,
+            "page": 1,
+            "original_page": 1
+          },
+          "content": "INV-9865",
+          "image_url": null,
+          "chart_data": null,
+          "confidence": "high",
+          "granular_confidence": {
+            "extract_confidence": 0.996,
+            "parse_confidence": 0.82140212059021
+          },
+          "extra": null,
+          "parentBlock": {
+            "type": "Key Value",
+            "bbox": {
+              "left": 0.06290322580645161,
+              "top": 0.26795895096921324,
+              "width": 0.24516129032258063,
+              "height": 0.0974914481185861,
+              "page": 1,
+              "original_page": 1
+            },
+            "content": "",
+            "image_url": null,
+            "chart_data": null,
+            "confidence": "high",
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": 0.82140212059021
+            },
+            "extra": null
+          }
+        }
+      ]
+    },
+    "line_items": [
+      {
+        "description": {
+          "value": "Hydraulic fluid, 5 gal",
+          "citations": [
+            {
+              "type": "Text",
+              "bbox": {
+                "left": 0.07580645382404327,
+                "top": 0.4201824367046356,
+                "width": 0.18629030883312225,
+                "height": 0.01482325792312622,
+                "page": 1,
+                "original_page": 1
+              },
+              "content": "gal Hydraulic fluid, 5",
+              "image_url": null,
+              "chart_data": null,
+              "confidence": "high",
+              "granular_confidence": {
+                "extract_confidence": 0.995,
+                "parse_confidence": 0.9101180825914656
+              },
+              "extra": null,
+              "parentBlock": {
+                "type": "Table",
+                "bbox": {
+                  "left": 0.06370967741935483,
+                  "top": 0.38369441277080957,
+                  "width": 0.8741935483870967,
+                  "height": 0.21094640820980615,
+                  "page": 1,
+                  "original_page": 1
+                },
+                "content": "",
+                "image_url": null,
+                "chart_data": null,
+                "confidence": "high",
+                "granular_confidence": {
+                  "extract_confidence": null,
+                  "parse_confidence": 0.9101180825914656
+                },
+                "extra": null
+              }
+            }
+          ]
+        },
+        "amount": {
+          "value": "$439.20",
+          "citations": [
+            {
+              "type": "Text",
+              "bbox": {
+                "left": 0.8500000238418579,
+                "top": 0.42132270336151123,
+                "width": 0.07258063554763794,
+                "height": 0.010262250900268555,
+                "page": 1,
+                "original_page": 1
+              },
+              "content": "$439.20",
+              "image_url": null,
+              "chart_data": null,
+              "confidence": "high",
+              "granular_confidence": {
+                "extract_confidence": 0.996,
+                "parse_confidence": 0.9101180825914656
+              },
+              "extra": null,
+              "parentBlock": {
+                "type": "Table",
+                "bbox": {
+                  "left": 0.06370967741935483,
+                  "top": 0.38369441277080957,
+                  "width": 0.8741935483870967,
+                  "height": 0.21094640820980615,
+                  "page": 1,
+                  "original_page": 1
+                },
+                "content": "",
+                "image_url": null,
+                "chart_data": null,
+                "confidence": "high",
+                "granular_confidence": {
+                  "extract_confidence": null,
+                  "parse_confidence": 0.9101180825914656
+                },
+                "extra": null
+              }
+            }
+          ]
+        }
+      },
+      {
+        "description": {
+          "value": "Thermal label rolls",
+          "citations": [
+            {
+              "type": "Text",
+              "bbox": {
+                "left": 0.07741935551166534,
+                "top": 0.45096921920776367,
+                "width": 0.16774193942546844,
+                "height": 0.011402487754821777,
+                "page": 1,
+                "original_page": 1
+              },
+              "content": "Thermal label rolls",
+              "image_url": null,
+              "chart_data": null,
+              "confidence": "high",
+              "granular_confidence": {
+                "extract_confidence": 0.995,
+                "parse_confidence": 0.9101180825914656
+              },
+              "extra": null,
+              "parentBlock": {
+                "type": "Table",
+                "bbox": {
+                  "left": 0.06370967741935483,
+                  "top": 0.38369441277080957,
+                  "width": 0.8741935483870967,
+                  "height": 0.21094640820980615,
+                  "page": 1,
+                  "original_page": 1
+                },
+                "content": "",
+                "image_url": null,
+                "chart_data": null,
+                "confidence": "high",
+                "granular_confidence": {
+                  "extract_confidence": null,
+                  "parse_confidence": 0.9101180825914656
+                },
+                "extra": null
+              }
+            }
+          ]
+        },
+        "amount": {
+          "value": "$1,562.70",
+          "citations": [
+            {
+              "type": "Text",
+              "bbox": {
+                "left": 0.8322580456733704,
+                "top": 0.4515393376350403,
+                "width": 0.09112906455993652,
+                "height": 0.010832369327545166,
+                "page": 1,
+                "original_page": 1
+              },
+              "content": "$1,562.70",
+              "image_url": null,
+              "chart_data": null,
+              "confidence": "high",
+              "granular_confidence": {
+                "extract_confidence": 0.996,
+                "parse_confidence": 0.9101180825914656
+              },
+              "extra": null,
+              "parentBlock": {
+                "type": "Table",
+                "bbox": {
+                  "left": 0.06370967741935483,
+                  "top": 0.38369441277080957,
+                  "width": 0.8741935483870967,
+                  "height": 0.21094640820980615,
+                  "page": 1,
+                  "original_page": 1
+                },
+                "content": "",
+                "image_url": null,
+                "chart_data": null,
+                "confidence": "high",
+                "granular_confidence": {
+                  "extract_confidence": null,
+                  "parse_confidence": 0.9101180825914656
+                },
+                "extra": null
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "vendor_address": {
+      "city": {
+        "value": "Akron",
+        "citations": [
+          {
+            "type": "Text",
+            "bbox": {
+              "left": 0.06370967741935483,
+              "top": 0.13854047890535917,
+              "width": 0.06209677419354838,
+              "height": 0.01254275940706956,
+              "page": 1,
+              "original_page": 1
+            },
+            "content": "Akron,",
+            "image_url": null,
+            "chart_data": null,
+            "confidence": "high",
+            "granular_confidence": {
+              "extract_confidence": 0.994,
+              "parse_confidence": 0.9319870054721833
+            },
+            "extra": null,
+            "parentBlock": {
+              "type": "Text",
+              "bbox": {
+                "left": 0.06370967741935483,
+                "top": 0.09578107183580388,
+                "width": 0.1620967741935484,
+                "height": 0.05530216647662486,
+                "page": 1,
+                "original_page": 1
+              },
+              "content": "",
+              "image_url": null,
+              "chart_data": null,
+              "confidence": "high",
+              "granular_confidence": {
+                "extract_confidence": null,
+                "parse_confidence": 0.9319870054721833
+              },
+              "extra": null
+            }
+          }
+        ]
+      },
+      "state": {
+        "value": "OH",
+        "citations": [
+          {
+            "type": "Text",
+            "bbox": {
+              "left": 0.13225806451612904,
+              "top": 0.1379703534777651,
+              "width": 0.03145161290322579,
+              "height": 0.011972633979475483,
+              "page": 1,
+              "original_page": 1
+            },
+            "content": "OH",
+            "image_url": null,
+            "chart_data": null,
+            "confidence": "high",
+            "granular_confidence": {
+              "extract_confidence": 0.995,
+              "parse_confidence": 0.9319870054721833
+            },
+            "extra": null,
+            "parentBlock": {
+              "type": "Text",
+              "bbox": {
+                "left": 0.06370967741935483,
+                "top": 0.09578107183580388,
+                "width": 0.1620967741935484,
+                "height": 0.05530216647662486,
+                "page": 1,
+                "original_page": 1
+              },
+              "content": "",
+              "image_url": null,
+              "chart_data": null,
+              "confidence": "high",
+              "granular_confidence": {
+                "extract_confidence": null,
+                "parse_confidence": 0.9319870054721833
+              },
+              "extra": null
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,498 @@
+{
+  "object": "extract_run",
+  "id": "exr_TR4bUO18s2EjPzeLNB5vy",
+  "status": "PROCESSED",
+  "output": {
+    "value": {
+      "total": "$14,667.43",
+      "vendor": "Cedar Ridge Supply",
+      "line_items": [
+        {
+          "amount": "$439.20",
+          "description": "Hydraulic fluid, 5 gal"
+        },
+        {
+          "amount": "$1,562.70",
+          "description": "Thermal label rolls"
+        }
+      ],
+      "invoice_number": "INV-9865"
+    },
+    "metadata": {
+      "total": {
+        "ocrConfidence": 0.989,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Total Due: $14,667.43",
+            "polygon": [
+              {
+                "x": 79,
+                "y": 1174
+              },
+              {
+                "x": 331,
+                "y": 1174
+              },
+              {
+                "x": 331,
+                "y": 1203
+              },
+              {
+                "x": 79,
+                "y": 1203
+              }
+            ]
+          }
+        ]
+      },
+      "vendor": {
+        "ocrConfidence": 0.993,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Cedar Ridge Supply",
+            "polygon": [
+              {
+                "x": 80,
+                "y": 80
+              },
+              {
+                "x": 499,
+                "y": 84
+              },
+              {
+                "x": 498,
+                "y": 136
+              },
+              {
+                "x": 79,
+                "y": 130
+              }
+            ]
+          }
+        ]
+      },
+      "line_items": {
+        "ocrConfidence": 0.982,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": []
+      },
+      "line_items[0]": {
+        "ocrConfidence": 0.982,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Hydraulic fluid, 5 gal $439.20",
+            "polygon": [
+              {
+                "x": 93,
+                "y": 734
+              },
+              {
+                "x": 328,
+                "y": 734
+              },
+              {
+                "x": 328,
+                "y": 766
+              },
+              {
+                "x": 93,
+                "y": 766
+              }
+            ]
+          },
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Hydraulic fluid, 5 gal $439.20",
+            "polygon": [
+              {
+                "x": 1053,
+                "y": 735
+              },
+              {
+                "x": 1146,
+                "y": 735
+              },
+              {
+                "x": 1146,
+                "y": 762
+              },
+              {
+                "x": 1053,
+                "y": 762
+              }
+            ]
+          }
+        ]
+      },
+      "line_items[1]": {
+        "ocrConfidence": 0.993,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Thermal label rolls $1,562.70",
+            "polygon": [
+              {
+                "x": 94,
+                "y": 788
+              },
+              {
+                "x": 304,
+                "y": 788
+              },
+              {
+                "x": 304,
+                "y": 816
+              },
+              {
+                "x": 94,
+                "y": 816
+              }
+            ]
+          },
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Thermal label rolls $1,562.70",
+            "polygon": [
+              {
+                "x": 1032,
+                "y": 788
+              },
+              {
+                "x": 1146,
+                "y": 788
+              },
+              {
+                "x": 1146,
+                "y": 816
+              },
+              {
+                "x": 1032,
+                "y": 816
+              }
+            ]
+          }
+        ]
+      },
+      "invoice_number": {
+        "ocrConfidence": 0.929,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Invoice #: INV-9865",
+            "polygon": [
+              {
+                "x": 78,
+                "y": 468
+              },
+              {
+                "x": 310,
+                "y": 467
+              },
+              {
+                "x": 310,
+                "y": 495
+              },
+              {
+                "x": 78,
+                "y": 496
+              }
+            ]
+          }
+        ]
+      },
+      "line_items[0].amount": {
+        "ocrConfidence": 0.996,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "$439.20",
+            "polygon": [
+              {
+                "x": 1053,
+                "y": 735
+              },
+              {
+                "x": 1146,
+                "y": 735
+              },
+              {
+                "x": 1146,
+                "y": 762
+              },
+              {
+                "x": 1053,
+                "y": 762
+              }
+            ]
+          }
+        ]
+      },
+      "line_items[1].amount": {
+        "ocrConfidence": 0.994,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "$1,562.70",
+            "polygon": [
+              {
+                "x": 1032,
+                "y": 788
+              },
+              {
+                "x": 1146,
+                "y": 788
+              },
+              {
+                "x": 1146,
+                "y": 816
+              },
+              {
+                "x": 1032,
+                "y": 816
+              }
+            ]
+          }
+        ]
+      },
+      "line_items[0].description": {
+        "ocrConfidence": 0.982,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Hydraulic fluid, 5 gal",
+            "polygon": [
+              {
+                "x": 93,
+                "y": 734
+              },
+              {
+                "x": 328,
+                "y": 734
+              },
+              {
+                "x": 328,
+                "y": 766
+              },
+              {
+                "x": 93,
+                "y": 766
+              }
+            ]
+          }
+        ]
+      },
+      "line_items[1].description": {
+        "ocrConfidence": 0.993,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          {
+            "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "referenceText": "Thermal label rolls",
+            "polygon": [
+              {
+                "x": 94,
+                "y": 788
+              },
+              {
+                "x": 304,
+                "y": 788
+              },
+              {
+                "x": 304,
+                "y": 816
+              },
+              {
+                "x": 94,
+                "y": 816
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "failureReason": null,
+  "failureMessage": null,
+  "reviewed": false,
+  "edited": false,
+  "config": {
+    "baseProcessor": "extraction_performance",
+    "schema": {
+      "type": "object",
+      "required": [
+        "invoice_number",
+        "total",
+        "vendor",
+        "line_items"
+      ],
+      "properties": {
+        "total": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "vendor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "line_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "amount"
+            ],
+            "properties": {
+              "amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "invoice_number": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "extractionRules": "Extract the invoice header and its line items exactly as printed.",
+    "advancedOptions": {
+      "citationsEnabled": true,
+      "arrayCitationStrategy": "property"
+    },
+    "parseConfig": {
+      "engine": "parse_performance",
+      "engineVersion": "latest"
+    }
+  },
+  "file": {
+    "object": "file",
+    "id": "file_ffUqII9mSKKJsgQN1j1qz",
+    "name": "invoice_001.png",
+    "type": "IMG",
+    "parentFileId": null,
+    "metadata": {},
+    "dataRetention": {
+      "mode": "workspace_default",
+      "status": "available"
+    },
+    "createdAt": "2026-09-11T08:56:09.595Z",
+    "updatedAt": "2026-09-11T08:56:44.882Z"
+  },
+  "parseRunId": "pr_q0b8az3CAWPoSbWGUk7RO",
+  "dashboardUrl": "https://dashboard.extend.ai/runs/exr_TR4bUO18s2EjPzeLNB5vy",
+  "usage": {
+    "credits": 3,
+    "totalCredits": 3,
+    "breakdown": [
+      {
+        "object": "extract_run",
+        "id": "exr_TR4bUO18s2EjPzeLNB5vy",
+        "credits": 3,
+        "charges": [
+          {
+            "product": "extraction_performance",
+            "unit": "page",
+            "quantity": 1,
+            "credits": 3
+          }
+        ]
+      }
+    ]
+  },
+  "createdAt": "2026-09-11T09:09:10.328Z",
+  "updatedAt": "2026-09-11T09:09:18.952Z"
+}

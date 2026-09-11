@@ -1,0 +1,18 @@
+{
+  "response_type": "extract",
+  "job_id": "b0b32d1f-ba5a-4bf6-87c2-2bcb3345b1c4",
+  "usage": {
+    "num_pages": 1,
+    "num_fields": 2,
+    "credits": 3.333333,
+    "extract_mode": "extract"
+  },
+  "studio_link": "https://studio.reducto.ai/job/b0b32d1f-ba5a-4bf6-87c2-2bcb3345b1c4",
+  "result": [
+    {
+      "invoice_number": "INV-9865",
+      "total": "$14,667.43"
+    }
+  ],
+  "citations": null
+}

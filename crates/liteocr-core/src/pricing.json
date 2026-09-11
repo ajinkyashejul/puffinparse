@@ -7,9 +7,9 @@
   "extend/parse_light": { "parse": 0.00625, "ocr": 0.00625, "source": "https://docs.extend.ai/credits (PAYG: 0.5 credits/page @ $0.0125)", "updated": "2026-09-11" },
   "extend/parse_auto": { "parse": 0.025, "ocr": 0.025, "source": "https://docs.extend.ai/credits (PAYG; light pages bill at 0.5 credits)", "updated": "2026-09-11" },
   "llamaparse/fast": { "parse": 0.00125, "ocr": 0.00125, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (1 credit/page, 1000 credits = $1.25)", "updated": "2026-09-11" },
-  "llamaparse/cost_effective": { "parse": 0.00375, "ocr": 0.00375, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (3 credits/page)", "updated": "2026-09-11" },
-  "llamaparse/agentic": { "parse": 0.0125, "ocr": 0.0125, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (10 credits/page)", "updated": "2026-09-11" },
-  "llamaparse/agentic_plus": { "parse": 0.05625, "ocr": 0.05625, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (45 credits/page)", "updated": "2026-09-11" },
+  "llamaparse/cost_effective": { "parse": 0.00375, "ocr": 0.00375, "extract": 0.01, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (3 credits/page)", "updated": "2026-09-11" },
+  "llamaparse/agentic": { "parse": 0.0125, "ocr": 0.0125, "extract": 0.03125, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (10 credits/page)", "updated": "2026-09-11" },
+  "llamaparse/agentic_plus": { "parse": 0.05625, "ocr": 0.05625, "extract": 0.11875, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (45 credits/page)", "updated": "2026-09-11" },
   "mistral/ocr-latest": { "parse": 0.004, "ocr": 0.004, "extract": 0.005, "source": "https://docs.mistral.ai/models/ocr-4-1 ($4/1k pages, $5/1k annotated pages)", "updated": "2026-09-11" },
   "mistral/ocr-4-1": { "parse": 0.004, "ocr": 0.004, "extract": 0.005, "source": "https://docs.mistral.ai/models/ocr-4-1 ($4/1k pages, $5/1k annotated pages)", "updated": "2026-09-11" },
   "mistral/ocr-4-0": { "parse": 0.004, "ocr": 0.004, "extract": 0.005, "source": "https://docs.mistral.ai/models/ocr-4-0 ($4/1k pages, $5/1k annotated pages)", "updated": "2026-09-11" },
@@ -52,5 +52,9 @@
   "google_documentai/ocr": { "parse": 0.0015, "ocr": 0.0015, "source": "https://cloud.google.com/document-ai/pricing (Enterprise Document OCR $1.50/1k pages)", "updated": "2026-09-11" },
   "google_documentai/layout": { "parse": 0.01, "ocr": 0.01, "source": "https://cloud.google.com/document-ai/pricing (Layout Parser $10/1k pages)", "updated": "2026-09-11" },
   "google_documentai/form": { "parse": 0.03, "ocr": 0.03, "extract": 0.03, "source": "https://cloud.google.com/document-ai/pricing (Form Parser $30/1k pages)", "updated": "2026-09-11" },
-  "google_documentai/prebuilt": { "parse": 0.03, "ocr": 0.03, "extract": 0.03, "source": "https://cloud.google.com/document-ai/pricing (Custom Extractor / specialized processors $30/1k pages)", "updated": "2026-09-11" }
+  "google_documentai/prebuilt": { "parse": 0.03, "ocr": 0.03, "extract": 0.03, "source": "https://cloud.google.com/document-ai/pricing (Custom Extractor / specialized processors $30/1k pages)", "updated": "2026-09-11" },
+  "reducto/extract": { "extract": 0.035, "source": "https://docs.reducto.ai/reference/credit-usage (Extract $20/1k pages plus the parse it runs at $15/1k)", "updated": "2026-09-11" },
+  "reducto/deep_extract": { "extract": 0.055, "source": "https://docs.reducto.ai/reference/credit-usage (Deep Extract $40/1k pages plus parse $15/1k)", "updated": "2026-09-11" },
+  "extend/extraction_performance": { "extract": 0.0625, "source": "https://docs.extend.ai/credits (extract 3 credits + parse_performance 2 credits per page @ $0.0125)", "updated": "2026-09-11" },
+  "extend/extraction_light": { "extract": 0.015, "source": "https://docs.extend.ai/credits (extract 0.7 credits + parse_light 0.5 credits per page @ $0.0125)", "updated": "2026-09-11" }
 }

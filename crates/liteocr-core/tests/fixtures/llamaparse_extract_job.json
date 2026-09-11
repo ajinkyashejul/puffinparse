@@ -1,0 +1,162 @@
+{
+  "file_input": "baab7fe0-7a85-42fd-bc6b-5efedf98778e",
+  "id": "ext-k3hxt8ewyhh8hpia5nichfdymixa",
+  "project_id": "e513b9ea-b1e8-408e-b612-d91cae45df7e",
+  "configuration_id": null,
+  "configuration": null,
+  "status": "COMPLETED",
+  "error_message": null,
+  "extract_result": {
+    "title": "A Short History of the Harbor",
+    "sites": [
+      {
+        "site": "Hazel Bend",
+        "samples": 205
+      },
+      {
+        "site": "Ash Grove",
+        "samples": 195
+      }
+    ]
+  },
+  "extract_metadata": {
+    "field_metadata": {
+      "document_metadata": {
+        "title": {
+          "citation": [
+            {
+              "page": 1,
+              "matching_text": "# A Short History of the Harbor",
+              "bounding_boxes": [
+                {
+                  "x": 36.86,
+                  "y": 38.94,
+                  "w": 341.68,
+                  "h": 24.560000000000002
+                }
+              ],
+              "page_dimensions": {
+                "width": 595.2,
+                "height": 841.92
+              }
+            }
+          ],
+          "confidence": 0.9425703056665324,
+          "extraction_confidence": 0.9425703056665324,
+          "parsing_confidence": 1.0
+        },
+        "sites": [
+          {
+            "site": {
+              "citation": [
+                {
+                  "page": 2,
+                  "matching_text": "| Hazel Bend   | 205     | 3.12       | 2.493    |",
+                  "bounding_boxes": [
+                    {
+                      "x": 43.4,
+                      "y": 139.62,
+                      "w": 72.68,
+                      "h": 15.439999999999998
+                    }
+                  ],
+                  "page_dimensions": {
+                    "width": 595.2,
+                    "height": 841.92
+                  }
+                }
+              ],
+              "confidence": 0.9476349178974411,
+              "extraction_confidence": 0.9476349178974411,
+              "parsing_confidence": 1.0
+            },
+            "samples": {
+              "citation": [
+                {
+                  "page": 2,
+                  "matching_text": "| Hazel Bend   | 205     | 3.12       | 2.493    |",
+                  "bounding_boxes": [
+                    {
+                      "x": 256.27,
+                      "y": 137.51,
+                      "w": 28.930000000000007,
+                      "h": 20.0
+                    }
+                  ],
+                  "page_dimensions": {
+                    "width": 595.2,
+                    "height": 841.92
+                  }
+                }
+              ],
+              "confidence": 0.9496690112810596,
+              "extraction_confidence": 0.9496690112810596,
+              "parsing_confidence": 1.0
+            }
+          },
+          {
+            "site": {
+              "citation": [
+                {
+                  "page": 2,
+                  "matching_text": "| Ash Grove    | 195     | 8.26       | 1.458    |",
+                  "bounding_boxes": [
+                    {
+                      "x": 45.78,
+                      "y": 168.91,
+                      "w": 67.1,
+                      "h": 15.789999999999992
+                    }
+                  ],
+                  "page_dimensions": {
+                    "width": 595.2,
+                    "height": 841.92
+                  }
+                }
+              ],
+              "confidence": 0.9471170891695906,
+              "extraction_confidence": 0.9471170891695906,
+              "parsing_confidence": 1.0
+            },
+            "samples": {
+              "citation": [
+                {
+                  "page": 2,
+                  "matching_text": "| Ash Grove    | 195     | 8.26       | 1.458    |",
+                  "bounding_boxes": [
+                    {
+                      "x": 256.61,
+                      "y": 166.28,
+                      "w": 28.24000000000001,
+                      "h": 20.0
+                    }
+                  ],
+                  "page_dimensions": {
+                    "width": 595.2,
+                    "height": 841.92
+                  }
+                }
+              ],
+              "confidence": 0.9484824561762857,
+              "extraction_confidence": 0.9484824561762857,
+              "parsing_confidence": 1.0
+            }
+          }
+        ]
+      },
+      "page_metadata": null,
+      "row_metadata": null
+    },
+    "parse_job_id": "pjb-y7hury0bogx6a1wilw6mwkdousg5",
+    "parse_tier": "agentic"
+  },
+  "metadata": null,
+  "usage": {
+    "credits": 50.0,
+    "extract_credits": 30.0,
+    "parse_credits": 20.0
+  },
+  "created_at": "2026-09-11T09:00:31.892912Z",
+  "updated_at": "2026-09-11T09:00:54.257044Z",
+  "document_input_value": "baab7fe0-7a85-42fd-bc6b-5efedf98778e"
+}

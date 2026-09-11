@@ -23,7 +23,10 @@ not the legacy `document_url` schema.
 | `reducto/standard` *(default)* | none beyond the shared body — the account's default model (legacy Parse for most accounts) | $0.015 / page |
 | `reducto/r-1` | `settings.model = "r-1"` | $0.010 / page |
 | `reducto/agentic` | `enhance.agentic = [{"scope":"text"},{"scope":"table"}]` | $0.030 / page |
+| `reducto/extract` *(default for `extract`)* | `POST /extract` with `instructions.schema` | $0.035 / page (extract $0.020 + the parse it runs) |
+| `reducto/deep_extract` | `settings.deep_extract = true` | $0.055 / page (deep extract $0.040 + parse) |
 
+The first three models serve `parse` and `ocr`; the last two serve `extract` only (§5).
 Prices are public pay-as-you-go list prices (source: <https://docs.reducto.ai/reference/credit-usage>),
 used only to fill `OcrResponse.cost_usd = per_page_usd × usage.pages`. Reducto bills "complex" pages a
 surcharge credit on top of the base page credit, so the estimate is a floor for `standard`/`agentic`.
@@ -72,7 +75,7 @@ replace). So `provider_options` keys are top-level Reducto request keys — `set
 `formatting`, `enhance`, `spreadsheet`, `queue_priority`, `async` (the Reducto object of that name is
 *not* forwarded; only the boolean switch is consumed).
 
-## 4. Response mapping
+## 4. Response mapping (`parse` / `ocr`)
 
 | Reducto field | LiteOCR unified field | Notes |
 |---|---|---|
@@ -144,7 +147,115 @@ Trimmed real response (`crates/liteocr-core/tests/fixtures/reducto_parse.json`, 
 }
 ```
 
-## 5. Errors, status codes, rate limits, timeouts
+## 5. Extract mode (`extract`)
+
+`liteocr.extract(...)` posts to `POST {base}/extract` (sync) or `POST {base}/extract_async` +
+`GET {base}/job/{job_id}` when `provider_options={"async": true}` — the same upload step, auth header
+and polling schedule as parse. Implementation: `Reducto::extract` in
+`crates/liteocr-core/src/providers/reducto.rs`.
+
+Body built by `build_extract_body()`:
+
+```json
+{
+  "input": "reducto://<uuid>.png",
+  "instructions": { "schema": { "...the request's JSON Schema, verbatim..." },
+                    "system_prompt": "…only when `instructions` is set…" },
+  "settings": { "citations": { "enabled": true },
+                "deep_extract": true,
+                "page_range": [{ "start": 1, "end": 3 }] }
+}
+```
+
+* The **schema is passed through unchanged** — Reducto accepts standard JSON Schema, so nothing is
+  rewritten (unlike Extend — see `extend.md` §5).
+* `ExtractRequest.instructions` → `instructions.system_prompt` (Reducto's default is
+  `"Be precise and thorough."`).
+* `ExtractRequest.citations = true` → `settings.citations.enabled`. Without it Reducto returns bare
+  values and no boxes.
+* `reducto/deep_extract` adds `settings.deep_extract` (agentic refinement loop; `usage.extract_mode`
+  comes back as `"super_agent"`).
+* `pages` → `settings.page_range`, and `provider_options` are deep-merged exactly as on the parse path
+  (`settings`, `parsing`, `queue_priority`, …; the LiteOCR-only `async` key is consumed).
+
+### Response mapping
+
+The response shape **changes with citations**, which is the main trap:
+
+| Citations | `response_type` | `result` |
+|---|---|---|
+| off | `"extract"` | a **list** of objects (one per chunk; length 1 unless chunking is on), plus a top-level `"citations": null` |
+| on | `"v3_extract"` | an **object** whose every *leaf* is `{"value": …, "citations": [ParseBlock…]}` — recursively, inside nested objects and arrays too |
+
+| Reducto field | LiteOCR unified field | Notes |
+|---|---|---|
+| `result` | `ExtractResponse.data` | Citation wrappers are stripped so `data` matches the request schema. A single-element list is unwrapped to the object; a longer list is kept as an array (pointers then start `/0/…`). |
+| `result.<path>.citations[]` | `ExtractResponse.fields["<json pointer>"]` | Keys are RFC 6901 pointers: `/invoice_number`, `/line_items/0/amount`, `/vendor_address/city`. Only leaves get an entry. |
+| citation `bbox{left,top,width,height,page}` | `Citation.bbox` / `Citation.page_number` | Already normalised 0–1, top-left origin — converted with `from_normalized_ltwh`. |
+| citation `content` | `Citation.text` | The matched span (its `parentBlock` — the whole source block — is **not** surfaced; set `settings.citations.parent_block="bbox_only"` to shrink responses). |
+| citation `granular_confidence.extract_confidence` | `FieldInfo.confidence` | Max over a field's citations; falls back to `confidence` (`high → 0.9`, `low → 0.5`). |
+| `usage.num_pages` | `Usage.pages` | |
+| `usage.credits` | `Usage.credits` | `null` on accounts on per-product pricing. |
+| `usage.num_fields` / `usage.extract_mode` | `metadata.reducto_num_fields` / `metadata.reducto_extract_mode` | `extract_mode` ∈ `extract`, `super_agent`, `spreadsheet_agent`. |
+| `confidence` / `confidence_reason` | `metadata.reducto_confidence…` | Document-level Deep Extract labels, when present. |
+| `studio_link` | `metadata.reducto_studio_link` | |
+| `job_id` | `ExtractResponse.provider_job_id` | Optional in the schema, so it may be `None`. |
+
+`settings.force_url_result` (and large results) replace `result` with
+`{"type":"url","url":"https://…"}`; LiteOCR fetches that URL **without** the Authorization header and
+uses the body, which is the *bare* result value — not a wrapper object like the parse path's.
+
+Trimmed real response (`crates/liteocr-core/tests/fixtures/reducto_extract.json`, one citation shown):
+
+```json
+{
+  "response_type": "v3_extract",
+  "job_id": "33e0fac4-a1bc-42ed-9aab-9c9faab42e31",
+  "usage": { "num_pages": 1, "num_fields": 15, "credits": 3.333333, "extract_mode": "extract" },
+  "studio_link": "https://studio.reducto.ai/job/33e0fac4-a1bc-42ed-9aab-9c9faab42e31",
+  "result": {
+    "invoice_number": {
+      "value": "INV-9865",
+      "citations": [
+        {
+          "type": "Key Value",
+          "bbox": { "left": 0.157, "top": 0.269, "width": 0.092, "height": 0.011,
+                    "page": 1, "original_page": 1 },
+          "content": "INV-9865",
+          "confidence": "high",
+          "granular_confidence": { "extract_confidence": 0.996, "parse_confidence": 0.821 },
+          "parentBlock": { "type": "Key Value", "bbox": { "…": "…" }, "content": "" }
+        }
+      ]
+    },
+    "line_items": [ { "description": { "value": "Hydraulic fluid, 5 gal", "citations": [ … ] },
+                      "amount": { "value": "$439.20", "citations": [ … ] } } ]
+  }
+}
+```
+
+**Verified live** on 2026-09-11 with `benchmark/datasets/synthetic-v1/docs/invoice_001.png`:
+`{invoice_number: "INV-9865", total: "$14,667.43", date: "2024-08-03", vendor: "Cedar Ridge Supply"}`,
+`usage.num_pages = 1`, `credits = 3.333333`, every field cited on page 1 with
+`extract_confidence ≈ 0.995`. Test: `providers::reducto::tests::live_extract` (`#[ignore]`).
+
+### Extract gotchas
+
+* **`parentBlock` is the only camelCase key in the API.** It embeds the entire source block, so
+  table-heavy schemas repeat the same block many times; `settings.citations.parent_block="bbox_only"`
+  blanks its `content`.
+* **Citations change the response type**, including the container type of `result` (list → object).
+  Code that indexes `result[0]` breaks as soon as citations are on.
+* **Credits are not the extract price alone**: a 1-page extract of this invoice billed `3.333333`
+  credits — the extract itself, plus the page parse, plus Reducto's "complex page" surcharge. The
+  `pricing.json` figure is a list-price estimate, not the billed amount.
+* **Deep Extract ≠ 2× credits in practice** (`4.666667` vs `3.333333` on the same page), though the
+  list price is 2×.
+* An invalid JSON Schema comes back as `422` with a Pydantic validation array.
+* Passing a `jobid://…` input from a previous `/parse` skips (and stops billing) the parse step;
+  `parsing` options are then ignored.
+
+## 6. Errors, status codes, rate limits, timeouts
 
 Every non-2xx body goes through `Error::from_http`, which pulls a message out of `message` / `detail` /
 `error` and classifies by status:
@@ -180,7 +291,7 @@ backoff is blind.
 result download; it is also the per-request timeout, shrinking as the budget is spent. Reducto's own
 sync `/parse` ceiling is 900 s — use `provider_options={"async": true}` for anything longer.
 
-## 6. Gotchas (verified)
+## 7. Gotchas (verified)
 
 * **`input`, not `document_url`.** The body is a three-way server-side union: `ParseConfigNew`,
   legacy `ParseConfig` (`document_url` + `options`/`advanced_options`/`experimental_options`), and the
@@ -213,7 +324,7 @@ sync `/parse` ceiling is 900 s — use `provider_options={"async": true}` for an
 * **`settings.return_images: ["page"]` does not populate `block.image_url`** (it stays `null`); the URL
   shows up under `block.extra.page_image_url`. LiteOCR surfaces neither.
 
-## 7. Useful `provider_options` passthrough
+## 8. Useful `provider_options` passthrough
 
 ```python
 # 1. Long documents: submit asynchronously and poll (the `async` key is consumed by LiteOCR).
@@ -236,7 +347,7 @@ liteocr.ocr("locked.pdf", model="reducto/standard",
             provider_options={"settings": {"document_password": "…", "force_url_result": True}})
 ```
 
-## 8. Links
+## 9. Links
 
 * Docs home: <https://docs.reducto.ai> · agent guide: <https://docs.reducto.ai/agent-guide.md> ·
   index: <https://docs.reducto.ai/llms.txt>

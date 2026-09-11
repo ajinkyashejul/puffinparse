@@ -22,6 +22,12 @@ confidence. LiteOCR always uses the **async** run API (`/parse_runs`), never the
 | `extend/parse_performance` *(default)* | `config.engine = "parse_performance"` | $0.025 / page (2 credits) |
 | `extend/parse_light` | `config.engine = "parse_light"` | $0.00625 / page (0.5 credits) |
 | `extend/parse_auto` | `config.engine = "parse_auto"` | $0.025 / page (per-page: light pages bill 0.5 credits) |
+| `extend/extraction_performance` *(default for `extract`)* | `config.baseProcessor = "extraction_performance"`, `config.parseConfig.engine = "parse_performance"` | $0.0625 / page (3 + 2 credits) |
+| `extend/extraction_light` | `config.baseProcessor = "extraction_light"`, `config.parseConfig.engine = "parse_light"` | $0.015 / page (0.7 + 0.5 credits) |
+
+The first three models serve `parse` and `ocr`; the last two serve `extract` only (§5). An extract run
+triggers its own parse run and is billed for both, which is why the extract prices are the sum of the
+two line items; re-extracting a file Extend has already parsed bills only the extraction.
 
 Credits are the billing unit; pay-as-you-go is $0.0125/credit (Scale: $0.01). Prices above are the PAYG
 list rate from <https://docs.extend.ai/credits>, used for `OcrResponse.cost_usd`. `parse_auto` is priced
@@ -78,7 +84,7 @@ deep-merges everything that remains at the **top level** of the body — which i
 `dataRetention` and even `file` overrides get through. So both spellings work:
 `{"blockOptions": {...}}` and `{"config": {"blockOptions": {...}}}`.
 
-## 4. Response mapping
+## 4. Response mapping (`parse` / `ocr`)
 
 | Extend field | LiteOCR unified field | Notes |
 |---|---|---|
@@ -155,7 +161,137 @@ block shown; the file holds 2 pages, 5 blocks and 21 OCR words):
 }
 ```
 
-## 5. Errors, status codes, rate limits, timeouts
+## 5. Extract mode (`extract`)
+
+`liteocr.extract(...)` reuses the file reference from §3 (URL passed through as `file.url`, everything
+else uploaded to `POST /files/upload`) and then runs the async pair
+`POST {base}/extract_runs` → poll `GET {base}/extract_runs/{id}`, with the same
+`x-extend-api-version: 2026-02-09` (and optional `x-extend-workspace-id`) headers. Terminal statuses
+are `PROCESSED`, `FAILED`, `CANCELLED`. The sync `POST /extract` is not used: Extend documents it as
+onboarding-only and caps it at 5 minutes. Implementation: `Extend::extract` in
+`crates/liteocr-core/src/providers/extend.rs`.
+
+Body built by `build_extract_body()`:
+
+```json
+{
+  "file": { "id": "file_…" },
+  "config": {
+    "baseProcessor": "extraction_performance",
+    "schema": { "...the request schema, adapted (see below)..." },
+    "parseConfig": { "engine": "parse_performance" },
+    "extractionRules": "…only when `instructions` is set…",
+    "advancedOptions": { "citationsEnabled": true, "pageRanges": [{ "start": 1, "end": 3 }] }
+  }
+}
+```
+
+* `ExtractRequest.instructions` → `config.extractionRules` (natural-language guidance).
+* `ExtractRequest.citations = true` → `config.advancedOptions.citationsEnabled`. This also switches on
+  `ocrConfidence`, which is **absent** otherwise, and adds latency (a separate citation model runs).
+  Granularity knobs (`citationMode: line|word|block`, `arrayCitationStrategy: item|property`) are
+  available through `provider_options`.
+* `pages` → `config.advancedOptions.pageRanges` (open-ended ranges end at Extend's 750-page cap).
+* `provider_options` keys `baseProcessor`, `baseVersion`, `extractionRules`, `schema`,
+  `advancedOptions`, `parseConfig` are merged into `config`; anything else (`metadata`,
+  `dataRetention`, `extractor`) is merged at the top level — so a saved extractor is reachable with
+  `provider_options={"extractor": {"id": "ex_…"}}`.
+
+### Schema adaptation (mandatory)
+
+Extend rejects plain JSON Schema with `400 INVALID_REQUEST`. `adapt_schema()` rewrites the request
+schema before sending it:
+
+| LiteOCR input | Sent to Extend | Why |
+|---|---|---|
+| `{"type": "string"}` | `{"type": ["string", "null"]}` | *"Non-nullable primitive type "string" is not allowed."* Applies to `string`, `number`, `integer`, `boolean`. |
+| `{"type": "array", "items": {"type": "string"}}` | unchanged | Primitive **array items** must stay non-nullable — the documented exception. |
+| `{"enum": ["a", "b"]}` | `{"enum": ["a", "b", null]}` | Enums must offer a `null` option (a real JSON `null` here, unlike the `"null"` *string* used in a type union). |
+
+Everything else is passed through, including `required`, `description`, `extend:type`, `extend:name`.
+Unsupported constructs (`anyOf`/`oneOf`/`allOf`, `$ref`, `const`, regex/format validation, nesting
+deeper than 5) are *not* rewritten and will be rejected by the API.
+
+### Response mapping
+
+`output` has two halves sharing the same field paths: `output.value` (the data) and `output.metadata`
+(per-field confidence + citations).
+
+| Extend field | LiteOCR unified field | Notes |
+|---|---|---|
+| `output.value` | `ExtractResponse.data` | Exactly the schema shape. |
+| `output.metadata["line_items[0].amount"]` | `ExtractResponse.fields["/line_items/0/amount"]` | Extend's path notation is converted to an RFC 6901 pointer; `~` and `/` inside names are escaped. Array *containers* (`line_items`, `line_items[0]`) get their own entries and are kept. |
+| `metadata[].ocrConfidence` | `FieldInfo.confidence` | Falls back to `logprobsConfidence`, which is being phased out (`null` on `extraction_light` and on `extraction_performance ≥ 4.6.0`). |
+| `metadata[].citations[].page.number` | `Citation.page_number` | 1-based. |
+| `metadata[].citations[].polygon[]` | `Citation.bbox` | The polygon's axis-aligned bounds, normalised by `page.width`/`page.height` (page pixels). No page dimensions ⇒ `bbox: None`. |
+| `metadata[].citations[].referenceText` | `Citation.text` | |
+| `usage.breakdown[].charges[]` where `unit == "page"` | `Usage.pages` | Max `quantity` over the charges; falls back to `file.metadata.pageCount`, then the highest cited page, then 1. |
+| `usage.totalCredits` (else `usage.credits`) | `Usage.credits` | `totalCredits` includes the parse run the extraction triggered. |
+| `parseRunId` / `dashboardUrl` / `reviewed` | `metadata.extend_parse_run_id` / `extend_dashboard_url` / `extend_reviewed` | |
+| `id` | `ExtractResponse.provider_job_id` | `exr_…` |
+| `failureReason` + `failureMessage` | error message | `OUT_OF_CREDITS → authentication`; `INTERNAL_ERROR`, `FAILED_TO_PROCESS_FILE`, `PARSING_ERROR`, `PRE_`/`POST_PROCESSING_FAILURE` → `provider`; everything else (`INVALID_CONFIGURATION`, `SCHEMA_GENERATION_FAILED`, …) → `bad_request`. |
+
+`reviewAgentScore` and `insights` (model reasoning) are not surfaced; enable them through
+`provider_options` and read `response.raw`.
+
+Trimmed real response (`crates/liteocr-core/tests/fixtures/extend_extract_run.json`):
+
+```json
+{
+  "object": "extract_run",
+  "id": "exr_TR4bUO18s2EjPzeLNB5vy",
+  "status": "PROCESSED",
+  "output": {
+    "value": { "invoice_number": "INV-9865", "total": "$14,667.43", "vendor": "Cedar Ridge Supply",
+               "line_items": [ { "description": "Hydraulic fluid, 5 gal", "amount": "$439.20" } ] },
+    "metadata": {
+      "invoice_number": {
+        "ocrConfidence": 0.929,
+        "logprobsConfidence": null,
+        "reviewAgentScore": null,
+        "citations": [
+          { "fileId": "file_ffUqII9mSKKJsgQN1j1qz",
+            "page": { "number": 1, "width": 1240, "height": 1754 },
+            "referenceText": "Invoice #: INV-9865",
+            "polygon": [ { "x": 78, "y": 468 }, { "x": 310, "y": 467 },
+                         { "x": 310, "y": 495 }, { "x": 78, "y": 496 } ] }
+        ]
+      },
+      "line_items[0].amount": { "…": "…" }
+    }
+  },
+  "parseRunId": "pr_q0b8az3CAWPoSbWGUk7RO",
+  "usage": { "credits": 3, "totalCredits": 3,
+             "breakdown": [ { "object": "extract_run", "credits": 3,
+                              "charges": [ { "product": "extraction_performance", "unit": "page",
+                                             "quantity": 1, "credits": 3 } ] } ] }
+}
+```
+
+**Verified live** on 2026-09-11 with `benchmark/datasets/synthetic-v1/docs/invoice_001.png`:
+`{invoice_number: "INV-9865", total: "$14,667.43", date: "2024-08-03", vendor: "Cedar Ridge Supply"}`
+on both processors, every field cited on page 1 with `ocrConfidence` 0.93–0.99. A fresh
+`extraction_performance` run billed `totalCredits: 5` (3 extract + 2 parse); a second run on the
+already-parsed file billed only the extraction. Test: `providers::extend::tests::live_extract`
+(`#[ignore]`).
+
+### Extract gotchas
+
+* **Plain JSON Schema is a `400`.** The error names one path at a time
+  (*"Path: config.properties.invoice_number"*), so an unadapted schema fails field by field. Note the
+  asymmetry LiteOCR handles: type unions use the **string** `"null"`, enums use a real JSON `null`.
+* **`metadata` keys are paths, not a tree** — `line_items[0].description`, with an entry for the array
+  and for each item as well as each cell.
+* **`ocrConfidence` only exists with citations on**; without them a field's entry can be empty.
+* **Polygons are not rectangles** (four points, often slightly skewed) and are in page pixels, so the
+  page dimensions in the same citation are required to normalise them.
+* **Extract implicitly bills a parse run** on a file Extend has not parsed yet; `usage.credits` alone
+  understates the job (use `totalCredits`).
+* Omitting both `config` and `extractor` makes Extend infer a schema. LiteOCR always sends a schema —
+  `extract` is schema-driven by definition — but `provider_options={"config": {"schema": null}}` is not
+  a supported way around that; drop to `provider_options={"extractor": …}` instead.
+
+## 6. Errors, status codes, rate limits, timeouts
 
 Extend's error body is `{"code","message","requestId","retryable"}` (sometimes `docUrl`). LiteOCR's
 `Error::from_http` uses `message` and classifies by HTTP status:
@@ -194,7 +330,7 @@ handling only, though `Retry-After` is sometimes present.
 output download) and also caps each individual request. The async run itself has no server-side timeout;
 Extend's sync `/parse` (which LiteOCR does not use) has a hard 5-minute one.
 
-## 6. Gotchas (verified)
+## 7. Gotchas (verified)
 
 * **`x-extend-api-version` is mandatory** for any key created after 2025-04-21 — omitting it is a hard
   `400 INVALID_REQUEST`. Keys older than that silently fall back to the legacy `2024-12-23` behaviour.
@@ -225,7 +361,7 @@ Extend's sync `/parse` (which LiteOCR does not use) has a hard 5-minute one.
 * **The docs site moved.** `https://docs.extend.ai/2025-04-21/developers/api-reference/…` URLs now 404;
   current docs live at the root.
 
-## 7. Useful `provider_options` passthrough
+## 8. Useful `provider_options` passthrough
 
 ```python
 # 1. Organization-scoped API keys need a workspace; LiteOCR turns this into a header.
@@ -253,7 +389,7 @@ liteocr.ocr("book.xlsx", model="extend/parse_performance",
                                                   "excelSkipHiddenContent": True}})
 ```
 
-## 8. Links
+## 9. Links
 
 * Docs home: <https://docs.extend.ai> · index: <https://docs.extend.ai/llms.txt> ·
   compact platform context: <https://docs.extend.ai/agents.md>

@@ -24,6 +24,15 @@ region …"`. The OpenAPI spec is at `/api/openapi.json` (not `/openapi.json`); 
 | `llamaparse/agentic` | `tier=agentic`, `version=latest` | $0.0125 / page (10 credits) |
 | `llamaparse/agentic_plus` | `tier=agentic_plus`, `version=latest` | $0.05625 / page (45 credits) |
 
+`cost_effective`, `agentic` and `agentic_plus` also serve `extract` (§5); `fast` does not — it is a
+parse-only tier. Extract prices are per page, on top of the parse the extraction runs:
+
+| Model | Extract parameters | List price (`pricing.json`, `extract`) |
+|---|---|---|
+| `llamaparse/cost_effective` *(default for `extract`)* | `configuration.tier=cost_effective` | $0.01 / page (5 extract + 3 parse credits) |
+| `llamaparse/agentic` | `configuration.tier=agentic` | $0.03125 / page (15 + 10 credits) |
+| `llamaparse/agentic_plus` | `configuration.tier=agentic_plus` | $0.11875 / page (50 + 45 credits) |
+
 1 000 credits = $1.25 ⇒ 1 credit = $0.00125. Prices come from
 <https://developers.llamaindex.ai/llamaparse/general/pricing/> and drive `OcrResponse.cost_usd`;
 add-ons LiteOCR does not model include `extract_layout` (+3 credits/page) and enriched forms
@@ -57,7 +66,7 @@ text parts. Strings pass through; booleans become `"true"`/`"false"`; numbers ar
 values are skipped; objects/arrays are serialised as JSON text. A key already present (e.g. `version`,
 `tier`, `language`, `target_pages`) is **replaced**, so provider options override LiteOCR's defaults.
 
-## 4. Response mapping
+## 4. Response mapping (`parse` / `ocr`)
 
 | LlamaParse field | LiteOCR unified field | Notes |
 |---|---|---|
@@ -136,7 +145,126 @@ Trimmed real response (`crates/liteocr-core/tests/fixtures/llamaparse_result_jso
 }
 ```
 
-## 5. Errors, status codes, rate limits, timeouts
+## 5. Extract mode (`extract`) — LlamaExtract
+
+Extraction is a different API surface from parsing: LiteOCR uses LlamaCloud's **v2 extract** endpoints,
+not the v1 extraction-agent ones, so no agent has to be created and the schema travels with the
+request. Implementation: `LlamaParse::extract` in `crates/liteocr-core/src/providers/llamaparse.rs`.
+
+1. **Upload.** `POST {base}/api/v1/beta/files`, `multipart/form-data` with parts `file` and
+   `purpose=extract` → `201` `{"id": "<uuid>", "name": …, "expires_at": …}` (files expire after 48 h).
+   Unlike the parse path there is **no URL input**: an `https://…` document is downloaded by LiteOCR
+   and re-uploaded.
+2. **Create.** `POST {base}/api/v2/extract`:
+
+   ```json
+   {
+     "file_input": "<file uuid, or a parse job id>",
+     "configuration": {
+       "tier": "cost_effective",
+       "data_schema": { "...the request's JSON Schema, verbatim..." },
+       "cite_sources": true,
+       "confidence_scores": true,
+       "system_prompt": "…only when `instructions` is set…",
+       "target_pages": "1-3,5"
+     }
+   }
+   ```
+
+   → `{"id": "ext-…", "status": "PENDING", "configuration": {…resolved defaults…}}`.
+3. **Poll.** `GET {base}/api/v2/extract/{id}?expand=usage&expand=extract_metadata`, 1 s backing off
+   ×1.5 to 5 s. **Both `expand` values matter**: without them `usage` and `extract_metadata` come back
+   `null` even when citations were requested. Terminal statuses: `COMPLETED`, `FAILED`, `CANCELLED`
+   (a failure carries `error_message`).
+
+Mapping of the unified request:
+
+* the schema is passed through **verbatim** (LlamaCloud accepts standard JSON Schema);
+* `instructions` → `configuration.system_prompt`;
+* `citations = true` → both `cite_sources` and `confidence_scores` (they are reported together under
+  `extract_metadata`);
+* `pages` → `configuration.target_pages`, which is **1-based** here — the opposite of the 0-based
+  `target_pages` form field on the parsing endpoint;
+* `provider_options` are merged into `configuration` key-by-key (`use_reasoning`, `extraction_target`,
+  `parse_tier`, `disable_cache`, `max_pages`, `spreadsheet_mode`, …), and win over LiteOCR's defaults.
+
+### Response mapping
+
+| LlamaCloud field | LiteOCR unified field | Notes |
+|---|---|---|
+| `extract_result` | `ExtractResponse.data` | The schema shape; no wrapper to strip. |
+| `extract_metadata.field_metadata.document_metadata` | `ExtractResponse.fields` | A **parallel tree** mirroring the data: objects keyed by field, arrays as lists indexed by position, and `{citation, confidence, extraction_confidence, parsing_confidence}` entries at the leaves. Walked into RFC 6901 pointers (`/sites/0/samples`). |
+| leaf `confidence` (else `extraction_confidence`) | `FieldInfo.confidence` | 0–1. `parsing_confidence` is not surfaced. |
+| leaf `citation[].page` | `Citation.page_number` | 1-based. |
+| leaf `citation[].bounding_boxes[]` (`{x,y,w,h}`) | `Citation.bbox` | Normalised by the same entry's `page_dimensions` (PDF points). One `Citation` per box; a citation with no boxes still yields one with `bbox: None` (the `turbo` tier is text-only). |
+| leaf `citation[].matching_text` | `Citation.text` | The matched **markdown** span, so it can contain `#`/`|`/`**`. |
+| `usage.credits` | `Usage.credits` | Total: `extract_credits` + `parse_credits`. |
+| — | `Usage.pages` | **Derived** — see below. |
+| `extract_metadata.parse_job_id` / `parse_tier` | `metadata.llamaparse_parse_job_id` / `llamaparse_parse_tier` | The parse defaults to the extract tier. |
+| `id` | `ExtractResponse.provider_job_id` | `ext-…` |
+
+**Page count is derived.** LlamaExtract reports no page count anywhere in the job. LiteOCR uses the
+highest page number seen in the citations; with citations off it divides `usage.extract_credits` by the
+tier's published per-page rate (5 / 15 / 50 credits for cost_effective / agentic / agentic_plus, 35 for
+turbo); failing both it reports 1. So `usage.pages` — and therefore `cost_usd` — is a best-effort
+figure, exact when citations are on and every page contributes a cited field.
+
+Trimmed real response (`crates/liteocr-core/tests/fixtures/llamaparse_extract_job.json`, a 2-page PDF):
+
+```json
+{
+  "id": "ext-4mlkajo0l99nprnzarbjmt5x6143",
+  "status": "COMPLETED",
+  "extract_result": { "title": "A Short History of the Harbor",
+                      "sites": [ { "site": "Hazel Bend", "samples": 205 } ] },
+  "extract_metadata": {
+    "field_metadata": {
+      "document_metadata": {
+        "title": {
+          "citation": [ { "page": 1, "matching_text": "# A Short History of the Harbor",
+                          "bounding_boxes": [ { "x": 36.86, "y": 38.94, "w": 341.68, "h": 24.56 } ],
+                          "page_dimensions": { "width": 595.2, "height": 841.92 } } ],
+          "confidence": 0.9425, "extraction_confidence": 0.9425, "parsing_confidence": 1.0
+        },
+        "sites": [ { "site": { "citation": [ { "page": 2, "…": "…" } ], "confidence": 0.9476 },
+                     "samples": { "…": "…" } } ]
+      },
+      "page_metadata": null, "row_metadata": null
+    },
+    "parse_job_id": "pjb-12ue2qidroaofurlc4mfqgfgli1j",
+    "parse_tier": "agentic"
+  },
+  "usage": { "credits": 50.0, "extract_credits": 30.0, "parse_credits": 20.0 }
+}
+```
+
+**Verified live** on 2026-09-11: `invoice_001.png` on `cost_effective` returned
+`{invoice_number: "INV-9865", total: "$14,667.43", date: "2024-08-03", vendor: "Cedar Ridge Supply"}`
+with `usage.credits = 8` (5 extract + 3 parse) and every field cited on page 1; the 2-page
+`multipage_001.pdf` on `agentic` returned 7 table rows with cell-level citations on page 2 and
+`credits = 50` for 2 pages, matching 15 + 10 credits per page exactly. Tests:
+`providers::llamaparse::tests::live_extract` (`#[ignore]`) and `normalizes_extract_fixture`.
+
+### Extract gotchas
+
+* **`expand` is not optional.** `GET /api/v2/extract/{id}` without `expand=usage&expand=extract_metadata`
+  returns `usage: null` and `extract_metadata: null`, which looks exactly like "citations were not
+  produced".
+* **`target_pages` flips base** between the two APIs: 0-based on `/api/v1/parsing/upload`, 1-based on
+  the v2 extract configuration.
+* **No URL input and no page count** — both are handled by LiteOCR (download + re-upload, derived
+  pages).
+* **`fast` is not an extract tier**; `turbo` exists on the API (35 credits/page, text-only citations)
+  but is not registered as a LiteOCR model, so `llamaparse/turbo` resolves to an unsupported-model
+  error even though the provider code accepts the tier.
+* **Results are cached**: an identical file + configuration returns in a couple of seconds and may not
+  be billed again. Pass `provider_options={"disable_cache": true}` for benchmarking.
+* **`matching_text` is markdown**, taken from the parse output rather than the raw page text, and the
+  boxes are the parse block's, not a tight box around the value.
+* Uploaded files carry `expires_at` (48 h) and `purpose=extract`; a file uploaded for parsing is not
+  reusable here.
+
+## 6. Errors, status codes, rate limits, timeouts
 
 Every error is FastAPI-shaped: either `{"detail": "message"}` or, on 422, `{"detail": [ValidationError…]}`.
 `Error::from_http` picks up `detail` (stringifying the array form) and classifies by status:
@@ -165,7 +293,7 @@ overall. **No `Retry-After` and no rate-limit headers on any endpoint**, so back
 and caps each request. For reference, the official SDKs poll every 1 s with a 2 000 s ceiling; a 1-page
 image on `cost_effective` finished in ~4.3 s in testing.
 
-## 6. Gotchas (verified)
+## 7. Gotchas (verified)
 
 * **`tier` requires `version`.** Sending a tier alone is `400 "Must specify a version with a tier.
   Tier: cost_effective"`. LiteOCR always sends `version=latest`; pin a dated version through
@@ -204,7 +332,7 @@ image on `cost_effective` finished in ~4.3 s in testing.
   Avoid it for anything structured. Also note `output_tables_as_HTML` (capital HTML) only affects the
   rendered markdown — `items[].html` is present either way.
 
-## 7. Useful `provider_options` passthrough
+## 8. Useful `provider_options` passthrough
 
 ```python
 # 1. Pin a dated parser version instead of `latest` (reproducible output).
@@ -231,7 +359,7 @@ liteocr.ocr("contract.pdf", model="llamaparse/fast",
                               "page_error_tolerance": 0.1, "replace_failed_page_mode": "raw_text"})
 ```
 
-## 8. Links
+## 9. Links
 
 * Docs home: <https://developers.llamaindex.ai/llamaparse>
 * Tiers: <https://developers.llamaindex.ai/llamaparse/parse/guides/tiers/>

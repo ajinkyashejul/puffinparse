@@ -67,6 +67,20 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 default: false,
                 modes: PARSE_OCR,
             },
+            ModelInfo {
+                provider: "reducto",
+                model: "extract",
+                description: "Reducto Extract: POST /extract with a JSON schema, citations on request",
+                default: true,
+                modes: &[Mode::Extract],
+            },
+            ModelInfo {
+                provider: "reducto",
+                model: "deep_extract",
+                description: "Reducto Deep Extract (settings.deep_extract = true) for long or complex documents",
+                default: false,
+                modes: &[Mode::Extract],
+            },
         ],
     },
     ProviderInfo {
@@ -97,6 +111,20 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 default: false,
                 modes: PARSE_OCR,
             },
+            ModelInfo {
+                provider: "extend",
+                model: "extraction_performance",
+                description: "Extend Extract, baseProcessor=extraction_performance (runs parse_performance)",
+                default: true,
+                modes: &[Mode::Extract],
+            },
+            ModelInfo {
+                provider: "extend",
+                model: "extraction_light",
+                description: "Extend Extract, baseProcessor=extraction_light (runs parse_light)",
+                default: false,
+                modes: &[Mode::Extract],
+            },
         ],
     },
     ProviderInfo {
@@ -118,21 +146,21 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 model: "cost_effective",
                 description: "LlamaParse tier=cost_effective",
                 default: true,
-                modes: PARSE_OCR,
+                modes: Mode::ALL,
             },
             ModelInfo {
                 provider: "llamaparse",
                 model: "agentic",
                 description: "LlamaParse tier=agentic",
                 default: false,
-                modes: PARSE_OCR,
+                modes: Mode::ALL,
             },
             ModelInfo {
                 provider: "llamaparse",
                 model: "agentic_plus",
                 description: "LlamaParse tier=agentic_plus (highest accuracy)",
                 default: false,
-                modes: PARSE_OCR,
+                modes: Mode::ALL,
             },
         ],
     },
@@ -674,7 +702,9 @@ mod tests {
         assert_eq!(ModelRef::parse_for("reducto", Mode::Ocr).unwrap().qualified(), "reducto/standard");
         let e = ModelRef::parse_for("reducto/standard", Mode::Extract).unwrap_err();
         assert!(e.to_string().contains("does not support mode 'extract'"), "{e}");
-        assert!(ModelRef::parse_for("extend", Mode::Extract).is_err());
+        assert!(ModelRef::parse_for("datalab", Mode::Extract).is_err());
+        assert_eq!(ModelRef::parse_for("extend", Mode::Extract).unwrap().qualified(), "extend/extraction_performance");
+        assert_eq!(ModelRef::parse_for("reducto", Mode::Extract).unwrap().qualified(), "reducto/extract");
         assert!(list_models_for(Mode::Parse).len() < list_models().len());
         assert!(!list_models_for(Mode::Parse).contains(&"azure/read".to_string()));
         assert_eq!(ModelRef::parse_for("azure", Mode::Ocr).unwrap().qualified(), "azure/read");
@@ -693,6 +723,6 @@ mod tests {
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 53);
+        assert_eq!(m.len(), 57);
     }
 }
