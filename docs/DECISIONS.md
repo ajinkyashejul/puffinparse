@@ -100,6 +100,9 @@ references to `main` in workflows and docs are intentional and describe the post
 **Consequences.** Commits on `main-clean` never carry the old email. Dependabot PRs opened
 against the old `main` will be re-created once the default branch changes.
 
+*Update 2026-09-11:* done. The old `main` and the session branch were deleted and `main-clean`
+was renamed to `main`; all development now happens on `main`.
+
 ## ADR-10: Combined open benchmark instead of a new vendor benchmark
 
 **Context.** Each vendor publishes a benchmark it wins (ParseBench, RealDocBench,

@@ -22,7 +22,7 @@ without asking around is linked from this page; if something is missing, add it 
 ## Working in parallel
 
 1. Pick or add a task in [`TASKS.md`](TASKS.md); mark it `[~]` with your name and date.
-2. Work on `main-clean` (see ADR-9). Small, reviewable commits; run `make lint test` before pushing.
+2. Work on `main` (see ADR-9). Small, reviewable commits; run `make lint test` before pushing.
 3. Anything that changes an interface (unified types, model names, manifest format, result JSON)
    is a spec change: update `SPEC.md` in the same commit and add an ADR if it reverses a decision.
 4. Provider facts go in `providers/<name>.md`, never only in code comments or chat.
