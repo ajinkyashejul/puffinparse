@@ -6,8 +6,8 @@
 
 use crate::error::{Error, ErrorKind, Result};
 use crate::http::{self, Deadline, Retry};
-use crate::provider::{self, OcrProvider};
-use crate::types::{BBox, Block, BlockType, DocumentInput, OcrRequest, OcrResponse, OutputFormat, Page, Usage};
+use crate::provider::{self, Provider};
+use crate::types::{BBox, Block, BlockType, DocumentInput, DocumentRequest, OutputFormat, Page, ParseResponse, Usage};
 use crate::util::deep_merge;
 use async_trait::async_trait;
 use serde::Deserialize;
@@ -25,12 +25,12 @@ const DEFAULT_BASE: &str = "https://api.extend.ai";
 pub struct Extend;
 
 #[async_trait]
-impl OcrProvider for Extend {
+impl Provider for Extend {
     fn name(&self) -> &'static str {
         NAME
     }
 
-    async fn ocr(&self, request: &OcrRequest, model: &str) -> Result<OcrResponse> {
+    async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
         let api_key = provider::resolve_api_key(request, ENV_KEY, NAME)?;
         let base = provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE);
         let deadline = Deadline::new(request.timeout_secs);
@@ -128,7 +128,7 @@ impl OcrProvider for Extend {
     }
 }
 
-fn build_body(request: &OcrRequest, model: &str, file_ref: Value) -> Result<Value> {
+fn build_body(request: &DocumentRequest, model: &str, file_ref: Value) -> Result<Value> {
     let engine = match model {
         "parse_performance" | "parse_light" | "parse_auto" => model,
         other => return Err(Error::unsupported_model(format!("extend: unknown engine '{other}'"))),
@@ -329,7 +329,7 @@ fn map_block_type(t: &str) -> BlockType {
     }
 }
 
-pub(crate) fn normalize(run: &ParseRun, output: Output, fmt: OutputFormat) -> OcrResponse {
+pub(crate) fn normalize(run: &ParseRun, output: Output, fmt: OutputFormat) -> ParseResponse {
     let mut page_dims: BTreeMap<u32, (f64, f64)> = BTreeMap::new();
     let mut page_md: BTreeMap<u32, String> = BTreeMap::new();
     let mut blocks: Vec<Block> = Vec::new();
@@ -407,7 +407,7 @@ pub(crate) fn normalize(run: &ParseRun, output: Output, fmt: OutputFormat) -> Oc
         .unwrap_or(pages.len() as u32);
     let usage =
         Usage { pages: billed_pages, credits: run.usage.as_ref().and_then(|u| u.credits), provider_cost_usd: None };
-    let mut resp = OcrResponse::from_pages(
+    let mut resp = ParseResponse::from_pages(
         NAME,
         &format!(
             "{NAME}/{}",
@@ -460,7 +460,7 @@ mod tests {
 
     #[test]
     fn body_merges_provider_options_and_pages() {
-        let req = OcrRequest::from_url("https://x/y.pdf")
+        let req = DocumentRequest::from_url("https://x/y.pdf")
             .pages("1-2,5")
             .provider_options(json!({"blockOptions": {"figures": {"enabled": false}}, "metadata": {"k": "v"}}));
         let body = build_body(&req, "parse_light", json!({"url": "https://x/y.pdf"})).unwrap();

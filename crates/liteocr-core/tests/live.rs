@@ -1,7 +1,7 @@
 //! Live provider tests. Ignored by default; run with
 //! `cargo test -p liteocr-core --test live -- --ignored` when the provider keys are set.
 
-use liteocr_core::{ocr, OcrRequest};
+use liteocr_core::{parse, DocumentRequest};
 
 const SAMPLE: &str =
     concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmark/datasets/synthetic-v1/docs/multipage_001.pdf");
@@ -11,7 +11,7 @@ async fn check(model: &str, env_var: &str) {
         eprintln!("skipping {model}: {env_var} not set");
         return;
     }
-    let resp = ocr(OcrRequest::from_path(SAMPLE).model(model).timeout_secs(240.0)).await.expect("ocr succeeds");
+    let resp = parse(DocumentRequest::from_path(SAMPLE).model(model).timeout_secs(240.0)).await.expect("ocr succeeds");
     assert_eq!(resp.model, model);
     assert_eq!(resp.usage.pages, 2);
     assert_eq!(resp.pages.len(), 2);

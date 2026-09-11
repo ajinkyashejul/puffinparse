@@ -122,7 +122,7 @@ pub enum OutputFormat {
 
 /// A unified OCR request.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct OcrRequest {
+pub struct DocumentRequest {
     pub input: DocumentInput,
     /// `"<provider>/<model>"`, e.g. `"reducto/standard"`. `"reducto"` selects the default model.
     pub model: String,
@@ -137,7 +137,7 @@ pub struct OcrRequest {
     /// Provider-specific options merged verbatim into the provider request.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub provider_options: Option<serde_json::Value>,
-    /// Attach the provider's raw payload to `OcrResponse::raw`.
+    /// Attach the provider's raw payload to `ParseResponse::raw`.
     #[serde(default)]
     pub include_raw: bool,
     /// Whole-call deadline in seconds (upload + polling + result download).
@@ -165,7 +165,7 @@ fn default_retries() -> u32 {
     2
 }
 
-impl OcrRequest {
+impl DocumentRequest {
     pub fn new(input: DocumentInput) -> Self {
         Self {
             input,
@@ -375,7 +375,7 @@ pub struct Usage {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct OcrResponse {
+pub struct ParseResponse {
     /// LiteOCR-generated id (UUID v4).
     pub id: String,
     pub provider: String,
@@ -399,7 +399,7 @@ pub struct OcrResponse {
     pub raw: Option<serde_json::Value>,
 }
 
-impl OcrResponse {
+impl ParseResponse {
     /// Construct a response from pages, deriving document-level markdown/text.
     pub fn from_pages(provider: &str, model: &str, mut pages: Vec<Page>, usage: Usage) -> Self {
         pages.sort_by_key(|p| p.page_number);
@@ -442,7 +442,9 @@ pub fn pages_from_blocks(blocks: Vec<Block>, page_dims: &BTreeMap<u32, (f64, f64
         .into_iter()
         .map(|(page_number, blocks)| {
             let markdown = join_pages(blocks.iter().map(|b| b.content.as_str()));
-            let text = join_pages(blocks.iter().map(|b| b.text.as_deref().unwrap_or(b.content.as_str())));
+            let texts: Vec<String> =
+                blocks.iter().map(|b| b.text.clone().unwrap_or_else(|| markdown_to_text(&b.content))).collect();
+            let text = join_pages(texts.iter().map(String::as_str));
             let (width, height) = page_dims.get(&page_number).map(|&(w, h)| (Some(w), Some(h))).unwrap_or((None, None));
             Page { page_number, width, height, markdown, text, blocks }
         })
@@ -527,8 +529,8 @@ mod tests {
 
     #[test]
     fn request_from_str_detects_url() {
-        assert!(matches!(OcrRequest::from_str_input("https://a/b.pdf").input, DocumentInput::Url { .. }));
-        assert!(matches!(OcrRequest::from_str_input("b.pdf").input, DocumentInput::Path { .. }));
+        assert!(matches!(DocumentRequest::from_str_input("https://a/b.pdf").input, DocumentInput::Url { .. }));
+        assert!(matches!(DocumentRequest::from_str_input("b.pdf").input, DocumentInput::Path { .. }));
     }
 
     #[test]
@@ -546,7 +548,7 @@ mod tests {
         assert_eq!(pages[0].page_number, 1);
         assert_eq!(pages[0].markdown, "a\n\na2");
         assert_eq!(pages[1].markdown, "b");
-        let resp = OcrResponse::from_pages("p", "p/m", pages, Usage::default());
+        let resp = ParseResponse::from_pages("p", "p/m", pages, Usage::default());
         assert_eq!(resp.markdown, "a\n\na2\n\nb");
     }
 
@@ -568,5 +570,310 @@ mod tests {
         let b = BBox::from_xywh(10.0, 20.0, 30.0, 40.0, 100.0, 200.0).unwrap();
         assert!((b.x0 - 0.1).abs() < 1e-9 && (b.y1 - 0.3).abs() < 1e-9);
         assert!(BBox::from_xywh(1.0, 1.0, 1.0, 1.0, 0.0, 0.0).is_none());
+    }
+}
+
+// ---- modes ---------------------------------------------------------------------------------------
+
+/// What kind of work a call asks a provider to do. Providers can only be swapped within a mode.
+///
+/// - `parse`: layout-aware parsing → markdown + typed blocks with boxes ([`ParseResponse`]).
+/// - `ocr`: plain text recognition → text + words/lines with boxes ([`TextResponse`]).
+/// - `extract`: schema-driven structured extraction → JSON + citations ([`ExtractResponse`]).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Mode {
+    Parse,
+    Ocr,
+    Extract,
+}
+
+impl Mode {
+    pub const ALL: &'static [Mode] = &[Mode::Parse, Mode::Ocr, Mode::Extract];
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Mode::Parse => "parse",
+            Mode::Ocr => "ocr",
+            Mode::Extract => "extract",
+        }
+    }
+}
+
+impl std::fmt::Display for Mode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+impl std::str::FromStr for Mode {
+    type Err = crate::error::Error;
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s.trim().to_ascii_lowercase().as_str() {
+            "parse" => Ok(Mode::Parse),
+            "ocr" | "text" => Ok(Mode::Ocr),
+            "extract" | "extraction" => Ok(Mode::Extract),
+            other => Err(crate::error::Error::input(format!("unknown mode '{other}' (parse | ocr | extract)"))),
+        }
+    }
+}
+
+// ---- ocr mode ------------------------------------------------------------------------------------
+
+/// A recognised word with its box and confidence.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Word {
+    pub text: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bbox: Option<BBox>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confidence: Option<f64>,
+}
+
+/// A recognised line of text (a run of words on one baseline).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Line {
+    pub text: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bbox: Option<BBox>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confidence: Option<f64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TextPage {
+    /// 1-based.
+    pub page_number: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<f64>,
+    /// Plain text in reading order, lines separated by `\n`.
+    pub text: String,
+    #[serde(default)]
+    pub lines: Vec<Line>,
+    #[serde(default)]
+    pub words: Vec<Word>,
+}
+
+/// Result of an `ocr`-mode call: plain text with word/line geometry, no layout semantics.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TextResponse {
+    pub id: String,
+    pub provider: String,
+    pub model: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_job_id: Option<String>,
+    pub pages: Vec<TextPage>,
+    /// Whole-document text, pages joined by a blank line.
+    pub text: String,
+    pub usage: Usage,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_usd: Option<f64>,
+    pub latency_ms: u64,
+    pub created_at: String,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub metadata: BTreeMap<String, serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub raw: Option<serde_json::Value>,
+}
+
+impl TextResponse {
+    pub fn from_pages(provider: &str, model: &str, mut pages: Vec<TextPage>, usage: Usage) -> Self {
+        pages.sort_by_key(|p| p.page_number);
+        let text = join_pages(pages.iter().map(|p| p.text.as_str()));
+        Self {
+            id: uuid::Uuid::new_v4().to_string(),
+            provider: provider.to_string(),
+            model: model.to_string(),
+            provider_job_id: None,
+            pages,
+            text,
+            usage,
+            cost_usd: None,
+            latency_ms: 0,
+            created_at: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
+            metadata: BTreeMap::new(),
+            raw: None,
+        }
+    }
+
+    /// Derive a plain-text result from a layout parse (for providers without a native OCR endpoint).
+    /// Lines come from block text split on newlines; words carry no geometry.
+    pub fn from_parse(resp: &ParseResponse) -> Self {
+        let pages = resp
+            .pages
+            .iter()
+            .map(|p| {
+                let lines: Vec<Line> = p
+                    .blocks
+                    .iter()
+                    .flat_map(|b| {
+                        let text = b.text.clone().unwrap_or_else(|| markdown_to_text(&b.content));
+                        let bbox = b.bbox;
+                        let confidence = b.confidence;
+                        text.lines()
+                            .map(str::trim)
+                            .filter(|l| !l.is_empty())
+                            .map(|l| Line { text: l.to_string(), bbox, confidence })
+                            .collect::<Vec<_>>()
+                    })
+                    .collect();
+                let words: Vec<Word> = lines
+                    .iter()
+                    .flat_map(|l| {
+                        l.text
+                            .split_whitespace()
+                            .map(|w| Word { text: w.to_string(), bbox: None, confidence: l.confidence })
+                            .collect::<Vec<_>>()
+                    })
+                    .collect();
+                TextPage {
+                    page_number: p.page_number,
+                    width: p.width,
+                    height: p.height,
+                    text: p.text.clone(),
+                    lines,
+                    words,
+                }
+            })
+            .collect();
+        let mut out = Self::from_pages(&resp.provider, &resp.model, pages, resp.usage.clone());
+        out.provider_job_id = resp.provider_job_id.clone();
+        out.metadata = resp.metadata.clone();
+        out.metadata.insert("liteocr_derived_from".into(), serde_json::json!("parse"));
+        out.raw = resp.raw.clone();
+        out
+    }
+}
+
+// ---- extract mode --------------------------------------------------------------------------------
+
+/// A schema-driven extraction request: a document plus a JSON Schema describing the fields wanted.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExtractRequest {
+    /// Document, model, timeouts, provider options — same as a parse request.
+    #[serde(flatten)]
+    pub document: DocumentRequest,
+    /// JSON Schema (draft 2020-12 subset) for the output object.
+    pub schema: serde_json::Value,
+    /// Optional natural-language guidance forwarded to providers that accept it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instructions: Option<String>,
+    /// Ask for per-field citations (page + box + source text) when the provider supports them.
+    #[serde(default)]
+    pub citations: bool,
+}
+
+impl ExtractRequest {
+    pub fn new(document: DocumentRequest, schema: serde_json::Value) -> Self {
+        Self { document, schema, instructions: None, citations: false }
+    }
+
+    pub fn instructions(mut self, s: impl Into<String>) -> Self {
+        self.instructions = Some(s.into());
+        self
+    }
+
+    pub fn citations(mut self, on: bool) -> Self {
+        self.citations = on;
+        self
+    }
+}
+
+/// Where an extracted value came from.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Citation {
+    /// 1-based page.
+    pub page_number: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bbox: Option<BBox>,
+    /// Source text the value was read from, if reported.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+}
+
+/// Per-field metadata (confidence, citations) keyed by JSON pointer (`/invoice/total`).
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+pub struct FieldInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confidence: Option<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub citations: Vec<Citation>,
+}
+
+/// Result of an `extract`-mode call.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ExtractResponse {
+    pub id: String,
+    pub provider: String,
+    pub model: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_job_id: Option<String>,
+    /// The extracted object, shaped by the request schema.
+    pub data: serde_json::Value,
+    /// Per-field confidence and citations keyed by JSON pointer into `data`.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub fields: BTreeMap<String, FieldInfo>,
+    pub usage: Usage,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_usd: Option<f64>,
+    pub latency_ms: u64,
+    pub created_at: String,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub metadata: BTreeMap<String, serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub raw: Option<serde_json::Value>,
+}
+
+impl ExtractResponse {
+    pub fn new(provider: &str, model: &str, data: serde_json::Value, usage: Usage) -> Self {
+        Self {
+            id: uuid::Uuid::new_v4().to_string(),
+            provider: provider.to_string(),
+            model: model.to_string(),
+            provider_job_id: None,
+            data,
+            fields: BTreeMap::new(),
+            usage,
+            cost_usd: None,
+            latency_ms: 0,
+            created_at: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
+            metadata: BTreeMap::new(),
+            raw: None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod mode_tests {
+    use super::*;
+
+    #[test]
+    fn mode_parses() {
+        assert_eq!("parse".parse::<Mode>().unwrap(), Mode::Parse);
+        assert_eq!("OCR".parse::<Mode>().unwrap(), Mode::Ocr);
+        assert_eq!("extract".parse::<Mode>().unwrap(), Mode::Extract);
+        assert!("nope".parse::<Mode>().is_err());
+    }
+
+    #[test]
+    fn text_from_parse_derives_lines_and_words() {
+        let block = Block {
+            block_type: BlockType::Text,
+            content: "Hello **world**\nSecond line".into(),
+            text: None,
+            bbox: Some(BBox { x0: 0.1, y0: 0.1, x1: 0.5, y1: 0.2 }),
+            confidence: Some(0.9),
+            page_number: 1,
+        };
+        let pages = pages_from_blocks(vec![block], &BTreeMap::new());
+        let parse = ParseResponse::from_pages("p", "p/m", pages, Usage { pages: 1, ..Default::default() });
+        let text = TextResponse::from_parse(&parse);
+        assert_eq!(text.pages[0].lines.len(), 2);
+        assert_eq!(text.pages[0].lines[0].text, "Hello world");
+        assert_eq!(text.pages[0].words.len(), 4);
+        assert_eq!(text.text, "Hello world\nSecond line");
+        assert_eq!(text.metadata["liteocr_derived_from"], "parse");
     }
 }

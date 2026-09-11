@@ -1,13 +1,13 @@
 {
-  "_comment": "Best-effort public list prices in USD per page (pay-as-you-go tiers). Override at runtime with set_pricing().",
-  "reducto/standard": { "per_page_usd": 0.015, "source": "https://docs.reducto.ai/reference/credit-usage (legacy Parse: $15/1k standard pages; complex pages bill extra)", "updated": "2026-09-11" },
-  "reducto/r-1": { "per_page_usd": 0.010, "source": "https://docs.reducto.ai/reference/credit-usage (r-1 Parse: $10/1k pages)", "updated": "2026-09-11" },
-  "reducto/agentic": { "per_page_usd": 0.030, "source": "https://docs.reducto.ai/reference/credit-usage (legacy Parse x2 for agentic)", "updated": "2026-09-11" },
-  "extend/parse_performance": { "per_page_usd": 0.025, "source": "https://docs.extend.ai/credits (PAYG: 2 credits/page @ $0.0125)", "updated": "2026-09-11" },
-  "extend/parse_light": { "per_page_usd": 0.00625, "source": "https://docs.extend.ai/credits (PAYG: 0.5 credits/page @ $0.0125)", "updated": "2026-09-11" },
-  "extend/parse_auto": { "per_page_usd": 0.025, "source": "https://docs.extend.ai/credits (PAYG; light pages bill at 0.5 credits)", "updated": "2026-09-11" },
-  "llamaparse/fast": { "per_page_usd": 0.00125, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (1 credit/page, 1000 credits = $1.25)", "updated": "2026-09-11" },
-  "llamaparse/cost_effective": { "per_page_usd": 0.00375, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (3 credits/page)", "updated": "2026-09-11" },
-  "llamaparse/agentic": { "per_page_usd": 0.0125, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (10 credits/page)", "updated": "2026-09-11" },
-  "llamaparse/agentic_plus": { "per_page_usd": 0.05625, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (45 credits/page)", "updated": "2026-09-11" }
+  "_comment": "Best-effort public list prices in USD per page, per mode (pay-as-you-go tiers). Override at runtime with set_pricing().",
+  "reducto/standard": { "parse": 0.015, "ocr": 0.015, "source": "https://docs.reducto.ai/reference/credit-usage (legacy Parse: $15/1k standard pages; complex pages bill extra)", "updated": "2026-09-11" },
+  "reducto/r-1": { "parse": 0.010, "ocr": 0.010, "source": "https://docs.reducto.ai/reference/credit-usage (r-1 Parse: $10/1k pages)", "updated": "2026-09-11" },
+  "reducto/agentic": { "parse": 0.030, "ocr": 0.030, "source": "https://docs.reducto.ai/reference/credit-usage (legacy Parse x2 for agentic)", "updated": "2026-09-11" },
+  "extend/parse_performance": { "parse": 0.025, "ocr": 0.025, "source": "https://docs.extend.ai/credits (PAYG: 2 credits/page @ $0.0125)", "updated": "2026-09-11" },
+  "extend/parse_light": { "parse": 0.00625, "ocr": 0.00625, "source": "https://docs.extend.ai/credits (PAYG: 0.5 credits/page @ $0.0125)", "updated": "2026-09-11" },
+  "extend/parse_auto": { "parse": 0.025, "ocr": 0.025, "source": "https://docs.extend.ai/credits (PAYG; light pages bill at 0.5 credits)", "updated": "2026-09-11" },
+  "llamaparse/fast": { "parse": 0.00125, "ocr": 0.00125, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (1 credit/page, 1000 credits = $1.25)", "updated": "2026-09-11" },
+  "llamaparse/cost_effective": { "parse": 0.00375, "ocr": 0.00375, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (3 credits/page)", "updated": "2026-09-11" },
+  "llamaparse/agentic": { "parse": 0.0125, "ocr": 0.0125, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (10 credits/page)", "updated": "2026-09-11" },
+  "llamaparse/agentic_plus": { "parse": 0.05625, "ocr": 0.05625, "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ (45 credits/page)", "updated": "2026-09-11" }
 }

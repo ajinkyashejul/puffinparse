@@ -1,23 +1,44 @@
-//! The provider abstraction. Add a provider by implementing [`OcrProvider`] and registering it
+//! The provider abstraction. Add a provider by implementing [`Provider`] and registering it
 //! in [`crate::model::PROVIDERS`] and [`crate::providers::build`].
 
-use crate::error::Result;
-use crate::types::{OcrRequest, OcrResponse};
+use crate::error::{Error, Result};
+use crate::types::{DocumentRequest, ExtractRequest, ExtractResponse, Mode, ParseResponse, TextResponse};
 use async_trait::async_trait;
 
-/// One OCR backend.
+/// One document-AI backend. Implement the methods for the modes the provider's models declare
+/// in [`crate::model::PROVIDERS`]; the defaults return `UnsupportedModel`.
+///
+/// `model` is always the validated model name within this provider (e.g. `"standard"`), and the
+/// registry guarantees it declares the mode being called.
 #[async_trait]
-pub trait OcrProvider: Send + Sync {
+pub trait Provider: Send + Sync {
     /// Provider name, e.g. `"reducto"`.
     fn name(&self) -> &'static str;
 
-    /// Run the request end-to-end (upload, parse, poll, download) and return a normalised response.
-    /// `model` is the validated model name within this provider (e.g. `"standard"`).
-    async fn ocr(&self, request: &OcrRequest, model: &str) -> Result<OcrResponse>;
+    /// `parse` mode: layout-aware parsing to markdown + typed blocks.
+    async fn parse(&self, _request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
+        Err(unsupported(self.name(), model, Mode::Parse))
+    }
+
+    /// `ocr` mode: plain text with word/line geometry. The default derives it from [`Self::parse`],
+    /// which is correct for layout providers; native OCR endpoints should override it.
+    async fn ocr(&self, request: &DocumentRequest, model: &str) -> Result<TextResponse> {
+        let parsed = self.parse(request, model).await?;
+        Ok(TextResponse::from_parse(&parsed))
+    }
+
+    /// `extract` mode: schema-driven structured extraction.
+    async fn extract(&self, _request: &ExtractRequest, model: &str) -> Result<ExtractResponse> {
+        Err(unsupported(self.name(), model, Mode::Extract))
+    }
+}
+
+fn unsupported(provider: &str, model: &str, mode: Mode) -> Error {
+    Error::unsupported_model(format!("{provider}/{model} does not implement mode '{mode}'")).with_provider(provider)
 }
 
 /// Resolve the API key: explicit request override, then environment variable.
-pub fn resolve_api_key(request: &OcrRequest, env_var: &str, provider: &str) -> Result<String> {
+pub fn resolve_api_key(request: &DocumentRequest, env_var: &str, provider: &str) -> Result<String> {
     if let Some(k) = request.api_key.as_deref().filter(|k| !k.trim().is_empty()) {
         return Ok(k.to_string());
     }
@@ -28,7 +49,7 @@ pub fn resolve_api_key(request: &OcrRequest, env_var: &str, provider: &str) -> R
 }
 
 /// Resolve base URL: request override, then `<PREFIX>_BASE_URL` env, then default.
-pub fn resolve_base_url(request: &OcrRequest, env_var: &str, default: &str) -> String {
+pub fn resolve_base_url(request: &DocumentRequest, env_var: &str, default: &str) -> String {
     request
         .base_url
         .clone()

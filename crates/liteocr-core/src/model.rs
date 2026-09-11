@@ -1,6 +1,7 @@
 //! Model-string parsing (`"<provider>/<model>"`) and the provider registry.
 
 use crate::error::{Error, Result};
+use crate::types::Mode;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -8,14 +9,24 @@ pub struct ModelInfo {
     pub provider: &'static str,
     pub model: &'static str,
     pub description: &'static str,
+    /// Default model for its provider **within each mode it supports**.
     pub default: bool,
+    /// Modes this model can serve. Providers can only be swapped within a mode.
+    pub modes: &'static [Mode],
 }
 
 impl ModelInfo {
     pub fn qualified(&self) -> String {
         format!("{}/{}", self.provider, self.model)
     }
+
+    pub fn supports(&self, mode: Mode) -> bool {
+        self.modes.contains(&mode)
+    }
 }
+
+/// Shorthand for the common "layout parse, and plain text derived from it" pair.
+pub const PARSE_OCR: &[Mode] = &[Mode::Parse, Mode::Ocr];
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ProviderInfo {
@@ -40,18 +51,21 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 model: "standard",
                 description: "Reducto Parse with account-default model (legacy standard)",
                 default: true,
+                modes: PARSE_OCR,
             },
             ModelInfo {
                 provider: "reducto",
                 model: "r-1",
                 description: "Reducto Parse with settings.model=r-1 (newest model, cheaper)",
                 default: false,
+                modes: PARSE_OCR,
             },
             ModelInfo {
                 provider: "reducto",
                 model: "agentic",
                 description: "Reducto Parse with agentic text+table enhancement (highest accuracy, 2x cost)",
                 default: false,
+                modes: PARSE_OCR,
             },
         ],
     },
@@ -67,18 +81,21 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 model: "parse_performance",
                 description: "Extend engine=parse_performance (highest accuracy)",
                 default: true,
+                modes: PARSE_OCR,
             },
             ModelInfo {
                 provider: "extend",
                 model: "parse_light",
                 description: "Extend engine=parse_light (fast, cheap, digital-native docs)",
                 default: false,
+                modes: PARSE_OCR,
             },
             ModelInfo {
                 provider: "extend",
                 model: "parse_auto",
                 description: "Extend engine=parse_auto (picks light or performance per page)",
                 default: false,
+                modes: PARSE_OCR,
             },
         ],
     },
@@ -94,24 +111,28 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 model: "fast",
                 description: "LlamaParse tier=fast (text extraction, no OCR of images)",
                 default: false,
+                modes: PARSE_OCR,
             },
             ModelInfo {
                 provider: "llamaparse",
                 model: "cost_effective",
                 description: "LlamaParse tier=cost_effective",
                 default: true,
+                modes: PARSE_OCR,
             },
             ModelInfo {
                 provider: "llamaparse",
                 model: "agentic",
                 description: "LlamaParse tier=agentic",
                 default: false,
+                modes: PARSE_OCR,
             },
             ModelInfo {
                 provider: "llamaparse",
                 model: "agentic_plus",
                 description: "LlamaParse tier=agentic_plus (highest accuracy)",
                 default: false,
+                modes: PARSE_OCR,
             },
         ],
     },
@@ -125,9 +146,19 @@ pub struct ModelRef {
 }
 
 impl ModelRef {
-    /// Parse `"provider/model"` or `"provider"` (→ default model). Aliases: `llama`, `llama_parse`,
-    /// `llamacloud` → `llamaparse`.
+    /// Parse `"provider/model"` or `"provider"` (→ default model) without checking modes.
+    /// Aliases: `llama`, `llama_parse`, `llamacloud` → `llamaparse`.
     pub fn parse(s: &str) -> Result<Self> {
+        Self::resolve(s, None)
+    }
+
+    /// Parse and require that the model supports `mode`. A bare provider name resolves to the
+    /// provider's default model **for that mode**.
+    pub fn parse_for(s: &str, mode: Mode) -> Result<Self> {
+        Self::resolve(s, Some(mode))
+    }
+
+    fn resolve(s: &str, mode: Option<Mode>) -> Result<Self> {
         let s = s.trim();
         if s.is_empty() {
             return Err(Error::unsupported_model("model must not be empty"));
@@ -148,21 +179,35 @@ impl ModelRef {
         })?;
         let model = match model {
             Some(m) => {
-                if !info.models.iter().any(|mi| mi.model == m) {
+                let Some(mi) = info.models.iter().find(|mi| mi.model == m) else {
                     return Err(Error::unsupported_model(format!(
                         "unknown model '{m}' for provider '{prov}'. Known: {}",
                         info.models.iter().map(|mi| mi.model).collect::<Vec<_>>().join(", ")
                     )));
+                };
+                if let Some(mode) = mode {
+                    if !mi.supports(mode) {
+                        return Err(Error::unsupported_model(format!(
+                            "model '{prov}/{m}' does not support mode '{mode}' (supports: {}). Models for '{mode}' from {prov}: {}",
+                            mi.modes.iter().map(Mode::as_str).collect::<Vec<_>>().join(", "),
+                            info.models.iter().filter(|x| x.supports(mode)).map(|x| x.model).collect::<Vec<_>>().join(", ")
+                        )));
+                    }
                 }
                 m
             }
-            None => info
-                .models
-                .iter()
-                .find(|m| m.default)
-                .or_else(|| info.models.first())
-                .map(|m| m.model.to_string())
-                .expect("every provider has at least one model"),
+            None => {
+                let candidates = info.models.iter().filter(|m| mode.map(|md| m.supports(md)).unwrap_or(true));
+                let mut candidates: Vec<&ModelInfo> = candidates.collect();
+                if candidates.is_empty() {
+                    return Err(Error::unsupported_model(format!(
+                        "provider '{prov}' has no model for mode '{}'",
+                        mode.map(|m| m.as_str()).unwrap_or("any")
+                    )));
+                }
+                candidates.sort_by_key(|m| !m.default);
+                candidates[0].model.to_string()
+            }
         };
         Ok(Self { provider: prov, model })
     }
@@ -181,6 +226,16 @@ pub fn list_models() -> Vec<String> {
     PROVIDERS.iter().flat_map(|p| p.models.iter().map(|m| m.qualified())).collect()
 }
 
+/// Fully-qualified model names that support `mode`.
+pub fn list_models_for(mode: Mode) -> Vec<String> {
+    PROVIDERS.iter().flat_map(|p| p.models.iter().filter(|m| m.supports(mode)).map(|m| m.qualified())).collect()
+}
+
+/// Look up a model's registry entry.
+pub fn model_info(provider: &str, model: &str) -> Option<&'static ModelInfo> {
+    provider_info(provider)?.models.iter().find(|m| m.model == model)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -195,6 +250,16 @@ mod tests {
         assert!(ModelRef::parse("extend/bogus").is_err());
         assert!(ModelRef::parse("nope").is_err());
         assert!(ModelRef::parse("").is_err());
+    }
+
+    #[test]
+    fn mode_aware_resolution() {
+        assert_eq!(ModelRef::parse_for("reducto", Mode::Ocr).unwrap().qualified(), "reducto/standard");
+        let e = ModelRef::parse_for("reducto/standard", Mode::Extract).unwrap_err();
+        assert!(e.to_string().contains("does not support mode 'extract'"), "{e}");
+        assert!(ModelRef::parse_for("extend", Mode::Extract).is_err());
+        assert_eq!(list_models_for(Mode::Parse).len(), list_models().len());
+        assert!(list_models_for(Mode::Extract).is_empty());
     }
 
     #[test]

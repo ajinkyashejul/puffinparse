@@ -5,8 +5,8 @@
 
 use crate::error::{Error, ErrorKind, Result};
 use crate::http::{self, Deadline, Retry};
-use crate::provider::{self, OcrProvider};
-use crate::types::{BBox, Block, BlockType, DocumentInput, OcrRequest, OcrResponse, OutputFormat, Page, Usage};
+use crate::provider::{self, Provider};
+use crate::types::{BBox, Block, BlockType, DocumentInput, DocumentRequest, OutputFormat, Page, ParseResponse, Usage};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -21,12 +21,12 @@ const DEFAULT_BASE: &str = "https://api.cloud.llamaindex.ai";
 pub struct LlamaParse;
 
 #[async_trait]
-impl OcrProvider for LlamaParse {
+impl Provider for LlamaParse {
     fn name(&self) -> &'static str {
         NAME
     }
 
-    async fn ocr(&self, request: &OcrRequest, model: &str) -> Result<OcrResponse> {
+    async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
         let api_key = provider::resolve_api_key(request, ENV_KEY, NAME)?;
         let base = provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE);
         let deadline = Deadline::new(request.timeout_secs);
@@ -111,7 +111,7 @@ fn is_terminal(status: &str) -> bool {
 }
 
 /// Multipart text fields for the upload call.
-fn form_fields(request: &OcrRequest, model: &str) -> Result<Vec<(String, String)>> {
+fn form_fields(request: &DocumentRequest, model: &str) -> Result<Vec<(String, String)>> {
     let tier = match model {
         "fast" | "cost_effective" | "agentic" | "agentic_plus" => model,
         other => return Err(Error::unsupported_model(format!("llamaparse: unknown tier '{other}'"))),
@@ -246,7 +246,7 @@ fn map_item_type(t: &str, lvl: Option<u32>) -> BlockType {
     }
 }
 
-pub(crate) fn normalize(result: &JsonResult, fmt: OutputFormat, model: &str) -> OcrResponse {
+pub(crate) fn normalize(result: &JsonResult, fmt: OutputFormat, model: &str) -> ParseResponse {
     let mut pages: Vec<Page> = Vec::new();
     for wp in &result.pages {
         let dims = wp.width.zip(wp.height);
@@ -285,7 +285,7 @@ pub(crate) fn normalize(result: &JsonResult, fmt: OutputFormat, model: &str) -> 
     // LlamaParse reports 0 credits until billing has settled; only keep a positive value.
     let credits = meta.and_then(|m| m.job_credits_usage.or(m.credits_used)).filter(|&c| c > 0.0);
     let usage = Usage { pages: billed, credits, provider_cost_usd: None };
-    let mut resp = OcrResponse::from_pages(NAME, &format!("{NAME}/{model}"), pages, usage);
+    let mut resp = ParseResponse::from_pages(NAME, &format!("{NAME}/{model}"), pages, usage);
     if let Some(true) = meta.and_then(|m| m.job_is_cache_hit) {
         resp.metadata.insert("llamaparse_cache_hit".into(), json!(true));
     }
@@ -325,7 +325,7 @@ mod tests {
 
     #[test]
     fn form_fields_convert_pages_and_options() {
-        let req = OcrRequest::from_url("https://x/y.pdf")
+        let req = DocumentRequest::from_url("https://x/y.pdf")
             .pages("1-3,5")
             .language("de")
             .provider_options(json!({"take_screenshot": true, "version": "2026-08-19"}));

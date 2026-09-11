@@ -6,8 +6,8 @@
 
 use crate::error::{Error, Result};
 use crate::http::{self, Deadline, Retry};
-use crate::provider::{self, OcrProvider};
-use crate::types::{BBox, Block, BlockType, DocumentInput, OcrRequest, OcrResponse, OutputFormat, Page, Usage};
+use crate::provider::{self, Provider};
+use crate::types::{BBox, Block, BlockType, DocumentInput, DocumentRequest, OutputFormat, Page, ParseResponse, Usage};
 use crate::util::deep_merge;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -24,12 +24,12 @@ const DEFAULT_BASE: &str = "https://platform.reducto.ai";
 pub struct Reducto;
 
 #[async_trait]
-impl OcrProvider for Reducto {
+impl Provider for Reducto {
     fn name(&self) -> &'static str {
         NAME
     }
 
-    async fn ocr(&self, request: &OcrRequest, model: &str) -> Result<OcrResponse> {
+    async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
         let api_key = provider::resolve_api_key(request, ENV_KEY, NAME)?;
         let base = provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE);
         let deadline = Deadline::new(request.timeout_secs);
@@ -64,7 +64,7 @@ impl OcrProvider for Reducto {
         let body = build_body(request, model, &input)?;
 
         // 3. Parse (sync or async + poll).
-        let parsed: ParseResponse = if use_async {
+        let parsed: WireParseResponse = if use_async {
             let submit: AsyncParseResponse = http::with_retry(NAME, retry, &deadline, || {
                 let rb = client
                     .post(format!("{base}/parse_async"))
@@ -145,7 +145,7 @@ impl OcrProvider for Reducto {
     }
 }
 
-fn build_body(request: &OcrRequest, model: &str, input: &str) -> Result<Value> {
+fn build_body(request: &DocumentRequest, model: &str, input: &str) -> Result<Value> {
     let mut body = json!({
         "input": input,
         "retrieval": { "chunking": { "chunk_mode": "page" } },
@@ -202,7 +202,7 @@ struct JobResponse {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub(crate) struct ParseResponse {
+pub(crate) struct WireParseResponse {
     pub job_id: String,
     #[serde(default)]
     pub duration: Option<f64>,
@@ -303,7 +303,12 @@ fn map_block_type(t: &str) -> BlockType {
     }
 }
 
-pub(crate) fn normalize(parsed: &ParseResponse, full: &FullResult, fmt: OutputFormat, model: &str) -> OcrResponse {
+pub(crate) fn normalize(
+    parsed: &WireParseResponse,
+    full: &FullResult,
+    fmt: OutputFormat,
+    model: &str,
+) -> ParseResponse {
     let mut blocks: Vec<Block> = Vec::new();
     // Chunk content is the provider's own markdown rendering; keep it when a chunk maps to one page.
     let mut page_md: BTreeMap<u32, String> = BTreeMap::new();
@@ -370,7 +375,7 @@ pub(crate) fn normalize(parsed: &ParseResponse, full: &FullResult, fmt: OutputFo
     let num_pages = parsed.usage.as_ref().map(|u| u.num_pages).filter(|&n| n > 0).unwrap_or(pages.len() as u32);
     let usage =
         Usage { pages: num_pages, credits: parsed.usage.as_ref().and_then(|u| u.credits), provider_cost_usd: None };
-    let mut resp = OcrResponse::from_pages(NAME, &format!("{NAME}/{model}"), pages, usage);
+    let mut resp = ParseResponse::from_pages(NAME, &format!("{NAME}/{model}"), pages, usage);
     if let Some(d) = parsed.duration {
         resp.metadata.insert("reducto_duration_s".into(), json!(d));
     }
@@ -387,7 +392,7 @@ mod tests {
     #[test]
     fn normalizes_fixture() {
         let raw = include_str!("../../tests/fixtures/reducto_parse.json");
-        let parsed: ParseResponse = serde_json::from_str(raw).unwrap();
+        let parsed: WireParseResponse = serde_json::from_str(raw).unwrap();
         let ParseResult::Full(full) = &parsed.result else { panic!("expected full") };
         let resp = normalize(&parsed, full, OutputFormat::Markdown, "standard");
         assert_eq!(resp.pages.len(), 1);
@@ -411,7 +416,7 @@ mod tests {
 
     #[test]
     fn body_variants() {
-        let req = OcrRequest::from_url("https://x/y.pdf")
+        let req = DocumentRequest::from_url("https://x/y.pdf")
             .pages("2-3")
             .provider_options(json!({"async": true, "settings": {"ocr_system": "legacy"}}));
         let b = build_body(&req, "agentic", "https://x/y.pdf").unwrap();
@@ -420,8 +425,8 @@ mod tests {
         assert_eq!(b["settings"]["page_range"][0]["start"], 2);
         assert_eq!(b["settings"]["ocr_system"], "legacy");
         assert!(b.get("async").is_none());
-        let b = build_body(&OcrRequest::from_url("u"), "r-1", "u").unwrap();
+        let b = build_body(&DocumentRequest::from_url("u"), "r-1", "u").unwrap();
         assert_eq!(b["settings"]["model"], "r-1");
-        assert!(build_body(&OcrRequest::from_url("u"), "nope", "u").is_err());
+        assert!(build_body(&DocumentRequest::from_url("u"), "nope", "u").is_err());
     }
 }
