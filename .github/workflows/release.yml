@@ -171,6 +171,65 @@ jobs:
           path: dist
           if-no-files-found: error
 
+  # ------------------------------------------------------ Node.js addon (stub) --
+  # Builds the prebuilt `liteocr.<platform>.node` binaries for the npm package (js/) and uploads
+  # them as workflow artifacts. Nothing is published to npm yet and `publish` below does not
+  # depend on this job. To ship: add a job that downloads these artifacts, runs
+  # `napi create-npm-dirs && napi artifacts && napi prepublish -t npm` in js/, then
+  # `npm publish --provenance` with `id-token: write` (npm trusted publishing, no NPM_TOKEN).
+  # See js/README.md, "Releasing prebuilt binaries".
+  node-addon:
+    name: Node addon · ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-24.04-arm
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-apple-darwin
+            os: macos-13
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+    defaults:
+      run:
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: node-${{ matrix.target }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+
+      - run: npm ci
+
+      - name: Build the addon (release)
+        run: npm run build -- --target ${{ matrix.target }}
+
+      - name: Smoke test
+        run: npm test
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: node-addon-${{ matrix.target }}
+          path: js/*.node
+          if-no-files-found: error
+
   # ----------------------------------------------------------------- publish --
   publish:
     name: Publish to PyPI and create the GitHub Release
