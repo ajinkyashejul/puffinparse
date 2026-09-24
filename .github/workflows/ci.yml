@@ -150,3 +150,22 @@ jobs:
       # skips itself because LITEOCR_LIVE_TESTS and provider keys are deliberately not set.
       - name: Test
         run: npm test
+
+  docker:
+    name: Gateway image (build + smoke test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t liteocr:ci .
+      - name: CLI runs in the image
+        run: docker run --rm liteocr:ci --version
+      - name: Gateway serves /health and /v1/models
+        run: |
+          printf '[server]\nport = 4000\n' > "$RUNNER_TEMP/liteocr.toml"
+          docker run -d --name gw -p 4000:4000 \
+            -v "$RUNNER_TEMP/liteocr.toml:/etc/liteocr/liteocr.toml:ro" liteocr:ci
+          for i in $(seq 1 30); do curl -fsS localhost:4000/health && break; sleep 1; done
+          curl -fsS localhost:4000/v1/models | head -c 300; echo
+          docker logs gw
+          docker rm -f gw
