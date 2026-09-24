@@ -31,3 +31,5 @@ benchmark/cache/
 benchmark/site/dist/
 website/dist/
 .claude/worktrees/
+# in-progress `bench run` logs (removed when the run completes)
+*.partial.jsonl
