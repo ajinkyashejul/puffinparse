@@ -46,12 +46,7 @@ fn witness(rules: &[Rule]) -> String {
                 let c = r.cell.as_ref().expect("table_cell has a cell");
                 let col = c.col_header.as_deref().unwrap_or("col");
                 let row = c.row_header.as_deref().unwrap_or("row");
-                out.push(format!(
-                    "| head | {} |\n| --- | --- |\n| {} | {} |",
-                    cell(col),
-                    cell(row),
-                    cell(&c.value)
-                ));
+                out.push(format!("| head | {} |\n| --- | --- |\n| {} | {} |", cell(col), cell(row), cell(&c.value)));
             }
             RuleType::Absent => {}
         }
