@@ -11,6 +11,15 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **More public benchmarks in the combined dataset.** `olmocr` (40 AI2 olmOCR-bench PDFs, 205
+  rules, ODC-BY-1.0) and `omnidocbench` (40 pages across 10 document types, English and Chinese;
+  index only — images and truth are fetched at a pinned revision by
+  `python -m benchmark.adapters omnidocbench` because the data is research-only), joined with
+  synthetic-v1 and ParseBench as `combined-v2` (159 documents; `combined-v1` is unchanged).
+  Upstream tests that cannot be expressed faithfully (math, baseline, positional absences,
+  vertical table neighbours) are skipped and counted in `conversion-stats.json`, never dropped
+  silently. A dataset self-check test proves every converted rule is satisfiable. Survey of
+  academic benchmarks with licences at pinned revisions: `docs/benchmarks/academic-benchmarks.md`.
 - **Gateway server: `liteocr serve` (`crates/liteocr-server`).** An HTTP gateway in front of every
   provider, the LiteOCR equivalent of the LiteLLM proxy: `POST /v1/parse|ocr|extract` (JSON or
   multipart, `output_format`, `fallbacks`), `GET /v1/models`, `/v1/usage`, `/health` and
@@ -59,6 +68,8 @@ Python package `liteocr` share a single version.
 
 ### Changed
 
+- Adapter HTML→markdown table conversion no longer doubles backslashes, so LaTeX in table cells reaches
+  the scorer as a parser would print it.
 - **Modes.** Every call now names a mode — `parse` (markdown + typed blocks), `ocr`
   (plain text with line/word boxes) or `extract` (a JSON object from a schema, with
   per-field confidence and citations) — and providers can only be swapped within a

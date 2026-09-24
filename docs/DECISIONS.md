@@ -228,3 +228,21 @@ failures map to 502, not 401, because the caller's own key was valid.
 **Consequences.** Single binary, no infrastructure to run. Budgets can be overshot by requests in
 flight, and key changes need a restart. A database, HTTP key management, async job endpoints and
 metrics auth are follow-ups, not blockers.
+
+## ADR-16: Vendor only what the licence permits; index the rest
+
+**Context.** The combined benchmark (ADR-10) pulls in public datasets whose licences differ:
+olmOCR-bench is ODC-BY-1.0, OmniDocBench has no licence and is marked research-only /
+non-commercial.
+
+**Decision.** A dataset is vendored into the repo (with attribution) only when its licence permits
+redistribution. Otherwise the repo holds a manifest with upstream paths, a pinned revision and
+image/truth hashes, and the adapter materialises the data locally. Combined datasets are
+versioned and never rewritten once results exist (`combined-v2` supersedes `combined-v1` for new
+runs). Upstream tests that cannot be expressed faithfully in the shared rule schema are skipped
+and counted, never weakened silently; the one relaxed mapping (olmOCR "left/right of" → same row)
+is counted as relaxed.
+
+**Consequences.** Anyone can reproduce every score, but index-only sources need a fetch step before
+a run (their documents carry a `fetch-required` tag). Stats files make the coverage of each
+conversion auditable.
