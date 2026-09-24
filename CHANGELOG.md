@@ -11,6 +11,12 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **DP-Bench** (Upstage, MIT) adapter: 40 committed single-page PDFs with reading-order transcript
+  truth (`python -m benchmark.adapters dpbench`, pinned at `24702c61`), and `combined-v3` =
+  combined-v2 + DP-Bench (199 documents). Headers and footers stay in the DP-Bench truth because
+  DP-Bench's own NID scores them; each source keeps its publisher's conventions.
+- `tesseract/default` runs `tesseract` with `OMP_THREAD_LIMIT=1` unless set, so parallel pages no
+  longer oversubscribe the CPU (70 s → 0.7 s for a small page on 4 cores).
 - Benchmark results flag a successful call that returned no text as `empty_output: true` (counted in
   `summary.empty_outputs`, shown as `(+N empty)` in the leaderboard), and `bench rescore
   --keep-missing` keeps the recorded scores of documents whose outputs are not committed.

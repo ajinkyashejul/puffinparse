@@ -321,7 +321,14 @@ async fn rendered_pages(dir: &Path) -> Result<Vec<(u32, PathBuf)>> {
 
 /// Run a local binary with the call's deadline; non-zero exits carry the tool's stderr verbatim.
 async fn exec(cmd: &str, args: &[String], deadline: &Deadline, tool: &str, install_hint: &str) -> Result<Vec<u8>> {
-    let child = tokio::process::Command::new(cmd)
+    let mut command = tokio::process::Command::new(cmd);
+    // Tesseract's OpenMP threads oversubscribe the CPU when several pages run concurrently (a
+    // small PNG took 70 s instead of 0.7 s on 4 cores); one thread per process is the documented
+    // fix. An explicit OMP_THREAD_LIMIT in the environment still wins.
+    if std::env::var_os("OMP_THREAD_LIMIT").is_none() {
+        command.env("OMP_THREAD_LIMIT", "1");
+    }
+    let child = command
         .args(args)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())

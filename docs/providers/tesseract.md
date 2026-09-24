@@ -83,9 +83,11 @@ Boxes are normalised by the page's pixel size, origin top-left, clamped to 0..1.
 | Not an image or PDF (e.g. `.docx`) | `input_error` |
 | Bad `provider_options` (non-integer `psm`, non-object `config`) | `input_error` |
 
-There is no concurrency limit beyond your CPU. Tesseract uses OpenMP threads by default; when
-running many documents in parallel (e.g. `liteocr bench run --concurrency 4`) set
-`OMP_THREAD_LIMIT=1` to avoid oversubscription.
+There is no concurrency limit beyond your CPU. Tesseract uses OpenMP threads by default, which
+oversubscribe the CPU when several pages run in parallel (one small PNG took 70 s instead of 0.7 s
+on 4 cores), so LiteOCR starts `tesseract` with `OMP_THREAD_LIMIT=1` unless `OMP_THREAD_LIMIT` is
+already set in the environment. Set it yourself (e.g. `OMP_THREAD_LIMIT=4`) to give a single large
+document more threads.
 
 ## 6. Gotchas
 
