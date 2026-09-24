@@ -6,40 +6,57 @@
     <title>LiteOCR Benchmark</title>
     <meta
       name="description"
-      content="Open, reproducible OCR / document-parsing benchmark: accuracy, latency and cost for every provider, with every document, output and score inspectable."
+      content="Open, reproducible OCR / document-parsing benchmark: accuracy, latency and cost for every provider, with every document, output, diff and rule inspectable."
     />
     <meta name="color-scheme" content="light dark" />
     <!-- URL prefix app.js loads its data from; rewritten by build.py --base-url. -->
     <meta name="liteocr-base" content="./" />
-    <!-- Inline SVG favicon: the site must load no external resources. -->
+    <!-- Product-site links, filled by build.py --home-url / --docs-url (empty = standalone). -->
+    <meta name="liteocr-home" content="" />
+    <meta name="liteocr-docs" content="" />
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%232f6feb'/%3E%3Cpath d='M4 4h3v8H4zM9 4h3v2H9zm0 3h3v2H9zm0 3h3v2H9z' fill='%23fff'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3.5' fill='%23c53a1a'/%3E%3Cg fill='white'%3E%3Crect x='4' y='4' width='8' height='1.6' rx='.8'/%3E%3Crect x='4' y='7.2' width='8' height='1.6' rx='.8'/%3E%3Crect x='4' y='10.4' width='5' height='1.6' rx='.8'/%3E%3C/g%3E%3C/svg%3E"
     />
+    <!-- Same theme switch as the product site (shared localStorage key), before first paint. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("liteocr-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="site-header">
-      <div class="wrap header-inner">
-        <a class="brand" href="#/leaderboard">
-          <span class="brand-mark" aria-hidden="true">◧</span>
-          <span class="brand-text">
-            <strong>LiteOCR Benchmark</strong>
-            <span class="brand-sub">open OCR provider leaderboard</span>
-          </span>
-        </a>
+    <header class="top">
+      <div class="topin">
+        <a class="brand" id="brand" href="#/leaderboard"
+          ><span class="mark" aria-hidden="true"></span>LiteOCR<span class="brand-sub"
+            >benchmark</span
+          ></a
+        >
+        <span class="spacer"></span>
         <nav class="site-nav" aria-label="Main">
           <a id="nav-leaderboard" href="#/leaderboard">Leaderboard</a>
           <a id="nav-documents" href="#/documents">Documents</a>
-          <a
-            class="external"
-            href="https://github.com/ajinkyashejul/liteocr"
-            rel="noopener noreferrer"
-            >GitHub<span aria-hidden="true"> ↗</span></a
+          <a id="nav-docs" class="hide-sm" href="#" hidden>Docs</a>
+          <a class="hide-sm" href="https://github.com/ajinkyashejul/liteocr" rel="noopener noreferrer"
+            >GitHub</a
           >
         </nav>
+        <button class="iconbtn" id="help-btn" type="button" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+          <span aria-hidden="true" class="kbd">?</span>
+        </button>
+        <button class="iconbtn" id="theme" type="button" aria-label="Switch theme" title="Switch theme">
+          <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.4" />
+            <path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor" />
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -48,6 +65,29 @@
         <p class="loading">Loading benchmark data…</p>
       </div>
     </main>
+
+    <dialog id="help" aria-labelledby="help-title">
+      <h2 id="help-title">Keyboard shortcuts</h2>
+      <dl class="keys">
+        <dt><kbd>j</kbd> / <kbd>k</kbd></dt>
+        <dd>Next / previous document</dd>
+        <dt><kbd>m</kbd> / <kbd>M</kbd></dt>
+        <dd>Next / previous model</dd>
+        <dt><kbd>1</kbd>–<kbd>4</kbd></dt>
+        <dd>Switch inspector tab</dd>
+        <dt><kbd>d</kbd></dt>
+        <dd>Diff: side by side / unified</dd>
+        <dt><kbd>o</kbd></dt>
+        <dd>Toggle layout boxes</dd>
+        <dt><kbd>[</kbd> / <kbd>]</kbd></dt>
+        <dd>Previous / next page</dd>
+        <dt><kbd>g</kbd> <kbd>l</kbd> · <kbd>g</kbd> <kbd>d</kbd></dt>
+        <dd>Go to leaderboard · documents</dd>
+        <dt><kbd>?</kbd></dt>
+        <dd>This help</dd>
+      </dl>
+      <form method="dialog"><button class="btn" type="submit">Close</button></form>
+    </dialog>
 
     <footer class="site-footer">
       <div class="wrap">

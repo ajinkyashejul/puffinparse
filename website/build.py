@@ -850,7 +850,18 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
     module = importlib.util.module_from_spec(spec)
     try:
         spec.loader.exec_module(module)
-        code = module.main(["--out", str(out / BENCH_PREFIX), "--base-url", site.viewer_url])
+        code = module.main(
+            [
+                "--out",
+                str(out / BENCH_PREFIX),
+                "--base-url",
+                site.viewer_url,
+                "--home-url",
+                site.base,
+                "--docs-url",
+                site.docs_base,
+            ]
+        )
     except Exception as exc:  # the viewer is optional; never take the site down with it
         print(f"benchmark viewer: build failed ({exc}), skipping", file=sys.stderr)
         shutil.rmtree(out / BENCH_PREFIX, ignore_errors=True)
