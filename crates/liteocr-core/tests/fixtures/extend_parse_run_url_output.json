@@ -1,0 +1,313 @@
+{
+  "chunks": [
+    {
+      "object": "chunk",
+      "id": "chunk_1_YrukeJ",
+      "type": "page",
+      "content": "# Cedar Ridge Supply\n\n88 Foundry Lane Building C Akron, OH 44308\n\nBill To: Globex Industries 88 Riverside Avenue Austin, TX 78701\n\nInvoice #: INV-9865\nDate: 2024-08-03\nDue Date: 2024-09-03\nPurchase Order: PO-28844\nTerms: Net 30\n\n| Description | Qty | Unit Price | Amount |\n| --- | --- | --- | --- |\n| Hydraulic fluid, 5 gal | 18 | 24.40 | $439.20 |\n| Thermal label rolls | 10 | 156.27 | $1,562.70 |\n| Workbench vise, 6 inch | 12 | 88.57 | $1,062.84 |\n| Safety goggles, pack of 12 | 21 | 299.02 | $6,279.42 |\n| Kraft shipping boxes, large | 15 | 281.05 | $4,215.75 |\n| Replacement drive belts | 22 | 10.59 | $232.98 |\n\nSubtotal: $13,792.89\nSales Tax (6.25%): $862.06\nShipping and Handling: $12.48\nTotal Due: $14,667.43\n\nPayment is due within 30 days of the invoice date. Please include the invoice number with your remittance.",
+      "metadata": {
+        "pageRange": {
+          "start": 1,
+          "end": 1
+        },
+        "minOcrConfidence": 0.923,
+        "avgOcrConfidence": 0.994
+      },
+      "blocks": [
+        {
+          "object": "block",
+          "id": "block_1_KVifvt",
+          "type": "heading",
+          "content": "# Cedar Ridge Supply",
+          "details": {},
+          "metadata": {
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "minOcrConfidence": 0.993,
+            "avgOcrConfidence": 0.994
+          },
+          "polygon": [
+            {
+              "x": 79.4129322522815,
+              "y": 83.6409598654443
+            },
+            {
+              "x": 497.7110891091928,
+              "y": 83.6409598654443
+            },
+            {
+              "x": 497.7110891091928,
+              "y": 131.0198649102515
+            },
+            {
+              "x": 79.4129322522815,
+              "y": 131.0198649102515
+            }
+          ],
+          "boundingBox": {
+            "left": 79.4129322522815,
+            "top": 83.6409598654443,
+            "right": 497.7110891091928,
+            "bottom": 131.0198649102515
+          }
+        },
+        {
+          "object": "block",
+          "id": "block_1_l0tnoU",
+          "type": "text",
+          "content": "88 Foundry Lane Building C Akron, OH 44308",
+          "details": {},
+          "metadata": {
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "minOcrConfidence": 0.992,
+            "avgOcrConfidence": 0.995
+          },
+          "polygon": [
+            {
+              "x": 78.47518016344372,
+              "y": 166.28148969713146
+            },
+            {
+              "x": 281.9638989803511,
+              "y": 166.28148969713146
+            },
+            {
+              "x": 281.9638989803511,
+              "y": 266.09514322385684
+            },
+            {
+              "x": 78.47518016344372,
+              "y": 266.09514322385684
+            }
+          ],
+          "boundingBox": {
+            "left": 78.47518016344372,
+            "top": 166.28148969713146,
+            "right": 281.9638989803511,
+            "bottom": 266.09514322385684
+          }
+        },
+        {
+          "object": "block",
+          "id": "block_1_53tKwq",
+          "type": "text",
+          "content": "Bill To: Globex Industries 88 Riverside Avenue Austin, TX 78701",
+          "details": {},
+          "metadata": {
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "minOcrConfidence": 0.99,
+            "avgOcrConfidence": 0.994
+          },
+          "polygon": [
+            {
+              "x": 78.33497428337965,
+              "y": 299.07249718969996
+            },
+            {
+              "x": 308.97172547869593,
+              "y": 299.07249718969996
+            },
+            {
+              "x": 308.97172547869593,
+              "y": 436.8497178213937
+            },
+            {
+              "x": 78.33497428337965,
+              "y": 436.8497178213937
+            }
+          ],
+          "boundingBox": {
+            "left": 78.33497428337965,
+            "top": 299.07249718969996,
+            "right": 308.97172547869593,
+            "bottom": 436.8497178213937
+          }
+        },
+        {
+          "object": "block",
+          "id": "block_1_Abp2sQ",
+          "type": "key_value",
+          "content": "Invoice #: INV-9865\nDate: 2024-08-03\nDue Date: 2024-09-03\nPurchase Order: PO-28844\nTerms: Net 30",
+          "details": {
+            "type": "key_value_details"
+          },
+          "metadata": {
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "minOcrConfidence": 0.923,
+            "avgOcrConfidence": 0.989
+          },
+          "polygon": [
+            {
+              "x": 77.84397788830934,
+              "y": 468.19603536417196
+            },
+            {
+              "x": 382.34821997995624,
+              "y": 468.19603536417196
+            },
+            {
+              "x": 382.34821997995624,
+              "y": 641.9914209554483
+            },
+            {
+              "x": 77.84397788830934,
+              "y": 641.9914209554483
+            }
+          ],
+          "boundingBox": {
+            "left": 77.84397788830934,
+            "top": 468.19603536417196,
+            "right": 382.34821997995624,
+            "bottom": 641.9914209554483
+          }
+        },
+        {
+          "object": "block",
+          "id": "block_1_3LNyoz",
+          "type": "table",
+          "content": "| Description | Qty | Unit Price | Amount |\n| --- | --- | --- | --- |\n| Hydraulic fluid, 5 gal | 18 | 24.40 | $439.20 |\n| Thermal label rolls | 10 | 156.27 | $1,562.70 |\n| Workbench vise, 6 inch | 12 | 88.57 | $1,062.84 |\n| Safety goggles, pack of 12 | 21 | 299.02 | $6,279.42 |\n| Kraft shipping boxes, large | 15 | 281.05 | $4,215.75 |\n| Replacement drive belts | 22 | 10.59 | $232.98 |",
+          "details": {
+            "type": "table_details",
+            "rowCount": 7,
+            "columnCount": 4
+          },
+          "metadata": {
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "minOcrConfidence": 0.989,
+            "avgOcrConfidence": 0.995
+          },
+          "polygon": [
+            {
+              "x": 78.99523824945716,
+              "y": 673.0108731447996
+            },
+            {
+              "x": 1161.2694244829627,
+              "y": 673.0108731447996
+            },
+            {
+              "x": 1161.2694244829627,
+              "y": 1043.0973774836614
+            },
+            {
+              "x": 78.99523824945716,
+              "y": 1043.0973774836614
+            }
+          ],
+          "boundingBox": {
+            "left": 78.99523824945716,
+            "top": 673.0108731447996,
+            "right": 1161.2694244829627,
+            "bottom": 1043.0973774836614
+          }
+        },
+        {
+          "object": "block",
+          "id": "block_1_85Abxb",
+          "type": "key_value",
+          "content": "Subtotal: $13,792.89\nSales Tax (6.25%): $862.06\nShipping and Handling: $12.48\nTotal Due: $14,667.43",
+          "details": {
+            "type": "key_value_details"
+          },
+          "metadata": {
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "minOcrConfidence": 0.928,
+            "avgOcrConfidence": 0.989
+          },
+          "polygon": [
+            {
+              "x": 78.00140380859375,
+              "y": 1064.9720995557177
+            },
+            {
+              "x": 423.56062137466597,
+              "y": 1064.9720995557177
+            },
+            {
+              "x": 423.56062137466597,
+              "y": 1202.0591567322447
+            },
+            {
+              "x": 78.00140380859375,
+              "y": 1202.0591567322447
+            }
+          ],
+          "boundingBox": {
+            "left": 78.00140380859375,
+            "top": 1064.9720995557177,
+            "right": 423.56062137466597,
+            "bottom": 1202.0591567322447
+          }
+        },
+        {
+          "object": "block",
+          "id": "block_1_dKvsCJ",
+          "type": "text",
+          "content": "Payment is due within 30 days of the invoice date. Please include the invoice number with your remittance.",
+          "details": {},
+          "metadata": {
+            "page": {
+              "number": 1,
+              "width": 1240,
+              "height": 1754
+            },
+            "minOcrConfidence": 0.992,
+            "avgOcrConfidence": 0.995
+          },
+          "polygon": [
+            {
+              "x": 77.70573948748026,
+              "y": 1235.3595710167517
+            },
+            {
+              "x": 1128.5938971012513,
+              "y": 1235.3595710167517
+            },
+            {
+              "x": 1128.5938971012513,
+              "y": 1295.5211778577868
+            },
+            {
+              "x": 77.70573948748026,
+              "y": 1295.5211778577868
+            }
+          ],
+          "boundingBox": {
+            "left": 77.70573948748026,
+            "top": 1235.3595710167517,
+            "right": 1128.5938971012513,
+            "bottom": 1295.5211778577868
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "originalMimeType": "image/png",
+    "finalMimeType": "image/png",
+    "pages": null
+  }
+}

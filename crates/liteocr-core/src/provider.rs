@@ -2,6 +2,7 @@
 //! in [`crate::model::PROVIDERS`] and [`crate::providers::build`].
 
 use crate::error::{Error, Result};
+use crate::jobs::{JobHandle, JobStatus, WebhookEvent};
 use crate::types::{DocumentRequest, ExtractRequest, ExtractResponse, Mode, ParseResponse, TextResponse};
 use async_trait::async_trait;
 
@@ -31,6 +32,43 @@ pub trait Provider: Send + Sync {
     async fn extract(&self, _request: &ExtractRequest, model: &str) -> Result<ExtractResponse> {
         Err(unsupported(self.name(), model, Mode::Extract))
     }
+
+    /// Start a `parse` job without waiting for it (see [`crate::jobs`]). Only providers with a
+    /// job queue implement it; the default returns `UnsupportedModel`.
+    async fn submit_parse(&self, _request: &DocumentRequest, model: &str) -> Result<JobHandle> {
+        Err(no_jobs(self.name(), model))
+    }
+
+    /// Check a submitted `parse` job once. `request` carries the credentials, deadline and output
+    /// preferences (built from the handle and the caller's options); `model` is the bare model name.
+    async fn retrieve_parse(&self, _job: &JobHandle, _request: &DocumentRequest, model: &str) -> Result<JobStatus> {
+        Err(no_jobs(self.name(), model))
+    }
+
+    /// Interpret the JSON body this provider POSTs to a webhook. Pure: no network.
+    fn parse_webhook(&self, model: &str, _payload: &serde_json::Value) -> Result<WebhookEvent> {
+        Err(no_jobs(self.name(), model))
+    }
+}
+
+fn no_jobs(provider: &str, model: &str) -> Error {
+    Error::unsupported_model(format!(
+        "{provider}/{model} has no asynchronous job API in LiteOCR; use parse() \
+         (providers with jobs: reducto, extend, llamaparse)"
+    ))
+    .with_provider(provider)
+}
+
+/// The request's `webhook_url`, validated as an absolute http(s) URL.
+pub fn webhook_url(request: &DocumentRequest) -> Result<Option<&str>> {
+    let Some(raw) = request.webhook_url.as_deref().map(str::trim).filter(|u| !u.is_empty()) else {
+        return Ok(None);
+    };
+    let parsed = url::Url::parse(raw).map_err(|e| Error::input(format!("invalid webhook_url {raw}: {e}")))?;
+    if !matches!(parsed.scheme(), "http" | "https") {
+        return Err(Error::input(format!("webhook_url must be http(s), got {raw}")));
+    }
+    Ok(Some(raw))
 }
 
 fn unsupported(provider: &str, model: &str, mode: Mode) -> Error {

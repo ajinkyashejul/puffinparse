@@ -6,9 +6,13 @@
 //! Extract flow: `POST /api/v1/beta/files` (multipart, `purpose=extract`) → `POST /api/v2/extract`
 //! with an inline `configuration.data_schema` → poll
 //! `GET /api/v2/extract/{id}?expand=usage&expand=extract_metadata`.
+//!
+//! Jobs API (`crate::submit_parse` / `retrieve_parse`): the same upload (plus the `webhook_url`
+//! form field), then one `GET /api/v1/parsing/job/{id}` (+ `result/json` once done) per retrieve.
 
 use crate::error::{Error, ErrorKind, Result};
 use crate::http::{self, Deadline, Retry};
+use crate::jobs::{JobHandle, JobStatus, WebhookEvent, WebhookStatus};
 use crate::provider::{self, Provider};
 use crate::types::{
     BBox, Block, BlockType, Citation, DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, FieldInfo,
@@ -32,85 +36,6 @@ pub struct LlamaParse;
 impl Provider for LlamaParse {
     fn name(&self) -> &'static str {
         NAME
-    }
-
-    async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
-        let api_key = provider::resolve_api_key(request, ENV_KEY, NAME)?;
-        let base = provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE);
-        let deadline = Deadline::new(request.timeout_secs);
-        let retry = Retry::new(request.max_retries);
-        let client = http::client();
-        let fields = form_fields(request, model)?;
-        let data = provider::load_bytes(&request.input).await?;
-
-        // 1. Upload / submit job.
-        let job: ParsingJob = http::with_retry(NAME, retry, &deadline, || {
-            let mut form = reqwest::multipart::Form::new();
-            for (k, v) in &fields {
-                form = form.text(k.clone(), v.clone());
-            }
-            form = match (&data, &request.input) {
-                (Some(bytes), input) => form.part("file", provider::file_part(bytes.clone(), input)),
-                (None, DocumentInput::Url { url }) => form.text("input_url", url.clone()),
-                (None, _) => unreachable!("load_bytes returns bytes for non-URL inputs"),
-            };
-            let rb = client
-                .post(format!("{base}/api/v1/parsing/upload"))
-                .bearer_auth(&api_key)
-                .header("accept", "application/json")
-                .timeout(deadline.request_timeout())
-                .multipart(form);
-            async move { http::read_json(NAME, rb.send().await?).await }
-        })
-        .await?;
-        let job_id = job.id.clone();
-        tracing::debug!(job_id = %job_id, status = %job.status, "llamaparse: job created");
-
-        // 2. Poll.
-        let job = if is_terminal(&job.status) {
-            job
-        } else {
-            http::poll_until(NAME, &deadline, Duration::from_secs(1), Duration::from_secs(5), || {
-                let rb = client
-                    .get(format!("{base}/api/v1/parsing/job/{job_id}"))
-                    .bearer_auth(&api_key)
-                    .timeout(deadline.request_timeout());
-                async move {
-                    let job: ParsingJob = http::read_json(NAME, rb.send().await?).await?;
-                    Ok(if is_terminal(&job.status) { Some(job) } else { None })
-                }
-            })
-            .await
-            .map_err(|e| e.with_job_id(job_id.clone()))?
-        };
-        if !matches!(job.status.as_str(), "SUCCESS" | "PARTIAL_SUCCESS") {
-            let code = job.error_code.clone().unwrap_or_default();
-            let msg = job.error_message.clone().unwrap_or_default();
-            let kind = if code.starts_with("INVALID") { ErrorKind::BadRequest } else { ErrorKind::Provider };
-            return Err(Error::new(kind, format!("job {}: {code} {msg}", job.status).trim().to_string())
-                .with_provider(NAME)
-                .with_job_id(job_id));
-        }
-
-        // 3. JSON result (pages + items + metadata).
-        let result: JsonResult = http::with_retry(NAME, retry, &deadline, || {
-            let rb = client
-                .get(format!("{base}/api/v1/parsing/job/{job_id}/result/json"))
-                .bearer_auth(&api_key)
-                .timeout(deadline.request_timeout());
-            async move { http::read_json(NAME, rb.send().await?).await }
-        })
-        .await
-        .map_err(|e| e.with_job_id(job_id.clone()))?;
-
-        let raw = if request.include_raw { Some(serde_json::to_value(&result)?) } else { None };
-        let mut resp = normalize(&result, request.output, model);
-        resp.provider_job_id = Some(job_id);
-        if job.status == "PARTIAL_SUCCESS" {
-            resp.metadata.insert("llamaparse_partial_success".into(), json!(true));
-        }
-        resp.raw = raw;
-        Ok(resp)
     }
 
     async fn extract(&self, request: &ExtractRequest, model: &str) -> Result<ExtractResponse> {
@@ -195,6 +120,194 @@ impl Provider for LlamaParse {
         resp.raw = raw;
         Ok(resp)
     }
+
+    async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
+        let ctx = Ctx::new(request)?;
+
+        // 1. Upload / submit job.
+        let job = ctx.upload(request, form_fields(request, model)?).await?;
+        let job_id = job.id.clone();
+        tracing::debug!(job_id = %job_id, status = %job.status, "llamaparse: job created");
+
+        // 2. Poll.
+        let job = if is_terminal(&job.status) {
+            job
+        } else {
+            http::poll_until(NAME, &ctx.deadline, Duration::from_secs(1), Duration::from_secs(5), || async {
+                let job = ctx.job_once(&job_id).await?;
+                Ok(if is_terminal(&job.status) { Some(job) } else { None })
+            })
+            .await
+            .map_err(|e| e.with_job_id(job_id.clone()))?
+        };
+        if !matches!(job.status.as_str(), "SUCCESS" | "PARTIAL_SUCCESS") {
+            return Err(job_failure(&job));
+        }
+
+        // 3. JSON result (pages + items + metadata).
+        ctx.finish_parse(&job, request, model).await
+    }
+
+    /// `POST /api/v1/parsing/upload` (with the `webhook_url` form field when set) and return.
+    async fn submit_parse(&self, request: &DocumentRequest, model: &str) -> Result<JobHandle> {
+        let ctx = Ctx::new(request)?;
+        let mut fields = form_fields(request, model)?;
+        if let Some(url) = provider::webhook_url(request)? {
+            fields.retain(|(k, _)| k != "webhook_url");
+            fields.push(("webhook_url".into(), url.to_string()));
+        }
+        let job = ctx.upload(request, fields).await?;
+        tracing::debug!(job_id = %job.id, status = %job.status, "llamaparse: job submitted");
+        Ok(JobHandle::new(NAME, model, job.id))
+    }
+
+    /// One `GET /api/v1/parsing/job/{id}`, then the JSON result once it succeeded.
+    async fn retrieve_parse(&self, job: &JobHandle, request: &DocumentRequest, model: &str) -> Result<JobStatus> {
+        let ctx = Ctx::new(request)?;
+        let wire = http::with_retry(NAME, ctx.retry, &ctx.deadline, || ctx.job_once(&job.job_id))
+            .await
+            .map_err(|e| e.with_job_id(job.job_id.clone()))?;
+        match wire.status.as_str() {
+            "SUCCESS" | "PARTIAL_SUCCESS" => {
+                Ok(JobStatus::Succeeded(Box::new(ctx.finish_parse(&wire, request, model).await?)))
+            }
+            "ERROR" | "CANCELLED" => Ok(JobStatus::Failed(job_failure(&wire))),
+            _ => Ok(JobStatus::Pending),
+        }
+    }
+
+    /// Two body shapes reach a webhook:
+    /// * the `webhook_url` result push — `{"txt", "md", "json": [pages…], "images"}` — which *is*
+    ///   the result (pages in the `result/json` shape, no job id);
+    /// * a LlamaCloud event — `{"event_id", "event_type": "parse.success", "data": {"job_id"}}` —
+    ///   which only names the job.
+    fn parse_webhook(&self, model: &str, payload: &Value) -> Result<WebhookEvent> {
+        let job_id = payload
+            .pointer("/data/job_id")
+            .or_else(|| payload.pointer("/data/id"))
+            .or_else(|| payload.get("job_id"))
+            .and_then(Value::as_str)
+            .filter(|s| !s.is_empty());
+        let job = job_id.map(|id| JobHandle::new(NAME, model, id));
+        if let Some(event) = payload.get("event_type").and_then(Value::as_str) {
+            let status = match event {
+                "parse.pending" | "parse.running" => WebhookStatus::Pending,
+                "parse.success" | "parse.partial_success" | "parse.error" | "parse.cancelled" => {
+                    WebhookStatus::Finished
+                }
+                other => {
+                    return Err(Error::input(format!("llamaparse webhook event '{other}' is not a parse event"))
+                        .with_provider(NAME))
+                }
+            };
+            if job.is_none() {
+                return Err(Error::input("llamaparse webhook event has no data.job_id").with_provider(NAME));
+            }
+            return Ok(WebhookEvent { job, status });
+        }
+        let Some(pages) = payload.get("json").filter(|p| p.is_array()) else {
+            return Err(Error::input(
+                "unrecognised llamaparse webhook body: expected an event (event_type + data.job_id) or a result \
+                 push (txt / md / json)",
+            )
+            .with_provider(NAME));
+        };
+        let result: JsonResult = serde_json::from_value(json!({ "pages": pages })).map_err(|e| {
+            Error::input(format!("llamaparse webhook result has an unexpected shape: {e}")).with_provider(NAME)
+        })?;
+        let mut resp = normalize(&result, OutputFormat::Markdown, model);
+        resp.provider_job_id = job_id.map(String::from);
+        Ok(WebhookEvent { job, status: WebhookStatus::Succeeded(Box::new(resp)) })
+    }
+}
+
+/// Credentials, endpoint and limits resolved once per call.
+struct Ctx {
+    api_key: String,
+    base: String,
+    deadline: Deadline,
+    retry: Retry,
+    client: &'static reqwest::Client,
+}
+
+impl Ctx {
+    fn new(request: &DocumentRequest) -> Result<Self> {
+        Ok(Self {
+            api_key: provider::resolve_api_key(request, ENV_KEY, NAME)?,
+            base: provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE),
+            deadline: Deadline::new(request.timeout_secs),
+            retry: Retry::new(request.max_retries),
+            client: http::client(),
+        })
+    }
+
+    /// `POST /api/v1/parsing/upload`: the form fields plus `file` (bytes) or `input_url` (URL).
+    async fn upload(&self, request: &DocumentRequest, fields: Vec<(String, String)>) -> Result<ParsingJob> {
+        let data = provider::load_bytes(&request.input).await?;
+        let url = format!("{}/api/v1/parsing/upload", self.base);
+        http::with_retry(NAME, self.retry, &self.deadline, || {
+            let mut form = reqwest::multipart::Form::new();
+            for (k, v) in &fields {
+                form = form.text(k.clone(), v.clone());
+            }
+            form = match (&data, &request.input) {
+                (Some(bytes), input) => form.part("file", provider::file_part(bytes.clone(), input)),
+                (None, DocumentInput::Url { url }) => form.text("input_url", url.clone()),
+                (None, _) => unreachable!("load_bytes returns bytes for non-URL inputs"),
+            };
+            let rb = self
+                .client
+                .post(&url)
+                .bearer_auth(&self.api_key)
+                .header("accept", "application/json")
+                .timeout(self.deadline.request_timeout())
+                .multipart(form);
+            async move { http::read_json(NAME, rb.send().await?).await }
+        })
+        .await
+    }
+
+    /// One `GET /api/v1/parsing/job/{id}`.
+    async fn job_once(&self, job_id: &str) -> Result<ParsingJob> {
+        let rb = self
+            .client
+            .get(format!("{}/api/v1/parsing/job/{job_id}", self.base))
+            .bearer_auth(&self.api_key)
+            .timeout(self.deadline.request_timeout());
+        http::read_json(NAME, rb.send().await?).await
+    }
+
+    /// `GET /api/v1/parsing/job/{id}/result/json` for a succeeded job, normalised.
+    async fn finish_parse(&self, job: &ParsingJob, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
+        let job_id = job.id.clone();
+        let url = format!("{}/api/v1/parsing/job/{job_id}/result/json", self.base);
+        let result: JsonResult = http::with_retry(NAME, self.retry, &self.deadline, || {
+            let rb = self.client.get(&url).bearer_auth(&self.api_key).timeout(self.deadline.request_timeout());
+            async move { http::read_json(NAME, rb.send().await?).await }
+        })
+        .await
+        .map_err(|e| e.with_job_id(job_id.clone()))?;
+
+        let raw = if request.include_raw { Some(serde_json::to_value(&result)?) } else { None };
+        let mut resp = normalize(&result, request.output, model);
+        resp.provider_job_id = Some(job_id);
+        if job.status == "PARTIAL_SUCCESS" {
+            resp.metadata.insert("llamaparse_partial_success".into(), json!(true));
+        }
+        resp.raw = raw;
+        Ok(resp)
+    }
+}
+
+/// A job that ended `ERROR` / `CANCELLED`: `INVALID*` codes are the caller's fault (bad request),
+/// everything else is the provider's. Code, message and job id are always kept.
+fn job_failure(job: &ParsingJob) -> Error {
+    let code = job.error_code.clone().unwrap_or_default();
+    let msg = job.error_message.clone().unwrap_or_default();
+    let kind = if code.starts_with("INVALID") { ErrorKind::BadRequest } else { ErrorKind::Provider };
+    Error::new(kind, format!("job {}: {code} {msg}", job.status).trim().to_string())
+        .with_provider(NAME)
+        .with_job_id(job.id.clone())
 }
 
 fn is_terminal(status: &str) -> bool {
@@ -778,5 +891,128 @@ mod tests {
         assert_eq!(f.citations[0].page_number, 1);
         assert!(f.citations[0].bbox.is_some());
         assert!(f.confidence.unwrap() > 0.5);
+    }
+}
+
+// ---- loopback transport tests --------------------------------------------------------------------
+
+/// End-to-end tests of the jobs API against a local HTTP server.
+#[cfg(test)]
+mod wire {
+    use super::*;
+    use crate::jobs::RetrieveOptions;
+    use crate::testutil::{fixture, pdf_request, serve};
+
+    fn job(id: &str, status: &str) -> (u16, String) {
+        (200, json!({"id": id, "status": status, "error_code": null, "error_message": null}).to_string())
+    }
+
+    fn opts(base: &str) -> RetrieveOptions {
+        RetrieveOptions {
+            api_key: Some("test-key".into()),
+            base_url: Some(base.into()),
+            max_retries: 0,
+            ..Default::default()
+        }
+    }
+
+    #[tokio::test]
+    async fn submit_with_webhook_then_retrieve() {
+        let (base, seen) = serve(vec![
+            job("0b6f-job", "PENDING"),
+            job("0b6f-job", "PENDING"),
+            job("0b6f-job", "SUCCESS"),
+            (200, fixture("llamaparse_result_json.json")),
+        ])
+        .await;
+        let req = pdf_request(&base).model("llamaparse/agentic").webhook_url("https://hooks.example.com/llama");
+        let handle = crate::submit_parse(req).await.expect("submit");
+        assert_eq!((handle.model.as_str(), handle.job_id.as_str()), ("llamaparse/agentic", "0b6f-job"));
+
+        assert!(crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap().is_pending());
+        let JobStatus::Succeeded(resp) = crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap() else {
+            panic!("expected success")
+        };
+        assert_eq!(resp.pages.len(), 2);
+        assert_eq!(resp.model, "llamaparse/agentic");
+        assert_eq!(resp.provider_job_id.as_deref(), Some("0b6f-job"));
+
+        let seen = seen.lock().unwrap();
+        assert_eq!(seen[0].route(), "POST /api/v1/parsing/upload");
+        let form = &seen[0].body;
+        assert!(form.contains("name=\"webhook_url\"\r\n\r\nhttps://hooks.example.com/llama"), "{form}");
+        assert!(form.contains("name=\"tier\"\r\n\r\nagentic"));
+        assert_eq!(seen[1].route(), "GET /api/v1/parsing/job/0b6f-job");
+        assert_eq!(seen[3].route(), "GET /api/v1/parsing/job/0b6f-job/result/json");
+    }
+
+    #[tokio::test]
+    async fn retrieve_reports_a_failed_job() {
+        let failed = json!({"id": "j-err", "status": "ERROR", "error_code": "INVALID_PDF", "error_message": "Could not open the PDF"});
+        let (base, _) = serve(vec![(200, failed.to_string())]).await;
+        let handle = crate::JobHandle::new(NAME, "llamaparse/cost_effective", "j-err");
+        let JobStatus::Failed(e) = crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap() else {
+            panic!("expected failure")
+        };
+        assert_eq!(e.kind, ErrorKind::BadRequest);
+        assert!(e.message.contains("Could not open the PDF"));
+        assert_eq!(e.job_id.as_deref(), Some("j-err"));
+    }
+
+    #[tokio::test]
+    async fn webhook_result_push_is_the_result() {
+        // The documented `webhook_url` push: txt + md + per-page json.
+        let push = json!({
+            "txt": "Hello LiteOCR\nInvoice #1234",
+            "md": "# Hello LiteOCR\n\nInvoice #1234",
+            "json": [
+                {"page": 1, "text": "Hello LiteOCR\nInvoice #1234", "md": "# Hello LiteOCR\n\nInvoice #1234",
+                 "images": [{"name": "img_p0_1.png", "height": 100, "width": 100, "x": 0, "y": 0}]},
+                {"page": 2, "text": "Line Items", "md": "## Line Items"}
+            ],
+            "images": ["img_p0_1.png"]
+        });
+        let event = crate::parse_webhook("llamaparse/agentic", &push).unwrap();
+        assert!(event.job.is_none(), "the push carries no job id");
+        let WebhookStatus::Succeeded(resp) = event.status else { panic!("expected the result") };
+        assert_eq!(resp.pages.len(), 2);
+        assert_eq!(resp.model, "llamaparse/agentic");
+        assert!(resp.markdown.starts_with("# Hello LiteOCR"));
+        let status = crate::resolve_webhook("llamaparse", &push, &RetrieveOptions::default()).await.unwrap();
+        assert!(matches!(status, JobStatus::Succeeded(_)));
+    }
+
+    #[tokio::test]
+    async fn webhook_events_name_the_job() {
+        let event = json!({"event_id": "149744dd", "event_type": "parse.success", "timestamp": 1753985275.1,
+                           "data": {"id": "a9a5-job", "job_id": "a9a5-job"}});
+        let parsed = crate::parse_webhook("llamaparse", &event).unwrap();
+        assert!(matches!(parsed.status, WebhookStatus::Finished));
+        assert_eq!(parsed.job.as_ref().unwrap().model, "llamaparse/cost_effective");
+        let pending = json!({"event_type": "parse.pending", "data": {"job_id": "a9a5-job"}});
+        assert!(matches!(crate::parse_webhook("llamaparse", &pending).unwrap().status, WebhookStatus::Pending));
+        let extract = json!({"event_type": "extract.success", "data": {"job_id": "x"}});
+        assert_eq!(crate::parse_webhook("llamaparse", &extract).unwrap_err().kind, ErrorKind::Input);
+        assert_eq!(crate::parse_webhook("llamaparse", &json!({"hello": 1})).unwrap_err().kind, ErrorKind::Input);
+
+        let failed =
+            json!({"id": "a9a5-job", "status": "ERROR", "error_code": "TIMEOUT", "error_message": "Job timed out"});
+        let (base, _) = serve(vec![(200, failed.to_string())]).await;
+        let error_event = json!({"event_type": "parse.error", "data": {"job_id": "a9a5-job"}});
+        let JobStatus::Failed(e) = crate::resolve_webhook("llamaparse", &error_event, &opts(&base)).await.unwrap()
+        else {
+            panic!("expected failure")
+        };
+        assert_eq!(e.kind, ErrorKind::Provider);
+        assert!(e.message.contains("Job timed out"), "the provider's message is fetched: {e}");
+    }
+
+    #[tokio::test]
+    async fn providers_without_jobs_say_so() {
+        let e = crate::submit_parse(DocumentRequest::from_path("a.pdf").model("gemini/2.5-flash")).await.unwrap_err();
+        assert_eq!(e.kind, ErrorKind::UnsupportedModel);
+        assert!(e.message.contains("reducto, extend, llamaparse"), "{e}");
+        let bad = DocumentRequest::from_path("a.pdf").model("llamaparse").webhook_url("ftp://x");
+        assert_eq!(crate::submit_parse(bad).await.unwrap_err().kind, ErrorKind::Input);
     }
 }

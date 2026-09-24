@@ -1,0 +1,29 @@
+{
+  "response_type": "parse",
+  "job_id": "5b0e8a52-3f1c-4d7e-9a61-2c4f0d9e7b13",
+  "duration": 2.8653998374938965,
+  "pdf_url": "https://example-storage.invalid/org/REDACTED/5b0e8a52-3f1c-4d7e-9a61-2c4f0d9e7b13/converted.pdf?X-Amz-Signature=REDACTED",
+  "studio_link": "https://studio.reducto.ai/job/5b0e8a52-3f1c-4d7e-9a61-2c4f0d9e7b13",
+  "usage": {
+    "num_pages": 1,
+    "credits": 2.0,
+    "credit_breakdown": {
+      "page": 1.0,
+      "complex": 1.0
+    },
+    "page_billing_breakdown": {
+      "1": [
+        "complex",
+        "page"
+      ]
+    },
+    "non_empty_cell_count": null
+  },
+  "result": {
+    "type": "url",
+    "url": "https://example-storage.invalid/org/REDACTED/5b0e8a52-3f1c-4d7e-9a61-2c4f0d9e7b13/c7d2f4a9-8e15-4b3a-a0d6-91f2e3b4c5d8.json?X-Amz-Expires=43200&X-Amz-Signature=REDACTED",
+    "result_id": "c7d2f4a9-8e15-4b3a-a0d6-91f2e3b4c5d8"
+  },
+  "parse_mode": null,
+  "document_properties": null
+}

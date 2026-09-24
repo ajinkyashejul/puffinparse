@@ -1,0 +1,65 @@
+{
+  "object": "parse_run",
+  "id": "pr_Q7uRlTestUrlRun0000001",
+  "file": {
+    "object": "file",
+    "id": "file_Q7uRlTestUrlFile00001",
+    "name": "invoice_001.png",
+    "type": "IMG",
+    "parentFileId": null,
+    "metadata": {},
+    "dataRetention": {
+      "mode": "workspace_default",
+      "status": "available"
+    },
+    "createdAt": "2026-09-24T20:21:43.552Z",
+    "updatedAt": "2026-09-24T20:21:48.951Z"
+  },
+  "status": "PROCESSED",
+  "failureReason": null,
+  "failureMessage": null,
+  "metadata": null,
+  "dataRetention": {
+    "mode": "workspace_default",
+    "status": "available"
+  },
+  "output": null,
+  "outputUrl": "https://example-storage.invalid/org__REDACTED/ws_REDACTED/parser-runs/pr_Q7uRlTestUrlRun0000001.json?X-Amz-Expires=900&X-Amz-Signature=REDACTED",
+  "metrics": {
+    "processingTimeMs": 4398,
+    "pageCount": 1
+  },
+  "config": {
+    "target": "markdown",
+    "blockOptions": {
+      "tables": {
+        "targetFormat": "markdown"
+      }
+    },
+    "chunkingStrategy": {
+      "type": "page"
+    },
+    "engine": "parse_light",
+    "engineVersion": "1.0.0"
+  },
+  "batchId": null,
+  "usage": {
+    "credits": 0.5,
+    "totalCredits": 0.5,
+    "breakdown": [
+      {
+        "object": "parse_run",
+        "id": "pr_Q7uRlTestUrlRun0000001",
+        "credits": 0.5,
+        "charges": [
+          {
+            "product": "parse_light",
+            "unit": "page",
+            "quantity": 1,
+            "credits": 0.5
+          }
+        ]
+      }
+    ]
+  }
+}

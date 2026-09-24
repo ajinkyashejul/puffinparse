@@ -4,9 +4,14 @@
 //! → poll `GET /parse_runs/{id}` until `PROCESSED` / `FAILED`.
 //! Extract flow: the same file reference → `POST /extract_runs` → poll `GET /extract_runs/{id}`.
 //! API version pinned via the mandatory `x-extend-api-version` header.
+//!
+//! Jobs API (`crate::submit_parse` / `retrieve_parse`): the same `POST /parse_runs`, then one
+//! `GET /parse_runs/{id}` per retrieve. `provider_options.responseType = "url"` asks for the output
+//! as a presigned URL (fetched without auth) instead of inline.
 
 use crate::error::{Error, ErrorKind, Result};
 use crate::http::{self, Deadline, Retry};
+use crate::jobs::{JobHandle, JobStatus, WebhookEvent, WebhookStatus};
 use crate::provider::{self, Provider};
 use crate::types::{
     BBox, Block, BlockType, Citation, DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, FieldInfo,
@@ -32,85 +37,6 @@ pub struct Extend;
 impl Provider for Extend {
     fn name(&self) -> &'static str {
         NAME
-    }
-
-    async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
-        let api_key = provider::resolve_api_key(request, ENV_KEY, NAME)?;
-        let base = provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE);
-        let deadline = Deadline::new(request.timeout_secs);
-        let retry = Retry::new(request.max_retries);
-        let client = http::client();
-        let headers = |rb: reqwest::RequestBuilder| {
-            let rb = rb.bearer_auth(&api_key).header("x-extend-api-version", API_VERSION);
-            match request.option("workspace_id").and_then(Value::as_str) {
-                Some(ws) => rb.header("x-extend-workspace-id", ws),
-                None => rb,
-            }
-        };
-
-        // 1. File reference: URL directly, or upload bytes.
-        let file_ref = resolve_file_ref(request, client, &base, &headers, retry, &deadline).await?;
-
-        // 2. Build config.
-        let body = build_body(request, model, file_ref)?;
-
-        // 3. Create async run.
-        let run: ParseRun = http::with_retry(NAME, retry, &deadline, || {
-            let rb = headers(client.post(format!("{base}/parse_runs"))).timeout(deadline.request_timeout()).json(&body);
-            async move { http::read_json(NAME, rb.send().await?).await }
-        })
-        .await?;
-        let run_id = run.id.clone();
-        tracing::debug!(run_id = %run_id, status = %run.status, "extend: run created");
-
-        // 4. Poll.
-        let run = if run.status == "PROCESSED" || run.status == "FAILED" {
-            run
-        } else {
-            http::poll_until(NAME, &deadline, Duration::from_secs(1), Duration::from_secs(10), || {
-                let rb = headers(client.get(format!("{base}/parse_runs/{run_id}"))).timeout(deadline.request_timeout());
-                async move {
-                    let run: ParseRun = http::read_json(NAME, rb.send().await?).await?;
-                    Ok(match run.status.as_str() {
-                        "PROCESSED" | "FAILED" => Some(run),
-                        _ => None,
-                    })
-                }
-            })
-            .await
-            .map_err(|e| e.with_job_id(run_id.clone()))?
-        };
-
-        if run.status == "FAILED" {
-            let reason = run.failure_reason.clone().unwrap_or_else(|| "UNKNOWN".into());
-            let msg = run.failure_message.clone().unwrap_or_default();
-            let kind = match reason.as_str() {
-                "OCR_ERROR" | "INTERNAL_ERROR" => ErrorKind::Provider,
-                "OUT_OF_CREDITS" => ErrorKind::Authentication,
-                _ => ErrorKind::BadRequest,
-            };
-            return Err(Error::new(kind, format!("parse run failed: {reason}: {msg}"))
-                .with_provider(NAME)
-                .with_job_id(run_id));
-        }
-
-        // 5. Output (inline, or via presigned URL when responseType=url was requested).
-        let output = match (run.output.clone(), run.output_url.as_deref()) {
-            (Some(o), _) => o,
-            (None, Some(url)) => {
-                let resp = client.get(url).timeout(deadline.request_timeout()).send().await?;
-                http::read_json::<Output>(NAME, resp).await?
-            }
-            (None, None) => {
-                return Err(Error::provider("run finished without output").with_provider(NAME).with_job_id(run_id))
-            }
-        };
-
-        let raw = if request.include_raw { Some(serde_json::to_value(&run)?) } else { None };
-        let mut resp = normalize(&run, output, request.output);
-        resp.provider_job_id = Some(run_id);
-        resp.raw = raw;
-        Ok(resp)
     }
 
     async fn extract(&self, request: &ExtractRequest, model: &str) -> Result<ExtractResponse> {
@@ -176,6 +102,209 @@ impl Provider for Extend {
         resp.raw = raw;
         Ok(resp)
     }
+
+    async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
+        let ctx = Ctx::new(request)?;
+        let headers = |rb: reqwest::RequestBuilder| ctx.headers(rb);
+
+        // 1. File reference: URL directly, or upload bytes.
+        let file_ref = resolve_file_ref(request, ctx.client, &ctx.base, &headers, ctx.retry, &ctx.deadline).await?;
+
+        // 2. Build config.
+        let body = build_body(request, model, file_ref)?;
+
+        // 3. Create async run.
+        let run = ctx.create(&body).await?;
+        let run_id = run.id.clone();
+        tracing::debug!(run_id = %run_id, status = %run.status, "extend: run created");
+
+        // 4. Poll.
+        let run = if run.status == "PROCESSED" || run.status == "FAILED" {
+            run
+        } else {
+            http::poll_until(NAME, &ctx.deadline, Duration::from_secs(1), Duration::from_secs(10), || async {
+                let run = ctx.get_run_once(&run_id).await?;
+                Ok(match run.status.as_str() {
+                    "PROCESSED" | "FAILED" => Some(run),
+                    _ => None,
+                })
+            })
+            .await
+            .map_err(|e| e.with_job_id(run_id.clone()))?
+        };
+
+        if run.status == "FAILED" {
+            return Err(parse_run_failure(&run));
+        }
+
+        // 5. Output (inline, or via presigned URL when responseType=url was requested).
+        ctx.finish_parse(run, request).await
+    }
+
+    /// `POST /parse_runs` and return; Extend has no per-run webhook (see `docs/providers/extend.md`).
+    async fn submit_parse(&self, request: &DocumentRequest, model: &str) -> Result<JobHandle> {
+        if provider::webhook_url(request)?.is_some() {
+            return Err(Error::input(
+                "extend has no per-run webhook URL: register an endpoint once (POST /webhook_endpoints or the \
+                 dashboard) subscribed to parse_run.processed / parse_run.failed, then hand its bodies to \
+                 liteocr parse_webhook / resolve_webhook",
+            )
+            .with_provider(NAME));
+        }
+        let ctx = Ctx::new(request)?;
+        let headers = |rb: reqwest::RequestBuilder| ctx.headers(rb);
+        let file_ref = resolve_file_ref(request, ctx.client, &ctx.base, &headers, ctx.retry, &ctx.deadline).await?;
+        let body = build_body(request, model, file_ref)?;
+        let run = ctx.create(&body).await?;
+        tracing::debug!(run_id = %run.id, status = %run.status, "extend: run submitted");
+        let mut job = JobHandle::new(NAME, model, run.id);
+        for key in ["workspace_id", RESPONSE_TYPE] {
+            if let Some(v) = request.option(key) {
+                job = job.with_state(key, v.clone());
+            }
+        }
+        Ok(job)
+    }
+
+    /// One `GET /parse_runs/{id}` (with `?responseType=url` when the run was submitted that way).
+    async fn retrieve_parse(&self, job: &JobHandle, request: &DocumentRequest, _model: &str) -> Result<JobStatus> {
+        let ctx = Ctx::new(request)?;
+        let run = http::with_retry(NAME, ctx.retry, &ctx.deadline, || ctx.get_run_once(&job.job_id))
+            .await
+            .map_err(|e| e.with_job_id(job.job_id.clone()))?;
+        match run.status.as_str() {
+            "PROCESSED" => Ok(JobStatus::Succeeded(Box::new(ctx.finish_parse(run, request).await?))),
+            "FAILED" | "CANCELLED" => Ok(JobStatus::Failed(parse_run_failure(&run))),
+            _ => Ok(JobStatus::Pending),
+        }
+    }
+
+    /// `{"eventId", "eventType": "parse_run.processed" | "parse_run.failed", "payload": {…}}` where
+    /// `payload` is a `parse_run_status` (id, status, failureReason, failureMessage, metadata).
+    fn parse_webhook(&self, model: &str, payload: &Value) -> Result<WebhookEvent> {
+        let event_type = payload.get("eventType").and_then(Value::as_str).unwrap_or_default();
+        if !event_type.is_empty() && !event_type.starts_with("parse_run.") {
+            return Err(Error::input(format!("extend webhook event '{event_type}' is not a parse run event"))
+                .with_provider(NAME));
+        }
+        let inner = payload.get("payload").unwrap_or(payload);
+        if inner.get("id").is_none() && inner.get("data").and_then(Value::as_str).is_some() {
+            return Err(Error::input(
+                "extend webhook body is a signed download URL (payload.data): download it and pass the JSON it \
+                 holds instead",
+            )
+            .with_provider(NAME));
+        }
+        let run: ParseRun = serde_json::from_value(inner.clone()).map_err(|e| {
+            Error::input(format!("extend webhook payload is not a parse run status: {e}")).with_provider(NAME)
+        })?;
+        let status = match run.status.as_str() {
+            "PROCESSED" => match run.output.clone() {
+                // A full run object (not the minimal status) carries the output inline.
+                Some(output) => {
+                    let mut resp = normalize(&run, output, OutputFormat::Markdown);
+                    resp.provider_job_id = Some(run.id.clone());
+                    WebhookStatus::Succeeded(Box::new(resp))
+                }
+                None => WebhookStatus::Finished,
+            },
+            "FAILED" | "CANCELLED" => WebhookStatus::Failed(parse_run_failure(&run)),
+            _ => WebhookStatus::Pending,
+        };
+        Ok(WebhookEvent { job: Some(JobHandle::new(NAME, model, run.id)), status })
+    }
+}
+
+/// `provider_options` key (Extend's own query-parameter name) asking for the output as a presigned
+/// URL (`GET /parse_runs/{id}?responseType=url`) instead of inline. Consumed by LiteOCR, never sent
+/// in the body.
+const RESPONSE_TYPE: &str = "responseType";
+
+/// Credentials, endpoint and limits resolved once per call.
+struct Ctx {
+    api_key: String,
+    base: String,
+    workspace_id: Option<String>,
+    response_type: Option<String>,
+    deadline: Deadline,
+    retry: Retry,
+    client: &'static reqwest::Client,
+}
+
+impl Ctx {
+    fn new(request: &DocumentRequest) -> Result<Self> {
+        Ok(Self {
+            api_key: provider::resolve_api_key(request, ENV_KEY, NAME)?,
+            base: provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE),
+            workspace_id: request.option("workspace_id").and_then(Value::as_str).map(String::from),
+            response_type: request.option(RESPONSE_TYPE).and_then(Value::as_str).map(String::from),
+            deadline: Deadline::new(request.timeout_secs),
+            retry: Retry::new(request.max_retries),
+            client: http::client(),
+        })
+    }
+
+    /// Bearer key, pinned API version, and the workspace header when one was given.
+    fn headers(&self, rb: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        let rb = rb.bearer_auth(&self.api_key).header("x-extend-api-version", API_VERSION);
+        match &self.workspace_id {
+            Some(ws) => rb.header("x-extend-workspace-id", ws),
+            None => rb,
+        }
+    }
+
+    /// `POST /parse_runs`.
+    async fn create(&self, body: &Value) -> Result<ParseRun> {
+        let url = format!("{}/parse_runs", self.base);
+        http::with_retry(NAME, self.retry, &self.deadline, || {
+            let rb = self.headers(self.client.post(&url)).timeout(self.deadline.request_timeout()).json(body);
+            async move { http::read_json(NAME, rb.send().await?).await }
+        })
+        .await
+    }
+
+    /// One `GET /parse_runs/{id}`, adding `?responseType=…` when asked for.
+    async fn get_run_once(&self, run_id: &str) -> Result<ParseRun> {
+        let mut url = format!("{}/parse_runs/{run_id}", self.base);
+        if let Some(rt) = &self.response_type {
+            url.push_str(&format!("?responseType={rt}"));
+        }
+        let rb = self.headers(self.client.get(url)).timeout(self.deadline.request_timeout());
+        http::read_json(NAME, rb.send().await?).await
+    }
+
+    /// Output inline, or downloaded from `outputUrl` (plain GET, no auth header: it is presigned).
+    async fn finish_parse(&self, run: ParseRun, request: &DocumentRequest) -> Result<ParseResponse> {
+        let run_id = run.id.clone();
+        let output = match (run.output.clone(), run.output_url.as_deref()) {
+            (Some(o), _) => o,
+            (None, Some(url)) => {
+                let resp = self.client.get(url).timeout(self.deadline.request_timeout()).send().await?;
+                http::read_json::<Output>(NAME, resp).await.map_err(|e| e.with_job_id(run_id.clone()))?
+            }
+            (None, None) => {
+                return Err(Error::provider("run finished without output").with_provider(NAME).with_job_id(run_id))
+            }
+        };
+        let raw = if request.include_raw { Some(serde_json::to_value(&run)?) } else { None };
+        let mut resp = normalize(&run, output, request.output);
+        resp.provider_job_id = Some(run_id);
+        resp.raw = raw;
+        Ok(resp)
+    }
+}
+
+/// A `FAILED` parse run → error: `OCR_ERROR` / `INTERNAL_ERROR` → provider, `OUT_OF_CREDITS` →
+/// authentication, anything else → bad request. Message and run id are always kept.
+fn parse_run_failure(run: &ParseRun) -> Error {
+    let reason = run.failure_reason.clone().unwrap_or_else(|| "UNKNOWN".into());
+    let msg = run.failure_message.clone().unwrap_or_default();
+    let kind = match reason.as_str() {
+        "OCR_ERROR" | "INTERNAL_ERROR" => ErrorKind::Provider,
+        "OUT_OF_CREDITS" => ErrorKind::Authentication,
+        _ => ErrorKind::BadRequest,
+    };
+    Error::new(kind, format!("parse run failed: {reason}: {msg}")).with_provider(NAME).with_job_id(run.id.clone())
 }
 
 fn is_terminal(status: &str) -> bool {
@@ -260,6 +389,7 @@ fn build_body(request: &DocumentRequest, model: &str, file_ref: Value) -> Result
         let mut patch = opts.clone();
         if let Value::Object(o) = &mut patch {
             o.remove("workspace_id");
+            o.remove(RESPONSE_TYPE);
             let mut cfg = serde_json::Map::new();
             for k in CONFIG_KEYS {
                 if let Some(v) = o.remove(*k) {
@@ -1051,5 +1181,180 @@ mod tests {
         assert_eq!(f.citations[0].page_number, 1);
         assert!(f.citations[0].bbox.is_some());
         assert!(f.confidence.unwrap() > 0.5);
+    }
+}
+
+// ---- loopback transport tests --------------------------------------------------------------------
+
+/// End-to-end tests against a local HTTP server: the real requests the provider builds and the
+/// real response paths, including `responseType=url` output downloads.
+#[cfg(test)]
+mod wire {
+    use super::*;
+    use crate::jobs::RetrieveOptions;
+    use crate::testutil::{fixture, pdf_request, serve};
+
+    const STORAGE: &str = "https://example-storage.invalid";
+    const RUN: &str = "pr_Q7uRlTestUrlRun0000001";
+
+    fn upload() -> (u16, String) {
+        (200, json!({"object": "file", "id": "file_up1", "name": "doc.pdf"}).to_string())
+    }
+
+    fn processing(id: &str) -> (u16, String) {
+        (
+            200,
+            json!({"object": "parse_run", "id": id, "status": "PROCESSING", "output": null, "outputUrl": null})
+                .to_string(),
+        )
+    }
+
+    /// The captured `GET /parse_runs/{id}?responseType=url` answer, pointed at the loopback server.
+    fn url_run() -> String {
+        fixture("extend_parse_run_url.json").replace(STORAGE, "{base}")
+    }
+
+    fn opts(base: &str) -> RetrieveOptions {
+        RetrieveOptions {
+            api_key: Some("test-key".into()),
+            base_url: Some(base.into()),
+            max_retries: 0,
+            ..Default::default()
+        }
+    }
+
+    #[tokio::test]
+    async fn parse_downloads_a_url_output() {
+        let (base, seen) = serve(vec![
+            upload(),
+            processing(RUN),
+            (200, url_run()),
+            (200, fixture("extend_parse_run_url_output.json")),
+        ])
+        .await;
+        let req = pdf_request(&base).provider_options(json!({"responseType": "url", "workspace_id": "ws_1"}));
+        let resp = Extend.parse(&req, "parse_light").await.expect("parse");
+
+        let seen = seen.lock().unwrap();
+        assert_eq!(seen.len(), 4);
+        assert_eq!(seen[0].route(), "POST /files/upload");
+        assert_eq!(seen[1].route(), "POST /parse_runs");
+        let body: Value = serde_json::from_str(&seen[1].body).unwrap();
+        assert!(body.get("responseType").is_none(), "responseType is a query parameter, not a body key");
+        assert!(body.get("workspace_id").is_none());
+        assert_eq!(body["config"]["engine"], "parse_light");
+        assert_eq!(seen[2].route(), format!("GET /parse_runs/{RUN}?responseType=url"));
+        assert_eq!(seen[2].header("x-extend-api-version").as_deref(), Some(API_VERSION));
+        assert_eq!(seen[2].header("x-extend-workspace-id").as_deref(), Some("ws_1"));
+        assert!(seen[3].route().starts_with("GET /org__REDACTED/ws_REDACTED/parser-runs/"));
+        assert_eq!(seen[3].header("authorization"), None, "presigned URLs are fetched without the key");
+
+        assert_eq!(resp.provider_job_id.as_deref(), Some(RUN));
+        assert_eq!(resp.pages.len(), 1);
+        assert_eq!(resp.usage.pages, 1);
+        assert_eq!(resp.usage.credits, Some(0.5));
+        assert!(resp.markdown.contains("Cedar Ridge Supply"));
+        assert_eq!(resp.pages[0].blocks.len(), 7);
+        assert_eq!(resp.pages[0].width, Some(1240.0));
+        assert!(resp.pages[0].blocks.iter().all(|b| b.bbox.is_some()));
+    }
+
+    #[tokio::test]
+    async fn a_run_with_neither_output_nor_url_is_an_error() {
+        let mut run: Value = serde_json::from_str(&url_run()).unwrap();
+        run["outputUrl"] = Value::Null;
+        let (base, _) = serve(vec![upload(), (200, run.to_string())]).await;
+        let e = Extend.parse(&pdf_request(&base), "parse_light").await.unwrap_err();
+        assert_eq!(e.kind, ErrorKind::Provider);
+        assert!(e.message.contains("without output"));
+        assert_eq!(e.job_id.as_deref(), Some(RUN));
+    }
+
+    // ---- jobs API --------------------------------------------------------------------------------
+
+    #[tokio::test]
+    async fn submit_then_retrieve_until_done() {
+        let (base, seen) = serve(vec![
+            upload(),
+            processing("pr_job1"),
+            processing("pr_job1"),
+            (200, url_run()),
+            (200, fixture("extend_parse_run_url_output.json")),
+        ])
+        .await;
+        let req = pdf_request(&base)
+            .model("extend/parse_light")
+            .provider_options(json!({"workspace_id": "ws_1", "responseType": "url", "metadata": {"k": "v"}}));
+        let handle = crate::submit_parse(req).await.expect("submit");
+        assert_eq!(handle.job_id, "pr_job1");
+        assert_eq!(handle.model, "extend/parse_light");
+        assert_eq!(handle.provider_state, Some(json!({"workspace_id": "ws_1", "responseType": "url"})));
+
+        assert!(crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap().is_pending());
+        let JobStatus::Succeeded(resp) = crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap() else {
+            panic!("expected success")
+        };
+        assert_eq!(resp.model, "extend/parse_light");
+        assert!(resp.markdown.contains("Cedar Ridge Supply"));
+        assert!(resp.cost_usd.is_some());
+
+        let seen = seen.lock().unwrap();
+        let body: Value = serde_json::from_str(&seen[1].body).unwrap();
+        assert_eq!(body["metadata"], json!({"k": "v"}), "extend's own run metadata still goes through");
+        assert_eq!(seen[2].route(), "GET /parse_runs/pr_job1?responseType=url");
+        assert_eq!(seen[2].header("x-extend-workspace-id").as_deref(), Some("ws_1"), "state survives the handle");
+    }
+
+    #[tokio::test]
+    async fn retrieve_reports_a_failed_run() {
+        let failed = json!({"object": "parse_run", "id": "pr_f", "status": "FAILED",
+            "failureReason": "PASSWORD_PROTECTED_FILE", "failureMessage": "The file is password protected."});
+        let (base, _) = serve(vec![(200, failed.to_string())]).await;
+        let handle = crate::JobHandle::new(NAME, "extend/parse_performance", "pr_f");
+        let JobStatus::Failed(e) = crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap() else {
+            panic!("expected failure")
+        };
+        assert_eq!(e.kind, ErrorKind::BadRequest);
+        assert!(e.message.contains("PASSWORD_PROTECTED_FILE") && e.message.contains("password protected"));
+        assert_eq!(e.job_id.as_deref(), Some("pr_f"));
+    }
+
+    #[tokio::test]
+    async fn webhook_url_is_rejected_before_any_request() {
+        let (base, seen) = serve(vec![]).await;
+        let req = pdf_request(&base).model("extend").webhook_url("https://hooks.example.com/x");
+        let e = crate::submit_parse(req).await.unwrap_err();
+        assert_eq!(e.kind, ErrorKind::Input);
+        assert!(e.message.contains("webhook_endpoints"), "{e}");
+        assert!(seen.lock().unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn webhook_events_map_to_statuses() {
+        let failed = json!({"eventId": "evt_1", "eventType": "parse_run.failed", "payload": {
+            "object": "parse_run_status", "id": "pr_9", "status": "FAILED",
+            "failureReason": "OUT_OF_CREDITS", "failureMessage": "No credits left.", "metadata": null}});
+        let event = crate::parse_webhook("extend", &failed).unwrap();
+        let WebhookStatus::Failed(e) = event.status else { panic!("expected failure") };
+        assert_eq!(e.kind, ErrorKind::Authentication);
+        assert!(e.message.contains("No credits left."));
+        assert_eq!(event.job.unwrap().job_id, "pr_9");
+
+        let processed = json!({"eventId": "evt_2", "eventType": "parse_run.processed", "payload": {
+            "object": "parse_run_status", "id": RUN, "status": "PROCESSED", "failureReason": null}});
+        let event = crate::parse_webhook("extend/parse_light", &processed).unwrap();
+        assert!(matches!(event.status, WebhookStatus::Finished));
+        assert_eq!(event.job.as_ref().unwrap().model, "extend/parse_light");
+
+        let signed = json!({"eventId": "e", "eventType": "parse_run.processed", "payload": {"data": "https://x"}});
+        assert_eq!(crate::parse_webhook("extend", &signed).unwrap_err().kind, ErrorKind::Input);
+        let other = json!({"eventId": "e", "eventType": "extract_run.processed", "payload": {"id": "exr_1"}});
+        assert_eq!(crate::parse_webhook("extend", &other).unwrap_err().kind, ErrorKind::Input);
+
+        let (base, seen) = serve(vec![(200, fixture("extend_parse_run.json"))]).await;
+        let status = crate::resolve_webhook("extend/parse_light", &processed, &opts(&base)).await.unwrap();
+        let JobStatus::Succeeded(resp) = status else { panic!("expected success") };
+        assert_eq!(resp.pages.len(), 2);
+        assert_eq!(seen.lock().unwrap()[0].route(), format!("GET /parse_runs/{RUN}"));
     }
 }

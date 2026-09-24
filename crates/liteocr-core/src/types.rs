@@ -162,6 +162,11 @@ pub struct DocumentRequest {
     /// Override the provider base URL.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub base_url: Option<String>,
+    /// A URL the provider should POST to when an asynchronous job finishes. Only used by
+    /// [`crate::submit_parse`]; mapped to each provider's native webhook setting (Reducto
+    /// `async.webhook`, LlamaParse `webhook_url`). Providers without per-job webhooks reject it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub webhook_url: Option<String>,
     /// Free-form metadata echoed back in the response.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub metadata: BTreeMap<String, serde_json::Value>,
@@ -190,6 +195,7 @@ impl DocumentRequest {
             max_retries: default_retries(),
             api_key: None,
             base_url: None,
+            webhook_url: None,
             metadata: BTreeMap::new(),
         }
     }
@@ -285,6 +291,12 @@ impl DocumentRequest {
 
     pub fn base_url(mut self, url: impl Into<String>) -> Self {
         self.base_url = Some(url.into());
+        self
+    }
+
+    /// Ask the provider to POST to `url` when a job started with [`crate::submit_parse`] finishes.
+    pub fn webhook_url(mut self, url: impl Into<String>) -> Self {
+        self.webhook_url = Some(url.into());
         self
     }
 

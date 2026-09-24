@@ -1,0 +1,155 @@
+{
+  "type": "full",
+  "chunks": [
+    {
+      "content": "# Cedar Ridge Supply\n\n88 Foundry Lane\nBuilding C\nAkron, OH 44308\n\nBill To:\nGlobex Industries\n88 Riverside Avenue\nAustin, TX 78701\n\nInvoice #: INV-9865\nDate: 2024-08-03\nDue Date: 2024-09-03\nPurchase Order: PO-28844\nTerms: Net 30\n\n| Description                 | Qty   | Unit Price   | Amount    |\n|-|-|-|-|\n| Hydraulic fluid, 5 gal      | 18    | 24.40        | $439.20   |\n| Thermal label rolls         | 10    | 156.27       | $1,562.70 |\n| Workbench vise, 6 inch      | 12    | 88.57        | $1,062.84 |\n| Safety goggles, pack of 12  | 21    | 299.02       | $6,279.42 |\n| Kraft shipping boxes, large | 15    | 281.05       | $4,215.75 |\n| Replacement drive belts     | 22    | 10.59        | $232.98   |\n\nSubtotal: $13,792.89\nSales Tax (6.25%): $862.06\nShipping and Handling: $12.48\nTotal Due: $14,667.43\n\nPayment is due within 30 days of the invoice date. Please include the invoice number with your remittance.",
+      "embed": "# Cedar Ridge Supply\n\n88 Foundry Lane\nBuilding C\nAkron, OH 44308\n\nBill To:\nGlobex Industries\n88 Riverside Avenue\nAustin, TX 78701\n\nInvoice #: INV-9865\nDate: 2024-08-03\nDue Date: 2024-09-03\nPurchase Order: PO-28844\nTerms: Net 30\n\n| Description                 | Qty   | Unit Price   | Amount    |\n|-|-|-|-|\n| Hydraulic fluid, 5 gal      | 18    | 24.40        | $439.20   |\n| Thermal label rolls         | 10    | 156.27       | $1,562.70 |\n| Workbench vise, 6 inch      | 12    | 88.57        | $1,062.84 |\n| Safety goggles, pack of 12  | 21    | 299.02       | $6,279.42 |\n| Kraft shipping boxes, large | 15    | 281.05       | $4,215.75 |\n| Replacement drive belts     | 22    | 10.59        | $232.98   |\n\nSubtotal: $13,792.89\nSales Tax (6.25%): $862.06\nShipping and Handling: $12.48\nTotal Due: $14,667.43\n\nPayment is due within 30 days of the invoice date. Please include the invoice number with your remittance.",
+      "enriched": null,
+      "enrichment_success": false,
+      "blocks": [
+        {
+          "type": "Title",
+          "bbox": {
+            "left": 0.06532258064516129,
+            "top": 0.046750285062713795,
+            "width": 0.3379032258064516,
+            "height": 0.026225769669327253,
+            "page": 1,
+            "original_page": 1
+          },
+          "content": "Cedar Ridge Supply",
+          "image_url": null,
+          "chart_data": null,
+          "confidence": "high",
+          "granular_confidence": {
+            "extract_confidence": null,
+            "parse_confidence": 0.9407446265220643
+          },
+          "extra": null
+        },
+        {
+          "type": "Text",
+          "bbox": {
+            "left": 0.06370967741935483,
+            "top": 0.09578107183580388,
+            "width": 0.1620967741935484,
+            "height": 0.05530216647662486,
+            "page": 1,
+            "original_page": 1
+          },
+          "content": "88 Foundry Lane\nBuilding C\nAkron, OH 44308",
+          "image_url": null,
+          "chart_data": null,
+          "confidence": "high",
+          "granular_confidence": {
+            "extract_confidence": null,
+            "parse_confidence": 0.9319870054721833
+          },
+          "extra": null
+        },
+        {
+          "type": "Text",
+          "bbox": {
+            "left": 0.06370967741935483,
+            "top": 0.17217787913340935,
+            "width": 0.18548387096774194,
+            "height": 0.0758266818700114,
+            "page": 1,
+            "original_page": 1
+          },
+          "content": "Bill To:\nGlobex Industries\n88 Riverside Avenue\nAustin, TX 78701",
+          "image_url": null,
+          "chart_data": null,
+          "confidence": "high",
+          "granular_confidence": {
+            "extract_confidence": null,
+            "parse_confidence": 0.8211942315101624
+          },
+          "extra": null
+        },
+        {
+          "type": "Key Value",
+          "bbox": {
+            "left": 0.06290322580645161,
+            "top": 0.26795895096921324,
+            "width": 0.24516129032258063,
+            "height": 0.0974914481185861,
+            "page": 1,
+            "original_page": 1
+          },
+          "content": "Invoice #: INV-9865\nDate: 2024-08-03\nDue Date: 2024-09-03\nPurchase Order: PO-28844\nTerms: Net 30",
+          "image_url": null,
+          "chart_data": null,
+          "confidence": "high",
+          "granular_confidence": {
+            "extract_confidence": null,
+            "parse_confidence": 0.8217881917953491
+          },
+          "extra": null
+        },
+        {
+          "type": "Table",
+          "bbox": {
+            "left": 0.06370967741935483,
+            "top": 0.3831242873432155,
+            "width": 0.8733870967741936,
+            "height": 0.21151653363740022,
+            "page": 1,
+            "original_page": 1
+          },
+          "content": "| Description                 | Qty   | Unit Price   | Amount    |\n|-|-|-|-|\n| Hydraulic fluid, 5 gal      | 18    | 24.40        | $439.20   |\n| Thermal label rolls         | 10    | 156.27       | $1,562.70 |\n| Workbench vise, 6 inch      | 12    | 88.57        | $1,062.84 |\n| Safety goggles, pack of 12  | 21    | 299.02       | $6,279.42 |\n| Kraft shipping boxes, large | 15    | 281.05       | $4,215.75 |\n| Replacement drive belts     | 22    | 10.59        | $232.98   |",
+          "image_url": null,
+          "chart_data": null,
+          "confidence": "high",
+          "granular_confidence": {
+            "extract_confidence": null,
+            "parse_confidence": 0.9135054145540511
+          },
+          "extra": null
+        },
+        {
+          "type": "Text",
+          "bbox": {
+            "left": 0.06370967741935483,
+            "top": 0.6088939566704675,
+            "width": 0.27661290322580645,
+            "height": 0.07525655644241733,
+            "page": 1,
+            "original_page": 1
+          },
+          "content": "Subtotal: $13,792.89\nSales Tax (6.25%): $862.06\nShipping and Handling: $12.48\nTotal Due: $14,667.43",
+          "image_url": null,
+          "chart_data": null,
+          "confidence": "high",
+          "granular_confidence": {
+            "extract_confidence": null,
+            "parse_confidence": 0.7848081022500992
+          },
+          "extra": null
+        },
+        {
+          "type": "Text",
+          "bbox": {
+            "left": 0.06370967741935483,
+            "top": 0.7052451539338654,
+            "width": 0.8459677419354839,
+            "height": 0.0330672748004561,
+            "page": 1,
+            "original_page": 1
+          },
+          "content": "Payment is due within 30 days of the invoice date. Please include the invoice number with your remittance.",
+          "image_url": null,
+          "chart_data": null,
+          "confidence": "high",
+          "granular_confidence": {
+            "extract_confidence": null,
+            "parse_confidence": 0.9603421747684479
+          },
+          "extra": null
+        }
+      ]
+    }
+  ],
+  "ocr": null,
+  "custom": null
+}

@@ -6,9 +6,13 @@
 //!
 //! Extract flow: the same upload step → `POST /extract` (or `/extract_async` + `GET /job/{id}`) with
 //! `instructions.schema` and `settings.citations`.
+//!
+//! Jobs API (`crate::submit_parse` / `retrieve_parse`): `POST /parse_async` (with
+//! `async.webhook` for `webhook_url`) → one `GET /job/{id}` per retrieve.
 
 use crate::error::{Error, Result};
 use crate::http::{self, Deadline, Retry};
+use crate::jobs::{JobHandle, JobStatus, WebhookEvent, WebhookStatus};
 use crate::provider::{self, Provider};
 use crate::types::{
     BBox, Block, BlockType, Citation, DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, FieldInfo,
@@ -36,14 +40,10 @@ impl Provider for Reducto {
     }
 
     async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
-        let api_key = provider::resolve_api_key(request, ENV_KEY, NAME)?;
-        let base = provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE);
-        let deadline = Deadline::new(request.timeout_secs);
-        let retry = Retry::new(request.max_retries);
-        let client = http::client();
+        let ctx = Ctx::new(request)?;
 
         // 1. Input reference.
-        let input = resolve_input(request, client, &base, &api_key, retry, &deadline).await?;
+        let input = resolve_input(request, ctx.client, &ctx.base, &ctx.api_key, ctx.retry, &ctx.deadline).await?;
 
         // 2. Body.
         let use_async = request.option("async").and_then(Value::as_bool).unwrap_or(false);
@@ -51,95 +51,24 @@ impl Provider for Reducto {
 
         // 3. Parse (sync or async + poll).
         let parsed: WireParseResponse = if use_async {
-            let submit: AsyncParseResponse = http::with_retry(NAME, retry, &deadline, || {
-                let rb = client
-                    .post(format!("{base}/parse_async"))
-                    .bearer_auth(&api_key)
-                    .timeout(deadline.request_timeout())
-                    .json(&body);
-                async move { http::read_json(NAME, rb.send().await?).await }
-            })
-            .await?;
-            let job_id = submit.job_id.clone();
+            let job_id = ctx.submit("parse_async", &body).await?;
             tracing::debug!(job_id = %job_id, "reducto: async job submitted");
-            let job = http::poll_until(NAME, &deadline, Duration::from_secs(1), Duration::from_secs(8), || {
-                let rb = client
-                    .get(format!("{base}/job/{job_id}"))
-                    .bearer_auth(&api_key)
-                    .timeout(deadline.request_timeout());
-                async move {
-                    let job: JobResponse = http::read_json(NAME, rb.send().await?).await?;
-                    Ok(match job.status.as_str() {
-                        "Completed" | "Failed" | "Cancelled" => Some(job),
-                        _ => None,
-                    })
-                }
-            })
-            .await
-            .map_err(|e| e.with_job_id(job_id.clone()))?;
-            if job.status != "Completed" {
-                let reason = job
-                    .reason
-                    .or_else(|| {
-                        job.error.as_ref().and_then(|e| e.get("message")).and_then(Value::as_str).map(String::from)
-                    })
-                    .unwrap_or_else(|| "unknown".into());
-                return Err(Error::provider(format!("job {}: {reason}", job.status))
-                    .with_provider(NAME)
-                    .with_job_id(job_id));
-            }
-            let result = job.result.ok_or_else(|| {
-                Error::provider("completed job has no result").with_provider(NAME).with_job_id(job_id.clone())
-            })?;
-            serde_json::from_value(result).map_err(|e| {
-                Error::provider(format!("unexpected job result shape: {e}")).with_provider(NAME).with_job_id(job_id)
-            })?
+            let result = ctx.wait(&job_id).await?;
+            parse_job_result(result, &job_id)?
         } else {
-            http::with_retry(NAME, retry, &deadline, || {
-                let rb = client
-                    .post(format!("{base}/parse"))
-                    .bearer_auth(&api_key)
-                    .timeout(deadline.request_timeout())
-                    .json(&body);
-                async move { http::read_json(NAME, rb.send().await?).await }
-            })
-            .await?
+            ctx.post("parse", &body).await?
         };
 
         // 4. Large results come back as a presigned URL holding the same `FullResult` object.
-        let job_id = parsed.job_id.clone();
-        let full = match &parsed.result {
-            ParseResult::Full(f) => f.clone(),
-            ParseResult::Url { url, .. } => {
-                let resp = client.get(url).timeout(deadline.request_timeout()).send().await?;
-                match http::read_json::<ParseResult>(NAME, resp).await? {
-                    ParseResult::Full(f) => f,
-                    ParseResult::Url { .. } => {
-                        return Err(Error::provider("result URL returned another URL")
-                            .with_provider(NAME)
-                            .with_job_id(job_id))
-                    }
-                }
-            }
-        };
-
-        let raw = if request.include_raw { Some(serde_json::to_value(&parsed)?) } else { None };
-        let mut resp = normalize(&parsed, &full, request.output, model);
-        resp.provider_job_id = Some(job_id);
-        resp.raw = raw;
-        Ok(resp)
+        ctx.finish_parse(parsed, request, model).await
     }
 
     async fn extract(&self, request: &ExtractRequest, model: &str) -> Result<ExtractResponse> {
         let doc = &request.document;
-        let api_key = provider::resolve_api_key(doc, ENV_KEY, NAME)?;
-        let base = provider::resolve_base_url(doc, ENV_BASE, DEFAULT_BASE);
-        let deadline = Deadline::new(doc.timeout_secs);
-        let retry = Retry::new(doc.max_retries);
-        let client = http::client();
+        let ctx = Ctx::new(doc)?;
 
         // 1. Input reference (identical to the parse path: URL through, everything else uploaded).
-        let input = resolve_input(doc, client, &base, &api_key, retry, &deadline).await?;
+        let input = resolve_input(doc, ctx.client, &ctx.base, &ctx.api_key, ctx.retry, &ctx.deadline).await?;
 
         // 2. Body.
         let use_async = doc.option("async").and_then(Value::as_bool).unwrap_or(false);
@@ -147,59 +76,14 @@ impl Provider for Reducto {
 
         // 3. Extract (sync, or async + poll on the shared /job endpoint).
         let wire: WireExtractResponse = if use_async {
-            let submit: AsyncParseResponse = http::with_retry(NAME, retry, &deadline, || {
-                let rb = client
-                    .post(format!("{base}/extract_async"))
-                    .bearer_auth(&api_key)
-                    .timeout(deadline.request_timeout())
-                    .json(&body);
-                async move { http::read_json(NAME, rb.send().await?).await }
-            })
-            .await?;
-            let job_id = submit.job_id.clone();
+            let job_id = ctx.submit("extract_async", &body).await?;
             tracing::debug!(job_id = %job_id, "reducto: async extract job submitted");
-            let job = http::poll_until(NAME, &deadline, Duration::from_secs(1), Duration::from_secs(8), || {
-                let rb = client
-                    .get(format!("{base}/job/{job_id}"))
-                    .bearer_auth(&api_key)
-                    .timeout(deadline.request_timeout());
-                async move {
-                    let job: JobResponse = http::read_json(NAME, rb.send().await?).await?;
-                    Ok(match job.status.as_str() {
-                        "Completed" | "Failed" | "Cancelled" => Some(job),
-                        _ => None,
-                    })
-                }
-            })
-            .await
-            .map_err(|e| e.with_job_id(job_id.clone()))?;
-            if job.status != "Completed" {
-                let reason = job
-                    .reason
-                    .or_else(|| {
-                        job.error.as_ref().and_then(|e| e.get("message")).and_then(Value::as_str).map(String::from)
-                    })
-                    .unwrap_or_else(|| "unknown".into());
-                return Err(Error::provider(format!("job {}: {reason}", job.status))
-                    .with_provider(NAME)
-                    .with_job_id(job_id));
-            }
-            let result = job.result.ok_or_else(|| {
-                Error::provider("completed job has no result").with_provider(NAME).with_job_id(job_id.clone())
-            })?;
+            let result = ctx.wait(&job_id).await?;
             serde_json::from_value(result).map_err(|e| {
                 Error::provider(format!("unexpected job result shape: {e}")).with_provider(NAME).with_job_id(job_id)
             })?
         } else {
-            http::with_retry(NAME, retry, &deadline, || {
-                let rb = client
-                    .post(format!("{base}/extract"))
-                    .bearer_auth(&api_key)
-                    .timeout(deadline.request_timeout())
-                    .json(&body);
-                async move { http::read_json(NAME, rb.send().await?).await }
-            })
-            .await?
+            ctx.post("extract", &body).await?
         };
 
         // 4. `settings.force_url_result` (and large results) return a presigned URL holding the
@@ -207,7 +91,7 @@ impl Provider for Reducto {
         let result = match url_result(&wire.result) {
             None => wire.result.clone(),
             Some(url) => {
-                let resp = client.get(url).timeout(deadline.request_timeout()).send().await?;
+                let resp = ctx.client.get(url).timeout(ctx.deadline.request_timeout()).send().await?;
                 let body = http::read_response(NAME, resp).await?;
                 serde_json::from_str(&body).map_err(|e| {
                     Error::provider(format!(
@@ -225,6 +109,203 @@ impl Provider for Reducto {
         resp.raw = raw;
         Ok(resp)
     }
+
+    /// `POST /parse_async` with the same body as `parse`, plus `async.webhook` for `webhook_url`.
+    async fn submit_parse(&self, request: &DocumentRequest, model: &str) -> Result<JobHandle> {
+        let ctx = Ctx::new(request)?;
+        let input = resolve_input(request, ctx.client, &ctx.base, &ctx.api_key, ctx.retry, &ctx.deadline).await?;
+        let body = build_submit_body(request, model, &input)?;
+        let job_id = ctx.submit("parse_async", &body).await?;
+        tracing::debug!(job_id = %job_id, "reducto: job submitted");
+        Ok(JobHandle::new(NAME, model, job_id))
+    }
+
+    /// One `GET /job/{id}`; a completed job's result is followed through a presigned URL if needed.
+    async fn retrieve_parse(&self, job: &JobHandle, request: &DocumentRequest, model: &str) -> Result<JobStatus> {
+        let ctx = Ctx::new(request)?;
+        let job_id = job.job_id.as_str();
+        let wire = ctx.job(job_id).await?;
+        match job_outcome(wire, job_id) {
+            JobOutcome::Running => Ok(JobStatus::Pending),
+            JobOutcome::Failed(e) => Ok(JobStatus::Failed(e)),
+            JobOutcome::Completed(result) => {
+                let parsed = parse_job_result(result, job_id)?;
+                let resp = ctx.finish_parse(parsed, request, model).await.map_err(|e| e.with_job_id(job_id))?;
+                Ok(JobStatus::Succeeded(Box::new(resp)))
+            }
+        }
+    }
+
+    /// Direct webhooks POST `{"status": "Completed" | "Failed", "job_id": …, "metadata": …}`.
+    /// The body carries neither the result nor a failure reason, so both are `Finished`.
+    fn parse_webhook(&self, model: &str, payload: &Value) -> Result<WebhookEvent> {
+        let job_id = payload
+            .get("job_id")
+            .and_then(Value::as_str)
+            .filter(|s| !s.is_empty())
+            .ok_or_else(|| Error::input("reducto webhook payload has no job_id").with_provider(NAME))?;
+        let status = match payload.get("status").and_then(Value::as_str) {
+            Some("Completed" | "Failed" | "Cancelled") => WebhookStatus::Finished,
+            _ => WebhookStatus::Pending,
+        };
+        Ok(WebhookEvent { job: Some(JobHandle::new(NAME, model, job_id)), status })
+    }
+}
+
+/// Credentials, endpoint and limits resolved once per call.
+struct Ctx {
+    api_key: String,
+    base: String,
+    deadline: Deadline,
+    retry: Retry,
+    client: &'static reqwest::Client,
+}
+
+impl Ctx {
+    fn new(request: &DocumentRequest) -> Result<Self> {
+        Ok(Self {
+            api_key: provider::resolve_api_key(request, ENV_KEY, NAME)?,
+            base: provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE),
+            deadline: Deadline::new(request.timeout_secs),
+            retry: Retry::new(request.max_retries),
+            client: http::client(),
+        })
+    }
+
+    /// `POST {base}/{path}` with retries, decoding the JSON answer.
+    async fn post<T: serde::de::DeserializeOwned>(&self, path: &str, body: &Value) -> Result<T> {
+        let url = format!("{}/{path}", self.base);
+        http::with_retry(NAME, self.retry, &self.deadline, || {
+            let rb =
+                self.client.post(&url).bearer_auth(&self.api_key).timeout(self.deadline.request_timeout()).json(body);
+            async move { http::read_json(NAME, rb.send().await?).await }
+        })
+        .await
+    }
+
+    /// Submit to an `*_async` endpoint and return the job id.
+    async fn submit(&self, path: &str, body: &Value) -> Result<String> {
+        let submit: AsyncParseResponse = self.post(path, body).await?;
+        Ok(submit.job_id)
+    }
+
+    /// One `GET {base}/job/{id}` (no retry: the polling loop is the retry).
+    async fn job_once(&self, job_id: &str) -> Result<JobResponse> {
+        let rb = self
+            .client
+            .get(format!("{}/job/{job_id}", self.base))
+            .bearer_auth(&self.api_key)
+            .timeout(self.deadline.request_timeout());
+        http::read_json(NAME, rb.send().await?).await
+    }
+
+    /// `GET {base}/job/{id}` with retries on transient errors.
+    async fn job(&self, job_id: &str) -> Result<JobResponse> {
+        http::with_retry(NAME, self.retry, &self.deadline, || self.job_once(job_id))
+            .await
+            .map_err(|e| e.with_job_id(job_id))
+    }
+
+    /// Poll the job until it is terminal; returns a completed job's `result`.
+    async fn wait(&self, job_id: &str) -> Result<Value> {
+        let job = http::poll_until(NAME, &self.deadline, Duration::from_secs(1), Duration::from_secs(8), || async {
+            let job = self.job_once(job_id).await?;
+            Ok(match job.status.as_str() {
+                "Completed" | "Failed" | "Cancelled" => Some(job),
+                _ => None,
+            })
+        })
+        .await
+        .map_err(|e| e.with_job_id(job_id))?;
+        match job_outcome(job, job_id) {
+            JobOutcome::Completed(result) => Ok(result),
+            JobOutcome::Failed(e) => Err(e),
+            JobOutcome::Running => unreachable!("poll_until only returns terminal jobs"),
+        }
+    }
+
+    /// Follow a `url` result if needed, then normalise.
+    async fn finish_parse(
+        &self,
+        parsed: WireParseResponse,
+        request: &DocumentRequest,
+        model: &str,
+    ) -> Result<ParseResponse> {
+        let job_id = parsed.job_id.clone();
+        let full = match &parsed.result {
+            ParseResult::Full(f) => f.clone(),
+            ParseResult::Url { url, .. } => {
+                let resp = self.client.get(url).timeout(self.deadline.request_timeout()).send().await?;
+                match http::read_json::<ParseResult>(NAME, resp).await.map_err(|e| e.with_job_id(job_id.clone()))? {
+                    ParseResult::Full(f) => f,
+                    ParseResult::Url { .. } => {
+                        return Err(Error::provider("result URL returned another URL")
+                            .with_provider(NAME)
+                            .with_job_id(job_id))
+                    }
+                }
+            }
+        };
+        let raw = if request.include_raw { Some(serde_json::to_value(&parsed)?) } else { None };
+        let mut resp = normalize(&parsed, &full, request.output, model);
+        resp.provider_job_id = Some(job_id);
+        resp.raw = raw;
+        Ok(resp)
+    }
+}
+
+/// Where a `GET /job/{id}` answer leaves the job.
+enum JobOutcome {
+    Running,
+    Completed(Value),
+    Failed(Error),
+}
+
+/// `Completed` → the result; `Failed` / `Cancelled` → a provider error carrying `reason` (or
+/// `error.message`) and the job id; anything else (`Pending`, `Idle`, `InProgress`, `Completing`)
+/// is still running.
+fn job_outcome(job: JobResponse, job_id: &str) -> JobOutcome {
+    match job.status.as_str() {
+        "Completed" => match job.result {
+            Some(result) => JobOutcome::Completed(result),
+            None => JobOutcome::Failed(
+                Error::provider("completed job has no result").with_provider(NAME).with_job_id(job_id),
+            ),
+        },
+        "Failed" | "Cancelled" => {
+            let reason = job
+                .reason
+                .or_else(|| job.error.as_ref().and_then(|e| e.get("message")).and_then(Value::as_str).map(String::from))
+                .unwrap_or_else(|| "unknown".into());
+            JobOutcome::Failed(
+                Error::provider(format!("job {}: {reason}", job.status)).with_provider(NAME).with_job_id(job_id),
+            )
+        }
+        _ => JobOutcome::Running,
+    }
+}
+
+/// A completed parse job's `result` is the same object the sync `/parse` returns.
+fn parse_job_result(result: Value, job_id: &str) -> Result<WireParseResponse> {
+    serde_json::from_value(result).map_err(|e| {
+        Error::provider(format!("unexpected job result shape: {e}")).with_provider(NAME).with_job_id(job_id)
+    })
+}
+
+/// The `/parse_async` body: the `parse` body, Reducto's own `async` object if the caller passed
+/// one, and `async.webhook = {"mode": "direct", "url": …}` for `webhook_url`.
+fn build_submit_body(request: &DocumentRequest, model: &str, input: &str) -> Result<Value> {
+    let mut body = build_body(request, model, input)?;
+    if let Some(Value::Object(native)) = request.option("async") {
+        body["async"] = Value::Object(native.clone());
+    }
+    if let Some(url) = provider::webhook_url(request)? {
+        if !body["async"].is_object() {
+            body["async"] = json!({});
+        }
+        body["async"]["webhook"] = json!({ "mode": "direct", "url": url });
+    }
+    Ok(body)
 }
 
 /// Resolve the document to a Reducto `input` string: URLs are passed through, bytes and paths are
@@ -869,5 +950,217 @@ mod tests {
         assert_eq!(f.citations[0].page_number, 1);
         assert!(f.citations[0].bbox.is_some());
         assert!(f.confidence.unwrap() > 0.5);
+    }
+}
+
+// ---- loopback transport tests --------------------------------------------------------------------
+
+/// End-to-end tests against a local HTTP server: the real requests the provider builds and the
+/// real response paths, including following a presigned `result.type == "url"` link.
+#[cfg(test)]
+mod wire {
+    use super::*;
+    use crate::jobs::RetrieveOptions;
+    use crate::testutil::{fixture, pdf_request, serve};
+    use crate::ErrorKind;
+
+    const STORAGE: &str = "https://example-storage.invalid";
+
+    fn upload() -> (u16, String) {
+        (200, json!({"file_id": "reducto://abc.pdf", "presigned_url": null}).to_string())
+    }
+
+    /// The captured `/parse` envelope, with its presigned URL pointed at the loopback server.
+    fn url_envelope() -> String {
+        fixture("reducto_parse_url.json").replace(STORAGE, "{base}")
+    }
+
+    #[tokio::test]
+    async fn parse_follows_a_url_result() {
+        let (base, seen) =
+            serve(vec![upload(), (200, url_envelope()), (200, fixture("reducto_parse_url_result.json"))]).await;
+        let resp = Reducto.parse(&pdf_request(&base).include_raw(true), "standard").await.expect("parse");
+
+        let seen = seen.lock().unwrap();
+        assert_eq!(seen.len(), 3);
+        assert_eq!(seen[0].route(), "POST /upload");
+        assert_eq!(seen[1].route(), "POST /parse");
+        assert!(seen[2].route().starts_with("GET /org/REDACTED/"), "{}", seen[2].line);
+        assert!(seen[2].line.contains("X-Amz-Signature=REDACTED"), "query string kept: {}", seen[2].line);
+        assert_eq!(seen[1].header("authorization").as_deref(), Some("bearer test-key"));
+        assert_eq!(seen[2].header("authorization"), None, "presigned URLs are fetched without the key");
+
+        assert_eq!(resp.provider_job_id.as_deref(), Some("5b0e8a52-3f1c-4d7e-9a61-2c4f0d9e7b13"));
+        assert_eq!(resp.pages.len(), 1);
+        assert_eq!(resp.usage.pages, 1);
+        assert_eq!(resp.usage.credits, Some(2.0));
+        assert!(resp.markdown.contains("Cedar Ridge Supply"));
+        assert!(resp.markdown.contains("Total Due: $14,667.43"));
+        assert_eq!(resp.pages[0].blocks.len(), 7);
+        assert!(resp.pages[0].blocks.iter().all(|b| b.bbox.is_some()));
+        assert_eq!(resp.raw.as_ref().unwrap()["result"]["type"], "url", "raw keeps the envelope");
+    }
+
+    #[tokio::test]
+    async fn a_url_that_returns_another_url_is_an_error() {
+        let (base, _) = serve(vec![
+            upload(),
+            (200, url_envelope()),
+            (200, json!({"type": "url", "url": "x", "result_id": "y"}).to_string()),
+        ])
+        .await;
+        let e = Reducto.parse(&pdf_request(&base), "standard").await.unwrap_err();
+        assert_eq!(e.kind, ErrorKind::Provider);
+        assert!(e.message.contains("another URL"));
+        assert_eq!(e.job_id.as_deref(), Some("5b0e8a52-3f1c-4d7e-9a61-2c4f0d9e7b13"));
+    }
+
+    #[tokio::test]
+    async fn an_expired_result_url_keeps_the_storage_error() {
+        let expired =
+            "<?xml version=\"1.0\"?><Error><Code>AccessDenied</Code><Message>Request has expired</Message></Error>";
+        let (base, _) = serve(vec![upload(), (200, url_envelope()), (403, expired.into())]).await;
+        let e = Reducto.parse(&pdf_request(&base), "standard").await.unwrap_err();
+        assert_eq!(e.status_code, Some(403));
+        assert!(e.message.contains("Request has expired"), "the storage message is surfaced: {e}");
+    }
+
+    #[tokio::test]
+    async fn extract_follows_a_url_result_holding_the_bare_value() {
+        let plain: Value = serde_json::from_str(&fixture("reducto_extract_plain.json")).unwrap();
+        let mut envelope = plain.clone();
+        envelope["result"] =
+            json!({"type": "url", "url": "{base}/results/r1.json?X-Amz-Signature=REDACTED", "result_id": "r1"});
+        let (base, seen) = serve(vec![upload(), (200, envelope.to_string()), (200, plain["result"].to_string())]).await;
+        let doc = pdf_request(&base).provider_options(json!({"settings": {"force_url_result": true}}));
+        let schema = json!({"type": "object", "properties": {"invoice_number": {"type": "string"}}});
+        let resp = Reducto.extract(&ExtractRequest::new(doc, schema), "extract").await.expect("extract");
+
+        let seen = seen.lock().unwrap();
+        assert_eq!(seen[1].route(), "POST /extract");
+        let sent: Value = serde_json::from_str(&seen[1].body).unwrap();
+        assert_eq!(sent["settings"]["force_url_result"], true);
+        assert!(seen[2].route().starts_with("GET /results/r1.json"));
+        assert_eq!(seen[2].header("authorization"), None);
+        assert_eq!(resp.data["invoice_number"], "INV-9865", "single-element list unwrapped");
+        assert_eq!(resp.usage.pages, 1);
+    }
+
+    // ---- jobs API --------------------------------------------------------------------------------
+
+    fn job(status: &str, result: Option<Value>) -> (u16, String) {
+        let mut j = json!({"status": status, "progress": null, "reason": null});
+        if let Some(r) = result {
+            j["result"] = r;
+        }
+        (200, j.to_string())
+    }
+
+    fn opts(base: &str) -> RetrieveOptions {
+        RetrieveOptions {
+            api_key: Some("test-key".into()),
+            base_url: Some(base.into()),
+            max_retries: 0,
+            ..Default::default()
+        }
+    }
+
+    #[tokio::test]
+    async fn submit_then_retrieve_until_done() {
+        let parsed: Value = serde_json::from_str(&fixture("reducto_parse.json")).unwrap();
+        let (base, seen) = serve(vec![
+            upload(),
+            (200, json!({"job_id": "job-123"}).to_string()),
+            job("Pending", None),
+            job("InProgress", None),
+            job("Completed", Some(parsed)),
+        ])
+        .await;
+        let req = pdf_request(&base)
+            .model("reducto/r-1")
+            .webhook_url("https://hooks.example.com/reducto")
+            .provider_options(json!({"async": {"metadata": {"tenant": "t1"}}}));
+        let mut req = req;
+        req.metadata.insert("run".into(), json!("r1"));
+        let handle = crate::submit_parse(req).await.expect("submit");
+        assert_eq!(handle.provider, "reducto");
+        assert_eq!(handle.model, "reducto/r-1");
+        assert_eq!(handle.job_id, "job-123");
+        assert_eq!(handle.base_url.as_deref(), Some(base.as_str()));
+        assert!(!serde_json::to_string(&handle).unwrap().contains("test-key"), "no secret in the handle");
+
+        assert!(crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap().is_pending());
+        assert!(crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap().is_pending());
+        let JobStatus::Succeeded(resp) = crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap() else {
+            panic!("expected success")
+        };
+        assert_eq!(resp.model, "reducto/r-1");
+        assert_eq!(resp.provider, "reducto");
+        assert!(resp.markdown.starts_with("# Hello LiteOCR"));
+        assert_eq!(resp.metadata["run"], "r1", "request metadata is echoed");
+        assert!(resp.cost_usd.is_some(), "priced like parse()");
+        assert!(resp.raw.is_none());
+
+        let seen = seen.lock().unwrap();
+        assert_eq!(seen[1].route(), "POST /parse_async");
+        let body: Value = serde_json::from_str(&seen[1].body).unwrap();
+        assert_eq!(body["async"]["webhook"], json!({"mode": "direct", "url": "https://hooks.example.com/reducto"}));
+        assert_eq!(body["async"]["metadata"]["tenant"], "t1", "reducto's own async object is kept");
+        assert_eq!(body["settings"]["model"], "r-1");
+        assert_eq!(seen[2].route(), "GET /job/job-123");
+        assert_eq!(seen[4].header("authorization").as_deref(), Some("bearer test-key"));
+    }
+
+    #[tokio::test]
+    async fn retrieve_follows_a_url_result_and_reports_failures() {
+        let envelope: Value = serde_json::from_str(&url_envelope()).unwrap();
+        let (base, _) = serve(vec![
+            job("Completed", Some(envelope)),
+            (200, fixture("reducto_parse_url_result.json")),
+            (200, json!({"status": "Failed", "reason": "Password-protected document"}).to_string()),
+        ])
+        .await;
+        let handle = crate::JobHandle::new(NAME, "reducto/standard", "job-9");
+        let JobStatus::Succeeded(resp) = crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap() else {
+            panic!("expected success")
+        };
+        assert!(resp.markdown.contains("Cedar Ridge Supply"));
+        let JobStatus::Failed(e) = crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap() else {
+            panic!("expected failure")
+        };
+        assert_eq!(e.kind, ErrorKind::Provider);
+        assert!(e.message.contains("Password-protected document"));
+        assert_eq!(e.job_id.as_deref(), Some("job-9"));
+        assert_eq!(e.provider.as_deref(), Some("reducto"));
+    }
+
+    #[tokio::test]
+    async fn retrieve_maps_http_errors() {
+        let (base, _) = serve(vec![(401, r#"{"detail":"Invalid access token"}"#.into())]).await;
+        let handle = crate::JobHandle::new(NAME, "reducto/standard", "job-1");
+        let e = crate::retrieve_parse_with(&handle, &opts(&base)).await.unwrap_err();
+        assert_eq!(e.kind, ErrorKind::Authentication);
+        assert_eq!(e.job_id.as_deref(), Some("job-1"));
+    }
+
+    #[tokio::test]
+    async fn webhook_names_the_job_and_resolve_fetches_it() {
+        let body = json!({"status": "Completed", "job_id": "job-7", "metadata": {"tenant": "t1"}});
+        let event = crate::parse_webhook("reducto", &body).unwrap();
+        assert!(matches!(event.status, WebhookStatus::Finished));
+        let handle = event.job.unwrap();
+        assert_eq!((handle.model.as_str(), handle.job_id.as_str()), ("reducto/standard", "job-7"));
+        let pending = crate::parse_webhook("reducto", &json!({"status": "Pending", "job_id": "job-7"})).unwrap();
+        assert!(matches!(pending.status, WebhookStatus::Pending));
+        assert_eq!(
+            crate::parse_webhook("reducto", &json!({"status": "Completed"})).unwrap_err().kind,
+            ErrorKind::Input
+        );
+
+        let parsed: Value = serde_json::from_str(&fixture("reducto_parse.json")).unwrap();
+        let (base, seen) = serve(vec![job("Completed", Some(parsed))]).await;
+        let status = crate::resolve_webhook("reducto", &body, &opts(&base)).await.unwrap();
+        assert!(matches!(status, JobStatus::Succeeded(_)));
+        assert_eq!(seen.lock().unwrap()[0].route(), "GET /job/job-7");
     }
 }
