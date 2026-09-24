@@ -298,13 +298,13 @@ fn table_scores(pred: &str, truth: &str, opts: NormalizeOptions) -> (Option<f64>
 
 /// Aggregate of per-document metrics.
 ///
-/// `score` is the headline: the mean over documents of each document's primary metric
+/// `headline` is the number leaderboards rank on: the mean over documents of each document's primary metric
 /// ([`headline`]: `table_score` for `table-only` documents, the pass rate for rule documents,
-/// `char_similarity` otherwise), failures counting 0; `overall = 100 × score`. `char_similarity` is
+/// `char_similarity` otherwise), failures counting 0; `overall = 100 × headline`. `char_similarity` is
 /// the plain mean of the documents' `char_similarity` (for a rule document that field carries the
 /// pass rate, see [`metrics_from_rules`]).
 ///
-/// Deserialising a result file written before `score` existed (scorer v1) fills it from
+/// Deserialising a result file written before `headline` existed (scorer v1) fills it from
 /// `overall / 100`; in those files `char_similarity` held the headline too.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(from = "SummaryWire")]
@@ -312,7 +312,7 @@ pub struct Summary {
     pub documents: usize,
     pub failed: usize,
     /// Headline accuracy in `0..=1` (see the type docs). Leaderboards rank on this.
-    pub score: f64,
+    pub headline: f64,
     /// Mean of per-document `char_similarity`; failures count as 0.
     pub char_similarity: f64,
     pub cer: f64,
@@ -328,7 +328,7 @@ pub struct Summary {
     /// Mean rule pass rate over the documents that were rule-scored. `None` if there were none.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rule_pass_rate: Option<f64>,
-    /// `100 * score`; failures count as 0.
+    /// `100 * headline`; failures count as 0.
     pub overall: f64,
 }
 
@@ -338,7 +338,7 @@ struct SummaryWire {
     documents: usize,
     failed: usize,
     #[serde(default)]
-    score: Option<f64>,
+    headline: Option<f64>,
     char_similarity: f64,
     cer: f64,
     wer: f64,
@@ -359,7 +359,7 @@ impl From<SummaryWire> for Summary {
         Self {
             documents: w.documents,
             failed: w.failed,
-            score: w.score.unwrap_or(w.overall / 100.0),
+            headline: w.headline.unwrap_or(w.overall / 100.0),
             char_similarity: w.char_similarity,
             cer: w.cer,
             wer: w.wer,
@@ -420,11 +420,11 @@ pub fn summarize_with(metrics: &[Option<Metrics>], table_only: &[bool]) -> Summa
             Some(vals.iter().sum::<f64>() / vals.len() as f64)
         }
     };
-    let score = if n == 0 { 0.0 } else { headlines.iter().sum::<f64>() / n as f64 };
+    let headline = if n == 0 { 0.0 } else { headlines.iter().sum::<f64>() / n as f64 };
     Summary {
         documents: n,
         failed,
-        score,
+        headline,
         char_similarity: mean(&|m| m.char_similarity),
         // error rates: failures count as 1.0
         cer: if n == 0 { 0.0 } else { (ok.iter().map(|m| m.cer).sum::<f64>() + failed as f64) / n as f64 },
@@ -434,7 +434,7 @@ pub fn summarize_with(metrics: &[Option<Metrics>], table_only: &[bool]) -> Summa
         table_score: mean_opt(&|m| m.table_score),
         teds_grid: mean_opt(&|m| m.teds_grid),
         rule_pass_rate: mean_opt(&|m| m.rule_pass_rate),
-        overall: 100.0 * score,
+        overall: 100.0 * headline,
     }
 }
 
@@ -527,6 +527,11 @@ pub struct Rule {
     /// Compare case-sensitively; overrides [`NormalizeOptions::case_insensitive`] for this rule.
     #[serde(default)]
     pub case_sensitive: bool,
+    /// Levenshtein edits tolerated when matching `text` / `before` / `after` / table headers and
+    /// values (olmOCR-bench's `max_diffs`, which upstream applies with `fuzzysearch`). `None` or `0`
+    /// means exact matching after normalisation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_diffs: Option<usize>,
     /// The upstream rule id, so a score can be pushed back to the publisher's own harness.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source: Option<String>,
@@ -696,6 +701,50 @@ fn approx_contains(needle: &[char], hay: &[char], max: usize) -> bool {
     false
 }
 
+/// End positions (exclusive, in chars) of every substring of `hay` within `max` edits of `needle`.
+fn approx_match_ends(needle: &[char], hay: &[char], max: usize) -> Vec<usize> {
+    let m = needle.len();
+    let mut ends = Vec::new();
+    let mut col: Vec<usize> = (0..=m).collect();
+    if col[m] <= max {
+        ends.push(0);
+    }
+    for (j, &h) in hay.iter().enumerate() {
+        let mut diag = 0;
+        for i in 1..=m {
+            let up = col[i];
+            let v = if needle[i - 1] == h { diag } else { 1 + diag.min(up).min(col[i - 1]) };
+            diag = up;
+            col[i] = v;
+        }
+        if col[m] <= max {
+            ends.push(j + 1);
+        }
+    }
+    ends
+}
+
+/// `(earliest start, latest start)` in chars of the substrings of `hay` within `max` edits of
+/// `needle`, or `None` when there is none. Starts come from matching the reversed strings.
+fn approx_match_start_range(needle: &str, hay: &[char], max: usize) -> Option<(usize, usize)> {
+    let rev_needle: Vec<char> = needle.chars().rev().collect();
+    let rev_hay: Vec<char> = hay.iter().rev().copied().collect();
+    let ends = approx_match_ends(&rev_needle, &rev_hay, max);
+    let n = hay.len();
+    // A match ending at `e` in the reversed text starts at `n - e` in the original.
+    Some((n - *ends.iter().max()?, n - *ends.iter().min()?))
+}
+
+/// Substring test honouring a rule's `max_diffs` (exact when it is 0).
+fn contains_within(hay: &str, needle: &str, max_diffs: usize) -> bool {
+    if max_diffs == 0 {
+        return hay.contains(needle);
+    }
+    let hay: Vec<char> = hay.chars().collect();
+    let needle: Vec<char> = needle.chars().collect();
+    approx_contains(&needle, &hay, max_diffs)
+}
+
 /// Is `sentence` (rule-normalised) present in the prediction, exactly or within
 /// [`BAG_SENTENCE_MIN_SIMILARITY`]?
 fn sentence_present(cache: &PredictionCache<'_>, sentence: &str, cs: bool) -> bool {
@@ -746,6 +795,7 @@ pub fn score_rules(prediction: &str, rules: &[Rule], opts: NormalizeOptions) -> 
 /// `Ok(())` when the rule passes, `Err(detail)` when it does not.
 fn check_rule(cache: &PredictionCache<'_>, rule: &Rule) -> Result<(), String> {
     let cs = rule.case_sensitive;
+    let k = rule.max_diffs.unwrap_or(0);
     match rule.rule_type {
         RuleType::Present | RuleType::Absent => {
             let raw = rule.text.as_deref().ok_or_else(|| "missing `text`".to_string())?;
@@ -753,7 +803,11 @@ fn check_rule(cache: &PredictionCache<'_>, rule: &Rule) -> Result<(), String> {
             if needle.is_empty() {
                 return Err(format!("`text` {} is empty after normalisation", snippet(raw)));
             }
-            let found = cache.text(cs).contains(&needle);
+            let found = if k == 0 {
+                cache.text(cs).contains(&needle)
+            } else {
+                approx_contains(&needle.chars().collect::<Vec<_>>(), cache.chars(cs), k)
+            };
             match (rule.rule_type, found) {
                 (RuleType::Present, false) => Err(format!("not found: {}", snippet(&needle))),
                 (RuleType::Absent, true) => Err(format!("present but must be absent: {}", snippet(&needle))),
@@ -767,6 +821,22 @@ fn check_rule(cache: &PredictionCache<'_>, rule: &Rule) -> Result<(), String> {
             let after = cache.needle(after_raw, cs);
             if before.is_empty() || after.is_empty() {
                 return Err("`before` or `after` is empty after normalisation".to_string());
+            }
+            if k > 0 {
+                // olmOCR semantics: some fuzzy match of `before` starts before some fuzzy match of
+                // `after`, i.e. the earliest `before` start precedes the latest `after` start.
+                let hay = cache.chars(cs);
+                let Some((b_first, _)) = approx_match_start_range(&before, hay, k) else {
+                    return Err(format!("`before` not found within {k} edits: {}", snippet(&before)));
+                };
+                let Some((_, a_last)) = approx_match_start_range(&after, hay, k) else {
+                    return Err(format!("`after` not found within {k} edits: {}", snippet(&after)));
+                };
+                return if b_first < a_last {
+                    Ok(())
+                } else {
+                    Err(format!("{} occurs only before {}", snippet(&after), snippet(&before)))
+                };
             }
             let hay = cache.text(cs);
             let Some(b) = hay.find(&before) else {
@@ -803,13 +873,14 @@ fn check_rule(cache: &PredictionCache<'_>, rule: &Rule) -> Result<(), String> {
         }
         RuleType::TableCell => {
             let cell = rule.cell.as_ref().ok_or_else(|| "missing `cell`".to_string())?;
-            check_table_cell(cache, cell, cs)
+            check_table_cell(cache, cell, cs, k)
         }
     }
 }
 
-/// `table_cell`: find a matching row in any markdown table of the prediction and compare the cell.
-fn check_table_cell(cache: &PredictionCache<'_>, cell: &CellRule, cs: bool) -> Result<(), String> {
+/// `table_cell`: find a matching row in any table of the prediction and compare the cell.
+/// `k` (`max_diffs`) edits are tolerated in header matches and in the value.
+fn check_table_cell(cache: &PredictionCache<'_>, cell: &CellRule, cs: bool, k: usize) -> Result<(), String> {
     let value = cache.needle(&cell.value, cs);
     if value.is_empty() {
         return Err("`cell.value` is empty after normalisation".to_string());
@@ -834,28 +905,28 @@ fn check_table_cell(cache: &PredictionCache<'_>, cell: &CellRule, cs: bool) -> R
         // A column is matched on the header row; without `col_header` every cell of the row counts.
         let col = match &col_header {
             Some(h) => {
-                let Some(i) = table.header.iter().position(|c| c.contains(h.as_str())) else { continue };
+                let Some(i) = table.header.iter().position(|c| contains_within(c, h, k)) else { continue };
                 saw_col = true;
                 Some(i)
             }
             None => None,
         };
         for row in &table.rows {
-            if !row_matches(row, row_header.as_deref()) {
+            if !row_matches(row, row_header.as_deref(), k) {
                 continue;
             }
             saw_row = true;
             match col {
                 Some(i) => {
                     let Some(got) = row.get(i) else { continue };
-                    if values_equal(got, &value) {
+                    if values_close(got, &value, k) {
                         return Ok(());
                     }
                     seen.push(got);
                 }
                 // No `col_header`: the value may sit in any cell of the row.
                 None => {
-                    if row.iter().any(|c| values_equal(c, &value)) || row.join(" ").contains(value.as_str()) {
+                    if row.iter().any(|c| values_close(c, &value, k)) || contains_within(&row.join(" "), &value, k) {
                         return Ok(());
                     }
                 }
@@ -879,11 +950,16 @@ fn check_table_cell(cache: &PredictionCache<'_>, cell: &CellRule, cs: bool) -> R
 
 /// A row matches when its first cell contains the header; any cell is accepted as a fallback (and
 /// when the rule gives no `row_header` at all).
-fn row_matches(row: &[String], row_header: Option<&str>) -> bool {
+fn row_matches(row: &[String], row_header: Option<&str>, k: usize) -> bool {
     match row_header {
         None => true,
-        Some(h) => row.first().is_some_and(|c| c.contains(h)) || row.iter().any(|c| c.contains(h)),
+        Some(h) => row.iter().any(|c| contains_within(c, h, k)),
     }
+}
+
+/// [`values_equal`], or within `k` Levenshtein edits when the rule allows it.
+fn values_close(a: &str, b: &str, k: usize) -> bool {
+    values_equal(a, b) || (k > 0 && levenshtein(&a.chars().collect::<Vec<_>>(), &b.chars().collect::<Vec<_>>()) <= k)
 }
 
 /// Normalised equality, with a relative tolerance of 1e-6 when both sides read as numbers.
@@ -1026,6 +1102,7 @@ mod tests {
             sentences: Vec::new(),
             threshold: None,
             case_sensitive: false,
+            max_diffs: None,
             source: None,
         }
     }
@@ -1277,7 +1354,7 @@ mod tests {
         let docs = [Some(m), Some(no_table), None];
         let s = summarize_with(&docs, &[true, true, true]);
         // The headline lives in `score`/`overall`; `char_similarity` stays the literal mean.
-        assert!((s.score - (0.99 + 0.4) / 3.0).abs() < 1e-12);
+        assert!((s.headline - (0.99 + 0.4) / 3.0).abs() < 1e-12);
         assert!((s.overall - 100.0 * (0.99 + 0.4) / 3.0).abs() < 1e-9);
         assert!((s.char_similarity - (0.311 + 0.4) / 3.0).abs() < 1e-12);
         assert_eq!(s.documents, 3);
@@ -1503,17 +1580,17 @@ mod tests {
 
     #[test]
     fn summary_json_is_backward_compatible() {
-        // A scorer-v1 summary has no `score`: it is recovered from `overall`.
+        // A scorer-v1 summary has no `headline`: it is recovered from `overall`.
         let old = r#"{"documents": 2, "failed": 0, "char_similarity": 0.9, "cer": 0.1, "wer": 0.1,
                       "word_f1": 0.9, "table_score": 0.8, "overall": 90.0}"#;
         let s: Summary = serde_json::from_str(old).unwrap();
-        assert!((s.score - 0.9).abs() < 1e-12);
+        assert!((s.headline - 0.9).abs() < 1e-12);
         assert_eq!(s.teds_grid, None);
         // Round trip of a v2 summary keeps every field.
         let m = score("| a |\n|---|\n| 1 |", "| a |\n|---|\n| 1 |", NormalizeOptions::default());
         let v2 = summarize_with(&[Some(m), None], &[true, false]);
         let json = serde_json::to_string(&v2).unwrap();
-        assert!(json.contains("\"score\":0.5"), "{json}");
+        assert!(json.contains("\"headline\":0.5"), "{json}");
         assert!(json.contains("\"teds_grid\":1.0"), "{json}");
         assert_eq!(serde_json::from_str::<Summary>(&json).unwrap(), v2);
         // Old per-document metrics without `teds_grid` still load.
@@ -1523,5 +1600,57 @@ mod tests {
         )
         .unwrap();
         assert_eq!(m_old.teds_grid, None);
+    }
+
+    #[test]
+    fn max_diffs_makes_present_absent_order_and_table_cell_fuzzy() {
+        let opts = NormalizeOptions::default();
+        let doc = "The Treaty of Westphalia was signed in 1648 after thirty years of war.";
+        let with = |r: Rule, k: usize| Rule { max_diffs: Some(k), ..r };
+        // present: two OCR slips pass at max_diffs 2, not at 0 or 1.
+        let p = present("p", "Treaty of Westphalla was sined");
+        assert_eq!(score_rules(doc, std::slice::from_ref(&p), opts).passed, 0);
+        assert_eq!(score_rules(doc, &[with(p.clone(), 1)], opts).passed, 0);
+        assert_eq!(score_rules(doc, &[with(p.clone(), 2)], opts).passed, 1);
+        // `max_diffs: 0` is exact, like no field at all.
+        assert_eq!(score_rules(doc, &[with(p, 0)], opts).passed, 0);
+        // absent: a near match counts as present, so the rule fails.
+        let a = Rule { text: Some("Treaty of Westphalla".into()), ..rule("a", RuleType::Absent) };
+        assert_eq!(score_rules(doc, std::slice::from_ref(&a), opts).passed, 1);
+        assert_eq!(score_rules(doc, &[with(a, 1)], opts).passed, 0);
+        // order: fuzzy on both sides; olmOCR semantics (some `before` start precedes some `after`).
+        let o =
+            Rule { before: Some("Westphalla".into()), after: Some("thirty yeers".into()), ..rule("o", RuleType::Order) };
+        assert_eq!(score_rules(doc, std::slice::from_ref(&o), opts).passed, 0);
+        assert_eq!(score_rules(doc, &[with(o, 1)], opts).passed, 1);
+        let rev =
+            Rule { before: Some("thirty yeers".into()), after: Some("Westphalla".into()), ..rule("r", RuleType::Order) };
+        let s = score_rules(doc, &[with(rev, 1)], opts);
+        assert_eq!(s.passed, 0);
+        assert!(s.failures[0].detail.contains("occurs only before"), "{}", s.failures[0].detail);
+        let missing =
+            Rule { before: Some("Versailles".into()), after: Some("war".into()), ..rule("m", RuleType::Order) };
+        assert!(score_rules(doc, &[with(missing, 1)], opts).failures[0].detail.contains("within 1 edits"));
+        // table_cell: headers and value within max_diffs.
+        let tc = Rule {
+            cell: Some(CellRule {
+                row_header: Some("Revenu".into()),
+                col_header: Some("Q 2".into()),
+                value: "2,001".into(),
+            }),
+            ..rule("t", RuleType::TableCell)
+        };
+        assert_eq!(score_rules(TABLE_DOC, std::slice::from_ref(&tc), opts).passed, 0);
+        assert_eq!(score_rules(TABLE_DOC, &[with(tc, 1)], opts).passed, 1);
+        // The wire field round-trips and is optional.
+        let r: Rule = serde_json::from_str(r#"{"id":"x","type":"present","text":"a","max_diffs":3}"#).unwrap();
+        assert_eq!(r.max_diffs, Some(3));
+        assert!(serde_json::to_value(present("y", "a")).unwrap().get("max_diffs").is_none());
+        // Start positions of fuzzy matches.
+        let hay: Vec<char> = "xx abc yy abd".chars().collect();
+        assert_eq!(approx_match_start_range("abc", &hay, 0), Some((3, 3)));
+        assert_eq!(approx_match_start_range("abc", &hay, 1).map(|(a, _)| a), Some(2));
+        assert!(approx_match_start_range("abc", &hay, 1).unwrap().1 >= 10);
+        assert_eq!(approx_match_start_range("zzz", &hay, 0), None);
     }
 }

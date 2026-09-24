@@ -225,7 +225,7 @@ pub struct DocResult {
     /// the pass rate for `rules`, `char_similarity` otherwise). Absent for failures and in scorer-v1
     /// files.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub score: Option<f64>,
+    pub headline: Option<f64>,
     pub latency_ms: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost_usd: Option<f64>,
@@ -605,7 +605,7 @@ async fn run_doc(ctx: &CallCtx, doc: &ManifestDoc, model: &str) -> DocResult {
                 table_only: doc.table_only(),
                 pages: resp.usage.pages,
                 metrics: Some(metrics),
-                score: Some(headline(&metrics, doc.table_only())),
+                headline: Some(headline(&metrics, doc.table_only())),
                 latency_ms: resp.latency_ms,
                 cost_usd: resp.cost_usd,
                 provider_job_id: resp.provider_job_id.clone(),
@@ -657,7 +657,7 @@ fn rescore(args: RescoreArgs) -> Result<()> {
 
 /// Re-score every document of `run` from `<outputs>/<model dir>/<doc id>.md` against `dataset`.
 ///
-/// Only the accuracy fields change: `metrics`, `score`, the `kind`/`table_only`/`category` labels
+/// Only the accuracy fields change: `metrics`, `headline`, the `kind`/`table_only`/`category` labels
 /// (refreshed from the manifest), and the summaries recomputed from them. Latency, cost, pages and
 /// errors are kept as measured. A document whose call failed stays failed. A missing output file
 /// for a successful document is an error, never a silent zero.
@@ -679,7 +679,7 @@ fn rescore_run(mut run: RunResult, dataset: &Path, outputs: &Path) -> Result<Run
             doc.category = mdoc.category.clone();
             if doc.error.is_some() {
                 doc.metrics = None;
-                doc.score = None;
+                doc.headline = None;
                 continue;
             }
             let path = dir.join(format!("{}.md", doc.id));
@@ -691,7 +691,7 @@ fn rescore_run(mut run: RunResult, dataset: &Path, outputs: &Path) -> Result<Run
                 scorings.insert(mdoc.id.as_str(), s);
             }
             let metrics = score_doc(&scorings[mdoc.id.as_str()], &prediction, run.normalize);
-            doc.score = Some(headline(&metrics, doc.table_only));
+            doc.headline = Some(headline(&metrics, doc.table_only));
             doc.metrics = Some(metrics);
         }
         model.summary = summarize_model(&model.docs);
@@ -932,7 +932,7 @@ mod tests {
             table_only,
             pages: 1,
             metrics,
-            score: None,
+            headline: None,
             latency_ms: 1,
             ..DocResult::default()
         };
@@ -987,7 +987,7 @@ mod tests {
         let raw = std::fs::read_to_string(fixture("result.json")).unwrap();
         let old: RunResult = serde_json::from_str(&raw).unwrap();
         assert_eq!(old.scorer_version, 1, "files without the field are scorer v1");
-        assert!((old.models[0].summary.accuracy.score - 0.375).abs() < 1e-12, "score recovered from overall");
+        assert!((old.models[0].summary.accuracy.headline - 0.375).abs() < 1e-12, "score recovered from overall");
 
         let new = rescore_run(old.clone(), &fixture("dataset"), &fixture("outputs")).expect("rescore");
         assert_eq!(new.scorer_version, SCORER_VERSION);
@@ -1006,25 +1006,25 @@ mod tests {
         }
         let doc = |id: &str| m_new.docs.iter().find(|d| d.id == id).unwrap();
         // The failed call stays failed and unscored.
-        assert!(doc("failed").metrics.is_none() && doc("failed").score.is_none());
-        assert_eq!(doc("plain").score, Some(1.0));
+        assert!(doc("failed").metrics.is_none() && doc("failed").headline.is_none());
+        assert_eq!(doc("plain").headline, Some(1.0));
         // HTML table (with a rowspan) now reads; table-only headline is table_score.
         let tbl = doc("src/tbl");
         let tm = tbl.metrics.unwrap();
         assert_eq!(tm.table_score, Some(1.0));
         assert_eq!(tm.teds_grid, Some(1.0));
-        assert_eq!(tbl.score, Some(1.0));
+        assert_eq!(tbl.headline, Some(1.0));
         assert!(tm.char_similarity < 1.0, "char_similarity stays the literal whole-page similarity");
         // The tokenised rule text matches now.
         assert_eq!(doc("rules").metrics.unwrap().rule_pass_rate, Some(1.0));
 
         let s = &m_new.summary;
-        assert!((s.accuracy.score - 0.75).abs() < 1e-12, "3 perfect docs + 1 failure: {}", s.accuracy.score);
+        assert!((s.accuracy.headline - 0.75).abs() < 1e-12, "3 perfect docs + 1 failure: {}", s.accuracy.headline);
         assert!((s.accuracy.overall - 75.0).abs() < 1e-9);
         assert_eq!(s.accuracy.teds_grid, Some(1.0));
         assert_eq!((s.latency_p50_ms, s.total_pages), (m_old.summary.latency_p50_ms, m_old.summary.total_pages));
         assert_eq!(s.total_cost_usd, m_old.summary.total_cost_usd);
-        assert_eq!(s.by_category["table"].score, 1.0);
+        assert_eq!(s.by_category["table"].headline, 1.0);
 
         // Round trip through JSON, and a second rescore is a no-op on the accuracy.
         let json = serde_json::to_string_pretty(&new).unwrap();
