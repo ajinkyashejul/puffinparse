@@ -681,12 +681,13 @@
           return { html: esc(fixed(row.stats.head.value, 2)), cls: "primary" };
         },
       },
-      numCol("char_similarity", "Char sim", 3, "Mean primary per-document score (0–1)"),
+      numCol("char_similarity", "Char sim", 3, "Mean character similarity (scorer v2; in v1 files this column held the headline)"),
       numCol("cer", "CER", 3, "Character error rate — lower is better"),
       numCol("wer", "WER", 3, "Word error rate — lower is better"),
       numCol("word_f1", "Word F1", 3),
       numCol("order_score", "Order", 3, "Reading-order agreement of shared lines"),
-      numCol("table_score", "Table", 3, "Similarity restricted to markdown table rows"),
+      numCol("table_score", "Table", 3, "Similarity restricted to table rows (markdown or HTML tables)"),
+      numCol("teds_grid", "TEDS", 3, "TEDS on the row/cell grid: table structure plus cell content (scorer v2)"),
     ];
     if (rulesRun) {
       cols.push(
@@ -1138,7 +1139,8 @@
         "on a <em>table-only</em> document the table score; on a <em>rules</em> document the share of assertions that pass. A failed call scores 0.</li>" +
         "<li><strong>CER / WER</strong> are edit rates over characters and whitespace tokens.</li>" +
         "<li><strong>Order</strong> is Kendall-τ-style agreement on the order of lines present in both texts.</li>" +
-        "<li><strong>Table</strong> is character similarity restricted to markdown table rows.</li>" +
+        "<li><strong>Table</strong> is character similarity restricted to table rows (markdown pipe tables or HTML <code>&lt;table&gt;</code>); <strong>TEDS</strong> is tree-edit-distance similarity on the row/cell grid.</li>" +
+        "<li><strong>Rules</strong> follow each source benchmark's own assertions (present, absent, order, table cell, sentences), ignoring spaces next to punctuation and honouring upstream edit tolerances.</li>" +
         "<li><strong>Latency</strong> is measured from the client with caches disabled; <strong>$/1k pages</strong> uses public list prices.</li></ul>" +
         '<p>Full definitions and caveats: <a href="' + METHODOLOGY + '" rel="noopener noreferrer">benchmark/README.md</a>.</p>' +
         "</section>" +
