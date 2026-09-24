@@ -119,14 +119,18 @@ or from Python: `liteocr.score(prediction, truth)`.
 |---|---|---|---|
 | [`synthetic-v1`](datasets/synthetic-v1/README.md) | 39 | plain, invoice, table, two_column, headings, noisy_scan, low_res, multipage, skewed, dense, faded, receipt, complex_table | generated, CC0 |
 | [`parsebench`](datasets/parsebench/README.md) | 40 committed (1,009 indexed) | tables (transcript, `table-only`), text pages as rule assertions (`kind: rules`) | LlamaIndex ParseBench, Apache-2.0, pinned upstream commit |
-| [`combined-v1`](datasets/combined-v1/README.md) | 79 | union of the above with source-prefixed ids | per source |
+| [`olmocr`](datasets/olmocr/README.md) | 40 committed (824 indexed) | headers_footers, long_tiny_text, multi_column, old_scans, table_tests — all `kind: rules` (205 assertions) | AI2 olmOCR-bench, ODC-BY-1.0, pinned upstream commit |
+| [`omnidocbench`](datasets/omnidocbench/README.md) | 40 **indexed, fetched at run time** | 10 document types (book, newspaper, exam paper, slides, notes, …), English + Chinese, transcript | OpenDataLab OmniDocBench, research-only / non-commercial — not redistributed; `python -m benchmark.adapters omnidocbench` materialises it |
+| [`combined-v1`](datasets/combined-v1/README.md) | 79 | synthetic-v1 + parsebench, source-prefixed ids (frozen: has committed results) | per source |
+| [`combined-v2`](datasets/combined-v2/README.md) | 159 | synthetic-v1 + parsebench + olmocr + omnidocbench | per source |
 
 Adding a dataset: create `benchmark/datasets/<name>/manifest.json` with
 `{name, version, description, license, documents:[{id, file, truth, pages, category, tags}]}`,
 put inputs under `docs/` and truth markdown under `truth/`. Public benchmarks are converted by
 adapters (`python -m benchmark.adapters <name>`; see [`docs/benchmarks/adapters.md`](../docs/benchmarks/adapters.md)),
 which also introduce `kind: rules` documents scored by machine-checkable assertions instead of a
-transcript. olmOCR-bench and OmniDocBench adapters are next.
+transcript. The [academic benchmark survey](../docs/benchmarks/academic-benchmarks.md) covers olmOCR-bench,
+OmniDocBench, DP-Bench, READoc and others; DP-Bench is the next adapter.
 
 ## Caveats
 
@@ -143,5 +147,10 @@ transcript. olmOCR-bench and OmniDocBench adapters are next.
   the same for every model, so it moves the absolute number far more than the ranking. The one
   `bag_of_sentences` rule per ParseBench document asks for *every* sentence of the page at
   `threshold: 1.0` and therefore fails almost always.
-- **A combined score mixes datasets, licences and document kinds.** Read `combined-v1` next to the
-  per-source table under the leaderboard, not instead of it.
+- **olmOCR rules are matched exactly**, while upstream tolerates `max_diffs` edits; its skipped
+  tests (math, positional absences, vertical table neighbours, baseline) are counted in
+  `datasets/olmocr/conversion-stats.json`. Its `absent-only` documents pass for an empty parse.
+- **OmniDocBench must be fetched** before a run (`python -m benchmark.adapters omnidocbench`);
+  otherwise its documents fail as file-not-found and the dataset `sha256` does not cover them.
+- **A combined score mixes datasets, licences and document kinds.** Read `combined-v1` /
+  `combined-v2` next to the per-source table under the leaderboard, not instead of it.

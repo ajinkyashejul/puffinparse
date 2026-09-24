@@ -14,7 +14,9 @@ Everything lives in [`benchmark/adapters/`](../../benchmark/adapters/):
 |---|---|
 | `base.py` | the framework: `Adapter`, the manifest model, the rule schema, shared helpers |
 | `parsebench.py` | LlamaIndex ParseBench → `benchmark/datasets/parsebench/` |
-| `combined.py` | union of the committed datasets → `benchmark/datasets/combined-v1/` |
+| `olmocr.py` | AI2 olmOCR-bench → `benchmark/datasets/olmocr/` (`kind: rules`) |
+| `omnidocbench.py` | OpenDataLab OmniDocBench → `benchmark/datasets/omnidocbench/` (`kind: transcript`, index only, fetched at run time) |
+| `combined.py` | union of the datasets → `benchmark/datasets/combined-v1/` (adapter `combined`, frozen) and `benchmark/datasets/combined-v2/` (adapter `combined-v2`) |
 | `__main__.py` | the `python -m benchmark.adapters` CLI |
 
 ## CLI
@@ -68,6 +70,8 @@ working and new manifests load in an unmodified CLI.
 | `sha256` | hex | the document file's hash |
 | `license` | SPDX | per-document license, when a dataset mixes them |
 | `attribution` | string | the citation this document must carry |
+| `source_url` | string | where the page originally came from (olmOCR-bench records one URL per test) |
+| `truth_sha256` | hex | hash of a truth file that is generated locally and not committed (OmniDocBench) |
 
 `truth` is **always emitted**, even for `kind: "rules"` documents, where it is the empty string.
 That is not cosmetic: the Rust `ManifestDoc` declares `pub truth: String` without
@@ -103,6 +107,7 @@ olmOCR-bench next):
   "sentences": ["…"],                // bag_of_sentences
   "threshold": 1.0,                  // bag_of_sentences: required pass fraction
   "case_sensitive": false,
+  "max_diffs": 0,                    // optional: upstream fuzzy allowance (olmOCR-bench)
   "source": "text_dense__baoutou_order_623"
 }
 ```
@@ -116,7 +121,10 @@ olmOCR-bench next):
 | `bag_of_sentences` | contains at least `threshold` (fraction, default `1.0`) of `sentences` |
 
 `case_sensitive` is always present and always explicit. `source` is the upstream rule id, so any
-score can be pushed back to the publisher's own harness for cross-checking.
+score can be pushed back to the publisher's own harness for cross-checking. `max_diffs` is
+optional and records how many Levenshtein edits the upstream scorer tolerates. The Rust scorer
+ignores it today and matches exactly. That is stricter than upstream for `present` / `order` /
+`table_cell`, and looser for `absent`, whenever `max_diffs > 0`.
 
 A document's rule score is `passed / total`; a dataset's is the mean over its rule documents.
 That is deliberately the same shape as an accuracy in `[0, 1]`, so it slots next to
@@ -223,7 +231,7 @@ Shared helpers:
 | `sha256_file`, `sha256_bytes` | streamed hashing for manifest provenance |
 | `write_manifest`, `write_rules`, `write_json` | stable 2-space JSON with a trailing newline; returns the SHA-256 written |
 | `slugify` | ASCII, lowercase, `_`-separated ids safe for filenames and `--filter` |
-| `html_table_to_markdown` | HTML `<table>` → GitHub pipe table; flattens `colspan`/`rowspan` by repeating the cell into every position it covers, and reports `merged_cells` so the caller can add the `merged-cells` tag. Inline markup is dropped, `<br>` becomes a space, `\|` is escaped, short rows are padded |
+| `html_table_to_markdown` | HTML `<table>` → GitHub pipe table; flattens `colspan`/`rowspan` by repeating the cell into every position it covers, and reports `merged_cells` so the caller can add the `merged-cells` tag. Inline markup is dropped, `<br>` becomes a space, `\|` is escaped (backslashes are kept verbatim so LaTeX in cells survives), short rows are padded |
 | `pdf_page_count` | `pypdf` when importable, otherwise a byte scan: the `/Count` of the root `/Type /Pages` node (also inside inflated object streams), falling back to *distinct* `/Type /Page` object numbers so an incrementally-updated PDF is not double counted |
 | `default_cache_dir` | `$LITEOCR_BENCH_CACHE` → `$XDG_CACHE_HOME/liteocr/benchmarks` → `~/.cache/liteocr/benchmarks` |
 
@@ -243,20 +251,96 @@ instead of aborting a build.
    `benchmark/adapters/__init__.py`.
 5. Use `Doc` / `Manifest` / `Rule` and `write_manifest` / `write_rules` so output stays
    byte-stable, and record every skip with `self.bump(...)` so the summary is honest.
-6. Add the dataset to `SOURCES` in `combined.py` if it should be in `combined-v1`, write a
-   `README.md` in the dataset directory with the license, and list the dataset in
-   `benchmark/README.md`.
-
-Next candidate: **olmOCR-bench**, which is already rule-shaped — its `present` / `absent` /
-`order` / `table` tests map onto `present` / `absent` / `order` / `table_cell` one-for-one, and
-its baseline tests onto `bag_of_sentences`. That is the reason the schema has `table_cell` and
-`absent` even though ParseBench never produces them.
+6. If the dataset belongs in `combined-v2`, add it to `SOURCES_V2` in `combined.py`.
+   `combined-v1` is frozen because it has committed results. Write a `README.md` in the dataset
+   directory with the license, and list the dataset in `benchmark/README.md`.
+7. Add the dataset to `crates/liteocr-core/tests/benchmark_datasets.rs`. Every rule must pass
+   against a witness built from its own document, and every transcript must score 1.0 against
+   itself.
 
 Not adaptable into either kind, per the
-[vendor benchmark survey](vendor-benchmarks.md): RealDoc-Bench (QA over a parse, needs an LLM
-reader — conflicts with the deterministic-metrics principle; source PDFs are not
-redistributable), RealDoc-Bench-Layout (bounding boxes, no text) and LongExtractBench
-(schema-driven extraction, a different mode).
+[vendor benchmark survey](vendor-benchmarks.md):
+
+- RealDoc-Bench: QA over a parse. It needs an LLM reader, which conflicts with the
+  deterministic-metrics principle, and its source PDFs are not redistributable.
+- RealDoc-Bench-Layout: bounding boxes, no text.
+- LongExtractBench: schema-driven extraction, a different mode.
+
+The [academic benchmark survey](academic-benchmarks.md) covers olmOCR-bench, OmniDocBench,
+DP-Bench, READoc, the Nanonets IDP leaderboard, Fox, CC-OCR and OCRBench v2. **DP-Bench** is the
+recommended next adapter: MIT-licensed, 200 single-page PDFs, with ground truth for every
+element in reading order.
+
+## olmOCR-bench mapping
+
+Upstream: [`allenai/olmOCR-bench`](https://huggingface.co/datasets/allenai/olmOCR-bench) at
+`54a96a6fb6a2bd3b297e59869491db4d3625b711`, ODC-BY-1.0. It has 1,403 single-page PDFs and
+7,010 tests, plus 9 explicit baseline tests. The semantics were read from
+`olmocr/bench/tests.py` at `f7cfe4c22098b154c76b6ec950d1c0a464eecf8d`. Every document is
+`kind: rules`.
+
+| Upstream test | → LiteOCR | Converted | Skipped | Note |
+|---|---|---:|---:|---|
+| `present` | `present` (upstream `case_sensitive`, default true) | 721 | 0 | |
+| `absent` | `absent` | 622 | 201 | positional (`first_n` / `last_n`) absences are skipped: a whole-page absence would be the wrong assertion |
+| `order` | `order`, `case_sensitive: true` | 1,061 | 0 | |
+| `table` | `table_cell` | 636 | 384 | `top_heading` → `col_header`, `left_heading` → `row_header`; `left`/`right` → `row_header` (327, relaxed to "same row"); `up`/`down` skipped |
+| `math` | — | 0 | 3,385 | KaTeX-rendered equivalence |
+| `baseline` | — | 0 | 9 | plus 1,394 implicit per-PDF baseline tests the upstream runner adds |
+| **Total** | | **3,040** | **3,979** | 824 of 1,403 PDFs keep ≥ 1 rule |
+
+All rule text has whitespace runs collapsed. Upstream's `normalize_text` does the same on both
+sides, so nothing is lost, and it matters for table headers annotated across two lines.
+
+What is committed:
+
+- 40 documents, 8 from each split that has convertible tests: 6.0 MB of PDFs and 205 rules.
+- `manifest.full.json`, an index of all 824 convertible documents.
+- `conversion-stats.json`, which records every count.
+
+Documents whose rules are all `absent` carry the `absent-only` tag, because an empty parse
+passes them. Details and caveats:
+[`benchmark/datasets/olmocr/README.md`](../../benchmark/datasets/olmocr/README.md).
+
+## OmniDocBench mapping
+
+Upstream: [`opendatalab/OmniDocBench`](https://huggingface.co/datasets/opendatalab/OmniDocBench)
+at `aa1ee96d106dbe53d0ae59474d75c6e6d9b53fec`. It has 1,651 page images and one annotation JSON
+with blocks, reading order and text / LaTeX / HTML. Each page becomes a `kind: transcript`
+document. The truth is built the way upstream's `tools/json2md.py` builds it:
+
+- blocks are emitted in reading order, with `truncated` chains merged;
+- titles become `#` headings, tables are converted from HTML to pipe tables, and display
+  formulas stay as `$$…$$`;
+- headers, footers, page numbers, page footnotes, `abandon` regions and figures are dropped,
+  because OmniDocBench does not score them either.
+
+Pages with `*_mask` regions (126) or less than 120 characters of truth (82) are skipped, which
+leaves 1,443 convertible pages. `category` is the upstream `data_source`. Language, layout,
+subset, special issues, `has-table`, `has-formula` and `merged-cells` are tags.
+
+**Licence.** The card has no licence and says "research purposes only and not for commercial
+use". So only `manifest.json`, with the image `sha256` and `truth_sha256`, is committed. `docs/`
+and `truth/` are excluded from version control and produced by
+`python -m benchmark.adapters omnidocbench`. Every document carries the `fetch-required` tag.
+Details: [`benchmark/datasets/omnidocbench/README.md`](../../benchmark/datasets/omnidocbench/README.md).
+
+## Self-checks
+
+`crates/liteocr-core/tests/benchmark_datasets.rs` keeps the adapters honest:
+
+- `olmocr_rules_are_satisfiable` builds a *witness* prediction from each document's own
+  assertions: every `present` text, every `order` pair, and each `table_cell` as a one-row table.
+  Every rule, including the `absent` ones, must pass, so an adapter cannot emit a rule the scorer
+  can never satisfy. It also requires an empty parse to fail every document that is not
+  `absent-only`.
+- `omnidocbench_truth_scores_itself_perfectly` scores each locally built truth against itself
+  and checks that the `has-table` tag agrees with `table_score`.
+- `combined_v2_references_resolve` checks every committed `../` path of `combined-v2`.
+- Two `#[ignore]`d helpers:
+  - `LITEOCR_SELFCHECK_RULES_DIR` runs the witness check over any directory of rule files. On
+    the full 824-document olmOCR conversion: 3,040 rules, 0 unsatisfiable.
+  - `LITEOCR_SELFCHECK_PRED_DIR` scores real extractions, such as `pdftotext` output.
 
 ## Licensing
 
@@ -264,6 +348,8 @@ redistributable), RealDoc-Bench-Layout (bounding boxes, no text) and LongExtract
 |---|---|---|
 | `synthetic-v1` | yes, CC0-1.0 | everything |
 | `parsebench` | yes, Apache-2.0 (publisher's terms) | 40 documents + truth + rules |
+| `olmocr` | yes, ODC-BY-1.0 (attribution; AI2 Responsible Use Guidelines) | 40 PDFs + rules |
+| `omnidocbench` | **no**: no licence; "research only, not for commercial use" | manifest index only (`sha256`, `truth_sha256`); fetched at run time |
 | RealDoc-Bench / LongExtractBench | annotations only | would be manifest + `sha256` only |
 
 Rules for any future adapter:
