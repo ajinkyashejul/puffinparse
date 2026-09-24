@@ -116,20 +116,22 @@ olmOCR-bench next):
 |---|---|
 | `present` | contains `text` (after the run's normalisation) |
 | `absent` | does **not** contain `text` |
-| `order` | contains both `before` and `after`, and the first occurrence of `before` precedes the first occurrence of `after` |
+| `order` | contains both `before` and `after`, and the first occurrence of `before` precedes the first occurrence of `after` (with `max_diffs > 0`: some fuzzy match of `before` starts before some fuzzy match of `after`, as olmOCR does) |
 | `table_cell` | has a table (markdown pipe table or HTML `<table>`, spans repeated into every slot) with a row matching `cell.row_header` and a column matching `cell.col_header` whose cell equals `cell.value` |
+| `bag_of_sentences` | contains at least `threshold` (fraction, default `0.8`) of `sentences`; a sentence counts when some window of the output is ≥ 0.8 similar to it (`1 − edit distance / length`) |
 
 Matching normalisation (scorer v2): the run's [`normalize`](../../benchmark/README.md#metrics), then
 every space adjacent to punctuation is dropped on **both** sides, so a tokenised rule such as
 `(this " agreement ")` matches the printed `(this "Agreement")` and vice versa. Words still need
 their spaces.
-| `bag_of_sentences` | contains at least `threshold` (fraction, default `0.8`) of `sentences`; a sentence counts when some window of the output is ≥ 0.8 similar to it (`1 − edit distance / length`) |
 
 `case_sensitive` is always present and always explicit. `source` is the upstream rule id, so any
 score can be pushed back to the publisher's own harness for cross-checking. `max_diffs` is
-optional and records how many Levenshtein edits the upstream scorer tolerates. The Rust scorer
-ignores it today and matches exactly. That is stricter than upstream for `present` / `order` /
-`table_cell`, and looser for `absent`, whenever `max_diffs > 0`.
+optional and records how many Levenshtein edits the upstream scorer tolerates. Since scorer v2 the
+Rust scorer honours it: `present` / `absent` use a fuzzy substring search (Sellers' algorithm, like
+upstream's `fuzzysearch.find_near_matches(max_l_dist=max_diffs)`), `order` uses the fuzzy rule
+above, and `table_cell` tolerates `max_diffs` edits in the header matches and the value. `0` or
+absent means exact matching after normalisation.
 
 A document's rule score is `passed / total`; a dataset's is the mean over its rule documents.
 That is deliberately the same shape as an accuracy in `[0, 1]`, so it slots next to
