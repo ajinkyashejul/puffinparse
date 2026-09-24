@@ -25,6 +25,7 @@ preview; without it PDFs are still copied and the site links to them instead.
 
 Usage:
     python benchmark/site/build.py [--out DIR] [--base-url /benchmark-results/]
+                                   [--home-url /] [--docs-url /docs/]
 """
 
 from __future__ import annotations
@@ -61,6 +62,9 @@ PREVIEW_MIN_HEIGHT = 900
 # `<meta name="liteocr-base">` tells app.js what to prefix its `data/` URLs with; the
 # stylesheet and script tags are rewritten with the same prefix.
 BASE_META_RE = re.compile(r'(<meta\s+name="liteocr-base"\s+content=")[^"]*(")')
+# `<meta name="liteocr-home">` / `liteocr-docs`: where the header's "LiteOCR" and "Docs"
+# links point when the viewer is embedded in the product site (empty = standalone).
+LINK_META_RE = re.compile(r'(<meta\s+name="liteocr-(home|docs)"\s+content=")[^"]*(")')
 ASSET_REF_RE = re.compile(r'((?:href|src)=")(styles\.css|app\.js)(")')
 
 
@@ -116,6 +120,17 @@ def apply_base(html_text: str, base: str) -> str:
     if not found:
         print('  ! index.html has no <meta name="liteocr-base">: data URLs stay relative', file=sys.stderr)
     return ASSET_REF_RE.sub(lambda m: m.group(1) + base + m.group(2) + m.group(3), text)
+
+
+def apply_links(html_text: str, home: str = "", docs: str = "") -> str:
+    """Fill the `liteocr-home` / `liteocr-docs` meta tags (HTML-escaped)."""
+    values = {"home": home or "", "docs": docs or ""}
+
+    def repl(match: re.Match[str]) -> str:
+        value = values[match.group(2)].replace("&", "&amp;").replace('"', "&quot;")
+        return match.group(1) + value + match.group(3)
+
+    return LINK_META_RE.sub(repl, html_text)
 
 
 def within(root: Path, candidate: Path) -> bool:
@@ -198,6 +213,28 @@ def render_pdf_preview(pdf_path: Path, out_png: Path) -> bool:
         return False
 
 
+def headline_score(summary: dict[str, Any]) -> float:
+    """The number a model is ranked by: `summary.headline` when the run has one, else `overall`.
+
+    `headline` may be a bare number or an object carrying `score` / `overall` / `value`; the
+    viewer applies the same rule (see `headlineOf` in app.js).
+    """
+    head = summary.get("headline")
+    value: Any = head
+    if isinstance(head, dict):
+        value = next(
+            (head[k] for k in ("score", "overall", "value") if isinstance(head.get(k), (int, float))),
+            None,
+        )
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        overall = summary.get("overall")
+        if value <= 1.0 and isinstance(overall, (int, float)) and overall > 1.0:
+            return float(value) * 100.0  # a 0..1 headline next to a 0..100 overall
+        return float(value)
+    overall = summary.get("overall")
+    return float(overall) if isinstance(overall, (int, float)) else 0.0
+
+
 # --------------------------------------------------------------------------------------
 # build steps
 # --------------------------------------------------------------------------------------
@@ -221,32 +258,50 @@ def load_runs() -> list[dict[str, Any]]:
     return runs
 
 
-def copy_outputs(run: dict[str, Any], dist: Path) -> int:
-    """Copy the saved per-document markdown outputs for one run.
+def copy_outputs(run: dict[str, Any], dist: Path) -> tuple[int, dict[str, dict[str, list[str]]]]:
+    """Copy the saved per-document outputs for one run.
+
+    Every document has a `<doc>.md` (the markdown that was scored). When `bench run
+    --save-outputs` also saved the unified `ParseResponse` as `<doc>.json` next to it, that is
+    copied too: its `pages[].blocks[].bbox` is what the viewer draws as layout overlays.
 
     Document ids may contain `/` (the combined dataset prefixes them with their source),
     which `bench run --save-outputs` turns into a subdirectory; the layout is mirrored.
+
+    Returns the number of files copied and, per model slug, which documents have a unified
+    JSON (`json`) and which have no markdown at all (`missing`), so the viewer never has to
+    probe for a file that is not there.
     """
     run_id = str(run["run_id"])
     src_root = OUTPUTS_DIR / run_id
+    inventory: dict[str, dict[str, list[str]]] = {}
     if not src_root.is_dir():
         print(f"  ! no saved outputs for run {run_id} (looked in {src_root})", file=sys.stderr)
-        return 0
+        return 0, inventory
     copied = 0
     for model in run.get("models", []):
         slug = model_slug(str(model["model"]))
         src_dir = src_root / slug
+        entry: dict[str, list[str]] = {"json": [], "missing": []}
+        inventory[slug] = entry
         if not src_dir.is_dir():
             print(f"  ! no outputs for {model['model']} in run {run_id}", file=sys.stderr)
+            entry["missing"] = [str(doc["id"]) for doc in model.get("docs", [])]
             continue
         for doc in model.get("docs", []):
-            rel = f"{doc['id']}.md"
-            src = normalised(src_dir / rel)
-            if not (within(src_dir, src) and src.is_file()):
-                continue
-            copy_file(src, dist / "data" / "outputs" / run_id / slug / rel)
-            copied += 1
-    return copied
+            doc_id = str(doc["id"])
+            for ext in (".md", ".json"):
+                rel = f"{doc_id}{ext}"
+                src = normalised(src_dir / rel)
+                if not (within(src_dir, src) and src.is_file()):
+                    if ext == ".md":
+                        entry["missing"].append(doc_id)
+                    continue
+                copy_file(src, dist / "data" / "outputs" / run_id / slug / rel)
+                copied += 1
+                if ext == ".json":
+                    entry["json"].append(doc_id)
+    return copied, inventory
 
 
 def copy_dataset(name: str, dist: Path, seen: set[Path]) -> dict[str, Any]:
@@ -365,7 +420,9 @@ def copy_dataset(name: str, dist: Path, seen: set[Path]) -> dict[str, Any]:
     }
 
 
-def run_index_entry(run: dict[str, Any]) -> dict[str, Any]:
+def run_index_entry(
+    run: dict[str, Any], outputs: Optional[dict[str, dict[str, list[str]]]] = None
+) -> dict[str, Any]:
     """The trimmed record for `data/index.json`: everything the leaderboard needs."""
     models = []
     for model in run.get("models", []):
@@ -376,7 +433,7 @@ def run_index_entry(run: dict[str, Any]) -> dict[str, Any]:
                 "summary": model.get("summary", {}),
             }
         )
-    models.sort(key=lambda m: m["summary"].get("overall") or 0.0, reverse=True)
+    models.sort(key=lambda m: headline_score(m["summary"]), reverse=True)
     categories = sorted(
         {str(d.get("category", "")) for m in run.get("models", []) for d in m.get("docs", [])}
     )
@@ -384,15 +441,17 @@ def run_index_entry(run: dict[str, Any]) -> dict[str, Any]:
         "run_id": run["run_id"],
         "created_at": run.get("created_at"),
         "liteocr_version": run.get("liteocr_version"),
+        "scorer_version": run.get("scorer_version"),
         "dataset": run.get("dataset", {}),
         "normalize": run.get("normalize", {}),
         "categories": categories,
         "models": models,
+        "outputs": outputs or {},
         "file": f"data/runs/{run['run_id']}.json",
     }
 
 
-def build(dist: Path, base: str = "./") -> int:
+def build(dist: Path, base: str = "./", home: str = "", docs: str = "") -> int:
     if not SRC_DIR.is_dir():
         print(f"error: missing source directory {SRC_DIR}", file=sys.stderr)
         return 1
@@ -409,7 +468,8 @@ def build(dist: Path, base: str = "./") -> int:
             print(f"error: missing {src}", file=sys.stderr)
             return 1
         if name == "index.html":
-            (dist / name).write_text(apply_base(src.read_text(encoding="utf-8"), base), encoding="utf-8")
+            page = apply_links(apply_base(src.read_text(encoding="utf-8"), base), home, docs)
+            (dist / name).write_text(page, encoding="utf-8")
         else:
             copy_file(src, dist / name)
     print(f"  static: {', '.join(STATIC_FILES)}")
@@ -432,13 +492,14 @@ def build(dist: Path, base: str = "./") -> int:
         print(f"  run {run_id} ({source.name}): {len(model_names)} models x {doc_count} documents")
 
         write_json(dist / "data" / "runs" / f"{run_id}.json", run)
-        total_outputs += copy_outputs(run, dist)
+        copied, inventory = copy_outputs(run, dist)
+        total_outputs += copied
 
         dataset_name = str(run.get("dataset", {}).get("name", ""))
         if dataset_name and dataset_name not in datasets:
             datasets[dataset_name] = copy_dataset(dataset_name, dist, seen)
 
-        index_runs.append(run_index_entry(run))
+        index_runs.append(run_index_entry(run, inventory))
 
     write_json(
         dist / "data" / "index.json",
@@ -478,8 +539,18 @@ def main(argv: Optional[list[str]] = None) -> int:
             "Default: page-relative URLs, which work at any path served with a trailing slash."
         ),
     )
+    parser.add_argument(
+        "--home-url",
+        default="",
+        help="URL of the product site the viewer is embedded in (header 'LiteOCR' link)",
+    )
+    parser.add_argument(
+        "--docs-url",
+        default="",
+        help="URL of the documentation (header 'Docs' link)",
+    )
     args = parser.parse_args(argv)
-    return build(Path(args.out).resolve(), normalize_base(args.base_url))
+    return build(Path(args.out).resolve(), normalize_base(args.base_url), args.home_url, args.docs_url)
 
 
 if __name__ == "__main__":
