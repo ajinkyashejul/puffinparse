@@ -316,3 +316,19 @@ truth has no header/body or span structure.
 
 **Consequences.** Leaderboards stay comparable across scorer fixes at no cost, and a reader can see
 which scorer produced a number. Saved outputs are part of every committed run (already required).
+
+## ADR-21: Gateway jobs are owned, not routed
+
+**Context.** ADR-18 left gateway job endpoints for later; ADR-15 gave the gateway fallbacks and
+per-key budgets.
+
+**Decision.** `/v1/jobs` submits to exactly one deployment (an alias's first target, or the next in
+a round-robin rotation) with no fallback: failures only surface at retrieve time, and retrying
+would mean resubmitting. Jobs are stored under opaque gateway ids bound to the submitting key (the
+master key can read all, as with `/v1/usage`), without secrets; provider credentials are resolved
+from config on every poll. Cost is charged once, on the first observed success, under the usage
+lock. Provider webhooks are received only when the operator opts in with a shared secret.
+
+**Consequences.** Clients poll the gateway, never the provider. Providers can reuse job ids
+(LlamaParse returns the cached job for an identical upload), so one webhook may settle several
+gateway jobs. Vendor HMAC verification and automatic webhook registration remain open.

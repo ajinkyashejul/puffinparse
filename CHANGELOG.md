@@ -11,6 +11,13 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **Jobs everywhere.** Gateway: `POST /v1/jobs` (parse body + `webhook_url`, 202 with a job id) and
+  `GET /v1/jobs/{id}` (pending / succeeded / failed, `output_format` on retrieval); job ids are
+  bound to the submitting key, cost is charged once when the job first succeeds, handles persist in
+  `state_file` (`server.job_retention_hours`), and an opt-in `POST /v1/webhooks/{provider}` receiver
+  (`[webhooks] enabled`, shared secret) settles jobs from provider webhook bodies. New
+  `liteocr_jobs_total` metric and `job_id`/`job_status` log fields. Node SDK: `submit`, `retrieve`,
+  `handleWebhook` with a typed `Job`.
 - **DP-Bench** (Upstage, MIT) adapter: 40 committed single-page PDFs with reading-order transcript
   truth (`python -m benchmark.adapters dpbench`, pinned at `24702c61`), and `combined-v3` =
   combined-v2 + DP-Bench (199 documents). Headers and footers stay in the DP-Bench truth because
