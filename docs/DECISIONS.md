@@ -191,3 +191,23 @@ Reducto render uses a reduced vocabulary (`footnote`/`caption`/`formula`/`other`
 three providers. Because the renderer only reads the unified types, any provider added later gets
 all three native shapes for free — and any unified field a new provider cannot fill shows up as a
 `null` in someone's vendor-shaped payload, which is the honest outcome.
+
+## ADR-14: The Node.js SDK is a napi-rs addon over the same core
+
+**Context.** A TypeScript SDK was on the roadmap once the Python surface stabilised. The options
+were a WASM build, a wrapper around the CLI, or a native N-API addon.
+
+**Decision.** `crates/liteocr-node` exposes the core through napi 3; the `js/` package is a thin
+layer. The addon only converts values: requests and responses cross as the core's serde JSON,
+errors as a prefixed JSON payload (`LITEOCR_CORE_ERROR:<json>`) that the JS layer rebuilds into
+typed `LiteOCRError` subclasses. The JS layer converts to camelCase with explicit per-type
+converters; `data`, `metadata` and `raw` are never renamed, and `index.d.ts` is hand-written
+against SPEC §5 (the napi-generated `native.d.ts` is internal). The crate is a normal workspace
+member: napi's `dyn-symbols` keeps `cargo test --workspace` free of Node. It uses
+`deny(unsafe_code)` because napi's macro expansion is incompatible with `forbid`, and declares
+`rust-version = "1.88"` (napi 3) while the rest of the workspace stays at 1.80. `timeout` is in
+seconds, as in the other SDKs, and `LiteOCRError.kind` uses the ErrorKind serde values.
+
+**Consequences.** One implementation behind three surfaces (Python, Node, CLI). No provider logic
+in JS. Prebuilt binaries per platform are required for `npm install` without a Rust toolchain;
+the release matrix builds them but publishing is not wired yet.

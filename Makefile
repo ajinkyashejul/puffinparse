@@ -10,7 +10,7 @@ PYTHON        ?= python
 CLI           := $(CARGO) run -p liteocr-cli --release --
 
 .DEFAULT_GOAL := help
-.PHONY: help build test test-rust test-python lint fmt develop bench dataset leaderboard clean
+.PHONY: help build test test-rust test-python test-node lint fmt develop bench dataset leaderboard clean
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -26,6 +26,9 @@ test-rust: ## cargo test --workspace
 
 test-python: ## pytest (requires `make develop` first)
 	pytest python/tests -q
+
+test-node: ## Build the Node addon (debug) and run the js/ test suite
+	cd js && npm ci && npm run build:debug && npm run typecheck && npm test
 
 lint: ## fmt check, clippy, ruff, mypy — everything CI enforces
 	$(CARGO) fmt --all --check

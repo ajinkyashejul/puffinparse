@@ -11,6 +11,12 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **Node.js / TypeScript SDK.** The `liteocr` npm package in `js/` runs on a napi-rs addon over the
+  same Rust core (`crates/liteocr-node`): async `parse` / `ocr` / `extract` (with `fallbacks`),
+  `Router`, camelCase typed responses (`index.d.ts`), `LiteOCRError` subclasses mapped from the core
+  `ErrorKind`, and the pricing, model and scoring helpers. CI builds the addon and runs the
+  typecheck and `node:test` suite; the release workflow builds prebuilt `.node` binaries as
+  artifacts (npm publishing not wired yet, so build from source for now). Docs at `/docs/typescript/`.
 - **`liteocr bench run --resume`**: every finished call is appended to `<out>.partial.jsonl`, so an
   interrupted or partly failed run continues where it stopped and only re-runs missing or failed
   (model, document) pairs. `--dry-run` prints the plan (calls, pages, list-price estimate) without
