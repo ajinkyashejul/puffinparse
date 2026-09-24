@@ -73,6 +73,34 @@ runs keep them under `results/outputs/<run_id>/<model>/<doc_id>.md`; the static 
 carry their source (`synthetic/plain_001`), so the saved output path keeps that directory level
 and `--filter synthetic` runs one source.
 
+Before spending money, check the plan and put a ceiling on it:
+
+```bash
+./target/release/liteocr bench run --dataset benchmark/datasets/combined-v1 \
+    --models reducto/standard llamaparse/agentic --out benchmark/results/combined.json --dry-run
+# | Model | Calls | Skipped (resumed) | Est. pages | $/page | Est. cost | … no provider is called
+./target/release/liteocr bench run … --max-cost 5    # aborts before the first call if the estimate is higher
+```
+
+The estimate is manifest `pages` × list price (`pricing.json`), so it is only as good as the
+manifest's page counts; `--max-cost` refuses to run a model that has no list price.
+
+Runs survive interruptions. Every finished (model, document) call is appended to
+`<out>.partial.jsonl` and flushed immediately; the final JSON is assembled from it at the end and
+the log is removed. After a crash, Ctrl-C or a batch of provider failures, rerun the same command
+with `--resume` (and the same `--out`: the default path contains today's date). Pairs that already
+succeeded — in the partial log or in an existing result JSON — are not called again; missing and
+failed ones are. The resumed run keeps the original `run_id`, so `--save-outputs` files of the
+first attempt stay valid, and it refuses to mix in records from another dataset revision or
+normalisation. `--retries N` re-issues a document after a retryable error (rate limit, 5xx,
+timeout, network) with backoff; it is off by default because a retried provider job can be
+billed twice.
+
+Each document record is auditable: `provider_job_id` (look the job up in the provider's
+dashboard), `cache_hit` (`false` when caches were disabled, the default), `attempts`,
+`started_at`, and `error_kind` + `error` for failures. The run ends with a summary line: calls
+made, resumed, failed, total cost and wall time.
+
 `bench report` renders the leaderboard table (a **Rules** column shows the mean rule pass rate,
 `–` for datasets with no rule documents), then the per-category breakdown, and — for datasets
 whose ids carry a `<source>/` prefix — a per-source breakdown of documents and `Overall`.

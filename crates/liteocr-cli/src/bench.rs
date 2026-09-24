@@ -10,6 +10,9 @@ use liteocr_core::{DocumentRequest, OutputFormat};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
+
+mod runlog;
 
 #[derive(Subcommand, Debug)]
 pub enum BenchCommand {
@@ -54,6 +57,24 @@ pub struct RunArgs {
     /// Off by default so latency reflects real work.
     #[arg(long)]
     allow_cache: bool,
+    /// Continue an interrupted run: skip (model, document) pairs that already have a successful
+    /// record in `--out` or its `<out>.partial.jsonl` log, and run only the missing or failed ones.
+    /// Use the same `--out` (the default path contains today's date).
+    #[arg(long)]
+    resume: bool,
+    /// Print the plan (documents x models, estimated pages and cost) and exit without any call.
+    #[arg(long)]
+    dry_run: bool,
+    /// Abort before the first call if the estimated cost (manifest pages x list price) exceeds this.
+    #[arg(long, value_name = "USD")]
+    max_cost: Option<f64>,
+    /// Re-issue a document's call this many times after a retryable error (rate limit, 5xx,
+    /// timeout, network). Off by default: a retried provider job may be billed twice.
+    #[arg(long, default_value_t = 0)]
+    retries: u32,
+    /// First backoff before a `--retries` re-issue (doubles each time); not a flag.
+    #[arg(skip = std::time::Duration::from_secs(2))]
+    retry_base: std::time::Duration,
 }
 
 #[derive(clap::Args, Debug)]
@@ -154,7 +175,7 @@ pub struct ModelResult {
     pub summary: ModelSummary,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct DocResult {
     pub id: String,
     pub category: String,
@@ -172,6 +193,25 @@ pub struct DocResult {
     pub cost_usd: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// `ErrorKind` of a failed document (`"rate_limit"`, `"provider"`, `"timeout"`, …;
+    /// `"input"` when the truth or rule file was unreadable). Absent on success.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error_kind: Option<String>,
+    /// The provider's own id for the call (Reducto job id, Extend parse run id, LlamaParse job
+    /// id, …), also recorded for failures when the provider had assigned one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_job_id: Option<String>,
+    /// `true` if the provider reported a result-cache hit, `false` if caches were disabled for
+    /// the run, `null` when unknown.
+    #[serde(default)]
+    pub cache_hit: Option<bool>,
+    /// Calls the runner issued for this document (1 unless `--retries` re-issued it). Retries
+    /// inside the HTTP client are not counted.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attempts: Option<u32>,
+    /// RFC 3339 time the first call for this document started.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub started_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -225,7 +265,39 @@ fn load_manifest(dir: &Path) -> Result<(Manifest, String)> {
     Ok((manifest, format!("{:x}", h.finalize())))
 }
 
+/// How the run loop issues one parse call. The CLI uses [`liteocr_core::parse`]; tests inject a
+/// fake so the loop, the partial log and resume can be exercised without a network.
+pub(crate) type Caller = Arc<
+    dyn Fn(DocumentRequest) -> futures::future::BoxFuture<'static, liteocr_core::Result<liteocr_core::ParseResponse>>
+        + Send
+        + Sync,
+>;
+
 async fn run_bench(args: RunArgs) -> Result<()> {
+    let caller: Caller = Arc::new(|req| Box::pin(liteocr_core::parse(req)));
+    if let Some(result) = run_bench_with(&args, caller).await? {
+        println!("{}", render_markdown(&[result]));
+    }
+    Ok(())
+}
+
+/// Settings shared by every call of a run.
+#[derive(Clone)]
+struct CallCtx {
+    dataset: PathBuf,
+    timeout: f64,
+    norm: NormalizeOptions,
+    save: Option<PathBuf>,
+    allow_cache: bool,
+    retries: u32,
+    retry_base: std::time::Duration,
+    caller: Caller,
+}
+
+/// The whole `bench run`: plan (with `--resume`), budget check, calls with an append-only log,
+/// final JSON. Returns `None` for `--dry-run`.
+async fn run_bench_with(args: &RunArgs, caller: Caller) -> Result<Option<RunResult>> {
+    let wall = std::time::Instant::now();
     let (manifest, sha) = load_manifest(&args.dataset)?;
     let mut docs: Vec<ManifestDoc> = manifest
         .documents
@@ -246,35 +318,103 @@ async fn run_bench(args: RunArgs) -> Result<()> {
     let norm = NormalizeOptions { case_insensitive: !args.case_sensitive, ..NormalizeOptions::default() };
     eprintln!("dataset {} v{} ({} docs, sha256 {}…)", manifest.name, manifest.version, docs.len(), &sha[..12]);
 
+    let now = chrono::Utc::now();
+    let out = args.out.clone().unwrap_or_else(|| {
+        PathBuf::from(format!("benchmark/results/{}-{}.json", now.format("%Y-%m-%d"), manifest.name))
+    });
+    let partial = runlog::partial_path(&out);
+    let state = if args.resume {
+        let (state, notes) = runlog::load_resume_state(&out, &partial, &sha, &norm)?;
+        if notes.is_empty() {
+            eprintln!("resume: neither {} nor {} exists; starting a new run", out.display(), partial.display());
+        }
+        for n in notes {
+            eprintln!("resume: {n}");
+        }
+        state
+    } else {
+        if partial.exists() && !args.dry_run {
+            bail!(
+                "{} is left over from an interrupted run; pass --resume to continue it, or delete it to start over",
+                partial.display()
+            );
+        }
+        runlog::ResumeState::default()
+    };
+
+    let outside =
+        state.completed.keys().filter(|(m, id)| !args.models.contains(m) || !docs.iter().any(|d| &d.id == id)).count();
+    if outside > 0 {
+        eprintln!(
+            "resume: warning: {outside} earlier record(s) are outside the current --models/--filter/--limit \
+             selection and will not be in the rewritten result"
+        );
+    }
+    let plan = runlog::plan_pairs(&args.models, &docs, &state.completed);
+    let estimate = runlog::estimate(&plan, docs.len());
+    if args.dry_run {
+        println!("{}", estimate.render());
+        println!("dry run: no provider was called; results would go to {}", out.display());
+        estimate.check_budget(args.max_cost)?;
+        return Ok(None);
+    }
+    estimate.check_budget(args.max_cost)?;
+    eprintln!(
+        "plan: {} call(s), ~{} page(s), estimated ${:.4} at list price",
+        estimate.total_calls(),
+        estimate.total_pages(),
+        estimate.total_cost_usd()
+    );
+
+    let header = runlog::LogHeader {
+        run_id: state.run_id.clone().unwrap_or_else(|| uuid_like(&now)),
+        created_at: state.created_at.clone().unwrap_or_else(|| now.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)),
+        dataset_sha256: sha.clone(),
+        normalize: norm,
+    };
+    let mut log = runlog::PartialLog::open(&partial, &header)?;
+    let ctx = CallCtx {
+        dataset: args.dataset.clone(),
+        timeout: args.timeout,
+        norm,
+        save: args.save_outputs.clone(),
+        allow_cache: args.allow_cache,
+        retries: args.retries,
+        retry_base: args.retry_base,
+        caller,
+    };
+    let resumed: usize = plan.iter().map(|(_, todo)| docs.len() - todo.len()).sum();
+    let mut records = state.completed;
+    let (mut new_calls, mut new_cost) = (0usize, 0.0f64);
+
     let mut models = Vec::new();
-    for model in &args.models {
-        eprintln!("\n== {model} ==");
-        let bar = indicatif::ProgressBar::new(docs.len() as u64);
+    for (model, todo) in &plan {
+        eprintln!("\n== {model} == ({} to run, {} already done)", todo.len(), docs.len() - todo.len());
+        let bar = indicatif::ProgressBar::new(todo.len() as u64);
         bar.set_style(
             indicatif::ProgressStyle::with_template("{msg} [{bar:30}] {pos}/{len} ({elapsed})")
                 .unwrap()
                 .progress_chars("=> "),
         );
-        bar.set_message(model.clone());
-        let results: Vec<DocResult> = stream::iter(docs.iter().cloned())
+        bar.set_message(model.to_string());
+        let mut calls = stream::iter(todo.iter().map(|d| (*d).clone()))
             .map(|doc| {
-                let dataset = args.dataset.clone();
-                let model = model.clone();
-                let bar = bar.clone();
-                let save = args.save_outputs.clone();
-                let timeout = args.timeout;
-                let allow_cache = args.allow_cache;
-                async move {
-                    let r = run_doc(&dataset, &doc, &model, timeout, norm, save.as_deref(), allow_cache).await;
-                    bar.inc(1);
-                    r
-                }
+                let ctx = ctx.clone();
+                let model = model.to_string();
+                async move { run_doc(&ctx, &doc, &model).await }
             })
-            .buffer_unordered(args.concurrency.max(1))
-            .collect()
-            .await;
+            .buffer_unordered(args.concurrency.max(1));
+        while let Some(r) = calls.next().await {
+            bar.inc(1);
+            // Record before anything else so an interrupt after this point loses nothing.
+            log.record(model, &r)?;
+            new_calls += 1;
+            new_cost += r.cost_usd.unwrap_or(0.0);
+            records.insert((model.to_string(), r.id.clone()), r);
+        }
         bar.finish_and_clear();
-        let mut results = results;
+        let mut results: Vec<DocResult> =
+            docs.iter().filter_map(|d| records.get(&(model.to_string(), d.id.clone())).cloned()).collect();
         results.sort_by(|a, b| a.id.cmp(&b.id));
         let summary = summarize_model(&results);
         eprintln!(
@@ -289,13 +429,12 @@ async fn run_bench(args: RunArgs) -> Result<()> {
         for d in results.iter().filter(|d| d.error.is_some()) {
             eprintln!("  ✗ {}: {}", d.id, d.error.as_deref().unwrap_or(""));
         }
-        models.push(ModelResult { model: model.clone(), docs: results, summary });
+        models.push(ModelResult { model: model.to_string(), docs: results, summary });
     }
 
-    let now = chrono::Utc::now();
     let result = RunResult {
-        run_id: uuid_like(&now),
-        created_at: now.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+        run_id: header.run_id.clone(),
+        created_at: header.created_at.clone(),
         liteocr_version: liteocr_core::VERSION.to_string(),
         dataset: DatasetInfo {
             name: manifest.name.clone(),
@@ -306,16 +445,17 @@ async fn run_bench(args: RunArgs) -> Result<()> {
         normalize: norm,
         models,
     };
-    let out = args.out.unwrap_or_else(|| {
-        PathBuf::from(format!("benchmark/results/{}-{}.json", now.format("%Y-%m-%d"), manifest.name))
-    });
     if let Some(parent) = out.parent() {
         std::fs::create_dir_all(parent)?;
     }
     std::fs::write(&out, serde_json::to_string_pretty(&result)?)?;
+    drop(log);
+    std::fs::remove_file(&partial).with_context(|| format!("removing {}", partial.display()))?;
     eprintln!("\nwrote {}", out.display());
-    println!("{}", render_markdown(&[result]));
-    Ok(())
+    let failed: usize = result.models.iter().map(|m| m.docs.iter().filter(|d| d.error.is_some()).count()).sum();
+    let total_cost: f64 = result.models.iter().flat_map(|m| m.docs.iter()).filter_map(|d| d.cost_usd).sum();
+    eprintln!("{}", runlog::summary_line(new_calls, resumed, failed, total_cost, new_cost, wall.elapsed()));
+    Ok(Some(result))
 }
 
 fn uuid_like(now: &chrono::DateTime<chrono::Utc>) -> String {
@@ -352,46 +492,62 @@ fn load_scoring(dataset: &Path, doc: &ManifestDoc) -> Result<Scoring, String> {
 }
 
 /// A `DocResult` that recorded a failure (no metrics), preserving the document's identity.
-fn failed_doc(doc: &ManifestDoc, error: String) -> DocResult {
+fn failed_doc(doc: &ManifestDoc, kind: &str, error: String) -> DocResult {
     DocResult {
         id: doc.id.clone(),
         category: doc.category.clone(),
         kind: doc.kind.clone(),
         table_only: doc.table_only(),
         pages: doc.pages,
-        metrics: None,
-        latency_ms: 0,
-        cost_usd: None,
         error: Some(error),
+        error_kind: Some(kind.to_string()),
+        ..DocResult::default()
     }
 }
 
-#[allow(clippy::too_many_arguments)]
-async fn run_doc(
-    dataset: &Path,
-    doc: &ManifestDoc,
-    model: &str,
-    timeout: f64,
-    norm: NormalizeOptions,
-    save: Option<&Path>,
-    allow_cache: bool,
-) -> DocResult {
-    let scoring = match load_scoring(dataset, doc) {
+/// The serde name of an `ErrorKind` (`"rate_limit"`, `"provider"`, …).
+fn error_kind_name(kind: liteocr_core::ErrorKind) -> String {
+    serde_json::to_value(kind).ok().and_then(|v| v.as_str().map(str::to_string)).unwrap_or_else(|| kind.to_string())
+}
+
+/// `true` if the provider reported a cache hit (a `<provider>_cache_hit` metadata key), `false`
+/// if caches were disabled for the run, `None` when neither is known.
+fn cache_hit(metadata: Option<&BTreeMap<String, serde_json::Value>>, allow_cache: bool) -> Option<bool> {
+    let reported =
+        metadata.and_then(|m| m.iter().find(|(k, _)| k.ends_with("_cache_hit")).and_then(|(_, v)| v.as_bool()));
+    reported.or(if allow_cache { None } else { Some(false) })
+}
+
+async fn run_doc(ctx: &CallCtx, doc: &ManifestDoc, model: &str) -> DocResult {
+    let started_at = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+    let scoring = match load_scoring(&ctx.dataset, doc) {
         Ok(s) => s,
-        Err(e) => return failed_doc(doc, e),
+        Err(e) => return DocResult { started_at: Some(started_at), ..failed_doc(doc, "input", e) },
     };
-    let mut req = DocumentRequest::from_path(dataset.join(&doc.file))
+    let mut req = DocumentRequest::from_path(ctx.dataset.join(&doc.file))
         .model(model)
-        .timeout_secs(timeout)
+        .timeout_secs(ctx.timeout)
         .output(OutputFormat::Markdown);
-    if !allow_cache {
+    if !ctx.allow_cache {
         if let Some(opts) = cache_busting_options(model) {
             req = req.provider_options(opts);
         }
     }
-    match liteocr_core::parse(req).await {
+    let mut attempts = 0u32;
+    let outcome = loop {
+        attempts += 1;
+        match (ctx.caller)(req.clone()).await {
+            Err(e) if e.retryable && attempts <= ctx.retries => {
+                let delay = ctx.retry_base.saturating_mul(1 << (attempts - 1).min(4));
+                tracing::warn!(doc = %doc.id, model, attempts, ?delay, error = %e, "bench: retrying");
+                tokio::time::sleep(delay).await;
+            }
+            other => break other,
+        }
+    };
+    let mut result = match outcome {
         Ok(resp) => {
-            if let Some(dir) = save {
+            if let Some(dir) = &ctx.save {
                 // Combined datasets prefix ids with their source (`synthetic/plain_001`), so the
                 // output path can have a directory component.
                 let path = dir.join(model.replace('/', "_")).join(format!("{}.md", doc.id));
@@ -401,8 +557,8 @@ async fn run_doc(
                 let _ = std::fs::write(path, &resp.markdown);
             }
             let metrics = match &scoring {
-                Scoring::Transcript(truth) => score(&resp.markdown, truth, norm),
-                Scoring::Rules(rules) => metrics_from_rules(&score_rules(&resp.markdown, rules, norm)),
+                Scoring::Transcript(truth) => score(&resp.markdown, truth, ctx.norm),
+                Scoring::Rules(rules) => metrics_from_rules(&score_rules(&resp.markdown, rules, ctx.norm)),
             };
             DocResult {
                 id: doc.id.clone(),
@@ -413,11 +569,20 @@ async fn run_doc(
                 metrics: Some(metrics),
                 latency_ms: resp.latency_ms,
                 cost_usd: resp.cost_usd,
-                error: None,
+                provider_job_id: resp.provider_job_id.clone(),
+                cache_hit: cache_hit(Some(&resp.metadata), ctx.allow_cache),
+                ..DocResult::default()
             }
         }
-        Err(e) => failed_doc(doc, e.to_string()),
-    }
+        Err(e) => DocResult {
+            provider_job_id: e.job_id.clone(),
+            cache_hit: cache_hit(None, ctx.allow_cache),
+            ..failed_doc(doc, &error_kind_name(e.kind), e.to_string())
+        },
+    };
+    result.attempts = Some(attempts);
+    result.started_at = Some(started_at);
+    result
 }
 
 fn percentile(sorted: &[u64], p: f64) -> u64 {
@@ -642,8 +807,7 @@ mod tests {
             pages: 1,
             metrics,
             latency_ms: 1,
-            cost_usd: None,
-            error: None,
+            ..DocResult::default()
         };
         let m = Metrics { char_similarity: 0.3, table_score: Some(0.9), ..Metrics::default() };
         let docs = vec![doc("a/x", true, Some(m)), doc("b/y", false, Some(m))];

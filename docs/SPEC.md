@@ -539,6 +539,27 @@ latency_p50_ms, latency_p95_ms, latency_per_page_ms, total_pages, total_cost_usd
 cost_per_1k_pages_usd, by_category}}]}`. The `sha256` covers the manifest plus every input and
 truth file, so a result is tied to an exact dataset revision.
 
+Each document record also carries audit fields (all optional, so older result files still load):
+`provider_job_id` (the provider's id for the call — Reducto job id, Extend parse run id,
+LlamaParse job id — taken from `ParseResponse.provider_job_id`, or from `Error.job_id` for a
+failure), `cache_hit` (`true` if the provider reported a result-cache hit via a
+`<provider>_cache_hit` metadata key, `false` if caches were disabled for the run, `null` unknown;
+always written), `attempts` (calls the runner issued, >1 only with `--retries`; retries inside the
+HTTP client are not counted), `started_at` (RFC 3339, first attempt) and, for failures,
+`error_kind` (the `ErrorKind` serde name, `"input"` for an unreadable truth/rule file) next to the
+`error` message.
+
+Resilience: while running, every finished (model, document) record is appended and flushed to
+`<out>.partial.jsonl` (first line `{"type":"header", run_id, created_at, dataset_sha256,
+normalize}`, then `{"type":"doc", model, doc}` per call). The final JSON is written from those
+records and the log is then deleted. `bench run --resume` reads the result JSON and/or the partial
+log, refuses them if the dataset `sha256` or normalisation differs, keeps the original `run_id`,
+and calls only the pairs without a successful record. A leftover log without `--resume` is an
+error, never silently overwritten. `--dry-run` prints the plan (calls, manifest pages, list-price
+estimate per model) without network access; `--max-cost <usd>` aborts before the first call when
+the estimate exceeds it (or when a planned model has no list price). The run ends with one line:
+calls made, resumed, failed, total cost, this invocation's cost and wall time.
+
 `LEADERBOARD.md` is regenerated from committed results and links to each run.
 
 Document kinds: a manifest document is `kind: "transcript"` (default; `truth` markdown, scored by
