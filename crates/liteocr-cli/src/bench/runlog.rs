@@ -596,6 +596,22 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn save_outputs_writes_markdown_and_unified_json() {
+        let dir = Scratch::new("save");
+        write_dataset(&dir.0);
+        let saved = dir.0.join("outputs");
+        let calls = Arc::new(Mutex::new(Vec::new()));
+        let extra = ["--save-outputs", saved.to_str().unwrap(), "--filter", "a"];
+        run_bench_with(&args(&dir.0, &extra), fake(calls, 0)).await.unwrap().expect("ran");
+        let base = saved.join("reducto_standard");
+        assert_eq!(std::fs::read_to_string(base.join("a.md")).unwrap(), "hello a");
+        let json: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(base.join("a.json")).unwrap()).unwrap();
+        assert_eq!(json["markdown"], "hello a");
+        assert_eq!(json["provider_job_id"], "job-a");
+    }
+
+    #[tokio::test]
     async fn run_records_audit_fields_and_resume_reruns_only_missing_pairs() {
         let dir = Scratch::new("run");
         write_dataset(&dir.0);

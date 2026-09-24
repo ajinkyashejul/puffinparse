@@ -554,7 +554,20 @@ async fn run_doc(ctx: &CallCtx, doc: &ManifestDoc, model: &str) -> DocResult {
                 if let Some(parent) = path.parent() {
                     let _ = std::fs::create_dir_all(parent);
                 }
-                let _ = std::fs::write(path, &resp.markdown);
+                if let Err(e) = std::fs::write(&path, &resp.markdown) {
+                    tracing::warn!(path = %path.display(), error = %e, "bench: could not save output");
+                }
+                // The unified response next to the markdown gives the viewer blocks and boxes for
+                // its layout overlay. Compact JSON: these files are committed with each run.
+                match serde_json::to_vec(&resp) {
+                    Ok(json) => {
+                        let json_path = path.with_extension("json");
+                        if let Err(e) = std::fs::write(&json_path, json) {
+                            tracing::warn!(path = %json_path.display(), error = %e, "bench: could not save output");
+                        }
+                    }
+                    Err(e) => tracing::warn!(error = %e, "bench: could not serialize response"),
+                }
             }
             let metrics = match &scoring {
                 Scoring::Transcript(truth) => score(&resp.markdown, truth, ctx.norm),

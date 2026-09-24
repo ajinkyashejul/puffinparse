@@ -11,6 +11,16 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **Benchmark viewer: verify every claim.** A per-document inspector at `#/<run>/<model>/<doc>` shows
+  the page itself (pdf.js for PDFs, pinned with SRI, PNG fallback), every model's output side by
+  side, a word diff against the truth, and a pass/fail rule checklist for rules documents that is
+  checked against the recorded score. Layout-box overlays by block type appear when a run saved
+  unified responses. The leaderboard ranks by `summary.headline` when present and adds p90 latency,
+  a score-vs-cost/latency scatter with the Pareto frontier, and per-source and source × category
+  breakdowns. Every view is a shareable link, with keyboard navigation (`j`/`k`, `m`, `1`–`4`,
+  `d`, `o`, `?`), the product site's design and theme switch, and a mobile layout.
+- `liteocr bench run --save-outputs` also writes the unified response as `<doc>.json` next to
+  `<doc>.md`, which the viewer uses for its layout overlay.
 - **More public benchmarks in the combined dataset.** `olmocr` (40 AI2 olmOCR-bench PDFs, 205
   rules, ODC-BY-1.0) and `omnidocbench` (40 pages across 10 document types, English and Chinese;
   index only — images and truth are fetched at a pinned revision by

@@ -246,3 +246,22 @@ is counted as relaxed.
 **Consequences.** Anyone can reproduce every score, but index-only sources need a fetch step before
 a run (their documents carry a `fetch-required` tag). Stats files make the coverage of each
 conversion auditable.
+
+## ADR-17: The benchmark results viewer stays vanilla JS
+
+**Context.** TASKS listed an open choice for `benchmark/site/` between a React app on Extend UI
+(PDF viewer and layout overlays out of the box) and the zero-build vanilla viewer. The viewer has
+to be where every benchmark claim can be checked: page rendering, side-by-side outputs, diffs,
+rule checklists, bbox overlays, charts, deep links.
+
+**Decision.** Keep static HTML/CSS/ES2018 in `benchmark/site/src/`: no framework, no bundler, no
+npm install; the build stays stdlib Python (Pillow optional). The one third-party runtime
+dependency is pdf.js, loaded lazily from cdnjs at a pinned version with SRI, only when a PDF is
+opened, with the build-time PNG as fallback. Overlays and charts are inline SVG. The per-document
+rule checklist uses a JS port of `liteocr-core`'s `score_rules`, and every rules page compares its
+count with the recorded Rust score and flags any disagreement.
+
+**Consequences.** Vercel and Pages build the site with one `uv run` command and nothing to audit.
+The data contract (`data/index.json`, `data/runs/`, `data/outputs/…/<doc>.{md,json}`) is
+independent of the front-end, so this can be revisited without touching the build. The JS port
+must follow scorer changes in `bench.rs`; the mismatch badge makes drift visible.
