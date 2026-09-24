@@ -66,6 +66,28 @@ text parts. Strings pass through; booleans become `"true"`/`"false"`; numbers ar
 values are skipped; objects/arrays are serialised as JSON text. A key already present (e.g. `version`,
 `tier`, `language`, `target_pages`) is **replaced**, so provider options override LiteOCR's defaults.
 
+### Jobs API and webhooks (`submit_parse` / `retrieve_parse`, SPEC §15)
+
+* **Submit** — the same `POST {base}/api/v1/parsing/upload`; the job `id` becomes
+  `JobHandle.job_id`. `webhook_url` becomes the multipart field `webhook_url` (LlamaParse requires
+  HTTPS, a domain name rather than an IP, and fewer than 200 characters).
+* **Retrieve** — one `GET {base}/api/v1/parsing/job/{id}` (retried on 429/5xx); `SUCCESS` /
+  `PARTIAL_SUCCESS` then fetch `result/json` exactly like `parse`; `ERROR` / `CANCELLED` →
+  `JobStatus::Failed` with `error_code error_message` (`INVALID*` → `bad_request`, else
+  `provider`); `PENDING` → `Pending`.
+* **Webhook bodies** — two shapes reach a handler, and `parse_webhook` reads both:
+  * the v1 `webhook_url` *result push*, `{"txt", "md", "json": [{"page", "text", "md", …}],
+    "images"}`: this **is** the result (normalised through the `result/json` mapping, no geometry
+    unless `items` are present) → `Succeeded`, but it carries no job id;
+  * a LlamaCloud *event* (sent for jobs created with `webhook_configurations`, a v2 feature; that
+    LiteOCR's v1 upload accepts it through `provider_options` is **not verified**),
+    `{"event_id", "event_type": "parse.success", "timestamp", "data": {"job_id"}}`:
+    `parse.pending` → `Pending`; `parse.success` / `partial_success` / `error` / `cancelled` →
+    `Finished` (retrieve for the result or the error message). Events for other products
+    (`extract.*`, …) are rejected. Verify the `LC-Signature` header when a signing secret is set.
+* Verified live 2026-09-24 (`tests/live_jobs.rs::llamaparse_submit_retrieve_live`, `fast`, 1 page:
+  3 status checks, ~4.4 s).
+
 ## 4. Response mapping (`parse` / `ocr`)
 
 | LlamaParse field | LiteOCR unified field | Notes |

@@ -160,7 +160,8 @@ liteocr.parse(
 ```
 
 `aparse(...)` is the `async def` equivalent. In Rust this is `DocumentRequest`, a builder over
-the same fields.
+the same fields. `DocumentRequest` also carries `webhook_url: Option<String>`, used only when the
+request is *submitted* as a job (§15; Python `submit(..., webhook_url=...)`); `parse` ignores it.
 
 ### 4.2 `ocr`
 
@@ -596,6 +597,10 @@ carry `kind` and `table_only`; rule files are included in the dataset `sha256`.
   `extract`/`ocr` names the mode *and* the models that serve it (`list_models(mode)`), so a
   user who passes a parse-only model to `extract` is told what to use instead. Passing a
   non-dict `schema` raises `TypeError` before any FFI call.
+- Jobs (§15): `submit`/`asubmit` → `Job` (dataclass mirroring `JobHandle`),
+  `retrieve`/`aretrieve` and `handle_webhook`/`ahandle_webhook` → `Job | ParseResponse`
+  (`liteocr.JobResult`), implemented in `python/liteocr/jobs.py` over `_core.submit`,
+  `_core.retrieve` and `_core.parse_webhook`.
 - `liteocr.score`, `normalize_text`, `markdown_to_text` expose the benchmark metrics.
 - Logging: `LITEOCR_LOG=debug` enables tracing in the core; Python uses
   `logging.getLogger("liteocr")`.
@@ -674,3 +679,53 @@ not hold provider keys. Operator reference: [`SERVER.md`](SERVER.md). Contract:
 - **Logs.** One JSON line per request: `ts, request_id, key_id, method, path, mode, model,
   served_model, provider, fallback_index, pages, cost_usd, latency_ms, status, error_type,
   provider_status`. Never document content or URLs, provider error text, or any secret.
+
+## 15. Asynchronous jobs and webhooks
+
+`parse` blocks until the provider is done (polling job-queue providers internally). The jobs API
+splits that call in two so the caller owns the waiting — for long documents, large batches, or
+pipelines driven by provider webhooks. An SDK cannot *receive* a webhook, so LiteOCR exposes the
+primitives and a parser for webhook bodies; your web handler does the receiving. `parse` mode only.
+
+```rust
+liteocr_core::submit_parse(DocumentRequest) -> Result<JobHandle>
+liteocr_core::retrieve_parse(&JobHandle) -> Result<JobStatus>            // env credentials
+liteocr_core::retrieve_parse_with(&JobHandle, &RetrieveOptions) -> Result<JobStatus>
+liteocr_core::parse_webhook(model, &serde_json::Value) -> Result<WebhookEvent>   // no network
+liteocr_core::resolve_webhook(model, &Value, &RetrieveOptions) -> Result<JobStatus>
+```
+
+```python
+job = liteocr.submit("big.pdf", model="reducto/standard", webhook_url="https://…/hook")  # -> Job
+liteocr.retrieve(job)                    # -> Job (still running) | ParseResponse; raises on failure
+liteocr.handle_webhook(body, model="reducto")   # -> Job | ParseResponse; raises on failure
+# asubmit / aretrieve / ahandle_webhook are the async equivalents
+```
+
+**`JobHandle`** (`Job` in Python): `provider`, `model` (qualified), `job_id` (the provider's id),
+`submitted_at` (RFC 3339), `output`, `include_raw`, `base_url`, `provider_state`, `metadata`.
+It never contains a secret: API keys are resolved again at retrieve time (env var or
+`RetrieveOptions.api_key` / `retrieve(api_key=…)`), and `provider_state` holds only the
+non-secret options a later call needs (Extend `workspace_id`, `responseType`). Serialise it with
+serde / `Job.to_dict()` to store it or hand it to another process.
+
+**`JobStatus`**: `Pending` | `Succeeded(ParseResponse)` | `Failed(Error)`. A succeeded job is
+normalised exactly like `parse` (qualified model, cost, request metadata echoed, `raw` only with
+`include_raw`); `latency_ms` is the time since submission. A provider-side failure is
+`Ok(Failed(e))` with `e.job_id` set — `Err` means the status check itself failed (auth, network).
+Python raises the typed exception for `Failed`.
+
+**Webhooks.** `webhook_url` maps to each provider's own per-job setting; `parse_webhook` reads
+the body the provider POSTs:
+
+| Provider | Submit / retrieve | `webhook_url` → | Webhook body → `WebhookStatus` |
+|---|---|---|---|
+| `reducto` | `POST /parse_async` / `GET /job/{id}` | `async.webhook = {"mode": "direct", "url": …}` | `{"status", "job_id"}`: `Completed`/`Failed` → `Finished` (retrieve for result or reason), else `Pending` |
+| `extend` | `POST /parse_runs` / `GET /parse_runs/{id}` | **rejected** (`input` error): Extend only has workspace webhook endpoints | `{"eventType": "parse_run.*", "payload": parse_run_status}`: `PROCESSED` → `Finished` (or `Succeeded` if a full run with output), `FAILED` → `Failed` (reason + message), else `Pending` |
+| `llamaparse` | `POST /api/v1/parsing/upload` / `GET /api/v1/parsing/job/{id}` (+ `result/json`) | multipart field `webhook_url` | the `webhook_url` result push `{"txt","md","json":[pages]}` → `Succeeded`; a LlamaCloud event `{"event_type": "parse.*", "data": {"job_id"}}` → `Finished` / `Pending` |
+
+`WebhookStatus::Finished` means "terminal, but the body carries neither the result nor the error
+detail"; `resolve_webhook` (Python `handle_webhook`) then makes one retrieve. Verifying webhook
+authenticity (Extend and LlamaCloud HMAC signatures, a secret in Reducto `async.metadata`) is the
+caller's job and must happen before the body is trusted. Other providers return
+`unsupported_model` from `submit_parse`.

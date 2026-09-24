@@ -72,17 +72,45 @@ x-extend-workspace-id: <provider_options.workspace_id>      # only when supplied
 3. **Poll.** `GET {base}/parse_runs/{id}` starting at 1 s, backing off ×1.5 to a maximum of 10 s, until
    `status` is `PROCESSED` or `FAILED`. (`PENDING`/`PROCESSING` keep polling.) If the create call already
    came back terminal, the poll loop is skipped.
-4. **Result.** Normally `run.output` is inline. If a run was created with `responseType=url`
-   (via `provider_options`), `output` is `null` and LiteOCR fetches `run.outputUrl` with a plain `GET`
-   and **no** auth header; the payload has exactly the shape of `output` (`{chunks, metadata, ocr?}`).
-   Presigned output URLs expire in 15 minutes.
+4. **Result.** Normally `run.output` is inline. `responseType` is a **query parameter of
+   `GET /parse_runs/{id}`** (not a body key): with `provider_options={"responseType": "url"}` LiteOCR
+   consumes the key (it is never sent in the create body) and polls
+   `GET /parse_runs/{id}?responseType=url`. The finished run then has `output: null` and an
+   `outputUrl`, which LiteOCR fetches with a plain `GET` and **no** auth header; the payload has
+   exactly the shape of `output` (`{chunks, metadata, ocr?}`). Presigned output URLs expire in
+   15 minutes. (Before 2026-09-24 LiteOCR forwarded the key into the body, so this path never
+   triggered.) Verified live on 2026-09-24; the captured run and output are the fixtures
+   `extend_parse_run_url.json` / `extend_parse_run_url_output.json` (ids and signatures redacted),
+   replayed by the loopback tests in `providers::extend::wire`.
 
-**Where `provider_options` are merged:** `build_body()` removes `workspace_id` (it becomes a header),
+**Where `provider_options` are merged:** `build_body()` removes `workspace_id` (it becomes a header)
+and `responseType` (a query parameter, step 4),
 then lifts any of `target`, `chunkingStrategy`, `engine`, `engineVersion`, `blockOptions`,
 `advancedOptions` into `config` (deep-merged with an explicit `config` object if you passed one), and
 deep-merges everything that remains at the **top level** of the body — which is how `metadata`,
 `dataRetention` and even `file` overrides get through. So both spellings work:
 `{"blockOptions": {...}}` and `{"config": {"blockOptions": {...}}}`.
+
+### Jobs API and webhooks (`submit_parse` / `retrieve_parse`, SPEC §15)
+
+* **Submit** — the same file reference and `POST {base}/parse_runs` as `parse`; the run id
+  (`pr_…`) becomes `JobHandle.job_id`. `workspace_id` and `responseType` are kept in
+  `JobHandle.provider_state` so retrieve sends the same header and query parameter.
+* **Retrieve** — one `GET {base}/parse_runs/{id}` (retried on 429/5xx). `PROCESSED` → the output
+  (inline or via `outputUrl`); `FAILED` / `CANCELLED` → `JobStatus::Failed` with
+  `failureReason: failureMessage` (kinds as in §6); `PENDING` / `PROCESSING` → `Pending`.
+* **`webhook_url` is rejected** (`input` error, no request sent). Extend has no per-run webhook:
+  webhooks are workspace **endpoints** (`POST /webhook_endpoints` or the dashboard) subscribed to
+  events such as `parse_run.processed` / `parse_run.failed`. Their body is
+  `{"eventId", "eventType", "payload": {"object": "parse_run_status", "id", "status",
+  "failureReason", "failureMessage", "metadata"}}`; `parse_webhook` maps `FAILED` straight to
+  `Failed` (the reason is in the body), `PROCESSED` to `Finished` (then one retrieve), anything
+  else to `Pending`. Endpoints configured for *signed download URL* delivery send
+  `payload: {"data": "<url>"}` — download it and pass the JSON inside. Verify the
+  `HMAC-SHA256(v0:{timestamp}:{body})` signature before trusting a body. Non-`parse_run.*`
+  events are rejected.
+* Verified live 2026-09-24 (`tests/live_jobs.rs::extend_submit_retrieve_live`, `parse_light`,
+  1 page: 3 status checks, ~4.4 s).
 
 ## 4. Response mapping (`parse` / `ocr`)
 

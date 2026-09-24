@@ -67,13 +67,37 @@ All requests carry `Authorization: Bearer $REDUCTO_API_KEY`. There is no version
 4. **Result.** If `result.type == "url"` (large results, or `settings.force_url_result`), LiteOCR issues
    a plain `GET` on the presigned URL **without** the Authorization header and expects the *whole*
    `FullResult` object back (`{"type":"full","chunks":[…]}`), not a bare chunk array. A second `url`
-   result is an error.
+   result is an error, and a storage error (e.g. an expired link: S3 answers `403` with an XML body)
+   is surfaced with its message. Verified live on 2026-09-24 with
+   `settings.force_url_result: true`; the captured envelope and URL body are the fixtures
+   `reducto_parse_url.json` / `reducto_parse_url_result.json` (ids and signatures redacted), replayed
+   end to end by the loopback tests in `providers::reducto::wire`. The link is valid for 12 h
+   (`X-Amz-Expires=43200`) and the object is deleted after 24 h.
 
 **Where `provider_options` are merged:** `build_body()` clones `provider_options`, removes the LiteOCR-only
 key `async`, and deep-merges the rest into the body above (objects merge recursively; scalars and arrays
 replace). So `provider_options` keys are top-level Reducto request keys — `settings`, `retrieval`,
 `formatting`, `enhance`, `spreadsheet`, `queue_priority`, `async` (the Reducto object of that name is
 *not* forwarded; only the boolean switch is consumed).
+
+### Jobs API and webhooks (`submit_parse` / `retrieve_parse`, SPEC §15)
+
+* **Submit** — the same upload step and body as `parse`, sent to `POST {base}/parse_async`; the
+  returned `job_id` becomes `JobHandle.job_id`. A Reducto-native `provider_options.async` *object*
+  (`{"metadata": …, "priority": …}`) is forwarded as the body's `async`; the boolean switch of the
+  blocking path is not.
+* **`webhook_url`** → `async.webhook = {"mode": "direct", "url": "<webhook_url>"}`. Reducto POSTs
+  `{"status": "Completed" | "Failed", "job_id": "…", "metadata": {…}}` (retried up to 3 times). The
+  body has no result and no failure reason, so `parse_webhook` reports `Finished` and
+  `resolve_webhook` / Python `handle_webhook` fetch `GET /job/{id}`. Direct webhooks are unsigned:
+  put a secret in `async.metadata` and check it before trusting the body. Svix-mode webhooks are
+  not configured by LiteOCR (pass `provider_options={"async": {"webhook": {"mode": "svix", …}}}`).
+* **Retrieve** — one `GET {base}/job/{job_id}` (retried on 429/5xx). `Completed` → the `result`
+  (a `ParseResponse`, `url`-typed results followed as above); `Failed` / `Cancelled` →
+  `JobStatus::Failed` with `reason` (or `error.message`); `Pending`, `Idle`, `InProgress`,
+  `Completing` → `Pending`. Job ids expire after 12 h.
+* Verified live 2026-09-24 (`tests/live_jobs.rs::reducto_submit_retrieve_live`, 1 page: 3 status
+  checks, ~4.6 s).
 
 ## 4. Response mapping (`parse` / `ocr`)
 

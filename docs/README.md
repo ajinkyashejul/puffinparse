@@ -38,8 +38,11 @@ crates/liteocr-core/src/
   model.rs        provider + model registry (the only place models are declared)
   pricing.rs/.json list prices, overridable
   http.rs         shared client, retry/backoff, deadline, polling helper
+  jobs.rs         async jobs API types: JobHandle, JobStatus, webhook events (SPEC §15)
   provider.rs     OcrProvider trait + helpers (keys, base URLs, multipart)
-  providers/      reducto.rs, extend.rs, llamaparse.rs (+ mod.rs build())
+  providers/      reducto.rs, extend.rs, llamaparse.rs (+ mod.rs build()); vlm.rs = shared
+                  helpers of the vision-LLM providers (gemini, openai, anthropic)
+  testutil.rs     test-only loopback HTTP server for provider wire tests
   compat/         render a unified response in a vendor's native JSON shape (docs/COMPAT.md)
   router.rs       ordered / round-robin fallbacks, stats
   bench.rs        normalisation + metrics + summaries
