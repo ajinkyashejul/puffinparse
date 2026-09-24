@@ -28,6 +28,9 @@ pub(crate) fn router(state: Arc<AppState>) -> axum::Router {
         .route("/v1/parse", post(|s: State<Arc<AppState>>, r: Request| run(s, Mode::Parse, r)))
         .route("/v1/ocr", post(|s: State<Arc<AppState>>, r: Request| run(s, Mode::Ocr, r)))
         .route("/v1/extract", post(|s: State<Arc<AppState>>, r: Request| run(s, Mode::Extract, r)))
+        .route("/v1/jobs", post(crate::jobs::submit))
+        .route("/v1/jobs/{id}", get(crate::jobs::retrieve))
+        .route("/v1/webhooks/{provider}", post(crate::jobs::webhook))
         .layer(DefaultBodyLimit::max(limit))
         .layer(tower_http::catch_panic::CatchPanicLayer::custom(|_| {
             ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "internal_error", "internal server error").into_response()
@@ -40,7 +43,7 @@ pub(crate) fn router(state: Arc<AppState>) -> axum::Router {
 
 /// Who is calling.
 #[derive(Debug, Clone)]
-enum Principal {
+pub(crate) enum Principal {
     /// Auth disabled (no master key, no virtual keys).
     Anonymous,
     Master,
@@ -48,7 +51,7 @@ enum Principal {
 }
 
 impl Principal {
-    fn id<'a>(&self, state: &'a AppState) -> &'a str {
+    pub(crate) fn id<'a>(&self, state: &'a AppState) -> &'a str {
         match self {
             Principal::Anonymous => "anonymous",
             Principal::Master => "master",
@@ -58,7 +61,7 @@ impl Principal {
 }
 
 /// Constant-time byte comparison, so response timing does not leak key prefixes.
-fn ct_eq(a: &[u8], b: &[u8]) -> bool {
+pub(crate) fn ct_eq(a: &[u8], b: &[u8]) -> bool {
     if a.len() != b.len() {
         return false;
     }
@@ -74,7 +77,7 @@ fn bearer(headers: &HeaderMap) -> Option<&str> {
     headers.get("x-api-key").and_then(|v| v.to_str().ok()).map(str::trim)
 }
 
-fn authenticate(state: &AppState, headers: &HeaderMap) -> Result<Principal, ApiError> {
+pub(crate) fn authenticate(state: &AppState, headers: &HeaderMap) -> Result<Principal, ApiError> {
     if !state.auth_enabled() {
         return Ok(Principal::Anonymous);
     }
@@ -108,7 +111,7 @@ fn allowed(patterns: &[String], name: &str) -> bool {
     })
 }
 
-fn check_model_access(state: &AppState, who: &Principal, name: &str) -> Result<(), ApiError> {
+pub(crate) fn check_model_access(state: &AppState, who: &Principal, name: &str) -> Result<(), ApiError> {
     if let Principal::Key(i) = who {
         let key = &state.keys[*i];
         if !allowed(&key.models, name) {
@@ -119,7 +122,7 @@ fn check_model_access(state: &AppState, who: &Principal, name: &str) -> Result<(
 }
 
 /// Budget and rate limit, checked before any provider call.
-fn check_limits(state: &AppState, who: &Principal) -> Result<(), ApiError> {
+pub(crate) fn check_limits(state: &AppState, who: &Principal) -> Result<(), ApiError> {
     let Principal::Key(i) = who else { return Ok(()) };
     let key = &state.keys[*i];
     if let Some(budget) = key.monthly_budget_usd {
@@ -131,6 +134,13 @@ fn check_limits(state: &AppState, who: &Principal) -> Result<(), ApiError> {
             )));
         }
     }
+    check_rate(state, who)
+}
+
+/// The key's `rpm` limit alone (job status checks are not budget-gated: the job is already paid).
+pub(crate) fn check_rate(state: &AppState, who: &Principal) -> Result<(), ApiError> {
+    let Principal::Key(i) = who else { return Ok(()) };
+    let key = &state.keys[*i];
     if let Some(rpm) = key.rpm {
         state.usage.check_rate(&key.id, rpm).map_err(ApiError::rate_limited)?;
     }
@@ -145,8 +155,8 @@ fn check_limits(state: &AppState, who: &Principal) -> Result<(), ApiError> {
 /// never be able to redirect the gateway's provider credentials.
 #[derive(Debug, Default, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct ApiRequest {
-    model: Option<String>,
+pub(crate) struct ApiRequest {
+    pub(crate) model: Option<String>,
     document_url: Option<String>,
     /// Base64 document bytes (a `data:` URL prefix is accepted); needs `filename`.
     document: Option<String>,
@@ -154,24 +164,26 @@ struct ApiRequest {
     pages: Option<String>,
     language: Option<String>,
     output: Option<OutputFormat>,
-    output_format: Option<String>,
+    pub(crate) output_format: Option<String>,
     provider_options: Option<Value>,
     include_raw: Option<bool>,
     /// Seconds, capped at `server.max_timeout_secs`.
     timeout: Option<f64>,
     max_retries: Option<u32>,
     /// Extra aliases / models tried after `model`'s own targets.
-    fallbacks: Option<Vec<String>>,
+    pub(crate) fallbacks: Option<Vec<String>>,
     metadata: Option<BTreeMap<String, Value>>,
     // extract only
-    schema: Option<Value>,
-    instructions: Option<String>,
-    citations: Option<bool>,
+    pub(crate) schema: Option<Value>,
+    pub(crate) instructions: Option<String>,
+    pub(crate) citations: Option<bool>,
+    /// `/v1/jobs` only: the provider's per-job webhook (SPEC §15).
+    pub(crate) webhook_url: Option<String>,
     #[serde(skip)]
     file: Option<(bytes::Bytes, String)>,
 }
 
-async fn decode_body(req: Request) -> Result<ApiRequest, ApiError> {
+pub(crate) async fn decode_body(req: Request) -> Result<ApiRequest, ApiError> {
     let ct = req.headers().get(header::CONTENT_TYPE).and_then(|v| v.to_str().ok()).unwrap_or("").to_ascii_lowercase();
     if ct.starts_with("multipart/form-data") {
         let mp = Multipart::from_request(req, &()).await.map_err(|e| body_error(e.status(), e.body_text()))?;
@@ -184,7 +196,7 @@ async fn decode_body(req: Request) -> Result<ApiRequest, ApiError> {
     serde_json::from_slice(&body).map_err(|e| ApiError::input(format!("invalid JSON body: {e}")))
 }
 
-fn body_error(status: StatusCode, text: String) -> ApiError {
+pub(crate) fn body_error(status: StatusCode, text: String) -> ApiError {
     if status == StatusCode::PAYLOAD_TOO_LARGE {
         ApiError::new(status, "payload_too_large", "request body exceeds server.max_body_mb")
     } else {
@@ -229,6 +241,7 @@ async fn decode_multipart(mut mp: Multipart) -> Result<ApiRequest, ApiError> {
                 )
             }
             "instructions" => r.instructions = Some(text),
+            "webhook_url" => r.webhook_url = Some(text),
             "include_raw" => r.include_raw = Some(parse_bool("include_raw", &text)?),
             "citations" => r.citations = Some(parse_bool("citations", &text)?),
             "timeout" => {
@@ -327,68 +340,165 @@ fn plan(
         } else if state.server.allow_direct_models {
             out.push(Deployment { model: name.to_string(), api_key: None, base_url: None });
         } else {
-            return Err(ApiError::new(
-                StatusCode::BAD_REQUEST,
-                "unsupported_model_error",
-                format!("unknown model '{name}': this gateway only serves its configured aliases (GET /v1/models)"),
-            ));
+            return Err(unknown_model(name));
         }
     }
     // Mode errors are raised before any network call (SPEC §6).
     for d in &mut out {
-        let r = ModelRef::parse_for(&d.model, mode).map_err(ApiError::from)?;
-        let (key, base) = state.providers.get(&r.provider).cloned().unwrap_or_default();
-        d.model = r.qualified();
-        d.api_key = d.api_key.take().or(key);
-        d.base_url = d.base_url.take().or(base);
+        with_credentials(state, d, mode)?;
     }
     Ok((out, fallback_on.unwrap_or_else(default_fallback_on)))
+}
+
+fn unknown_model(name: &str) -> ApiError {
+    ApiError::new(
+        StatusCode::BAD_REQUEST,
+        "unsupported_model_error",
+        format!("unknown model '{name}': this gateway only serves its configured aliases (GET /v1/models)"),
+    )
+}
+
+/// Check the deployment serves `mode`, qualify its model and fill `[providers.*]` credentials
+/// where the target has none of its own.
+pub(crate) fn with_credentials(state: &AppState, d: &mut Deployment, mode: Mode) -> Result<(), ApiError> {
+    let r = ModelRef::parse_for(&d.model, mode).map_err(ApiError::from)?;
+    let (key, base) = state.providers.get(&r.provider).cloned().unwrap_or_default();
+    d.model = r.qualified();
+    d.api_key = d.api_key.take().or(key);
+    d.base_url = d.base_url.take().or(base);
+    Ok(())
+}
+
+/// The single deployment an async job is submitted to: an alias's first target in its strategy
+/// order (jobs do not fall back — a provider failure surfaces later, on retrieve), or the model
+/// itself. Also returns the alias and target index, so retrieve reuses the same credentials.
+pub(crate) fn plan_job(
+    state: &AppState,
+    who: &Principal,
+    model: &str,
+) -> Result<(Deployment, Option<(String, usize)>), ApiError> {
+    check_model_access(state, who, model)?;
+    let (mut d, origin) = if let Some(alias) = state.aliases.get(model) {
+        let n = alias.targets.len();
+        let index = match alias.strategy {
+            Strategy::Ordered => 0,
+            Strategy::RoundRobin => alias.cursor.fetch_add(1, Ordering::Relaxed) % n,
+        };
+        (alias.targets[index].clone(), Some((model.to_string(), index)))
+    } else if state.server.allow_direct_models {
+        (Deployment { model: model.to_string(), api_key: None, base_url: None }, None)
+    } else {
+        return Err(unknown_model(model));
+    };
+    with_credentials(state, &mut d, Mode::Parse)?;
+    Ok((d, origin))
 }
 
 // ---------------------------------------------------------------------------------------------
 // Handlers
 
-struct Served {
-    body: Value,
-    model: String,
-    provider: String,
-    pages: u32,
-    cost_usd: Option<f64>,
-    fallback_index: usize,
+pub(crate) struct Served {
+    pub(crate) body: Value,
+    pub(crate) model: String,
+    pub(crate) provider: String,
+    /// Pages and cost this request adds to the metrics (and, with `billed`, to the key's usage).
+    pub(crate) pages: u32,
+    pub(crate) cost_usd: Option<f64>,
+    pub(crate) fallback_index: usize,
+    pub(crate) status: StatusCode,
+    /// Charge `cost_usd` / `pages` to the caller's key in [`finish`]. Jobs charge their owner
+    /// through `UsageStore::settle_job` instead.
+    pub(crate) billed: bool,
+}
+
+impl Served {
+    fn synchronous(body: Value, model: String, provider: String, pages: u32, cost_usd: Option<f64>, i: usize) -> Self {
+        Self { body, model, provider, pages, cost_usd, fallback_index: i, status: StatusCode::OK, billed: true }
+    }
 }
 
 /// Per-request context for logging and metrics.
-struct Ctx {
+pub(crate) struct Ctx {
     request_id: String,
     started: Instant,
+    method: &'static str,
     path: String,
     mode: Mode,
-    key_id: String,
+    /// Metrics `mode` label: the mode for synchronous calls, `job_submit` / `job_retrieve` /
+    /// `webhook` for the jobs API.
+    label: &'static str,
+    pub(crate) key_id: String,
     /// The requested model, as sent (logged).
-    requested: Option<String>,
+    pub(crate) requested: Option<String>,
     /// The requested model once it resolved to an alias or registry model (metrics label).
-    model: Option<String>,
+    pub(crate) model: Option<String>,
+    /// Gateway job id and the status observed (jobs API only).
+    pub(crate) job_id: Option<String>,
+    pub(crate) job_status: Option<&'static str>,
+}
+
+impl Ctx {
+    pub(crate) fn new(req: &Request, method: &'static str, mode: Mode, label: &'static str) -> Self {
+        let request_id = req
+            .headers()
+            .get("x-request-id")
+            .and_then(|v| v.to_str().ok())
+            .filter(|s| !s.is_empty() && s.len() <= 128 && s.chars().all(|c| c.is_ascii_graphic()))
+            .map(str::to_string)
+            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        Ctx {
+            request_id,
+            started: Instant::now(),
+            method,
+            path: req.uri().path().to_string(),
+            mode,
+            label,
+            key_id: "-".into(),
+            requested: None,
+            model: None,
+            job_id: None,
+            job_status: None,
+        }
+    }
+
+    pub(crate) fn request_id(&self) -> &str {
+        &self.request_id
+    }
 }
 
 async fn run(State(state): State<Arc<AppState>>, mode: Mode, req: Request) -> Response {
-    let request_id = req
-        .headers()
-        .get("x-request-id")
-        .and_then(|v| v.to_str().ok())
-        .filter(|s| !s.is_empty() && s.len() <= 128 && s.chars().all(|c| c.is_ascii_graphic()))
-        .map(str::to_string)
-        .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
-    let mut ctx = Ctx {
-        request_id,
-        started: Instant::now(),
-        path: req.uri().path().to_string(),
-        mode,
-        key_id: "-".into(),
-        requested: None,
-        model: None,
-    };
+    let mut ctx = Ctx::new(&req, "POST", mode, mode.as_str());
     let result = handle(&state, &mut ctx, req).await;
     finish(&state, &ctx, result)
+}
+
+/// The `DocumentRequest` shared by `/v1/{parse,ocr,extract}` and `/v1/jobs` (model and
+/// credentials are set per deployment by the caller).
+pub(crate) fn build_doc(state: &AppState, body: &mut ApiRequest) -> Result<DocumentRequest, ApiError> {
+    let input = build_input(body)?;
+    let mut doc = DocumentRequest::new(input);
+    doc.pages = body.pages.take();
+    doc.language = body.language.take();
+    doc.output = body.output.unwrap_or_default();
+    doc.provider_options = body.provider_options.take();
+    doc.include_raw = body.include_raw.unwrap_or(false);
+    doc.metadata = body.metadata.take().unwrap_or_default();
+    doc.max_retries = body.max_retries.unwrap_or(state.server.max_retries).min(10);
+    let max_t = state.server.max_timeout_secs;
+    doc.timeout_secs = match body.timeout {
+        Some(t) if t.is_finite() && t > 0.0 => t.min(max_t),
+        Some(_) => return Err(ApiError::input("'timeout' must be a positive number of seconds")),
+        None => max_t,
+    };
+    Ok(doc)
+}
+
+/// Parse an `output_format` value (`None` → the unified response).
+pub(crate) fn output_shape(format: Option<&str>) -> Result<liteocr_core::OutputShape, ApiError> {
+    match format {
+        None => Ok(liteocr_core::OutputShape::Liteocr),
+        Some(f) => f.parse().map_err(ApiError::from),
+    }
 }
 
 async fn handle(state: &AppState, ctx: &mut Ctx, req: Request) -> Result<Served, ApiError> {
@@ -403,25 +513,11 @@ async fn handle(state: &AppState, ctx: &mut Ctx, req: Request) -> Result<Served,
     ctx.model = Some(model);
     check_limits(state, &who)?;
 
-    let input = build_input(&mut body)?;
-    let mut doc = DocumentRequest::new(input);
-    doc.pages = body.pages;
-    doc.language = body.language;
-    doc.output = body.output.unwrap_or_default();
-    doc.provider_options = body.provider_options;
-    doc.include_raw = body.include_raw.unwrap_or(false);
-    doc.metadata = body.metadata.unwrap_or_default();
-    doc.max_retries = body.max_retries.unwrap_or(state.server.max_retries).min(10);
-    let max_t = state.server.max_timeout_secs;
-    doc.timeout_secs = match body.timeout {
-        Some(t) if t.is_finite() && t > 0.0 => t.min(max_t),
-        Some(_) => return Err(ApiError::input("'timeout' must be a positive number of seconds")),
-        None => max_t,
-    };
-    let format = match body.output_format.as_deref() {
-        None => liteocr_core::OutputShape::Liteocr,
-        Some(f) => f.parse().map_err(ApiError::from)?,
-    };
+    if body.webhook_url.is_some() {
+        return Err(ApiError::input("'webhook_url' belongs to POST /v1/jobs (asynchronous parse)"));
+    }
+    let doc = build_doc(state, &mut body)?;
+    let format = output_shape(body.output_format.as_deref())?;
     if ctx.mode == Mode::Ocr && format != liteocr_core::OutputShape::Liteocr {
         return Err(ApiError::input("output_format applies to /v1/parse and /v1/extract only"));
     }
@@ -486,27 +582,13 @@ async fn call(
                 liteocr_core::OutputShape::Liteocr => to_value(serde_json::to_value(&r))?,
                 f => liteocr_core::render_extract(&r, f),
             };
-            Ok(Served {
-                body,
-                model: r.model,
-                provider: r.provider,
-                pages: r.usage.pages,
-                cost_usd: r.cost_usd,
-                fallback_index: index,
-            })
+            Ok(Served::synchronous(body, r.model, r.provider, r.usage.pages, r.cost_usd, index))
         }
         (Mode::Ocr, _) => {
             let mut r = liteocr_core::ocr(req).await?;
             note(&mut r.metadata);
             let body = to_value(serde_json::to_value(&r))?;
-            Ok(Served {
-                body,
-                model: r.model,
-                provider: r.provider,
-                pages: r.usage.pages,
-                cost_usd: r.cost_usd,
-                fallback_index: index,
-            })
+            Ok(Served::synchronous(body, r.model, r.provider, r.usage.pages, r.cost_usd, index))
         }
         _ => {
             let mut r = liteocr_core::parse(req).await?;
@@ -515,26 +597,19 @@ async fn call(
                 liteocr_core::OutputShape::Liteocr => to_value(serde_json::to_value(&r))?,
                 f => liteocr_core::render_parse(&r, f),
             };
-            Ok(Served {
-                body,
-                model: r.model,
-                provider: r.provider,
-                pages: r.usage.pages,
-                cost_usd: r.cost_usd,
-                fallback_index: index,
-            })
+            Ok(Served::synchronous(body, r.model, r.provider, r.usage.pages, r.cost_usd, index))
         }
     }
 }
 
 /// Account, log, observe, and turn the outcome into an HTTP response.
-fn finish(state: &AppState, ctx: &Ctx, result: Result<Served, ApiError>) -> Response {
+pub(crate) fn finish(state: &AppState, ctx: &Ctx, result: Result<Served, ApiError>) -> Response {
     let latency = ctx.started.elapsed();
     let mut log = RequestLog {
         ts: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
         request_id: ctx.request_id.clone(),
         key_id: ctx.key_id.clone(),
-        method: "POST".into(),
+        method: ctx.method.into(),
         path: ctx.path.clone(),
         mode: Some(ctx.mode.as_str().to_string()),
         model: ctx.requested.clone(),
@@ -547,16 +622,18 @@ fn finish(state: &AppState, ctx: &Ctx, result: Result<Served, ApiError>) -> Resp
         status: 200,
         error_type: None,
         provider_status: None,
+        job_id: ctx.job_id.clone(),
+        job_status: ctx.job_status.map(str::to_string),
     };
     let mut resp = match result {
         Ok(s) => {
-            if ctx.key_id != "-" {
+            if s.billed && ctx.key_id != "-" {
                 state.usage.record(&ctx.key_id, s.cost_usd.unwrap_or(0.0), s.pages);
             }
             state.metrics.observe(&Observation {
-                mode: ctx.mode.as_str(),
+                mode: ctx.label,
                 model: &s.model,
-                status: 200,
+                status: s.status.as_u16(),
                 error_type: None,
                 latency_secs: latency.as_secs_f64(),
                 pages: s.pages,
@@ -568,7 +645,8 @@ fn finish(state: &AppState, ctx: &Ctx, result: Result<Served, ApiError>) -> Resp
             log.fallback_index = Some(s.fallback_index);
             log.pages = Some(s.pages);
             log.cost_usd = s.cost_usd;
-            let mut resp = (StatusCode::OK, Json(s.body)).into_response();
+            log.status = s.status.as_u16();
+            let mut resp = (s.status, Json(s.body)).into_response();
             if let Ok(v) = HeaderValue::from_str(&s.model) {
                 resp.headers_mut().insert("x-liteocr-model", v);
             }
@@ -582,7 +660,7 @@ fn finish(state: &AppState, ctx: &Ctx, result: Result<Served, ApiError>) -> Resp
         Err(e) => {
             let e = e.with_request_id(&ctx.request_id);
             state.metrics.observe(&Observation {
-                mode: ctx.mode.as_str(),
+                mode: ctx.label,
                 // Only label with a model name that passed validation, to bound cardinality.
                 model: ctx.model.as_deref().unwrap_or("-"),
                 status: e.status.as_u16(),

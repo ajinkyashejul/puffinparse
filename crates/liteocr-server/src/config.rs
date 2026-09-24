@@ -26,6 +26,21 @@ pub struct Config {
     /// Virtual keys handed to clients.
     #[serde(default)]
     pub keys: Vec<KeyConfig>,
+    /// `POST /v1/webhooks/{provider}`: off (404) unless enabled here.
+    #[serde(default)]
+    pub webhooks: WebhooksConfig,
+}
+
+/// Provider webhook receiver for jobs submitted through `POST /v1/jobs`.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct WebhooksConfig {
+    #[serde(default)]
+    pub enabled: bool,
+    /// Shared secret the provider must send as `?token=` or `x-liteocr-webhook-secret`.
+    /// Required when enabled; `env:VAR` allowed.
+    #[serde(default)]
+    pub secret: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -56,6 +71,9 @@ pub struct ServerConfig {
     /// Allow requests naming a registry model (`reducto/standard`) that is not an alias.
     #[serde(default = "yes")]
     pub allow_direct_models: bool,
+    /// How long `POST /v1/jobs` handles are kept for `GET /v1/jobs/{id}` (hours).
+    #[serde(default = "default_job_retention")]
+    pub job_retention_hours: u64,
 }
 
 impl Default for ServerConfig {
@@ -70,8 +88,13 @@ impl Default for ServerConfig {
             max_timeout_secs: default_timeout(),
             max_retries: default_retries(),
             allow_direct_models: true,
+            job_retention_hours: default_job_retention(),
         }
     }
+}
+
+fn default_job_retention() -> u64 {
+    168
 }
 
 fn default_host() -> String {
@@ -207,6 +230,9 @@ impl Config {
         if self.server.max_timeout_secs.is_nan() || self.server.max_timeout_secs <= 0.0 {
             return Err("server.max_timeout_secs must be > 0".into());
         }
+        if self.webhooks.enabled && !self.webhooks.secret.as_deref().is_some_and(|s| !s.trim().is_empty()) {
+            return Err("webhooks.enabled requires webhooks.secret (e.g. \"env:LITEOCR_WEBHOOK_SECRET\")".into());
+        }
         Ok(())
     }
 }
@@ -271,6 +297,8 @@ mod tests {
         assert!(Config::from_toml("[providers.nope]\napi_key='x'").is_err());
         assert!(Config::from_toml("[[keys]]\nid='a'\nkey='x'\n[[keys]]\nid='a'\nkey='y'").is_err());
         assert!(Config::from_toml("unknown = 1").is_err());
+        assert!(Config::from_toml("[webhooks]\nenabled = true").is_err());
+        assert!(Config::from_toml("[webhooks]\nenabled = true\nsecret = 'env:X'").is_ok());
     }
 
     #[test]

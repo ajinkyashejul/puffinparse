@@ -8,7 +8,10 @@ lists, monthly budgets and rate limits, and emits JSON-lines request logs and Pr
 It is a thin layer over `liteocr-core` (crate `crates/liteocr-server`, axum + tower-http). It adds
 no provider logic: every call is `liteocr_core::parse / ocr / extract` with the request fields
 below, so responses are exactly the unified types of [SPEC §5](SPEC.md#5-unified-responses), or
-a vendor shape via `output_format` ([COMPAT.md](COMPAT.md)).
+a vendor shape via `output_format` ([COMPAT.md](COMPAT.md)). Long documents can go through the
+async jobs API instead (`POST /v1/jobs` + `GET /v1/jobs/{id}`, core `submit_parse` /
+`retrieve_parse`, [SPEC §15](SPEC.md#15-asynchronous-jobs-and-webhooks)), so no connection is held
+open while the provider works.
 
 ## Run it
 
@@ -54,6 +57,11 @@ max_body_mb = 50                         # multipart upload / base64 JSON body c
 max_timeout_secs = 300                   # cap (and default) for a request's `timeout`
 max_retries = 2                          # per provider call, when the client sends none
 allow_direct_models = true               # false: only the aliases below may be requested
+job_retention_hours = 168                # how long POST /v1/jobs handles stay readable
+
+[webhooks]                               # optional provider webhook receiver (off by default)
+enabled = false
+secret = "env:LITEOCR_WEBHOOK_SECRET"    # required when enabled; sent as ?token= or a header
 
 [providers.reducto]                      # one table per provider (name as in `liteocr providers`)
 api_key = "env:REDUCTO_API_KEY"
@@ -89,8 +97,10 @@ behind one alias. When a fallback served the call, the response metadata carries
 the list-price estimate from `pricing.json`), summed per key per UTC calendar month. The check runs
 before the call: a key whose spend has reached its budget gets `402`. One in-flight request can take
 a key past its budget; nothing is charged for failed attempts (a provider may still bill a failed
-job). State is in memory; with `state_file` it is rewritten (temp file + rename) after every billed
-request and reloaded on startup. Rate-limit windows are not persisted.
+job). An async job is charged to the key that submitted it, once, when it is first observed
+succeeded (by `GET /v1/jobs/{id}` or a webhook); submitting and polling are free. State is in
+memory; with `state_file` it (spend, counts and submitted jobs) is rewritten (temp file + rename)
+after every change and reloaded on startup. Rate-limit windows are not persisted.
 
 ## API
 
@@ -129,6 +139,60 @@ paths are not accepted either.
 The response is the unified `ParseResponse` / `TextResponse` / `ExtractResponse` JSON (or the
 vendor shape), with headers `x-liteocr-model` (served model), `x-liteocr-cost-usd`, `x-request-id`.
 
+### `POST /v1/jobs`, `GET /v1/jobs/{id}` (async parse)
+
+`POST /v1/jobs` takes the `/v1/parse` body (JSON or multipart, same fields) plus an optional
+`webhook_url`, uploads the document, starts the provider job and answers **202** at once:
+
+```json
+{"id": "job_4f0c…", "object": "job", "status": "pending",
+ "job": {"provider": "reducto", "model": "reducto/standard", "job_id": "c1e2…",
+         "submitted_at": "2026-09-24T20:23:52.140Z", "output": "markdown", "include_raw": false}}
+```
+
+`job` is the core `JobHandle` (SPEC §15) minus the operator's `base_url`. Authentication, the
+key's model allow-list, aliases, the budget pre-check and `rpm` apply exactly as for
+`/v1/parse`. Only providers with a job queue can take jobs (`reducto`, `extend`, `llamaparse`;
+others give `400 unsupported_model_error`). **Fallback does not apply to jobs**: an alias submits
+to its first target (in `round_robin`, the next one in rotation) and a request `fallbacks` list is
+rejected, because a provider failure only shows up later, on retrieve. `webhook_url` is
+forwarded to the provider's per-job webhook (Reducto `async.webhook`, LlamaParse `webhook_url`;
+Extend rejects it) and is refused by the synchronous endpoints.
+
+`GET /v1/jobs/{id}` asks the provider once and returns
+
+```json
+{"id": "job_4f0c…", "object": "job", "status": "pending" | "succeeded" | "failed",
+ "model": "reducto/standard", "provider": "reducto", "provider_job_id": "c1e2…",
+ "submitted_at": "…", "result": {…ParseResponse…}, "error": {…error object…}}
+```
+
+with `result` only when `succeeded` (the unified `ParseResponse`, or the vendor shape for the
+`output_format` sent at submit time; `?output_format=reducto` overrides it per call) and `error`
+only when `failed` (the same object as an error body's `error`, with the provider's message and
+`job_id`). A failed *job* is still HTTP 200; a failed *status check* (provider credentials,
+network) is an error response as usual. Job ids are opaque and bound to the key that created the
+job: any other key gets `404 not_found`, exactly as for an unknown id (the master key can read all
+jobs). Polls count toward the key's `rpm` but are not budget-gated. The job's cost is charged to
+its owner once, the first time it is seen succeeded. Credentials are resolved from the config on
+every poll (the alias target's own key, else `[providers.*]`), never stored; handles are kept for
+`job_retention_hours` (and in `state_file` when set).
+
+### `POST /v1/webhooks/{provider}` (optional)
+
+Off by default (404). With `[webhooks] enabled = true` and a `secret`, the gateway accepts the
+body a provider POSTs when a job changes state — Reducto direct webhooks, Extend `parse_run.*`
+events, LlamaCloud `parse.*` events — authenticated by `?token=<secret>` or the
+`x-liteocr-webhook-secret` header (compared in constant time). The body is read with core
+`parse_webhook`; when it only says the job finished, the gateway makes one status check. The
+provider's job id must match a job submitted through this gateway (else 404); a success is
+charged to the job's owner (once, shared with `GET`), and the answer is an acknowledgement
+`{"id", "status"}` — clients still collect the result with `GET /v1/jobs/{id}`. Point a provider's
+webhook at `https://<gateway>/v1/webhooks/reducto?token=<secret>` (per job via `webhook_url`, or a
+workspace-level endpoint for Extend / LlamaCloud). This is a shared secret, not the vendors' HMAC
+signatures: keep the URL private and serve the gateway over TLS. A LlamaParse `webhook_url`
+result push that names no job id cannot be attributed and is rejected with 400.
+
 ### Errors
 
 Every error has the same body:
@@ -144,6 +208,7 @@ Every error has the same body:
 | 401 | `unauthorized` | Missing or unknown gateway key |
 | 402 | `budget_exceeded` | Key's monthly budget spent |
 | 403 | `model_not_allowed` | Model (or a fallback) not in the key's `models` |
+| 404 | `not_found` | Unknown job id, a job another key owns, or webhooks disabled |
 | 413 | `payload_too_large` | Body over `max_body_mb` |
 | 429 | `key_rate_limited` | Key's `rpm` reached (`Retry-After` set) |
 | 429 | `rate_limit_error` | Provider rate limit after retries and fallbacks |
@@ -176,6 +241,11 @@ keys for the master key.
 | `liteocr_pages_total` | `model` |
 | `liteocr_cost_usd_total` | `model` |
 | `liteocr_fallbacks_total` | — |
+| `liteocr_jobs_total` | `event`: `submitted`, and `succeeded` / `failed` the first time a job is seen terminal |
+
+`mode` is `parse` / `ocr` / `extract` for the synchronous endpoints and `job_submit`,
+`job_retrieve`, `webhook` for the jobs API, so job latencies do not mix with blocking calls. A
+job's pages and cost are counted once, when it is first seen succeeded.
 
 ## Request log
 
@@ -187,6 +257,11 @@ One JSON object per request, on stdout and/or `log_file`:
  "provider":"llamaparse","fallback_index":0,"pages":1,"cost_usd":0.00375,"latency_ms":10384,
  "status":200,"error_type":null,"provider_status":null}
 ```
+
+Jobs API lines add `job_id` (the gateway id) and `job_status` (`pending` / `succeeded` /
+`failed`, as observed by that request); `method` is `GET` for status checks, and `key_id` is
+`webhook` for provider webhooks. `pages` and `cost_usd` are set only on the request that charged
+the job.
 
 The record has no field for document bytes, URLs, extracted content, provider error text (some
 providers echo document text in errors), provider keys or gateway key secrets.
@@ -212,6 +287,11 @@ curl -s $GW/v1/ocr -H "x-api-key: $KEY" -H 'content-type: application/json' \
 curl -s $GW/v1/extract -H "Authorization: Bearer $KEY" -F model=invoice-fields -F file=@invoice.pdf \
   -F 'schema={"type":"object","properties":{"total":{"type":"number"}}}'
 
+# Async job: submit, then poll until status is succeeded or failed
+JOB=$(curl -s $GW/v1/jobs -H "Authorization: Bearer $KEY" -F model=invoices -F file=@big.pdf | jq -r .id)
+curl -s $GW/v1/jobs/$JOB -H "Authorization: Bearer $KEY" | jq .status
+curl -s "$GW/v1/jobs/$JOB?output_format=reducto" -H "Authorization: Bearer $KEY" | jq .result
+
 curl -s $GW/v1/models -H "Authorization: Bearer $KEY" | jq '.data[].id'
 curl -s $GW/v1/usage  -H "Authorization: Bearer $KEY"
 curl -s $GW/metrics
@@ -219,7 +299,8 @@ curl -s $GW/metrics
 
 ## Not in scope (yet)
 
-Streaming or async job endpoints (calls are synchronous; long jobs hold the connection), key
-management over HTTP (keys live in the config file; restart to change them), a database, response
+Streaming, jobs for `ocr` / `extract` (jobs are parse-only, like the core), fallback for jobs,
+the gateway registering its own webhook URL with providers automatically, vendor HMAC signature
+checks on webhooks, key management over HTTP (keys live in the config file; restart to change them), a database, response
 caching, per-key budgets by model, TLS termination (put it behind a reverse proxy), and metrics
 auth.

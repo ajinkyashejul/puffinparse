@@ -721,6 +721,19 @@ not hold provider keys. Operator reference: [`SERVER.md`](SERVER.md). Contract:
   (`file` part + the same fields). `api_key`, `base_url` and local paths are rejected. They return
   the §5 response JSON unchanged, or the vendor shape for `output_format` (parse, extract). Also
   `GET /v1/models`, `GET /v1/usage`, `GET /health`, `GET /metrics` (Prometheus text).
+- **Jobs (§15).** `POST /v1/jobs` takes the `/v1/parse` body plus `webhook_url` and returns `202
+  {id, object: "job", status: "pending", job: JobHandle}` (without `base_url`). Auth, allow-lists,
+  aliases, budget pre-check and `rpm` apply as for `/v1/parse`, but an alias submits to its first
+  target and `fallbacks` is rejected (no fallback for jobs). `GET /v1/jobs/{id}` checks the
+  provider once: `{id, object, status: pending|succeeded|failed, model, provider,
+  provider_job_id, submitted_at, result?, error?}`, `result` in the submit-time `output_format`
+  (or `?output_format=`), `error` the error object below. `id` is opaque and bound to the
+  submitting key (other keys get `404 not_found`; the master key sees all). Cost is charged to
+  that key once, when the job is first observed succeeded; polls count toward `rpm`, not the
+  budget. Handles (no secrets) live in memory and the `state_file` for `job_retention_hours`.
+  Optional `POST /v1/webhooks/{provider}` (`[webhooks] enabled`, shared `secret` as `?token=` or
+  `x-liteocr-webhook-secret`, else 404) resolves a provider webhook body with core
+  `parse_webhook` (+ one retrieve when needed) against a stored job and settles it the same way.
 - **Config.** One TOML file: `[server]`, `master_key`, `[providers.<name>]` (`api_key`,
   `base_url`), `[[models]]` aliases (`name`, `targets`, `strategy`, `fallback_on`, with the §7
   semantics and per-target credential overrides), `[[keys]]` virtual keys (`id`, `key`, `models`
@@ -733,10 +746,13 @@ not hold provider keys. Operator reference: [`SERVER.md`](SERVER.md). Contract:
   request_id}}`. `ErrorKind` → HTTP: input / bad_request / unsupported_model → 400, rate_limit →
   429, timeout → 504, provider / network / authentication → 502 (provider credentials are the
   operator's). Gateway-own types: `unauthorized` 401, `budget_exceeded` 402, `model_not_allowed`
-  403, `payload_too_large` 413, `key_rate_limited` 429. The provider's message is passed through.
+  403, `not_found` 404, `payload_too_large` 413, `key_rate_limited` 429. The provider's message is
+  passed through.
 - **Logs.** One JSON line per request: `ts, request_id, key_id, method, path, mode, model,
   served_model, provider, fallback_index, pages, cost_usd, latency_ms, status, error_type,
-  provider_status`. Never document content or URLs, provider error text, or any secret.
+  provider_status`, plus `job_id, job_status` on jobs API lines. Never document content or URLs,
+  provider error text, or any secret. Metrics label jobs traffic `mode="job_submit" |
+  "job_retrieve" | "webhook"` and count `liteocr_jobs_total{event}`.
 
 ## 15. Asynchronous jobs and webhooks
 

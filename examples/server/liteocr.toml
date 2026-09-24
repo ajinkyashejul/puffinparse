@@ -15,6 +15,12 @@ max_body_mb = 50
 max_timeout_secs = 300
 max_retries = 2
 allow_direct_models = true  # false = clients may only use the aliases below
+job_retention_hours = 168   # POST /v1/jobs handles stay readable this long
+
+# Optional receiver for provider webhooks about jobs submitted through POST /v1/jobs.
+# [webhooks]
+# enabled = true
+# secret = "env:LITEOCR_WEBHOOK_SECRET"   # providers call /v1/webhooks/<provider>?token=<secret>
 
 # Provider credentials. Without an entry the core reads the provider's default env var anyway;
 # listing them here makes the dependency explicit and lets you rename the variable.

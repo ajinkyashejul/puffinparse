@@ -37,6 +37,8 @@ struct Inner {
     pages: BTreeMap<String, u64>,
     cost: BTreeMap<String, f64>,
     fallbacks: u64,
+    /// Async job lifecycle event (`submitted`, `succeeded`, `failed`) → count.
+    jobs: BTreeMap<&'static str, u64>,
 }
 
 #[derive(Debug, Default)]
@@ -77,6 +79,12 @@ impl Metrics {
         }
     }
 
+    /// Count an async job event: `submitted`, or the first time it is seen `succeeded` / `failed`.
+    pub fn job_event(&self, event: &'static str) {
+        let mut m = self.inner.lock().unwrap_or_else(|p| p.into_inner());
+        *m.jobs.entry(event).or_default() += 1;
+    }
+
     pub fn render(&self) -> String {
         let m = self.inner.lock().unwrap_or_else(|p| p.into_inner());
         let mut out = String::new();
@@ -113,6 +121,15 @@ impl Metrics {
         }
         header(&mut out, "liteocr_fallbacks_total", "counter", "Requests served by a fallback target.");
         let _ = writeln!(out, "liteocr_fallbacks_total {}", m.fallbacks);
+        header(
+            &mut out,
+            "liteocr_jobs_total",
+            "counter",
+            "Async jobs submitted, and first observed succeeded or failed.",
+        );
+        for (event, n) in &m.jobs {
+            let _ = writeln!(out, "liteocr_jobs_total{{event=\"{event}\"}} {n}");
+        }
         out
     }
 }

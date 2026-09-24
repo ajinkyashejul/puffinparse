@@ -73,6 +73,11 @@ impl ApiError {
         Self::new(StatusCode::PAYMENT_REQUIRED, "budget_exceeded", message)
     }
 
+    /// 404: unknown job (or one another key owns), or a disabled endpoint.
+    pub fn not_found(message: impl Into<String>) -> Self {
+        Self::new(StatusCode::NOT_FOUND, "not_found", message)
+    }
+
     /// 429 from the gateway's own per-key limiter (not the provider's).
     pub fn rate_limited(retry_after_secs: u64) -> Self {
         let mut e = Self::new(
@@ -117,20 +122,25 @@ impl From<Error> for ApiError {
     }
 }
 
+impl ApiError {
+    /// The inner `{type, message, provider, provider_status, job_id, request_id}` object, also
+    /// used as the `error` of a failed job in `GET /v1/jobs/{id}`.
+    pub fn error_object(&self) -> serde_json::Value {
+        serde_json::json!({
+            "type": self.error_type,
+            "message": self.message,
+            "provider": self.provider,
+            "provider_status": self.provider_status,
+            "job_id": self.job_id,
+            "request_id": self.request_id,
+        })
+    }
+}
+
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        let ErrorBody { status, error_type, message, provider, provider_status, job_id, request_id, retry_after_secs } =
-            *self.0;
-        let body = serde_json::json!({
-            "error": {
-                "type": error_type,
-                "message": message,
-                "provider": provider,
-                "provider_status": provider_status,
-                "job_id": job_id,
-                "request_id": request_id,
-            }
-        });
+        let body = serde_json::json!({ "error": self.error_object() });
+        let (status, retry_after_secs) = (self.status, self.retry_after_secs);
         let mut resp = (status, axum::Json(body)).into_response();
         if let Some(secs) = retry_after_secs {
             if let Ok(v) = HeaderValue::from_str(&secs.to_string()) {

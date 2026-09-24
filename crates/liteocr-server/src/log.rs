@@ -33,6 +33,12 @@ pub struct RequestLog {
     /// message is returned to the caller but not logged: some providers echo document text in
     /// error bodies.
     pub provider_status: Option<u16>,
+    /// Gateway job id (`/v1/jobs`, `/v1/webhooks`), with `job_status` the state observed:
+    /// `pending`, `succeeded` or `failed`. Absent for synchronous calls.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub job_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub job_status: Option<String>,
 }
 
 #[derive(Debug)]

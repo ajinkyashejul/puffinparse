@@ -16,6 +16,7 @@
 mod api;
 pub mod config;
 pub mod error;
+mod jobs;
 pub mod log;
 pub mod metrics;
 pub mod usage;
@@ -62,6 +63,8 @@ pub struct AppState {
     pub(crate) providers: BTreeMap<String, (Option<String>, Option<String>)>,
     pub(crate) aliases: BTreeMap<String, Alias>,
     pub(crate) keys: Vec<VirtualKey>,
+    /// Shared secret of `POST /v1/webhooks/{provider}`; `None` = the endpoint is off (404).
+    pub(crate) webhook_secret: Option<String>,
     pub(crate) usage: usage::UsageStore,
     pub(crate) metrics: metrics::Metrics,
     pub(crate) logger: log::Logger,
@@ -144,6 +147,13 @@ impl AppState {
         if cfg.master_key.is_some() && master_key.is_none() {
             return Err("master_key is set but resolved to an empty value".into());
         }
+        let webhook_secret = if cfg.webhooks.enabled {
+            let s = secret("webhooks.secret", cfg.webhooks.secret.as_ref())?;
+            // Fail closed: an enabled receiver must never accept unauthenticated bodies.
+            Some(s.ok_or("webhooks.secret resolved to an empty value")?)
+        } else {
+            None
+        };
         let logger = match logger {
             Some(l) => l,
             None => log::Logger::new(cfg.server.log_stdout, cfg.server.log_file.as_deref())?,
@@ -155,6 +165,7 @@ impl AppState {
             providers,
             aliases,
             keys,
+            webhook_secret,
             usage,
             metrics: metrics::Metrics::default(),
             logger,
