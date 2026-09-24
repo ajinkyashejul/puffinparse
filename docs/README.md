@@ -46,5 +46,7 @@ crates/liteocr-core/src/
 crates/liteocr-cli/src/   main.rs (parse, providers), bench.rs (run, report, score)
 crates/liteocr-python/    PyO3 module `liteocr._core`
 python/liteocr/           public API, types, exceptions; python/tests/
+crates/liteocr-node/      napi-rs addon behind the npm package
+js/                       npm package `liteocr`: index.js + hand-written index.d.ts; js/test/
 benchmark/                generate_synthetic.py, datasets/, results/, site/, adapters/ (planned)
 ```
