@@ -1,0 +1,44 @@
+[
+  {
+    "id": "11_362944",
+    "type": "present",
+    "text": "We should be glad, however, if we could have an expression of good will from you for this occasion.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "11_362944"
+  },
+  {
+    "id": "11_117175",
+    "type": "order",
+    "before": "All our patrons and alumni have hoped that you might be here.",
+    "after": "Yours very truly,",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "11_117175"
+  },
+  {
+    "id": "11_107251",
+    "type": "absent",
+    "text": "ack 5/28/14",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "11_107251"
+  },
+  {
+    "id": "11_111414",
+    "type": "present",
+    "text": "an expression of good will from you for this occasion. Not",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "11_111414"
+  },
+  {
+    "id": "11_386417",
+    "type": "order",
+    "before": "in 1903 while Governor, you reviewed our cadets and addressed them,",
+    "after": "abroad must of necessity have precedence over anything",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "11_386417"
+  }
+]

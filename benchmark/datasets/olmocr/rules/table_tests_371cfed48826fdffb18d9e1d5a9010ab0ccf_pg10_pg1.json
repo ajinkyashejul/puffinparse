@@ -1,0 +1,35 @@
+[
+  {
+    "id": "371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_table_00",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Level",
+      "value": "Moral Reach"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_table_00"
+  },
+  {
+    "id": "371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_table_01",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Organizing Principle Type 2",
+      "value": "Meso"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_table_01"
+  },
+  {
+    "id": "371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_table_04",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Norm Type",
+      "value": "Standardized Procedures, Regulations Type 3"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_table_04"
+  }
+]

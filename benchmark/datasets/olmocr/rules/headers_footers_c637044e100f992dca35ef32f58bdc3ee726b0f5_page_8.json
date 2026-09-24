@@ -1,0 +1,26 @@
+[
+  {
+    "id": "c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8_header_00",
+    "type": "absent",
+    "text": "Laura Johnston",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8_header_00"
+  },
+  {
+    "id": "c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8_header_01",
+    "type": "absent",
+    "text": "http://cap.stanford.edu/profiles/Laura_Johnston/",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8_header_01"
+  },
+  {
+    "id": "c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8_pdf_manual_00",
+    "type": "absent",
+    "text": "Page 8 of 13",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8.pdf_manual_00"
+  }
+]

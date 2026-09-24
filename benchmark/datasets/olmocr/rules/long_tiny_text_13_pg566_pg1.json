@@ -1,0 +1,42 @@
+[
+  {
+    "id": "13_pg566_pg1_text_00",
+    "type": "present",
+    "text": "Among those educated at the grammar school were Thomas De Quincey, Harrison Ainsworth and Samuel Bamford the Radical.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "13_pg566_pg1_text_00"
+  },
+  {
+    "id": "13_pg566_pg1_text_01",
+    "type": "present",
+    "text": "There is also an adult deaf and dumb institution, containing a news-room, lecture hall, chapel, &c., for the use of deaf mutes.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "13_pg566_pg1_text_01"
+  },
+  {
+    "id": "13_pg566_pg1_text_02",
+    "type": "present",
+    "text": "The style is a mixture of Early English and Decorative, and a large amount of decorative art has been expended on the building.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "13_pg566_pg1_text_02"
+  },
+  {
+    "id": "13_pg566_pg1_text_03",
+    "type": "present",
+    "text": "Manchester University consists of one college-Owens College-in its greatly enlarged form.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "13_pg566_pg1_text_03"
+  },
+  {
+    "id": "13_pg566_pg1_text_04",
+    "type": "present",
+    "text": "Monuments. In Piccadilly are bronze statues of Wellington, Watt, Dalton, Peel and Queen Victoria.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "13_pg566_pg1_text_04"
+  }
+]

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_00",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "54",
+      "value": "55"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_00"
+  },
+  {
+    "id": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_01",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "RV's",
+      "value": "181"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_01"
+  },
+  {
+    "id": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_02",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "33",
+      "value": "107"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_02"
+  },
+  {
+    "id": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_03",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Busses",
+      "value": "97"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_03"
+  },
+  {
+    "id": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_04",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "7,333",
+      "value": "9,996"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "25789807b5c2a0902bd441a2800606d5dfdd_pg13_table_04"
+  }
+]

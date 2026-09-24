@@ -73,6 +73,34 @@ runs keep them under `results/outputs/<run_id>/<model>/<doc_id>.md`; the static 
 carry their source (`synthetic/plain_001`), so the saved output path keeps that directory level
 and `--filter synthetic` runs one source.
 
+Before spending money, check the plan and put a ceiling on it:
+
+```bash
+./target/release/liteocr bench run --dataset benchmark/datasets/combined-v1 \
+    --models reducto/standard llamaparse/agentic --out benchmark/results/combined.json --dry-run
+# | Model | Calls | Skipped (resumed) | Est. pages | $/page | Est. cost | … no provider is called
+./target/release/liteocr bench run … --max-cost 5    # aborts before the first call if the estimate is higher
+```
+
+The estimate is manifest `pages` × list price (`pricing.json`), so it is only as good as the
+manifest's page counts; `--max-cost` refuses to run a model that has no list price.
+
+Runs survive interruptions. Every finished (model, document) call is appended to
+`<out>.partial.jsonl` and flushed immediately; the final JSON is assembled from it at the end and
+the log is removed. After a crash, Ctrl-C or a batch of provider failures, rerun the same command
+with `--resume` (and the same `--out`: the default path contains today's date). Pairs that already
+succeeded — in the partial log or in an existing result JSON — are not called again; missing and
+failed ones are. The resumed run keeps the original `run_id`, so `--save-outputs` files of the
+first attempt stay valid, and it refuses to mix in records from another dataset revision or
+normalisation. `--retries N` re-issues a document after a retryable error (rate limit, 5xx,
+timeout, network) with backoff; it is off by default because a retried provider job can be
+billed twice.
+
+Each document record is auditable: `provider_job_id` (look the job up in the provider's
+dashboard), `cache_hit` (`false` when caches were disabled, the default), `attempts`,
+`started_at`, and `error_kind` + `error` for failures. The run ends with a summary line: calls
+made, resumed, failed, total cost and wall time.
+
 `bench report` renders the leaderboard table (a **Rules** column shows the mean rule pass rate,
 `–` for datasets with no rule documents), then the per-category breakdown, and — for datasets
 whose ids carry a `<source>/` prefix — a per-source breakdown of documents and `Overall`.
@@ -91,14 +119,18 @@ or from Python: `liteocr.score(prediction, truth)`.
 |---|---|---|---|
 | [`synthetic-v1`](datasets/synthetic-v1/README.md) | 39 | plain, invoice, table, two_column, headings, noisy_scan, low_res, multipage, skewed, dense, faded, receipt, complex_table | generated, CC0 |
 | [`parsebench`](datasets/parsebench/README.md) | 40 committed (1,009 indexed) | tables (transcript, `table-only`), text pages as rule assertions (`kind: rules`) | LlamaIndex ParseBench, Apache-2.0, pinned upstream commit |
-| [`combined-v1`](datasets/combined-v1/README.md) | 79 | union of the above with source-prefixed ids | per source |
+| [`olmocr`](datasets/olmocr/README.md) | 40 committed (824 indexed) | headers_footers, long_tiny_text, multi_column, old_scans, table_tests — all `kind: rules` (205 assertions) | AI2 olmOCR-bench, ODC-BY-1.0, pinned upstream commit |
+| [`omnidocbench`](datasets/omnidocbench/README.md) | 40 **indexed, fetched at run time** | 10 document types (book, newspaper, exam paper, slides, notes, …), English + Chinese, transcript | OpenDataLab OmniDocBench, research-only / non-commercial — not redistributed; `python -m benchmark.adapters omnidocbench` materialises it |
+| [`combined-v1`](datasets/combined-v1/README.md) | 79 | synthetic-v1 + parsebench, source-prefixed ids (frozen: has committed results) | per source |
+| [`combined-v2`](datasets/combined-v2/README.md) | 159 | synthetic-v1 + parsebench + olmocr + omnidocbench | per source |
 
 Adding a dataset: create `benchmark/datasets/<name>/manifest.json` with
 `{name, version, description, license, documents:[{id, file, truth, pages, category, tags}]}`,
 put inputs under `docs/` and truth markdown under `truth/`. Public benchmarks are converted by
 adapters (`python -m benchmark.adapters <name>`; see [`docs/benchmarks/adapters.md`](../docs/benchmarks/adapters.md)),
 which also introduce `kind: rules` documents scored by machine-checkable assertions instead of a
-transcript. olmOCR-bench and OmniDocBench adapters are next.
+transcript. The [academic benchmark survey](../docs/benchmarks/academic-benchmarks.md) covers olmOCR-bench,
+OmniDocBench, DP-Bench, READoc and others; DP-Bench is the next adapter.
 
 ## Caveats
 
@@ -115,5 +147,10 @@ transcript. olmOCR-bench and OmniDocBench adapters are next.
   the same for every model, so it moves the absolute number far more than the ranking. The one
   `bag_of_sentences` rule per ParseBench document asks for *every* sentence of the page at
   `threshold: 1.0` and therefore fails almost always.
-- **A combined score mixes datasets, licences and document kinds.** Read `combined-v1` next to the
-  per-source table under the leaderboard, not instead of it.
+- **olmOCR rules are matched exactly**, while upstream tolerates `max_diffs` edits; its skipped
+  tests (math, positional absences, vertical table neighbours, baseline) are counted in
+  `datasets/olmocr/conversion-stats.json`. Its `absent-only` documents pass for an empty parse.
+- **OmniDocBench must be fetched** before a run (`python -m benchmark.adapters omnidocbench`);
+  otherwise its documents fail as file-not-found and the dataset `sha256` does not cover them.
+- **A combined score mixes datasets, licences and document kinds.** Read `combined-v1` /
+  `combined-v2` next to the per-source table under the leaderboard, not instead of it.

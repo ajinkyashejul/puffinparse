@@ -1,0 +1,78 @@
+[
+  {
+    "id": "31_491141",
+    "type": "present",
+    "text": "I lived on its border for fifteen years.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "31_491141"
+  },
+  {
+    "id": "31_159811",
+    "type": "order",
+    "before": "I do not know your reasons, but I am dead certain that you have got good ones.",
+    "after": "That job has got to be done and think of having the time, the place and the men.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "31_159811"
+  },
+  {
+    "id": "31_287746",
+    "type": "absent",
+    "text": "Col, Roosevelt, 5-23-14",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "31_287746"
+  },
+  {
+    "id": "31_268607",
+    "type": "present",
+    "text": "chain of world events coming together here—you have",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "31_268607"
+  },
+  {
+    "id": "31_791177",
+    "type": "present",
+    "text": "our Spanish and Southern development. Root sounded a just regret when he asked",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "31_791177"
+  },
+  {
+    "id": "31_598637",
+    "type": "present",
+    "text": "be wrong, but I cannot but think of him—I",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "31_598637"
+  },
+  {
+    "id": "31_575158",
+    "type": "order",
+    "before": "We are in a remarkable position.",
+    "after": "a just regret when he asked the country to",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "31_575158"
+  },
+  {
+    "id": "31_285504",
+    "type": "order",
+    "before": "think of having the time, the place and the men.",
+    "after": "Well, Godspeed you on your way.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "31_285504"
+  },
+  {
+    "id": "31_793300",
+    "type": "order",
+    "before": "wish I could be on an island",
+    "after": "cannot but think of him—I cannot think of anyone",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "31_793300"
+  }
+]

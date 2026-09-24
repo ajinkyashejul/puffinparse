@@ -1,0 +1,50 @@
+[
+  {
+    "id": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pg1_header_00",
+    "type": "absent",
+    "text": "ARTICLE IN PRESS",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pg1_header_00"
+  },
+  {
+    "id": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pg1_header_01",
+    "type": "absent",
+    "text": "Midwifery xxx (XXXX) XXX-XXX",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pg1_header_01"
+  },
+  {
+    "id": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pg1_header_02",
+    "type": "absent",
+    "text": "Contents lists available at ScienceDirect",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pg1_header_02"
+  },
+  {
+    "id": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pdf_manual_00",
+    "type": "absent",
+    "text": "ELSEVIER",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed.pdf_manual_00"
+  },
+  {
+    "id": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pdf_manual_02",
+    "type": "absent",
+    "text": "journal homepage: www.elsevier.com/locate/midw",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed.pdf_manual_02"
+  },
+  {
+    "id": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed_pdf_manual_03",
+    "type": "absent",
+    "text": "Please cite this article as: Homer, C., Midwifery (2017), http://dx.doi.org/10.1016/j.midw.2017.",
+    "case_sensitive": false,
+    "max_diffs": 2,
+    "source": "0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processed.pdf_manual_03"
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "by_category": {
+    "academic_literature": 4,
+    "book": 4,
+    "colorful_textbook": 4,
+    "exam_paper": 4,
+    "historical_document": 4,
+    "magazine": 4,
+    "newspaper": 4,
+    "note": 4,
+    "ppt2pdf": 4,
+    "research_report": 4
+  },
+  "by_language": {
+    "lang-en_ch_mixed": 6,
+    "lang-english": 14,
+    "lang-other": 1,
+    "lang-simplified_chinese": 15,
+    "lang-traditional_chinese": 4
+  },
+  "committed_docs": 40,
+  "convertible_pages": 1443,
+  "fetched_bytes_not_committed": "32.7 MB",
+  "pages_skipped_masked_region": 126,
+  "pages_skipped_truth_too_short": 82,
+  "upstream_pages": 1651
+}

@@ -152,6 +152,11 @@ class Rule:
     sentences: Optional[list[str]] = None
     threshold: Optional[float] = None
     case_sensitive: bool = False
+    #: Upstream fuzzy-match allowance (olmOCR-bench ``max_diffs``: Levenshtein edits tolerated).
+    #: Recorded for provenance and for a future fuzzy scorer; the current Rust scorer matches
+    #: exactly, which is *stricter* than upstream for ``present`` / ``order`` / ``table_cell``
+    #: and *looser* for ``absent`` whenever this is > 0.
+    max_diffs: Optional[int] = None
 
     def __post_init__(self) -> None:
         if self.type not in RULE_TYPES:
@@ -164,6 +169,8 @@ class Rule:
             if value is not None:
                 out[key] = value
         out["case_sensitive"] = self.case_sensitive
+        if self.max_diffs is not None:
+            out["max_diffs"] = self.max_diffs
         out["source"] = self.source
         return out
 
@@ -194,6 +201,11 @@ class Doc:
     sha256: Optional[str] = None
     license: Optional[str] = None
     attribution: Optional[str] = None
+    #: Where the page originally came from (olmOCR-bench records one URL per test).
+    source_url: Optional[str] = None
+    #: SHA-256 of the truth file, for datasets whose truth is generated at fetch time and not
+    #: committed (OmniDocBench), so a local build can be verified against the manifest.
+    truth_sha256: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {
@@ -205,7 +217,16 @@ class Doc:
             "tags": list(self.tags),
             "kind": self.kind,
         }
-        for key in ("rules", "source_id", "upstream_path", "sha256", "license", "attribution"):
+        for key in (
+            "rules",
+            "source_id",
+            "upstream_path",
+            "sha256",
+            "truth_sha256",
+            "source_url",
+            "license",
+            "attribution",
+        ):
             value = getattr(self, key)
             if value is not None:
                 out[key] = value
@@ -308,8 +329,12 @@ _WS = re.compile(r"\s+")
 
 
 def _clean_cell(text: str) -> str:
-    """Collapse whitespace and escape the markdown cell separator."""
-    return _WS.sub(" ", text).strip().replace("\\", "\\\\").replace("|", "\\|")
+    """Collapse whitespace and escape the markdown cell separator.
+
+    Backslashes are kept verbatim: LaTeX in cells (``$\\delta$``) must reach the scorer as the
+    parser would print it, and the Rust table reader only unescapes ``\\|``.
+    """
+    return _WS.sub(" ", text).strip().replace("|", "\\|")
 
 
 def _span(value: Optional[str]) -> int:

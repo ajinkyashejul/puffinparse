@@ -1,0 +1,38 @@
+[
+  {
+    "id": "06df5e530c2ccb0310a3205586a37d4b9b7d_page_5_pdf_order_90d16d0a",
+    "type": "order",
+    "before": "Garantizamos acceso a agua segura, alimentos, formación y cuidados básicos de salud.",
+    "after": "Desde 2020, hemos ofrecido recursos económicos a 2284 personas garantizando no solo el acceso a alimentos, sino también capacitación para mejorar la calidad de su dieta.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "06df5e530c2ccb0310a3205586a37d4b9b7d_page_5.pdf_order_90d16d0a"
+  },
+  {
+    "id": "06df5e530c2ccb0310a3205586a37d4b9b7d_page_5_pdf_order_48f64718",
+    "type": "order",
+    "before": "NUESTRO IMPACTO EN LOS OBJETIVOS DE DESARROLLO SOSTENIBLE - AGENDA 2030",
+    "after": "Fieles a nuestro compromiso, ante las necesidades detectadas en España en este año 2022, hemos seguido promoviendo una estrategia de seguridad alimentaria que combina investigación, apoyo a políticas públicas, sensibilización y programas con enfoque de salud.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "06df5e530c2ccb0310a3205586a37d4b9b7d_page_5.pdf_order_48f64718"
+  },
+  {
+    "id": "06df5e530c2ccb0310a3205586a37d4b9b7d_page_5_pdf_order_5d1d6150",
+    "type": "order",
+    "before": "En Acción contra el Hambre mantenemos una estricta neutralidad política y religiosa.",
+    "after": "Verificamos la asignación de nuestros recursos para garantizar que llegan a las personas adecuadas.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "06df5e530c2ccb0310a3205586a37d4b9b7d_page_5.pdf_order_5d1d6150"
+  },
+  {
+    "id": "06df5e530c2ccb0310a3205586a37d4b9b7d_page_5_pdf_order_f8f008ac",
+    "type": "order",
+    "before": "Salvamos la vida de niños y niñas desnutridos.",
+    "after": "Actuamos de conformidad con nuestros propios principios para preservar nuestra independencia moral y económica.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "06df5e530c2ccb0310a3205586a37d4b9b7d_page_5.pdf_order_f8f008ac"
+  }
+]

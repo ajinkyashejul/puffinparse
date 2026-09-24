@@ -1,0 +1,42 @@
+[
+  {
+    "id": "20_pg33_pg1_text_00",
+    "type": "present",
+    "text": "He is a dandy, a preening bon viveur, in love with his own voice.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "20_pg33_pg1_text_00"
+  },
+  {
+    "id": "20_pg33_pg1_text_01",
+    "type": "present",
+    "text": "They are so madly in love that it is inevitable that fate (or Fogelman) will play a few tricks on them.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "20_pg33_pg1_text_01"
+  },
+  {
+    "id": "20_pg33_pg1_text_02",
+    "type": "present",
+    "text": "The film touches again and again on the misery in its protagonists' lives but never steps too far into the darkness.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "20_pg33_pg1_text_02"
+  },
+  {
+    "id": "20_pg33_pg1_text_04",
+    "type": "present",
+    "text": "Life is the \"ultimate unreliable narrator\".",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "20_pg33_pg1_text_04"
+  },
+  {
+    "id": "20_pg33_pg1_text_05",
+    "type": "present",
+    "text": "The group has signed off on an animated superhero movie based on their alter egos, but it has yet to be picked up by a broadcaster or distributor.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "20_pg33_pg1_text_05"
+  }
+]

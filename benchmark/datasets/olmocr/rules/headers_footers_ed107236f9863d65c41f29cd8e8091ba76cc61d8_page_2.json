@@ -1,0 +1,34 @@
+[
+  {
+    "id": "ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2_header_01",
+    "type": "absent",
+    "text": "SB Sino Biological",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2_header_01"
+  },
+  {
+    "id": "ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2_header_02",
+    "type": "absent",
+    "text": "Biological Solution Specialist",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2_header_02"
+  },
+  {
+    "id": "ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2_pdf_manual_00",
+    "type": "absent",
+    "text": "Manufactured By Sino Biological Inc., FOR RESEARCH USE ONLY. NOT FOR USE IN HUMANS.",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2.pdf_manual_00"
+  },
+  {
+    "id": "ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2_pdf_manual_01",
+    "type": "absent",
+    "text": "Tel: 215-583-7898 (US); +86-400-890-9989(Global) http://www.sinobiological.com",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2.pdf_manual_01"
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "id": "2d54e996d1247bd36695d872863eefebd8f8_pg4_table_00",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Chinese experimenter",
+      "value": "Divided attention"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "2d54e996d1247bd36695d872863eefebd8f8_pg4_table_00"
+  },
+  {
+    "id": "2d54e996d1247bd36695d872863eefebd8f8_pg4_table_01",
+    "type": "table_cell",
+    "cell": {
+      "row_header": ".36 (.20)",
+      "value": ".12 (.27)"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "2d54e996d1247bd36695d872863eefebd8f8_pg4_table_01"
+  },
+  {
+    "id": "2d54e996d1247bd36695d872863eefebd8f8_pg4_table_02",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Divided attention",
+      "value": ".12 (.27)"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "2d54e996d1247bd36695d872863eefebd8f8_pg4_table_02"
+  },
+  {
+    "id": "2d54e996d1247bd36695d872863eefebd8f8_pg4_table_03",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Nonverbal",
+      "value": "-.34 (.22)"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "2d54e996d1247bd36695d872863eefebd8f8_pg4_table_03"
+  }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_01",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Jagger",
+      "value": "49.7"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_01"
+  },
+  {
+    "id": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_05",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Trego-HWWW",
+      "value": "9.6"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_05"
+  },
+  {
+    "id": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_06",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "6.5",
+      "value": "2163"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_06"
+  },
+  {
+    "id": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_07",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Ike",
+      "value": "1.3"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_07"
+  },
+  {
+    "id": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_09",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "2137",
+      "value": "33.1"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_09"
+  },
+  {
+    "id": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_11",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "23.6",
+      "value": "Jagger"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_11"
+  },
+  {
+    "id": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_13",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Ike",
+      "value": "1.3"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "0953927d7a3f032c46a2e6d0ead837398a0b_pg20_table_13"
+  }
+]

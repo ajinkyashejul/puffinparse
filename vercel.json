@@ -47,6 +47,11 @@
       "permanent": true
     },
     {
+      "source": "/typescript/",
+      "destination": "/docs/typescript/",
+      "permanent": true
+    },
+    {
       "source": "/cli/",
       "destination": "/docs/cli/",
       "permanent": true

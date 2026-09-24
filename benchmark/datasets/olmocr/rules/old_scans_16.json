@@ -1,0 +1,52 @@
+[
+  {
+    "id": "16_211629",
+    "type": "present",
+    "text": "My dear Col.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "16_211629"
+  },
+  {
+    "id": "16_748797",
+    "type": "order",
+    "before": "With congratulations for your recent successful trip",
+    "after": "I am Very respectfully yours,",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "16_748797"
+  },
+  {
+    "id": "16_82933",
+    "type": "absent",
+    "text": "ack 5/30/14",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "16_82933"
+  },
+  {
+    "id": "16_703384",
+    "type": "present",
+    "text": "it is subject to on the floor. I would strongly advise",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "16_703384"
+  },
+  {
+    "id": "16_248968",
+    "type": "present",
+    "text": "for the wall the body skin is not cut away, but tucked",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "16_248968"
+  },
+  {
+    "id": "16_820620",
+    "type": "order",
+    "before": "May 22nd, 1914.",
+    "after": "Theodore Roosevelt",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "16_820620"
+  }
+]

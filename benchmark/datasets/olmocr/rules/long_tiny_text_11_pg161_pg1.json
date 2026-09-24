@@ -1,0 +1,66 @@
+[
+  {
+    "id": "11_pg161_pg1_text_00",
+    "type": "present",
+    "text": "PLOWRING. Weeping. Prompt. Parv.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "11_pg161_pg1_text_00"
+  },
+  {
+    "id": "11_pg161_pg1_text_01",
+    "type": "present",
+    "text": "(3) To pluck a rose, i. e. to go to the jakes, said",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "11_pg161_pg1_text_01"
+  },
+  {
+    "id": "11_pg161_pg1_text_02",
+    "type": "present",
+    "text": "of women. Middleton, iv. 222.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "11_pg161_pg1_text_02"
+  },
+  {
+    "id": "11_pg161_pg1_text_03",
+    "type": "present",
+    "text": "For hyme that is smetyne with his awenne blode,",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "11_pg161_pg1_text_03"
+  },
+  {
+    "id": "11_pg161_pg1_text_04",
+    "type": "present",
+    "text": "When kynge Richard perceved that the people by",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "11_pg161_pg1_text_04"
+  },
+  {
+    "id": "11_pg161_pg1_text_05",
+    "type": "present",
+    "text": "together. West.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "11_pg161_pg1_text_05"
+  },
+  {
+    "id": "11_pg161_pg1_text_06",
+    "type": "present",
+    "text": "POARE-BLIND. Dim-sighted. The word",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "11_pg161_pg1_text_06"
+  },
+  {
+    "id": "11_pg161_pg1_text_07",
+    "type": "present",
+    "text": "Unto another she dyde as moche;",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "11_pg161_pg1_text_07"
+  }
+]

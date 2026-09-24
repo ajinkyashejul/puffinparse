@@ -30,3 +30,4 @@ benchmark/cache/
 .DS_Store
 benchmark/site/dist/
 website/dist/
+.claude/worktrees/

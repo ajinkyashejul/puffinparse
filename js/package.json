@@ -1,0 +1,40 @@
+{
+  "name": "liteocr",
+  "version": "0.1.0",
+  "description": "One API for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, ...). Node.js bindings to the LiteOCR Rust core.",
+  "keywords": ["ocr", "document-parsing", "pdf", "reducto", "llamaparse", "extend", "napi-rs"],
+  "license": "MIT",
+  "homepage": "https://github.com/ajinkyashejul/liteocr",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajinkyashejul/liteocr.git",
+    "directory": "js"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": ["index.js", "index.d.ts", "native.js", "native.d.ts", "*.node"],
+  "engines": {
+    "node": ">=18"
+  },
+  "napi": {
+    "binaryName": "liteocr",
+    "targets": [
+      "x86_64-unknown-linux-gnu",
+      "aarch64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc"
+    ]
+  },
+  "scripts": {
+    "build": "napi build --manifest-path ../crates/liteocr-node/Cargo.toml --package-json-path package.json --output-dir . --platform --release --js native.js --dts native.d.ts",
+    "build:debug": "napi build --manifest-path ../crates/liteocr-node/Cargo.toml --package-json-path package.json --output-dir . --platform --js native.js --dts native.d.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.1.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}

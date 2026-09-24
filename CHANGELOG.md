@@ -11,6 +11,37 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **More public benchmarks in the combined dataset.** `olmocr` (40 AI2 olmOCR-bench PDFs, 205
+  rules, ODC-BY-1.0) and `omnidocbench` (40 pages across 10 document types, English and Chinese;
+  index only — images and truth are fetched at a pinned revision by
+  `python -m benchmark.adapters omnidocbench` because the data is research-only), joined with
+  synthetic-v1 and ParseBench as `combined-v2` (159 documents; `combined-v1` is unchanged).
+  Upstream tests that cannot be expressed faithfully (math, baseline, positional absences,
+  vertical table neighbours) are skipped and counted in `conversion-stats.json`, never dropped
+  silently. A dataset self-check test proves every converted rule is satisfiable. Survey of
+  academic benchmarks with licences at pinned revisions: `docs/benchmarks/academic-benchmarks.md`.
+- **Gateway server: `liteocr serve` (`crates/liteocr-server`).** An HTTP gateway in front of every
+  provider, the LiteOCR equivalent of the LiteLLM proxy: `POST /v1/parse|ocr|extract` (JSON or
+  multipart, `output_format`, `fallbacks`), `GET /v1/models`, `/v1/usage`, `/health` and
+  Prometheus `/metrics`. A `liteocr.toml` config defines model aliases with ordered or round-robin
+  fallback, provider keys as `env:` references, and virtual keys with model allow-lists, monthly
+  USD budgets and per-minute rate limits. Every request is logged as one JSON line (never document
+  content, provider error text or secrets), and all errors share one JSON body. Clients cannot
+  override `api_key`/`base_url` or read local files. Ships a multi-stage distroless `Dockerfile`
+  and `examples/server/liteocr.toml`; see [`docs/SERVER.md`](docs/SERVER.md).
+- **Node.js / TypeScript SDK.** The `liteocr` npm package in `js/` runs on a napi-rs addon over the
+  same Rust core (`crates/liteocr-node`): async `parse` / `ocr` / `extract` (with `fallbacks`),
+  `Router`, camelCase typed responses (`index.d.ts`), `LiteOCRError` subclasses mapped from the core
+  `ErrorKind`, and the pricing, model and scoring helpers. CI builds the addon and runs the
+  typecheck and `node:test` suite; the release workflow builds prebuilt `.node` binaries as
+  artifacts (npm publishing not wired yet, so build from source for now). Docs at `/docs/typescript/`.
+- **`liteocr bench run --resume`**: every finished call is appended to `<out>.partial.jsonl`, so an
+  interrupted or partly failed run continues where it stopped and only re-runs missing or failed
+  (model, document) pairs. `--dry-run` prints the plan (calls, pages, list-price estimate) without
+  calling any provider; `--max-cost <usd>` aborts before the first call when the estimate is higher;
+  `--retries N` re-issues documents after retryable errors (off by default, since a retried job may
+  be billed twice). Result documents record `provider_job_id`, `cache_hit`, `attempts`,
+  `started_at` and `error_kind`, and the run ends with a summary line (calls, failures, cost, wall time).
 - **Native-format compatibility (`output_format`).** A response can be rendered in a
   provider's own JSON shape instead of the unified one, so an integration already written
   against Reducto, Extend or LlamaParse can switch the underlying provider without
@@ -37,6 +68,8 @@ Python package `liteocr` share a single version.
 
 ### Changed
 
+- Adapter HTML→markdown table conversion no longer doubles backslashes, so LaTeX in table cells reaches
+  the scorer as a parser would print it.
 - **Modes.** Every call now names a mode — `parse` (markdown + typed blocks), `ocr`
   (plain text with line/word boxes) or `extract` (a JSON object from a schema, with
   per-field confidence and citations) — and providers can only be swapped within a

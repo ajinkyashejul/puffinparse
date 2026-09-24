@@ -1,0 +1,12 @@
+target/
+.git/
+.claude/
+.venv/
+**/__pycache__/
+benchmark/
+website/
+docs/
+python/
+node_modules/
+*.jsonl
+.env

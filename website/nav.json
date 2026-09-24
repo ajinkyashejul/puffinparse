@@ -37,6 +37,13 @@
           "description": "The complete public Python API: the parse / ocr / extract modes, Router, response dataclasses, exceptions, callbacks, pricing and scoring helpers."
         },
         {
+          "slug": "typescript",
+          "title": "TypeScript / Node.js SDK",
+          "nav_title": "TypeScript",
+          "source": "website/pages/typescript.md",
+          "description": "The liteocr npm package: async parse / ocr / extract on the Rust core, Router, camelCase response types, typed errors, pricing and scoring helpers."
+        },
+        {
           "slug": "cli",
           "title": "CLI",
           "source": "website/pages/cli.md",

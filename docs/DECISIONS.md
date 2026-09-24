@@ -191,3 +191,58 @@ Reducto render uses a reduced vocabulary (`footnote`/`caption`/`formula`/`other`
 three providers. Because the renderer only reads the unified types, any provider added later gets
 all three native shapes for free — and any unified field a new provider cannot fill shows up as a
 `null` in someone's vendor-shaped payload, which is the honest outcome.
+
+## ADR-14: The Node.js SDK is a napi-rs addon over the same core
+
+**Context.** A TypeScript SDK was on the roadmap once the Python surface stabilised. The options
+were a WASM build, a wrapper around the CLI, or a native N-API addon.
+
+**Decision.** `crates/liteocr-node` exposes the core through napi 3; the `js/` package is a thin
+layer. The addon only converts values: requests and responses cross as the core's serde JSON,
+errors as a prefixed JSON payload (`LITEOCR_CORE_ERROR:<json>`) that the JS layer rebuilds into
+typed `LiteOCRError` subclasses. The JS layer converts to camelCase with explicit per-type
+converters; `data`, `metadata` and `raw` are never renamed, and `index.d.ts` is hand-written
+against SPEC §5 (the napi-generated `native.d.ts` is internal). The crate is a normal workspace
+member: napi's `dyn-symbols` keeps `cargo test --workspace` free of Node. It uses
+`deny(unsafe_code)` because napi's macro expansion is incompatible with `forbid`, and declares
+`rust-version = "1.88"` (napi 3) while the rest of the workspace stays at 1.80. `timeout` is in
+seconds, as in the other SDKs, and `LiteOCRError.kind` uses the ErrorKind serde values.
+
+**Consequences.** One implementation behind three surfaces (Python, Node, CLI). No provider logic
+in JS. Prebuilt binaries per platform are required for `npm install` without a Rust toolchain;
+the release matrix builds them but publishing is not wired yet.
+
+## ADR-15: The gateway is a thin axum layer over the core, TOML-configured, with no database
+
+**Context.** LiteLLM's proxy is what teams actually deploy: one endpoint, central keys, budgets and
+logs. LiteOCR needed the same without growing a second implementation of providers.
+
+**Decision.** `crates/liteocr-server` (axum + tower-http, which are HTTP frameworks, not provider
+SDKs) calls `liteocr_core::{parse, ocr, extract}` and runs its own fallback loop, because the core
+`Router` cannot give each target its own credentials or base URL. Configuration is TOML (already
+idiomatic in Rust, lighter than YAML). Usage and budget state live in memory with an optional
+JSON state file; a database is out of scope. Clients may not send `api_key` or `base_url`, so they
+cannot redirect the gateway's credentials, and local file paths are refused. Provider credential
+failures map to 502, not 401, because the caller's own key was valid.
+
+**Consequences.** Single binary, no infrastructure to run. Budgets can be overshot by requests in
+flight, and key changes need a restart. A database, HTTP key management, async job endpoints and
+metrics auth are follow-ups, not blockers.
+
+## ADR-16: Vendor only what the licence permits; index the rest
+
+**Context.** The combined benchmark (ADR-10) pulls in public datasets whose licences differ:
+olmOCR-bench is ODC-BY-1.0, OmniDocBench has no licence and is marked research-only /
+non-commercial.
+
+**Decision.** A dataset is vendored into the repo (with attribution) only when its licence permits
+redistribution. Otherwise the repo holds a manifest with upstream paths, a pinned revision and
+image/truth hashes, and the adapter materialises the data locally. Combined datasets are
+versioned and never rewritten once results exist (`combined-v2` supersedes `combined-v1` for new
+runs). Upstream tests that cannot be expressed faithfully in the shared rule schema are skipped
+and counted, never weakened silently; the one relaxed mapping (olmOCR "left/right of" → same row)
+is counted as relaxed.
+
+**Consequences.** Anyone can reproduce every score, but index-only sources need a fetch step before
+a run (their documents carry a `fetch-required` tag). Stats files make the coverage of each
+conversion auditable.

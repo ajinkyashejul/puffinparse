@@ -108,3 +108,64 @@ jobs:
       # are missing.
       - name: Pytest
         run: pytest python/tests -q
+
+  node:
+    name: Node.js SDK (build addon, typecheck, node:test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry and target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: node-addon
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+
+      - name: Install JS tooling
+        run: npm ci
+
+      # Debug build: the tests exercise the bridge, not optimised code, and it is much faster.
+      # CARGO_TARGET_DIR keeps the addon in the workspace target dir that rust-cache restores.
+      - name: Build the native addon
+        run: npm run build:debug
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+
+      - name: Typecheck index.d.ts
+        run: npm run typecheck
+
+      # Offline: unit tests plus end-to-end calls against a local mock provider. The live test
+      # skips itself because LITEOCR_LIVE_TESTS and provider keys are deliberately not set.
+      - name: Test
+        run: npm test
+
+  docker:
+    name: Gateway image (build + smoke test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t liteocr:ci .
+      - name: CLI runs in the image
+        run: docker run --rm liteocr:ci --version
+      - name: Gateway serves /health and /v1/models
+        run: |
+          printf '[server]\nport = 4000\n' > "$RUNNER_TEMP/liteocr.toml"
+          docker run -d --name gw -p 4000:4000 \
+            -v "$RUNNER_TEMP/liteocr.toml:/etc/liteocr/liteocr.toml:ro" liteocr:ci
+          for i in $(seq 1 30); do curl -fsS localhost:4000/health && break; sleep 1; done
+          curl -fsS localhost:4000/v1/models | head -c 300; echo
+          docker logs gw
+          docker rm -f gw

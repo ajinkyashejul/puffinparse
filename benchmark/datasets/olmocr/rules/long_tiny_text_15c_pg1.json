@@ -1,0 +1,34 @@
+[
+  {
+    "id": "15c_pg1_text_00",
+    "type": "present",
+    "text": "Where discordance generally seems to lie is in the failure of uranium-bearing minerals to be closed systems.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "15c_pg1_text_00"
+  },
+  {
+    "id": "15c_pg1_text_01",
+    "type": "present",
+    "text": "At the present time, its application to the mineral magnetite seems reliable, provided that acid leaching first removes surficial material not held within the tight magnetite lattice.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "15c_pg1_text_01"
+  },
+  {
+    "id": "15c_pg1_text_02",
+    "type": "present",
+    "text": "For example, the detection of eight trillion calcium-40 atoms in a sample implies the presence of one trillion argon-40 atoms and therefore the decay of nine trillion potassium-40 atoms over the life of the sample.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "15c_pg1_text_02"
+  },
+  {
+    "id": "15c_pg1_text_03",
+    "type": "present",
+    "text": "Specifically, search is made for potassium-bearing minerals associated with uraninite specimens that have shown concordant uranium-thorium-lead ages.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "15c_pg1_text_03"
+  }
+]

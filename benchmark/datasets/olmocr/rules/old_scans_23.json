@@ -1,0 +1,35 @@
+[
+  {
+    "id": "23_675822",
+    "type": "present",
+    "text": "The Contemporary Club is a literary club of this City, composed of one hundred and twenty five of the leading gentlemen and ladies",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "23_675822"
+  },
+  {
+    "id": "23_189451",
+    "type": "order",
+    "before": "My dear Sir:-",
+    "after": "at the Progressive Head- quarters in New York, to ask your good offices in behalf of the Contemporary Club of Bridgeport, of which I have the honor to be President.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "23_189451"
+  },
+  {
+    "id": "23_774544",
+    "type": "present",
+    "text": "Sanford Stoddard of Bridgeport, and Mr. McGraw, Sec'y. at the Progressive Head- quarters in",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "23_774544"
+  },
+  {
+    "id": "23_266702",
+    "type": "present",
+    "text": "Club is a literary club of this City, composed of",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "23_266702"
+  }
+]
