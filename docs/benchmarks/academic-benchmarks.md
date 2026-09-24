@@ -18,7 +18,7 @@ means into one of those two kinds.
 |---|---|---|---|---|---|---|---|
 | **olmOCR-bench** (AI2) | PDF → markdown unit tests | 1,403 PDFs, 7,010 tests | ODC-BY-1.0 (card) | **Yes**, with attribution | JSONL unit tests | `rules`: 3,040 of 7,019 tests (43%) | **Adapted**: 40-doc subset committed |
 | **OmniDocBench** (OpenDataLab) | end-to-end page parsing: text, tables, formulas, reading order | 1,651 pages, 10 doc types, EN + ZH | none on the card; "research purposes only and not for commercial use" | **No**, index only | one JSON: blocks + order + text/LaTeX/HTML | `transcript` (1,443 of 1,651 pages) | **Adapted**: 40-page index, fetched at run time |
-| **DP-Bench** (Upstage) | element serialisation (NID), table structure (TEDS / TEDS-S) | 200 single-page PDFs, 36 MB | MIT (card) | Yes (see the caveat below) | `reference.json`: elements with category, coordinates, text/html/markdown | `transcript` | **Next adapter**: cheapest clean win |
+| **DP-Bench** (Upstage) | element serialisation (NID), table structure (TEDS / TEDS-S) | 200 single-page PDFs, 36 MB | MIT (card) | Yes (see the caveat below) | `reference.json`: elements with category, coordinates, text/html/markdown | `transcript` | **Adapted** (`benchmark/datasets/dpbench`, in `combined-v3`) |
 | **READoc** (ISCAS) | realistic PDF → markdown on whole documents | 2,233 docs (arXiv + GitHub) | MIT (card) | Ground truth yes; PDFs doubtful | one markdown file per document | `transcript`, multi-page | Adapter for a long-document track; fetch PDFs at run time |
 | **Nanonets IDP leaderboard** | aggregator: olmOCR-bench, OmniDocBench, "IDP Core" (KIE, VQA, OCR, tables, classification) | 6,406 IDP Core samples plus the two above | harness MIT; datasets mixed | Per dataset | per-dataset | — | No adapter of its own; its two public page benchmarks are covered above |
 | **Fox** (UCAS) | fine-grained, region/line/colour-focused page OCR, EN + ZH | 1 zip (`focus_benchmark_test.zip`) | CC-BY-NC-SA-4.0 (card) | **No** (non-commercial, share-alike) | prompt → text pairs | partly `transcript` | Skip: focus-prompted task, NC licence |
@@ -165,7 +165,7 @@ forgives reading-order differences. LiteOCR's `char_similarity` over the whole p
 If OpenDataLab ever publishes an explicit licence that permits redistribution, the same adapter
 can commit the files by deleting its `.gitignore`.
 
-## 3. DP-Bench (Upstage): recommended next
+## 3. DP-Bench (Upstage): adapted
 
 - Data, inference scripts and `evaluate.py` all live in HF `upstage/dp-bench`. There is no paper.
 
@@ -194,8 +194,9 @@ tables, figures and charts, so they could stay) or tagged. This is structurally 
 OmniDocBench adapter, so it is roughly a day's work, and the whole dataset (36 MB) is small
 enough that a 40–60 page subset commits in about 5 MB.
 
-**Recommendation.** Build `benchmark/adapters/dpbench.py` next. It is the only clean,
-redistributable, page-level reference-transcript benchmark besides `synthetic-v1`.
+**Status.** Adapted by `benchmark/adapters/dpbench.py`: headers and footers are kept (NID scores
+them), figures and charts dropped, 40 pages committed (4.5 MB), folded into `combined-v3`. See
+[`adapters.md`](adapters.md#dp-bench-mapping).
 
 ## 4. READoc (Institute of Software, CAS)
 
@@ -306,4 +307,4 @@ the "score `parse` output" design exactly as RealDoc-Bench's QA track does.
    - Neighbour relations (`up`, `down`, `left`, `right`) on `table_cell`.
    - HTML tables in predictions (in progress elsewhere).
    - A structural table metric (TEDS) next to `table_score`.
-3. Next adapters: DP-Bench (clean, MIT, page-level), then READoc as a long-document track.
+3. Next adapter: READoc as a long-document track (DP-Bench is done: `combined-v3`).

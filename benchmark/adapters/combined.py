@@ -1,7 +1,8 @@
 """Combined dataset builder — union several committed datasets into one manifest.
 
-``benchmark/datasets/combined-v1/manifest.json`` is a *view*: it copies no bytes. Every document
-keeps living in its own dataset directory and is referenced relatively, e.g.
+``benchmark/datasets/combined-v1/manifest.json`` (likewise ``-v2`` and ``-v3``) is a *view*: it
+copies no bytes. Every document keeps living in its own dataset directory and is referenced
+relatively, e.g.
 
     {"id": "synthetic/plain_001", "file": "../synthetic-v1/docs/plain_001.png",
      "truth": "../synthetic-v1/truth/plain_001.md"}
@@ -210,4 +211,45 @@ class CombinedV2Adapter(CombinedAdapter):
         "per category (docs/benchmarks/adapters.md).",
         "A combined score mixes licences, difficulty and document kinds — always read it next "
         "to the per-dataset scores.",
+    )
+
+
+#: ``combined-v3`` adds DP-Bench. ``combined-v2`` stays frozen for the same reason as v1.
+SOURCES_V3 = (
+    *SOURCES_V2,
+    Source(prefix="dpbench", directory="dpbench", name="dpbench"),
+)
+
+
+@register
+class CombinedV3Adapter(CombinedAdapter):
+    """Builds ``benchmark/datasets/combined-v3``: v2 plus the DP-Bench subset."""
+
+    name = "combined-v3"
+    default_out = "benchmark/datasets/combined-v3"
+    description = "combined-v2 plus the DP-Bench subset, referenced in place."
+    sources = SOURCES_V3
+    dataset_name = "combined-v3"
+    version = "3.0.0"
+    manifest_description = (
+        "Union of the LiteOCR benchmark datasets: synthetic-v1, the ParseBench subset, the "
+        "olmOCR-bench subset, the OmniDocBench subset and the DP-Bench subset. No bytes are "
+        "copied: every document is referenced relatively in its own dataset directory, so the "
+        "per-dataset and combined runs score exactly the same files."
+    )
+    manifest_notes = (
+        "Document ids are `<source>/<upstream id>`; use `--filter synthetic/`, "
+        "`--filter parsebench/`, `--filter olmocr/`, `--filter omnidocbench/` or "
+        "`--filter dpbench/` to run one source.",
+        "`file`, `truth` and `rules` are relative to this directory and start with `../`.",
+        "The omnidocbench documents are NOT in the repository (research-only, non-commercial "
+        "data): run `python -m benchmark.adapters omnidocbench` first, or they fail as "
+        "file-not-found and the dataset sha256 no longer covers them. They carry the "
+        "`fetch-required` tag.",
+        "olmocr documents tagged `absent-only` pass for an empty parse; read the olmocr score "
+        "per category (docs/benchmarks/adapters.md).",
+        "dpbench truth keeps page headers and footers, because DP-Bench's own NID scores them; "
+        "omnidocbench truth drops them, because OmniDocBench does not.",
+        "A combined score mixes licences, difficulty and document kinds — always read it next "
+        "to the per-source scores.",
     )

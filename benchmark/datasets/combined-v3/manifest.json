@@ -1,0 +1,3764 @@
+{
+  "name": "combined-v3",
+  "version": "3.0.0",
+  "description": "Union of the LiteOCR benchmark datasets: synthetic-v1, the ParseBench subset, the olmOCR-bench subset, the OmniDocBench subset and the DP-Bench subset. No bytes are copied: every document is referenced relatively in its own dataset directory, so the per-dataset and combined runs score exactly the same files.",
+  "license": "mixed — per-document `license`, summarised in `sources`",
+  "generator": "benchmark/adapters/combined.py",
+  "sources": [
+    {
+      "name": "synthetic-v1",
+      "version": "1.1.0",
+      "license": "CC0-1.0",
+      "path": "../synthetic-v1",
+      "documents": 39,
+      "manifest_sha256": "663403469a63ef4e8c3dee61442b69c5f5dc08d7d13dccce66eb2384e53b2f67"
+    },
+    {
+      "name": "parsebench",
+      "version": "1.0.0",
+      "license": "Apache-2.0",
+      "path": "../parsebench",
+      "documents": 40,
+      "manifest_sha256": "d74e2c51c05f3bc650df180574cb734a5571a6efa2dac2d3d1e7112dcc5e1f4c",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "name": "olmocr",
+      "version": "1.0.0",
+      "license": "ODC-By-1.0",
+      "path": "../olmocr",
+      "documents": 40,
+      "manifest_sha256": "634957fdce52e303e56e1f4f3073b56970ed0652e3b1b44bcf71a01658947118",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "name": "omnidocbench",
+      "version": "1.0.0",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "path": "../omnidocbench",
+      "documents": 40,
+      "manifest_sha256": "a534ebf1cfdcc468b970142eaa13163edad660d6dc319657b48752af054ceb36",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "name": "dpbench",
+      "version": "1.0.0",
+      "license": "MIT",
+      "path": "../dpbench",
+      "documents": 40,
+      "manifest_sha256": "4dcece5f623293f5f931ecbe1d4c65ec019a02e49d7db042fa26d432210f0347",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    }
+  ],
+  "notes": [
+    "Document ids are `<source>/<upstream id>`; use `--filter synthetic/`, `--filter parsebench/`, `--filter olmocr/`, `--filter omnidocbench/` or `--filter dpbench/` to run one source.",
+    "`file`, `truth` and `rules` are relative to this directory and start with `../`.",
+    "The omnidocbench documents are NOT in the repository (research-only, non-commercial data): run `python -m benchmark.adapters omnidocbench` first, or they fail as file-not-found and the dataset sha256 no longer covers them. They carry the `fetch-required` tag.",
+    "olmocr documents tagged `absent-only` pass for an empty parse; read the olmocr score per category (docs/benchmarks/adapters.md).",
+    "dpbench truth keeps page headers and footers, because DP-Bench's own NID scores them; omnidocbench truth drops them, because OmniDocBench does not.",
+    "A combined score mixes licences, difficulty and document kinds — always read it next to the per-source scores."
+  ],
+  "documents": [
+    {
+      "id": "dpbench/01030000000016",
+      "file": "../dpbench/docs/01030000000016.pdf",
+      "truth": "../dpbench/truth/01030000000016.md",
+      "pages": 1,
+      "category": "index",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-heading1",
+        "has-index"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000016",
+      "sha256": "0592b0a1dff0c0b4a48b4504c035336bc9b30831fa2ac2ca8ef8b43a9b5df271",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000018",
+      "file": "../dpbench/docs/01030000000018.pdf",
+      "truth": "../dpbench/truth/01030000000018.md",
+      "pages": 1,
+      "category": "index",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-index"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000018",
+      "sha256": "321a42833cde040a5e4525c5f84ca2e7df18ee57649c9b47a0e5472e1357abb6",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000021",
+      "file": "../dpbench/docs/01030000000021.pdf",
+      "truth": "../dpbench/truth/01030000000021.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000021",
+      "sha256": "8cfcbba6c953185e59b1edf5dfab0d36df31ef74a32548308deca21a8a96e615",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000026",
+      "file": "../dpbench/docs/01030000000026.pdf",
+      "truth": "../dpbench/truth/01030000000026.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-header",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000026",
+      "sha256": "9720f5990852942d3d2e0c84e6dfb1db5c528f3811b1fce9d320e8fe55219b78",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000030",
+      "file": "../dpbench/docs/01030000000030.pdf",
+      "truth": "../dpbench/truth/01030000000030.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-header",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000030",
+      "sha256": "9c897807c023cf6c34295d03cccb262ed0cbef83bef63d4908ab6d3775b15597",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000031",
+      "file": "../dpbench/docs/01030000000031.pdf",
+      "truth": "../dpbench/truth/01030000000031.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-header",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000031",
+      "sha256": "a5b975710668800f4d4712155bc597a028f0ffbfe162efef92ded23cb2c23b9f",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000032",
+      "file": "../dpbench/docs/01030000000032.pdf",
+      "truth": "../dpbench/truth/01030000000032.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-equation",
+        "has-footnote",
+        "has-formula",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000032",
+      "sha256": "65be3f78649d4ee59fa39b9d2b94a44570e52ddbf31cb7213f92853bc23ceb16",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000045",
+      "file": "../dpbench/docs/01030000000045.pdf",
+      "truth": "../dpbench/truth/01030000000045.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-footer",
+        "has-footnote",
+        "has-header",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000045",
+      "sha256": "00f0adaaa8358a28b4b4e83bc97dcd83a01f7283605b140c2be8e8d47bba8b6b",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000047",
+      "file": "../dpbench/docs/01030000000047.pdf",
+      "truth": "../dpbench/truth/01030000000047.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-paragraph",
+        "has-table",
+        "merged-cells"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000047",
+      "sha256": "934fbf534914863f6431eef38f5bf66fa91afd439ddf20fb1af0cf3225159ac1",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000050",
+      "file": "../dpbench/docs/01030000000050.pdf",
+      "truth": "../dpbench/truth/01030000000050.md",
+      "pages": 1,
+      "category": "list",
+      "tags": [
+        "dpbench",
+        "has-header",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000050",
+      "sha256": "97d60e0c292030da220648b4ce7e8971adbe29731b7077d9c3c8d7c6dd778e42",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000059",
+      "file": "../dpbench/docs/01030000000059.pdf",
+      "truth": "../dpbench/truth/01030000000059.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-footer",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000059",
+      "sha256": "0687b8e7d87922833102a8e792d999184f73fd8ccbc147bba73ab036a28ca776",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000073",
+      "file": "../dpbench/docs/01030000000073.pdf",
+      "truth": "../dpbench/truth/01030000000073.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-figure",
+        "has-footer",
+        "has-footnote",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000073",
+      "sha256": "f99de206dc21ba8ea57548b1c0c007eb736da5f26c925dc99a4027806297bd8f",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000076",
+      "file": "../dpbench/docs/01030000000076.pdf",
+      "truth": "../dpbench/truth/01030000000076.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-footer",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000076",
+      "sha256": "6d5a00597cdd1d363b56eb0fdc9f239a462b44fcb0be53a93d62f0d6e35d428f",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000079",
+      "file": "../dpbench/docs/01030000000079.pdf",
+      "truth": "../dpbench/truth/01030000000079.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000079",
+      "sha256": "63111d8ed6b32c2b3473840ace01896244527d3dc306d81410a3cc7d87a45226",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000086",
+      "file": "../dpbench/docs/01030000000086.pdf",
+      "truth": "../dpbench/truth/01030000000086.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-footnote",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000086",
+      "sha256": "4f6d9c52848acf2346013388db8ef25c40e6e2fd1232c49f2abfa7a21f65c82c",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000091",
+      "file": "../dpbench/docs/01030000000091.pdf",
+      "truth": "../dpbench/truth/01030000000091.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-footnote",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000091",
+      "sha256": "475c037beeba4ba75b3e749b51f3781a67e8e8f9db6a31772f7bf2ed2bd05d00",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000095",
+      "file": "../dpbench/docs/01030000000095.pdf",
+      "truth": "../dpbench/truth/01030000000095.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-chart",
+        "has-footer",
+        "has-footnote",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000095",
+      "sha256": "c04c230b8dfa00d0fabbe9730c078c840ccaa27f5f270d5899f35405784a535d",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000100",
+      "file": "../dpbench/docs/01030000000100.pdf",
+      "truth": "../dpbench/truth/01030000000100.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-chart",
+        "has-footer",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000100",
+      "sha256": "7675bb9557d6e1e663237098f37aaecb61ab411b71034c2d397487ed0deb2ecd",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000101",
+      "file": "../dpbench/docs/01030000000101.pdf",
+      "truth": "../dpbench/truth/01030000000101.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-footnote",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000101",
+      "sha256": "c75d25277c58e07bf91528ae08deccc80715b6f7f13b5ed571cf226463b364e8",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000105",
+      "file": "../dpbench/docs/01030000000105.pdf",
+      "truth": "../dpbench/truth/01030000000105.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-figure",
+        "has-footer",
+        "has-heading1",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000105",
+      "sha256": "c8f35048844313b77c8c6d6a059b9f91a3b5e34f30e7a774a0f2d8fca82101eb",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000110",
+      "file": "../dpbench/docs/01030000000110.pdf",
+      "truth": "../dpbench/truth/01030000000110.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000110",
+      "sha256": "cd160a4e2296bd7c23f19c26af5bb6ed772f766ee1eacfe9998703c38146b494",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000118",
+      "file": "../dpbench/docs/01030000000118.pdf",
+      "truth": "../dpbench/truth/01030000000118.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-figure",
+        "has-footer",
+        "has-header",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000118",
+      "sha256": "39aec6caead187513fa9e2a26a3bbb54ba0a3a4ae8e879642ca1584330b0c285",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000122",
+      "file": "../dpbench/docs/01030000000122.pdf",
+      "truth": "../dpbench/truth/01030000000122.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-header",
+        "has-heading1",
+        "has-list",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000122",
+      "sha256": "770c9434a3530bfb67ef32510b63e1da347dfd6c51e5db9e0b13e90c8b287895",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000128",
+      "file": "../dpbench/docs/01030000000128.pdf",
+      "truth": "../dpbench/truth/01030000000128.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-footer",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000128",
+      "sha256": "a0edae1fa147c7bb78ebc493743a68ba4372b5ead31f2a2b146c35119462379e",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000136",
+      "file": "../dpbench/docs/01030000000136.pdf",
+      "truth": "../dpbench/truth/01030000000136.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-footer",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000136",
+      "sha256": "ee0a6175753e8cfc2f35fcbb1c5f7666f56969fb8111e326757835f062c65bb0",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000143",
+      "file": "../dpbench/docs/01030000000143.pdf",
+      "truth": "../dpbench/truth/01030000000143.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-equation",
+        "has-formula",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000143",
+      "sha256": "b4d90b6cc2d96d952b49dd227148c08018baffbfebd8d204705384f0a4a0c8a3",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000146",
+      "file": "../dpbench/docs/01030000000146.pdf",
+      "truth": "../dpbench/truth/01030000000146.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-header",
+        "has-heading1",
+        "has-paragraph",
+        "has-table",
+        "merged-cells"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000146",
+      "sha256": "ba0e025d53c091e8d4bb87499ff69ed3428dcee325c8895ecdb40e973b4c835c",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000150",
+      "file": "../dpbench/docs/01030000000150.pdf",
+      "truth": "../dpbench/truth/01030000000150.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-header",
+        "has-heading1",
+        "has-table",
+        "merged-cells"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000150",
+      "sha256": "a46e40b2b04dc83e4014fca656dae6df20af1fe7a420df306406409ea8c0db31",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000152",
+      "file": "../dpbench/docs/01030000000152.pdf",
+      "truth": "../dpbench/truth/01030000000152.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-figure",
+        "has-footer",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000152",
+      "sha256": "16bc03112342160922798dc0b3220b260ad4ebe06deafb9ab3c67df528877717",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000155",
+      "file": "../dpbench/docs/01030000000155.pdf",
+      "truth": "../dpbench/truth/01030000000155.md",
+      "pages": 1,
+      "category": "index",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-index"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000155",
+      "sha256": "b2c11e30c537ecc6ac4d39ea937e512500882bc479ac6e5c3b380cf1627dc189",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000162",
+      "file": "../dpbench/docs/01030000000162.pdf",
+      "truth": "../dpbench/truth/01030000000162.md",
+      "pages": 1,
+      "category": "list",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000162",
+      "sha256": "165dfeaf31832cc4547b6b638a033c1057ddb6384874c16c4574c6278856dd30",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000167",
+      "file": "../dpbench/docs/01030000000167.pdf",
+      "truth": "../dpbench/truth/01030000000167.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-heading1",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000167",
+      "sha256": "18fbe4800ce186f3338eade3d1800bde4e275396656df9781f0d84f4b6e22f0c",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000170",
+      "file": "../dpbench/docs/01030000000170.pdf",
+      "truth": "../dpbench/truth/01030000000170.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000170",
+      "sha256": "4d5b682effaf9580928a7073980e3916687d168238bc96b6c17222f747eacde6",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000177",
+      "file": "../dpbench/docs/01030000000177.pdf",
+      "truth": "../dpbench/truth/01030000000177.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-figure",
+        "has-footer",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000177",
+      "sha256": "fbee4ae063533d20dc7339a3ffa2412d58504af06420fe15054657c87ed81a79",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000180",
+      "file": "../dpbench/docs/01030000000180.pdf",
+      "truth": "../dpbench/truth/01030000000180.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000180",
+      "sha256": "4b5f23f97fd273cacb8de95fc1799ed4dc4d5c15e9ed86d707cdf4be53eb7c7c",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000181",
+      "file": "../dpbench/docs/01030000000181.pdf",
+      "truth": "../dpbench/truth/01030000000181.md",
+      "pages": 1,
+      "category": "list",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-heading1",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000181",
+      "sha256": "92ba5d5f6f6e627a3e9ddc00bcdd31b9c2c047e0461fff6c8fa08894a68b72da",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000187",
+      "file": "../dpbench/docs/01030000000187.pdf",
+      "truth": "../dpbench/truth/01030000000187.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-heading1",
+        "has-paragraph",
+        "has-table",
+        "merged-cells"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000187",
+      "sha256": "29d883eb26e7b9d08250b4bab1c51092d74e310e6acfa955f8fe28f1008accf5",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000191",
+      "file": "../dpbench/docs/01030000000191.pdf",
+      "truth": "../dpbench/truth/01030000000191.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000191",
+      "sha256": "196876d21778214061c0d970de83cf37204a90e0f58c3da7e9f3c8c7e803b770",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000195",
+      "file": "../dpbench/docs/01030000000195.pdf",
+      "truth": "../dpbench/truth/01030000000195.md",
+      "pages": 1,
+      "category": "list",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000195",
+      "sha256": "2b12f031b9b42e6f54b76b7d4666df76b7c8410a676d63b0ad2afdb40388d623",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "dpbench/01030000000199",
+      "file": "../dpbench/docs/01030000000199.pdf",
+      "truth": "../dpbench/truth/01030000000199.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-chart",
+        "has-footer",
+        "has-footnote",
+        "has-header",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000199",
+      "sha256": "8bfb767df3506b4bd76b31e8823f59714c7abfc2a34ab11018e66fa2d9b5ed29",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "olmocr/headers_footers_0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processe",
+      "file": "../olmocr/docs/headers_footers_0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processe.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "headers_footers",
+      "tags": [
+        "absent-only",
+        "headers_footers",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/headers_footers_0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processe.json",
+      "source_id": "headers_footers_0678963a20825044fed5401fedb69bc7a3e54de6_page_2_processe",
+      "sha256": "8e18fb75fa2e7c7a6300ac7ca267ddc231a6c972b5f6b8c5769e2abe592cf7bd",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/headers_footers_077c9c1f4595af86a2efb0f5b4209350fea8a9b6_page_2_processe",
+      "file": "../olmocr/docs/headers_footers_077c9c1f4595af86a2efb0f5b4209350fea8a9b6_page_2_processe.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "headers_footers",
+      "tags": [
+        "absent-only",
+        "headers_footers",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/headers_footers_077c9c1f4595af86a2efb0f5b4209350fea8a9b6_page_2_processe.json",
+      "source_id": "headers_footers_077c9c1f4595af86a2efb0f5b4209350fea8a9b6_page_2_processe",
+      "sha256": "cb8c28d059173437319d0fe53c2c2f2111afbb400388116005c1ec3ea42a2122",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/headers_footers_0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processe",
+      "file": "../olmocr/docs/headers_footers_0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processe.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "headers_footers",
+      "tags": [
+        "absent-only",
+        "headers_footers",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/headers_footers_0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processe.json",
+      "source_id": "headers_footers_0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processe",
+      "sha256": "8e0904a823bc4c8beacbdf5702a143c4abf06b4a7864b4e1eb2bf83d39040999",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/headers_footers_3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4",
+      "file": "../olmocr/docs/headers_footers_3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "headers_footers",
+      "tags": [
+        "absent-only",
+        "headers_footers",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/headers_footers_3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4.json",
+      "source_id": "headers_footers_3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4",
+      "sha256": "6899420686a9fa190b4c0f8a70f474eeca112355fff6754172402a042f3c6313",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/headers_footers_8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21",
+      "file": "../olmocr/docs/headers_footers_8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "headers_footers",
+      "tags": [
+        "absent-only",
+        "headers_footers",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/headers_footers_8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21.json",
+      "source_id": "headers_footers_8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21",
+      "sha256": "2692f89d8cd5c3a034074bcece40f99a5a5d2ea121150b9965e81edb834c5358",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/headers_footers_c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8",
+      "file": "../olmocr/docs/headers_footers_c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "headers_footers",
+      "tags": [
+        "absent-only",
+        "headers_footers",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/headers_footers_c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8.json",
+      "source_id": "headers_footers_c637044e100f992dca35ef32f58bdc3ee726b0f5_page_8",
+      "sha256": "5a699bed37930440d81707e43e95e9315fde915101e80df505a7753f76ee81cc",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/headers_footers_dd9587961183e62e57bbcb75b084ca4066a726c2_page_3",
+      "file": "../olmocr/docs/headers_footers_dd9587961183e62e57bbcb75b084ca4066a726c2_page_3.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "headers_footers",
+      "tags": [
+        "absent-only",
+        "headers_footers",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/headers_footers_dd9587961183e62e57bbcb75b084ca4066a726c2_page_3.json",
+      "source_id": "headers_footers_dd9587961183e62e57bbcb75b084ca4066a726c2_page_3",
+      "sha256": "07fefa9ad9321dbe55a287aa8d6337a49074fb7b2782c71f88921d4300dfcc29",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/headers_footers_ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2",
+      "file": "../olmocr/docs/headers_footers_ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "headers_footers",
+      "tags": [
+        "absent-only",
+        "headers_footers",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/headers_footers_ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2.json",
+      "source_id": "headers_footers_ed107236f9863d65c41f29cd8e8091ba76cc61d8_page_2",
+      "sha256": "ed230986a5b92a3f239dc51c4fd63ba9f93097f9ed9704ffb597ff9bd18dfc04",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/long_tiny_text_10a_pg1",
+      "file": "../olmocr/docs/long_tiny_text_10a_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "long_tiny_text",
+      "tags": [
+        "long_tiny_text",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/long_tiny_text_10a_pg1.json",
+      "source_id": "long_tiny_text_10a_pg1",
+      "sha256": "51ce319150dce95866fca4852c8d966bf46530b933a9eed24b6359492adb7b0f",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/long_tiny_text_11_pg161_pg1",
+      "file": "../olmocr/docs/long_tiny_text_11_pg161_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "long_tiny_text",
+      "tags": [
+        "long_tiny_text",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/long_tiny_text_11_pg161_pg1.json",
+      "source_id": "long_tiny_text_11_pg161_pg1",
+      "sha256": "2686ac285dde9c73897d19e3f8a8b86de654e9a7427a160c24e139492788ca41",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/long_tiny_text_12_pg71_pg1",
+      "file": "../olmocr/docs/long_tiny_text_12_pg71_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "long_tiny_text",
+      "tags": [
+        "long_tiny_text",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/long_tiny_text_12_pg71_pg1.json",
+      "source_id": "long_tiny_text_12_pg71_pg1",
+      "sha256": "4b96cca0806d0c8df1f8df40546fc06bd1aeeb2b83a20c5c35dea6c98a082773",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/long_tiny_text_13_pg566_pg1",
+      "file": "../olmocr/docs/long_tiny_text_13_pg566_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "long_tiny_text",
+      "tags": [
+        "long_tiny_text",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/long_tiny_text_13_pg566_pg1.json",
+      "source_id": "long_tiny_text_13_pg566_pg1",
+      "sha256": "4dde41522969f36cd4ea75c696091e9b8a942da2f07e6fc5eb1d6f23e540395a",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/long_tiny_text_15c_pg1",
+      "file": "../olmocr/docs/long_tiny_text_15c_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "long_tiny_text",
+      "tags": [
+        "long_tiny_text",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/long_tiny_text_15c_pg1.json",
+      "source_id": "long_tiny_text_15c_pg1",
+      "sha256": "21789dd264ebc85d9f97a581fca014299871f7245d767d423b5cab12e57c850f",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/long_tiny_text_16b_pg1",
+      "file": "../olmocr/docs/long_tiny_text_16b_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "long_tiny_text",
+      "tags": [
+        "long_tiny_text",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/long_tiny_text_16b_pg1.json",
+      "source_id": "long_tiny_text_16b_pg1",
+      "sha256": "5e87fd6fde5a703147abf5968ef4cf251228422b63bb1912d0b6654857920228",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/long_tiny_text_20_pg33_pg1",
+      "file": "../olmocr/docs/long_tiny_text_20_pg33_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "long_tiny_text",
+      "tags": [
+        "long_tiny_text",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/long_tiny_text_20_pg33_pg1.json",
+      "source_id": "long_tiny_text_20_pg33_pg1",
+      "sha256": "4c7a13da39505dcc9a3a77cbe9bf76c1d42223445ce3895fcf90d06d83e2526e",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/long_tiny_text_20_pg49_pg1",
+      "file": "../olmocr/docs/long_tiny_text_20_pg49_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "long_tiny_text",
+      "tags": [
+        "long_tiny_text",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/long_tiny_text_20_pg49_pg1.json",
+      "source_id": "long_tiny_text_20_pg49_pg1",
+      "sha256": "eaa9e90d92d86c4fff1d2375a234cbaeb2e8643c98a959dac0a5d60ae4afa860",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/multi_column_019a8841dddeb304774ba62a9f5d8dccb43d_page_2_pg1",
+      "file": "../olmocr/docs/multi_column_019a8841dddeb304774ba62a9f5d8dccb43d_page_2_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "multi_column",
+      "tags": [
+        "multi_column",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/multi_column_019a8841dddeb304774ba62a9f5d8dccb43d_page_2_pg1.json",
+      "source_id": "multi_column_019a8841dddeb304774ba62a9f5d8dccb43d_page_2_pg1",
+      "sha256": "c5c1c12b0f9acba66a482c366a02ef1de9d6c5dd8f1bea49b167d35e000599ac",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/multi_column_031a888e402c82517f213222ae97147dd7dc_page_1_pg1",
+      "file": "../olmocr/docs/multi_column_031a888e402c82517f213222ae97147dd7dc_page_1_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "multi_column",
+      "tags": [
+        "multi_column",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/multi_column_031a888e402c82517f213222ae97147dd7dc_page_1_pg1.json",
+      "source_id": "multi_column_031a888e402c82517f213222ae97147dd7dc_page_1_pg1",
+      "sha256": "3085bc03ed3c4b24cc9d1399323a9e780c13b83fa46ea571f0a1e781f67f23a9",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/multi_column_04e85af12e0a127ebe1a8875250b0f3ab052_page_1_pg1",
+      "file": "../olmocr/docs/multi_column_04e85af12e0a127ebe1a8875250b0f3ab052_page_1_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "multi_column",
+      "tags": [
+        "multi_column",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/multi_column_04e85af12e0a127ebe1a8875250b0f3ab052_page_1_pg1.json",
+      "source_id": "multi_column_04e85af12e0a127ebe1a8875250b0f3ab052_page_1_pg1",
+      "sha256": "cf90889c05077e81d2bc20b8fda4decc468c46f4bc532c87f369ed30191abdac",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/multi_column_06c4bdabd51644320829c59e425e2350493b_page_7_pg1",
+      "file": "../olmocr/docs/multi_column_06c4bdabd51644320829c59e425e2350493b_page_7_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "multi_column",
+      "tags": [
+        "multi_column",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/multi_column_06c4bdabd51644320829c59e425e2350493b_page_7_pg1.json",
+      "source_id": "multi_column_06c4bdabd51644320829c59e425e2350493b_page_7_pg1",
+      "sha256": "8c70bfe06a679e7a7520cd6c648a097ca6e771cdcf67fa895e8b0b1bafb25392",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/multi_column_06df5e530c2ccb0310a3205586a37d4b9b7d_page_5_pg1",
+      "file": "../olmocr/docs/multi_column_06df5e530c2ccb0310a3205586a37d4b9b7d_page_5_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "multi_column",
+      "tags": [
+        "multi_column",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/multi_column_06df5e530c2ccb0310a3205586a37d4b9b7d_page_5_pg1.json",
+      "source_id": "multi_column_06df5e530c2ccb0310a3205586a37d4b9b7d_page_5_pg1",
+      "sha256": "151a7535870bf2bb1174d31b49fe692065200a90eafb63926faaaea4348caf47",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/multi_column_075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13_pg1",
+      "file": "../olmocr/docs/multi_column_075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "multi_column",
+      "tags": [
+        "multi_column",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/multi_column_075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13_pg1.json",
+      "source_id": "multi_column_075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13_pg1",
+      "sha256": "c7ed8a3319926107ab5b79103b203f565fbb32ed161aac380a30e1c9db28bc4d",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/multi_column_09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pg1",
+      "file": "../olmocr/docs/multi_column_09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "multi_column",
+      "tags": [
+        "multi_column",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/multi_column_09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pg1.json",
+      "source_id": "multi_column_09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pg1",
+      "sha256": "9ef1f05e6512ccfd8e17848a1a38904c5e05f077024b6233c0e1440815c70357",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/multi_column_0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pg1",
+      "file": "../olmocr/docs/multi_column_0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "multi_column",
+      "tags": [
+        "multi_column",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/multi_column_0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pg1.json",
+      "source_id": "multi_column_0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pg1",
+      "sha256": "5be9cb638f3d7714f21765f75f2bdfa94d9bced81ff24f7014a958a3336b8207",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/old_scans_11",
+      "file": "../olmocr/docs/old_scans_11.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "old_scans",
+      "tags": [
+        "old_scans",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/old_scans_11.json",
+      "source_id": "old_scans_11",
+      "sha256": "42655b09a4b053665df7401a857ecf9538791524c71db79cc431c646848dc4aa",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/old_scans_16",
+      "file": "../olmocr/docs/old_scans_16.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "old_scans",
+      "tags": [
+        "old_scans",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/old_scans_16.json",
+      "source_id": "old_scans_16",
+      "sha256": "488d335e0b5a6d60aed3826f75382f28e3131139447affe2df6d94281659fe76",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/old_scans_23",
+      "file": "../olmocr/docs/old_scans_23.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "old_scans",
+      "tags": [
+        "old_scans",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/old_scans_23.json",
+      "source_id": "old_scans_23",
+      "sha256": "1b988904cf11363bbc6b7a90b9d823f0874eb8a4948b31a629c93ba4d49ed7a1",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/old_scans_28",
+      "file": "../olmocr/docs/old_scans_28.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "old_scans",
+      "tags": [
+        "old_scans",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/old_scans_28.json",
+      "source_id": "old_scans_28",
+      "sha256": "b68f569467f801b5e72d8887588f5d41fb1da6b0cd4de0602de183db6b1dbca0",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/old_scans_29",
+      "file": "../olmocr/docs/old_scans_29.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "old_scans",
+      "tags": [
+        "old_scans",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/old_scans_29.json",
+      "source_id": "old_scans_29",
+      "sha256": "bd91de4c922fe0a4fc9db6ad7d20f6e2806905738cec5563c84f31d06922ee51",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/old_scans_31",
+      "file": "../olmocr/docs/old_scans_31.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "old_scans",
+      "tags": [
+        "old_scans",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/old_scans_31.json",
+      "source_id": "old_scans_31",
+      "sha256": "e10a3c771646dc3fe3f9762863cfd04be5d6587d2fabd0e36e11d37d158ff001",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/old_scans_41",
+      "file": "../olmocr/docs/old_scans_41.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "old_scans",
+      "tags": [
+        "old_scans",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/old_scans_41.json",
+      "source_id": "old_scans_41",
+      "sha256": "d4a7354d068d0684bcbe01422a9dabd5799fef621a66de294c05b6a6298f9a98",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/old_scans_96",
+      "file": "../olmocr/docs/old_scans_96.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "old_scans",
+      "tags": [
+        "old_scans",
+        "olmocr",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/old_scans_96.json",
+      "source_id": "old_scans_96",
+      "sha256": "71b5897bc116aad5ffdb0b7740402b27fa0190c37743318d4dc168d2ec90c821",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/table_tests_0953927d7a3f032c46a2e6d0ead837398a0b_pg20",
+      "file": "../olmocr/docs/table_tests_0953927d7a3f032c46a2e6d0ead837398a0b_pg20.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "table_tests",
+      "tags": [
+        "olmocr",
+        "rules",
+        "table_tests"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/table_tests_0953927d7a3f032c46a2e6d0ead837398a0b_pg20.json",
+      "source_id": "table_tests_0953927d7a3f032c46a2e6d0ead837398a0b_pg20",
+      "sha256": "7d4cf08f9a8a33ec118cbd3f3afc5a811b23a1d61d0ec18bd620a1d10a85447a",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/table_tests_1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_pg1",
+      "file": "../olmocr/docs/table_tests_1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "table_tests",
+      "tags": [
+        "olmocr",
+        "rules",
+        "table_tests"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/table_tests_1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_pg1.json",
+      "source_id": "table_tests_1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_pg1",
+      "sha256": "0c25eed27c23cfaf2769479b39a83b7e977cf0fd031cac435769dfc05dbfe8bd",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/table_tests_25789807b5c2a0902bd441a2800606d5dfdd_pg13",
+      "file": "../olmocr/docs/table_tests_25789807b5c2a0902bd441a2800606d5dfdd_pg13.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "table_tests",
+      "tags": [
+        "olmocr",
+        "rules",
+        "table_tests"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/table_tests_25789807b5c2a0902bd441a2800606d5dfdd_pg13.json",
+      "source_id": "table_tests_25789807b5c2a0902bd441a2800606d5dfdd_pg13",
+      "sha256": "b292e70ce3ba82c48ee9ff3bb07af02e72db15cd18bb59c007ec728ceb7968a1",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/table_tests_2d54e996d1247bd36695d872863eefebd8f8_pg4",
+      "file": "../olmocr/docs/table_tests_2d54e996d1247bd36695d872863eefebd8f8_pg4.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "table_tests",
+      "tags": [
+        "olmocr",
+        "rules",
+        "table_tests"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/table_tests_2d54e996d1247bd36695d872863eefebd8f8_pg4.json",
+      "source_id": "table_tests_2d54e996d1247bd36695d872863eefebd8f8_pg4",
+      "sha256": "479064807b36879814b43acad013fbc72acc8a16c8bdefcc47fab2a5b59af16f",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/table_tests_371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_pg1",
+      "file": "../olmocr/docs/table_tests_371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "table_tests",
+      "tags": [
+        "olmocr",
+        "rules",
+        "table_tests"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/table_tests_371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_pg1.json",
+      "source_id": "table_tests_371cfed48826fdffb18d9e1d5a9010ab0ccf_pg10_pg1",
+      "sha256": "4afe6594c1294de4167378a5008ed7de6f76061693059fe2c36a037f1b3e8567",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/table_tests_451680975a5b0e832d8fc8650189083384ce_pg10_pg1",
+      "file": "../olmocr/docs/table_tests_451680975a5b0e832d8fc8650189083384ce_pg10_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "table_tests",
+      "tags": [
+        "olmocr",
+        "rules",
+        "table_tests"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/table_tests_451680975a5b0e832d8fc8650189083384ce_pg10_pg1.json",
+      "source_id": "table_tests_451680975a5b0e832d8fc8650189083384ce_pg10_pg1",
+      "sha256": "4df50fd2505854321abec83aeaefc82ec5f2801acbe6a4bd62e91f71337c6c5e",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/table_tests_4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1",
+      "file": "../olmocr/docs/table_tests_4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "table_tests",
+      "tags": [
+        "olmocr",
+        "rules",
+        "table_tests"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/table_tests_4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1.json",
+      "source_id": "table_tests_4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1",
+      "sha256": "833c71206d31fdd10b71d9cdc855c266c79b65267f5e44bf769e3d8687911db3",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "olmocr/table_tests_dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_pg1",
+      "file": "../olmocr/docs/table_tests_dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_pg1.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "table_tests",
+      "tags": [
+        "olmocr",
+        "rules",
+        "table_tests"
+      ],
+      "kind": "rules",
+      "rules": "../olmocr/rules/table_tests_dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_pg1.json",
+      "source_id": "table_tests_dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_pg1",
+      "sha256": "9f8c859965102a072dfb9aa68a42f19073238b91fef76d3a46e55680b1128f1c",
+      "license": "ODC-By-1.0",
+      "attribution": "olmOCR-bench (Allen Institute for AI) — Poznanski et al., 'olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models', arXiv:2502.18443 · dataset https://huggingface.co/datasets/allenai/olmOCR-bench · ODC-BY-1.0, for research and educational use under AI2's Responsible Use Guidelines. Each page keeps its original source (`source_url`)."
+    },
+    {
+      "id": "omnidocbench/book_zh_gb115041989_extracted_page_9",
+      "file": "../omnidocbench/docs/book_zh_gb115041989_extracted_page_9.png",
+      "truth": "../omnidocbench/truth/book_zh_gb115041989_extracted_page_9.md",
+      "pages": 1,
+      "category": "book",
+      "tags": [
+        "book",
+        "fetch-required",
+        "has-formula",
+        "has-table",
+        "issue-table_fewer_line",
+        "issue-table_horizontal",
+        "issue-table_with_formula",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "book_zh_gb115041989_extracted_page_9",
+      "sha256": "b55dbfee10d5439040436783c269dd55fa61aef2cc21944d98b942ec591b4c14",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/color_textbook_zhonggaokao_ket_ketket25_10_04ket_ket_page_003",
+      "file": "../omnidocbench/docs/color_textbook_zhonggaokao_ket_ketket25_10_04ket_ket_page_003.png",
+      "truth": "../omnidocbench/truth/color_textbook_zhonggaokao_ket_ketket25_10_04ket_ket_page_003.md",
+      "pages": 1,
+      "category": "colorful_textbook",
+      "tags": [
+        "colorful_textbook",
+        "fetch-required",
+        "lang-english",
+        "layout-double_column",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "color_textbook_zhonggaokao_ket_ketket25_10_04ket_ket_page_003",
+      "sha256": "c3c359458792507d1118ee16c0ceef7cd504dd902111506446ad72173808e591",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/color_textbook_zhonggaokao_ket_ketket25_10_05part7_part7_page_001",
+      "file": "../omnidocbench/docs/color_textbook_zhonggaokao_ket_ketket25_10_05part7_part7_page_001.png",
+      "truth": "../omnidocbench/truth/color_textbook_zhonggaokao_ket_ketket25_10_05part7_part7_page_001.md",
+      "pages": 1,
+      "category": "colorful_textbook",
+      "tags": [
+        "colorful_textbook",
+        "fetch-required",
+        "lang-english",
+        "layout-other_layout",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "color_textbook_zhonggaokao_ket_ketket25_10_05part7_part7_page_001",
+      "sha256": "200dcd5d29a8e69b75601e63546fad54418414a0d621b8eb15b190c686b1b914",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/eastmoney_5f75d8df19ab34c706ae823d8ed54f845b6a693e31c0fae19b16cdd94c32a6",
+      "file": "../omnidocbench/docs/eastmoney_5f75d8df19ab34c706ae823d8ed54f845b6a693e31c0fae19b16cdd94c32a6.jpg",
+      "truth": "../omnidocbench/truth/eastmoney_5f75d8df19ab34c706ae823d8ed54f845b6a693e31c0fae19b16cdd94c32a6.md",
+      "pages": 1,
+      "category": "research_report",
+      "tags": [
+        "fetch-required",
+        "has-table",
+        "issue-table_fewer_line",
+        "issue-table_horizontal",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "omnidocbench",
+        "research_report",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "eastmoney_5f75d8df19ab34c706ae823d8ed54f845b6a693e31c0fae19b16cdd94c32a6",
+      "sha256": "9bb03b67153027cc781a3f65fe6e6d0c46c2f5f4918314b7ba9f7b495ec47bc6",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/exam_paper_2016_page_015",
+      "file": "../omnidocbench/docs/exam_paper_2016_page_015.png",
+      "truth": "../omnidocbench/truth/exam_paper_2016_page_015.md",
+      "pages": 1,
+      "category": "exam_paper",
+      "tags": [
+        "exam_paper",
+        "fetch-required",
+        "lang-english",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "exam_paper_2016_page_015",
+      "sha256": "5314538abb2bca3b5e02c18ccf7e284f81998afe725c4beb4396f7326af23b4a",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/jiaocai_jiaocai_en_595",
+      "file": "../omnidocbench/docs/jiaocai_jiaocai_en_595.jpg",
+      "truth": "../omnidocbench/truth/jiaocai_jiaocai_en_595.md",
+      "pages": 1,
+      "category": "colorful_textbook",
+      "tags": [
+        "colorful_textbook",
+        "fetch-required",
+        "has-table",
+        "issue-table_horizontal",
+        "issue-table_wireless_line",
+        "issue-watermark",
+        "lang-english",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "jiaocai_jiaocai_en_595",
+      "sha256": "148f45434605998aca3510e69895f34e3a4cd7168bd46317c6fa01cd1ba7ac4a",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/jiaocaineedrop_5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e",
+      "file": "../omnidocbench/docs/jiaocaineedrop_5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e.jpg",
+      "truth": "../omnidocbench/truth/jiaocaineedrop_5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e.md",
+      "pages": 1,
+      "category": "magazine",
+      "tags": [
+        "fetch-required",
+        "issue-colorful_backgroud",
+        "lang-english",
+        "layout-other_layout",
+        "magazine",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "jiaocaineedrop_5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e",
+      "sha256": "c36e65ab985b0392b96f653fa224d8fdcc986575fbde9936d0a5504a72dd579e",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/jiaocaineedrop_jiaocai_needrop_en_108",
+      "file": "../omnidocbench/docs/jiaocaineedrop_jiaocai_needrop_en_108.jpg",
+      "truth": "../omnidocbench/truth/jiaocaineedrop_jiaocai_needrop_en_108.md",
+      "pages": 1,
+      "category": "colorful_textbook",
+      "tags": [
+        "colorful_textbook",
+        "fetch-required",
+        "issue-colorful_backgroud",
+        "issue-fuzzy_scan",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "jiaocaineedrop_jiaocai_needrop_en_108",
+      "sha256": "2dc2ef0617db9bf2c22f7f182ef22c4cd01111e0502dbc2fcec78148b68be5d2",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/jiaocaineedrop_jiaocai_needrop_en_1271",
+      "file": "../omnidocbench/docs/jiaocaineedrop_jiaocai_needrop_en_1271.jpg",
+      "truth": "../omnidocbench/truth/jiaocaineedrop_jiaocai_needrop_en_1271.md",
+      "pages": 1,
+      "category": "exam_paper",
+      "tags": [
+        "exam_paper",
+        "fetch-required",
+        "has-table",
+        "issue-table_full_line",
+        "issue-table_horizontal",
+        "issue-table_with_formula",
+        "lang-simplified_chinese",
+        "layout-double_column",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "jiaocaineedrop_jiaocai_needrop_en_1271",
+      "sha256": "12ebba29879dae79e12e5d0b08fc371ffdbc923fc771b92d8677f9e4edf4f304",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/jiaocaineedrop_jiaocai_needrop_en_14",
+      "file": "../omnidocbench/docs/jiaocaineedrop_jiaocai_needrop_en_14.jpg",
+      "truth": "../omnidocbench/truth/jiaocaineedrop_jiaocai_needrop_en_14.md",
+      "pages": 1,
+      "category": "exam_paper",
+      "tags": [
+        "exam_paper",
+        "fetch-required",
+        "issue-watermark",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "jiaocaineedrop_jiaocai_needrop_en_14",
+      "sha256": "910d138724d2eab08e50f69c4ee5fa03f4324a01cccfed5e79551b1fe057e6f7",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/magazine_theeconomist_2023_11_18_page_082",
+      "file": "../omnidocbench/docs/magazine_theeconomist_2023_11_18_page_082.png",
+      "truth": "../omnidocbench/truth/magazine_theeconomist_2023_11_18_page_082.md",
+      "pages": 1,
+      "category": "magazine",
+      "tags": [
+        "fetch-required",
+        "lang-english",
+        "layout-other_layout",
+        "magazine",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "magazine_theeconomist_2023_11_18_page_082",
+      "sha256": "5962d372b626732e758ab6d10bd0ffe76dfa4e7fab520c524c2c439b183fb967",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/newspaper_2a6b4fa088699701a6fa9ccecfb5c25d_10",
+      "file": "../omnidocbench/docs/newspaper_2a6b4fa088699701a6fa9ccecfb5c25d_10.jpg",
+      "truth": "../omnidocbench/truth/newspaper_2a6b4fa088699701a6fa9ccecfb5c25d_10.md",
+      "pages": 1,
+      "category": "newspaper",
+      "tags": [
+        "fetch-required",
+        "lang-english",
+        "layout-three_column",
+        "newspaper",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "newspaper_2a6b4fa088699701a6fa9ccecfb5c25d_10",
+      "sha256": "55ac57e573ff05d630cba3c47402bf65ff671f87e3fb74dd278ffa3b373ee470",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/newspaper_75bb60c3be9959e1be400d6b8281fea1_1",
+      "file": "../omnidocbench/docs/newspaper_75bb60c3be9959e1be400d6b8281fea1_1.jpg",
+      "truth": "../omnidocbench/truth/newspaper_75bb60c3be9959e1be400d6b8281fea1_1.md",
+      "pages": 1,
+      "category": "newspaper",
+      "tags": [
+        "fetch-required",
+        "lang-simplified_chinese",
+        "layout-other_layout",
+        "newspaper",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "newspaper_75bb60c3be9959e1be400d6b8281fea1_1",
+      "sha256": "6af2d6ba2b5e8630df770bfb695123316fdd4cb79b9e8fcf436c32d2939d0ab2",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/newspaper_d84e38031cf03d3fd4649910cf0ecce1_1",
+      "file": "../omnidocbench/docs/newspaper_d84e38031cf03d3fd4649910cf0ecce1_1.jpg",
+      "truth": "../omnidocbench/truth/newspaper_d84e38031cf03d3fd4649910cf0ecce1_1.md",
+      "pages": 1,
+      "category": "newspaper",
+      "tags": [
+        "fetch-required",
+        "lang-simplified_chinese",
+        "layout-other_layout",
+        "newspaper",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "newspaper_d84e38031cf03d3fd4649910cf0ecce1_1",
+      "sha256": "f8c873165b20379487eba3f04aba2cdc85776789c12a55617d4bd765ce271ed7",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/newspaper_ny_daily_news_august_1_magazinesclubnew_page_020",
+      "file": "../omnidocbench/docs/newspaper_ny_daily_news_august_1_magazinesclubnew_page_020.png",
+      "truth": "../omnidocbench/truth/newspaper_ny_daily_news_august_1_magazinesclubnew_page_020.md",
+      "pages": 1,
+      "category": "newspaper",
+      "tags": [
+        "fetch-required",
+        "lang-english",
+        "layout-other_layout",
+        "newspaper",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "newspaper_ny_daily_news_august_1_magazinesclubnew_page_020",
+      "sha256": "f876fcee426da6e457a618fce137473193e9229afd6ece22f0554facd10d12f5",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/notes_1ba14cb325bc448f7201b20502ecf2b5_101",
+      "file": "../omnidocbench/docs/notes_1ba14cb325bc448f7201b20502ecf2b5_101.jpg",
+      "truth": "../omnidocbench/truth/notes_1ba14cb325bc448f7201b20502ecf2b5_101.md",
+      "pages": 1,
+      "category": "note",
+      "tags": [
+        "fetch-required",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "note",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "notes_1ba14cb325bc448f7201b20502ecf2b5_101",
+      "sha256": "28ebf1965f40868bd57a5e8ea34b66137258ddc92701f85a6751889995804636",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/notes_1ba14cb325bc448f7201b20502ecf2b5_102",
+      "file": "../omnidocbench/docs/notes_1ba14cb325bc448f7201b20502ecf2b5_102.jpg",
+      "truth": "../omnidocbench/truth/notes_1ba14cb325bc448f7201b20502ecf2b5_102.md",
+      "pages": 1,
+      "category": "note",
+      "tags": [
+        "fetch-required",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "note",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "notes_1ba14cb325bc448f7201b20502ecf2b5_102",
+      "sha256": "014c054571be63f642a3ba042731a34a8483f6c05f5cd7a4ded6ec8b94f33b04",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/notes_f7f010b78016aeebd76e56d9283eb67f_30",
+      "file": "../omnidocbench/docs/notes_f7f010b78016aeebd76e56d9283eb67f_30.jpg",
+      "truth": "../omnidocbench/truth/notes_f7f010b78016aeebd76e56d9283eb67f_30.md",
+      "pages": 1,
+      "category": "note",
+      "tags": [
+        "fetch-required",
+        "lang-en_ch_mixed",
+        "layout-single_column",
+        "note",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "notes_f7f010b78016aeebd76e56d9283eb67f_30",
+      "sha256": "d33c0f29151822376ce9df3d3576fdd1ada30f39d6e6e5e24ae4b69a739da364",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/notes_f7f010b78016aeebd76e56d9283eb67f_45",
+      "file": "../omnidocbench/docs/notes_f7f010b78016aeebd76e56d9283eb67f_45.jpg",
+      "truth": "../omnidocbench/truth/notes_f7f010b78016aeebd76e56d9283eb67f_45.md",
+      "pages": 1,
+      "category": "note",
+      "tags": [
+        "fetch-required",
+        "lang-en_ch_mixed",
+        "layout-single_column",
+        "note",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "notes_f7f010b78016aeebd76e56d9283eb67f_45",
+      "sha256": "f3c74b69e2586a4c3f01a732f167d879c05fbfa4420e8ff2f7f114ef29fbb443",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_07088b2f_f9d6_4c38_9c97_d7f98bc3d556",
+      "file": "../omnidocbench/docs/page_07088b2f_f9d6_4c38_9c97_d7f98bc3d556.png",
+      "truth": "../omnidocbench/truth/page_07088b2f_f9d6_4c38_9c97_d7f98bc3d556.md",
+      "pages": 1,
+      "category": "historical_document",
+      "tags": [
+        "fetch-required",
+        "historical_document",
+        "issue-fuzzy_content",
+        "issue-geometric_deformation",
+        "lang-traditional_chinese",
+        "layout-other_layout",
+        "omnidocbench",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_07088b2f_f9d6_4c38_9c97_d7f98bc3d556",
+      "sha256": "15a13b0cb26a2e25929287f8532001a2b958bc9e0c71ea20ce345c86881bb882",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_0b011030_84e4_49e3_adfb_437c96b9947d",
+      "file": "../omnidocbench/docs/page_0b011030_84e4_49e3_adfb_437c96b9947d.png",
+      "truth": "../omnidocbench/truth/page_0b011030_84e4_49e3_adfb_437c96b9947d.md",
+      "pages": 1,
+      "category": "academic_literature",
+      "tags": [
+        "academic_literature",
+        "fetch-required",
+        "lang-en_ch_mixed",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_0b011030_84e4_49e3_adfb_437c96b9947d",
+      "sha256": "34c1fe20597fd1f6a59eca845e70ab4c11ddccd33d01265ad6365996f1335b5e",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_0b772bee_71ec_4d4a_a406_d7691b1a6e86",
+      "file": "../omnidocbench/docs/page_0b772bee_71ec_4d4a_a406_d7691b1a6e86.png",
+      "truth": "../omnidocbench/truth/page_0b772bee_71ec_4d4a_a406_d7691b1a6e86.md",
+      "pages": 1,
+      "category": "magazine",
+      "tags": [
+        "fetch-required",
+        "issue-colorful_backgroud",
+        "lang-other",
+        "layout-other_layout",
+        "magazine",
+        "omnidocbench",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_0b772bee_71ec_4d4a_a406_d7691b1a6e86",
+      "sha256": "eed0dce4809c134fffdcc8da2c1810d1e178269e3bf7c8cd3701cc73a8cacff2",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_1f03d0f2_1166_4b9b_9609_94bf8bfd29b2",
+      "file": "../omnidocbench/docs/page_1f03d0f2_1166_4b9b_9609_94bf8bfd29b2.png",
+      "truth": "../omnidocbench/truth/page_1f03d0f2_1166_4b9b_9609_94bf8bfd29b2.md",
+      "pages": 1,
+      "category": "academic_literature",
+      "tags": [
+        "academic_literature",
+        "fetch-required",
+        "has-table",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "merged-cells",
+        "omnidocbench",
+        "subset-table_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_1f03d0f2_1166_4b9b_9609_94bf8bfd29b2",
+      "sha256": "84935f2747c3aae7c7b78d147a902003b52f4865818063875aabdba7de290d9f",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_2d8358c5_114a_4bda_92c3_e8480d9ab082",
+      "file": "../omnidocbench/docs/page_2d8358c5_114a_4bda_92c3_e8480d9ab082.png",
+      "truth": "../omnidocbench/truth/page_2d8358c5_114a_4bda_92c3_e8480d9ab082.md",
+      "pages": 1,
+      "category": "exam_paper",
+      "tags": [
+        "exam_paper",
+        "fetch-required",
+        "lang-traditional_chinese",
+        "layout-other_layout",
+        "omnidocbench",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_2d8358c5_114a_4bda_92c3_e8480d9ab082",
+      "sha256": "7ca4e51e5c78b122ca40d3f933233adb398be4e691f59f2b740f517e71d0ad1e",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_31fb2a53_5b32_40f6_9db1_52b357f3201f",
+      "file": "../omnidocbench/docs/page_31fb2a53_5b32_40f6_9db1_52b357f3201f.png",
+      "truth": "../omnidocbench/truth/page_31fb2a53_5b32_40f6_9db1_52b357f3201f.md",
+      "pages": 1,
+      "category": "ppt2pdf",
+      "tags": [
+        "fetch-required",
+        "has-table",
+        "lang-en_ch_mixed",
+        "layout-single_column",
+        "merged-cells",
+        "omnidocbench",
+        "ppt2pdf",
+        "subset-table_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_31fb2a53_5b32_40f6_9db1_52b357f3201f",
+      "sha256": "8ae1cd0720a28630235c2806d9e8067182d7228af63c6369ab35b3e76f2adb83",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_458ab820_615f_42fe_af33_3a8fb15ad691",
+      "file": "../omnidocbench/docs/page_458ab820_615f_42fe_af33_3a8fb15ad691.png",
+      "truth": "../omnidocbench/truth/page_458ab820_615f_42fe_af33_3a8fb15ad691.md",
+      "pages": 1,
+      "category": "research_report",
+      "tags": [
+        "fetch-required",
+        "has-table",
+        "lang-english",
+        "layout-single_column",
+        "merged-cells",
+        "omnidocbench",
+        "research_report",
+        "subset-table_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_458ab820_615f_42fe_af33_3a8fb15ad691",
+      "sha256": "4ee0c19b89398647e93a49fc5b478d4b099c342c764936acd5db0b5b0b8e8d87",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_4c92c2ac_d7f7_43a5_b323_f242f31ddbf8",
+      "file": "../omnidocbench/docs/page_4c92c2ac_d7f7_43a5_b323_f242f31ddbf8.png",
+      "truth": "../omnidocbench/truth/page_4c92c2ac_d7f7_43a5_b323_f242f31ddbf8.md",
+      "pages": 1,
+      "category": "ppt2pdf",
+      "tags": [
+        "fetch-required",
+        "lang-en_ch_mixed",
+        "layout-other_layout",
+        "omnidocbench",
+        "ppt2pdf",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_4c92c2ac_d7f7_43a5_b323_f242f31ddbf8",
+      "sha256": "f654cccee066220496049d056c40c27bda9a333e7c7f26118af31bf1d50d5abe",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_573c437e_c309_4483_a038_ef2f440b104a",
+      "file": "../omnidocbench/docs/page_573c437e_c309_4483_a038_ef2f440b104a.png",
+      "truth": "../omnidocbench/truth/page_573c437e_c309_4483_a038_ef2f440b104a.md",
+      "pages": 1,
+      "category": "book",
+      "tags": [
+        "book",
+        "fetch-required",
+        "has-formula",
+        "has-table",
+        "lang-english",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-equation_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_573c437e_c309_4483_a038_ef2f440b104a",
+      "sha256": "482e1599683ce1a206c133f4d89d0df73c353a7d1e864de4551862315be32ace",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_8e2f7ce3_83c4_4977_b6dc_278394c4bd64",
+      "file": "../omnidocbench/docs/page_8e2f7ce3_83c4_4977_b6dc_278394c4bd64.png",
+      "truth": "../omnidocbench/truth/page_8e2f7ce3_83c4_4977_b6dc_278394c4bd64.md",
+      "pages": 1,
+      "category": "historical_document",
+      "tags": [
+        "fetch-required",
+        "historical_document",
+        "issue-geometric_deformation",
+        "lang-simplified_chinese",
+        "layout-other_layout",
+        "omnidocbench",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_8e2f7ce3_83c4_4977_b6dc_278394c4bd64",
+      "sha256": "8de82882bab67331ab537ece2c3c16e2661b5308c27753b9772a3343349542b3",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_91b20bf2_3ad5_41f4_b739_4cc4b18ab1eb",
+      "file": "../omnidocbench/docs/page_91b20bf2_3ad5_41f4_b739_4cc4b18ab1eb.png",
+      "truth": "../omnidocbench/truth/page_91b20bf2_3ad5_41f4_b739_4cc4b18ab1eb.md",
+      "pages": 1,
+      "category": "academic_literature",
+      "tags": [
+        "academic_literature",
+        "fetch-required",
+        "has-table",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-table_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_91b20bf2_3ad5_41f4_b739_4cc4b18ab1eb",
+      "sha256": "9562b12305565f26e777f4cb4bb19bb19dc279af070e6fea7c7b54c9316e8fa5",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_942ac90d_4704_43f3_9286_719c7be9e655",
+      "file": "../omnidocbench/docs/page_942ac90d_4704_43f3_9286_719c7be9e655.png",
+      "truth": "../omnidocbench/truth/page_942ac90d_4704_43f3_9286_719c7be9e655.md",
+      "pages": 1,
+      "category": "historical_document",
+      "tags": [
+        "fetch-required",
+        "historical_document",
+        "lang-traditional_chinese",
+        "layout-other_layout",
+        "omnidocbench",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_942ac90d_4704_43f3_9286_719c7be9e655",
+      "sha256": "73d6248eceac4dd6218e22237082ced988dd1fd46d917b1b87f721ce86971048",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_dad79c54_8125_4927_9988_ee1d2a139d7b",
+      "file": "../omnidocbench/docs/page_dad79c54_8125_4927_9988_ee1d2a139d7b.png",
+      "truth": "../omnidocbench/truth/page_dad79c54_8125_4927_9988_ee1d2a139d7b.md",
+      "pages": 1,
+      "category": "historical_document",
+      "tags": [
+        "fetch-required",
+        "historical_document",
+        "issue-geometric_deformation",
+        "lang-traditional_chinese",
+        "layout-other_layout",
+        "omnidocbench",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_dad79c54_8125_4927_9988_ee1d2a139d7b",
+      "sha256": "e604a10cc9e6ca8a466c0c73dd09fcc430aa6eca006ae9215822534eefceb782",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_dca64e05_1ce6_49ee_857a_9b5d05a87357",
+      "file": "../omnidocbench/docs/page_dca64e05_1ce6_49ee_857a_9b5d05a87357.png",
+      "truth": "../omnidocbench/truth/page_dca64e05_1ce6_49ee_857a_9b5d05a87357.md",
+      "pages": 1,
+      "category": "academic_literature",
+      "tags": [
+        "academic_literature",
+        "fetch-required",
+        "has-table",
+        "lang-english",
+        "layout-single_column",
+        "merged-cells",
+        "omnidocbench",
+        "subset-table_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_dca64e05_1ce6_49ee_857a_9b5d05a87357",
+      "sha256": "163f1dc05deecd29663f6c44e77ece3beb3ba001067b28c290a6200299dfb340",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/page_eb7308e0_1395_4444_b6a5_9d33cc3a03b2",
+      "file": "../omnidocbench/docs/page_eb7308e0_1395_4444_b6a5_9d33cc3a03b2.png",
+      "truth": "../omnidocbench/truth/page_eb7308e0_1395_4444_b6a5_9d33cc3a03b2.md",
+      "pages": 1,
+      "category": "book",
+      "tags": [
+        "book",
+        "fetch-required",
+        "has-table",
+        "lang-en_ch_mixed",
+        "layout-single_column",
+        "omnidocbench",
+        "subset-layout_hard"
+      ],
+      "kind": "transcript",
+      "source_id": "page_eb7308e0_1395_4444_b6a5_9d33cc3a03b2",
+      "sha256": "14a16def277d00e5cc21c4fea2b07ea5df3f02e043bbf8080b9ad084e74812cd",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/ppt_baharmartonosi_page_006",
+      "file": "../omnidocbench/docs/ppt_baharmartonosi_page_006.png",
+      "truth": "../omnidocbench/truth/ppt_baharmartonosi_page_006.md",
+      "pages": 1,
+      "category": "ppt2pdf",
+      "tags": [
+        "fetch-required",
+        "lang-english",
+        "layout-other_layout",
+        "omnidocbench",
+        "ppt2pdf",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "ppt_baharmartonosi_page_006",
+      "sha256": "5643016f758e7a8d8b81aa29f50b4066c37a58dd8a56bb9818164b60fe5d2dd3",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/ppt_english_guidelines_for_humanities_students_zp199743_page_011",
+      "file": "../omnidocbench/docs/ppt_english_guidelines_for_humanities_students_zp199743_page_011.png",
+      "truth": "../omnidocbench/truth/ppt_english_guidelines_for_humanities_students_zp199743_page_011.md",
+      "pages": 1,
+      "category": "ppt2pdf",
+      "tags": [
+        "fetch-required",
+        "lang-english",
+        "layout-single_column",
+        "omnidocbench",
+        "ppt2pdf",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "ppt_english_guidelines_for_humanities_students_zp199743_page_011",
+      "sha256": "d956bd28d9aaa427fcddcabb78d537cbf57896c966a8bbf5f7c6b5772114c111",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/yanbaopptmerge_baa6d02928efcac46ccf7dfd3859de565cfb0bea918ae0ec0eed50944",
+      "file": "../omnidocbench/docs/yanbaopptmerge_baa6d02928efcac46ccf7dfd3859de565cfb0bea918ae0ec0eed50944.jpg",
+      "truth": "../omnidocbench/truth/yanbaopptmerge_baa6d02928efcac46ccf7dfd3859de565cfb0bea918ae0ec0eed50944.md",
+      "pages": 1,
+      "category": "research_report",
+      "tags": [
+        "fetch-required",
+        "has-table",
+        "issue-table_full_line",
+        "issue-table_horizontal",
+        "issue-table_span",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "merged-cells",
+        "omnidocbench",
+        "research_report",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "yanbaopptmerge_baa6d02928efcac46ccf7dfd3859de565cfb0bea918ae0ec0eed50944",
+      "sha256": "18d6e2b0db7615dc642d948c354756b9f1fa976148f268d675ede04ba87a3851",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/yanbaopptmerge_c75b0a56d8f1b31d04fbe97f776244f25f5238f6cada15fb4007f8bfb",
+      "file": "../omnidocbench/docs/yanbaopptmerge_c75b0a56d8f1b31d04fbe97f776244f25f5238f6cada15fb4007f8bfb.jpg",
+      "truth": "../omnidocbench/truth/yanbaopptmerge_c75b0a56d8f1b31d04fbe97f776244f25f5238f6cada15fb4007f8bfb.md",
+      "pages": 1,
+      "category": "research_report",
+      "tags": [
+        "fetch-required",
+        "has-table",
+        "issue-table_fewer_line",
+        "issue-table_horizontal",
+        "lang-simplified_chinese",
+        "layout-single_column",
+        "merged-cells",
+        "omnidocbench",
+        "research_report",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "yanbaopptmerge_c75b0a56d8f1b31d04fbe97f776244f25f5238f6cada15fb4007f8bfb",
+      "sha256": "a274aa22a6f5c1a650448efe5bbd98c3505c515dbe92c8e292984e5e08cc66fe",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/yanbaor2_bfe5f11c4ad2e94d966ef6801dc992816f42c9150e2be42b008c95f59713e90",
+      "file": "../omnidocbench/docs/yanbaor2_bfe5f11c4ad2e94d966ef6801dc992816f42c9150e2be42b008c95f59713e90.jpg",
+      "truth": "../omnidocbench/truth/yanbaor2_bfe5f11c4ad2e94d966ef6801dc992816f42c9150e2be42b008c95f59713e90.md",
+      "pages": 1,
+      "category": "magazine",
+      "tags": [
+        "fetch-required",
+        "issue-colorful_backgroud",
+        "lang-simplified_chinese",
+        "layout-other_layout",
+        "magazine",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "yanbaor2_bfe5f11c4ad2e94d966ef6801dc992816f42c9150e2be42b008c95f59713e90",
+      "sha256": "cfb6338b960697531fe9d7adeaf43769c04bd92453ba67ed332fccb5f4767495",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "omnidocbench/yanbaor2_ey_drug_device_combination_products_whitepaper_pdf_6",
+      "file": "../omnidocbench/docs/yanbaor2_ey_drug_device_combination_products_whitepaper_pdf_6.jpg",
+      "truth": "../omnidocbench/truth/yanbaor2_ey_drug_device_combination_products_whitepaper_pdf_6.md",
+      "pages": 1,
+      "category": "book",
+      "tags": [
+        "book",
+        "fetch-required",
+        "lang-english",
+        "layout-1andmore_column",
+        "omnidocbench",
+        "subset-v1_5"
+      ],
+      "kind": "transcript",
+      "source_id": "yanbaor2_ey_drug_device_combination_products_whitepaper_pdf_6",
+      "sha256": "45a8943826082cfe05eaa34da8f59e1720a3e2b6def70f04645849342c7935cb",
+      "license": "LicenseRef-OmniDocBench-research-only",
+      "attribution": "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · research use only, not for commercial use; not redistributed by LiteOCR."
+    },
+    {
+      "id": "parsebench/1653739079_page2",
+      "file": "../parsebench/docs/1653739079_page2.pdf",
+      "truth": "../parsebench/truth/1653739079_page2.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "1653739079_page2",
+      "sha256": "b6e78af59b811036d59dd4263ebe98277cac00647bf6e6b5ba14d686a2651466",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/222876fb_page2",
+      "file": "../parsebench/docs/222876fb_page2.pdf",
+      "truth": "../parsebench/truth/222876fb_page2.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "222876fb_page2",
+      "sha256": "277cb833db85ab0711a6feb167524eb47ce5b5099d7a38f04f09d9ff7ca6f796",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/245804406_cv_nevers_signe_ex_page10",
+      "file": "../parsebench/docs/245804406_cv_nevers_signe_ex_page10.pdf",
+      "truth": "../parsebench/truth/245804406_cv_nevers_signe_ex_page10.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "245804406_cv_nevers_signe_ex_page10",
+      "sha256": "67aadf54b040e7619fd94fdbeb862b1ebfe97b8e51f970ec250a4f1480881a89",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1",
+      "file": "../parsebench/docs/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.pdf",
+      "truth": "../parsebench/truth/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1",
+      "sha256": "0adddec3f7662792d69cefad45c26d9d0941068b6c32d54d315708d1312e6aac",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1",
+      "file": "../parsebench/docs/7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1.pdf",
+      "truth": "../parsebench/truth/7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "7b9c8208_d2be_2a81_8a15_215a9a5a26e8_page1",
+      "sha256": "cea3ed8daabdc656283653a78e79045855fd6f57081a2d658d2bdd0e639f3f7c",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/apple_10_k_page1",
+      "file": "../parsebench/docs/apple_10_k_page1.pdf",
+      "truth": "../parsebench/truth/apple_10_k_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "apple_10_k_page1",
+      "sha256": "e2c0c500996a8433217e9d274b3f8dee4d7d4e60d3d8c413e97fbebc333c6665",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/az_lic_rate_tables_2_0_v2_page47",
+      "file": "../parsebench/docs/az_lic_rate_tables_2_0_v2_page47.pdf",
+      "truth": "../parsebench/truth/az_lic_rate_tables_2_0_v2_page47.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "az_lic_rate_tables_2_0_v2_page47",
+      "sha256": "5c81a50fcbe8ec4122c924bf0adb61537eaa65cf7ce15ea375a0e55aa863d7f1",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/blackrock_funds_i_icav_annual_report_2022_page13",
+      "file": "../parsebench/docs/blackrock_funds_i_icav_annual_report_2022_page13.pdf",
+      "truth": "../parsebench/truth/blackrock_funds_i_icav_annual_report_2022_page13.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "blackrock_funds_i_icav_annual_report_2022_page13",
+      "sha256": "ee8ba1593472f452dc51d43613dbe2fd6b24d9c9e364fbe383e87256cfdfff66",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/bls_feb_2026_page14",
+      "file": "../parsebench/docs/bls_feb_2026_page14.pdf",
+      "truth": "../parsebench/truth/bls_feb_2026_page14.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "bls_feb_2026_page14",
+      "sha256": "c005cc79b03dd77a585e24a167939c8586f15bf85047e24b7ca6128014683e69",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/cinf_2006_page_93_pdf_140594_page1",
+      "file": "../parsebench/docs/cinf_2006_page_93_pdf_140594_page1.pdf",
+      "truth": "../parsebench/truth/cinf_2006_page_93_pdf_140594_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "cinf_2006_page_93_pdf_140594_page1",
+      "sha256": "5022c5b12930f45a63e12e7a8106ba70799fb8439b9c25ad428b9c8f805391a3",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/earnings_presentation_fy26_q2_page22",
+      "file": "../parsebench/docs/earnings_presentation_fy26_q2_page22.pdf",
+      "truth": "../parsebench/truth/earnings_presentation_fy26_q2_page22.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "earnings_presentation_fy26_q2_page22",
+      "sha256": "0f240b9484878e4fad98533f3774ff18cb99b37e89702f86a5ce1104c011dfe5",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/home_depot_10_k_unrestricted_page106",
+      "file": "../parsebench/docs/home_depot_10_k_unrestricted_page106.pdf",
+      "truth": "../parsebench/truth/home_depot_10_k_unrestricted_page106.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "home_depot_10_k_unrestricted_page106",
+      "sha256": "ee9fee8a92769a788043ea9467df0d70b0bb2a44754b7fde323cf9e0ceda9985",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/it_2009_page_74_pdf_78635_page1",
+      "file": "../parsebench/docs/it_2009_page_74_pdf_78635_page1.pdf",
+      "truth": "../parsebench/truth/it_2009_page_74_pdf_78635_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "it_2009_page_74_pdf_78635_page1",
+      "sha256": "e34b6a5f9d8175e283c268b8d9574dfd2200ca292adf7ee35f561fa0699d5e1f",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/jnpr_2010_page_167_pdf_111113_page1",
+      "file": "../parsebench/docs/jnpr_2010_page_167_pdf_111113_page1.pdf",
+      "truth": "../parsebench/truth/jnpr_2010_page_167_pdf_111113_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "jnpr_2010_page_167_pdf_111113_page1",
+      "sha256": "e16253797891ffb81573bd90a79c23e94fdd37054060622224e461df6ed13c30",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/jnpr_2011_page_82_pdf_110673_page1",
+      "file": "../parsebench/docs/jnpr_2011_page_82_pdf_110673_page1.pdf",
+      "truth": "../parsebench/truth/jnpr_2011_page_82_pdf_110673_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "jnpr_2011_page_82_pdf_110673_page1",
+      "sha256": "cb956bf00c7efb0a2639667121f9d240e31c3f6c2a17e940c00af065b34135bc",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/jnpr_2018_page_212_pdf_110717_page1",
+      "file": "../parsebench/docs/jnpr_2018_page_212_pdf_110717_page1.pdf",
+      "truth": "../parsebench/truth/jnpr_2018_page_212_pdf_110717_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "jnpr_2018_page_212_pdf_110717_page1",
+      "sha256": "604effa798683d16acf37b6ad137cfff8dd05433f491c741202ce85e2864bc75",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/llama_page18",
+      "file": "../parsebench/docs/llama_page18.pdf",
+      "truth": "../parsebench/truth/llama_page18.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "llama_page18",
+      "sha256": "0c152a2c4f3fecce4ce822d262ecae0d4440810412b9ad218f1bd8760aba5c5d",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/printablerulessection_page17",
+      "file": "../parsebench/docs/printablerulessection_page17.pdf",
+      "truth": "../parsebench/truth/printablerulessection_page17.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "printablerulessection_page17",
+      "sha256": "4643abfa967b5be8adfd1fbc2655692a5d195bbc44361bed3b9834490d3e0b01",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/pub_derivatives_quarterly_qtr1_2019_page6",
+      "file": "../parsebench/docs/pub_derivatives_quarterly_qtr1_2019_page6.pdf",
+      "truth": "../parsebench/truth/pub_derivatives_quarterly_qtr1_2019_page6.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "pub_derivatives_quarterly_qtr1_2019_page6",
+      "sha256": "36be85a3fec2d48504d40bb71f5a99d080ec7a5719b99a8c2e85704f5e973b26",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/serff_ca_random_pages_1_page1020",
+      "file": "../parsebench/docs/serff_ca_random_pages_1_page1020.pdf",
+      "truth": "../parsebench/truth/serff_ca_random_pages_1_page1020.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "serff_ca_random_pages_1_page1020",
+      "sha256": "165f54ddbf6c07a0e6a6fd49446071f902e8fc9a6e308b0686e1db5684c6ffa9",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/serff_interstate_random_pages_1_page174",
+      "file": "../parsebench/docs/serff_interstate_random_pages_1_page174.pdf",
+      "truth": "../parsebench/truth/serff_interstate_random_pages_1_page174.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "serff_interstate_random_pages_1_page174",
+      "sha256": "907b4bacc0e999c4012d353d1fda6b03d55dab0b8a135fd7c16ba2e3db7a7bf8",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/sizingchart_page1",
+      "file": "../parsebench/docs/sizingchart_page1.pdf",
+      "truth": "../parsebench/truth/sizingchart_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "sizingchart_page1",
+      "sha256": "ad51e39df0968d23775e5fc72deba19eb38dcf2d84fdbd02f6aa2719114e0cec",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/teds_paper_page6",
+      "file": "../parsebench/docs/teds_paper_page6.pdf",
+      "truth": "../parsebench/truth/teds_paper_page6.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "hard",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "teds_paper_page6",
+      "sha256": "87e5e4bc65caa0b5ea519c419da8b467cc9c5097775eafb541af893214b3a0c0",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_dense_legalnotices",
+      "file": "../parsebench/docs/text_dense_legalnotices.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dense",
+        "hard",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_dense_legalnotices.json",
+      "source_id": "text_dense_legalnotices",
+      "sha256": "0d664588aedc35270d688f05f556c91871579c3ba5aac515363f1fdf56c9f79c",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_handwritting_address",
+      "file": "../parsebench/docs/text_handwritting_address.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "handwritting",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_handwritting_address.json",
+      "source_id": "text_handwritting_address",
+      "sha256": "036d4ede7796c9678e322523bd891472415dd85bcc6dbdf9a7de14b37f6f8b63",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_handwritting_math2",
+      "file": "../parsebench/docs/text_handwritting_math2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "handwritting",
+        "hard",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_handwritting_math2.json",
+      "source_id": "text_handwritting_math2",
+      "sha256": "7eadc0d97381067c464eb2b967358ba3638f77b60be3dd3ff6b27e94b5917584",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_misc_mark2",
+      "file": "../parsebench/docs/text_misc_mark2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "misc",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_misc_mark2.json",
+      "source_id": "text_misc_mark2",
+      "sha256": "d79260da52319364f014730e6fb158bbcb0eef510be653cf40f8b6bbd6da5e20",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_misc_missing",
+      "file": "../parsebench/docs/text_misc_missing.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "misc",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_misc_missing.json",
+      "source_id": "text_misc_missing",
+      "sha256": "f09098d852a12959ec15c3697d007860581bf06c7a8817a7d549035b5252ddcc",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_multicolumns_2col",
+      "file": "../parsebench/docs/text_multicolumns_2col.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multicolumns",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_multicolumns_2col.json",
+      "source_id": "text_multicolumns_2col",
+      "sha256": "08b3e3a7011f6451eda81b8163ce208e178e7ae050a2877d7869f03a3bf3acd6",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_multicolumns_anual_2col",
+      "file": "../parsebench/docs/text_multicolumns_anual_2col.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multicolumns",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_multicolumns_anual_2col.json",
+      "source_id": "text_multicolumns_anual_2col",
+      "sha256": "df566084758cb61eacb0fc66f9e5b677b0e6f8972d8f4b5f0966ae7509908bae",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_multilang_bengali",
+      "file": "../parsebench/docs/text_multilang_bengali.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multilang",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_multilang_bengali.json",
+      "source_id": "text_multilang_bengali",
+      "sha256": "e52e4ead1e00aedd6ab88028406faaabe3b10bfb20abbf7bae6810db0a169080",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_multilang_french2",
+      "file": "../parsebench/docs/text_multilang_french2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "multilang",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_multilang_french2.json",
+      "source_id": "text_multilang_french2",
+      "sha256": "5d80ea1050034be5ee680051c9962a33f4e6127c2e204c57a40a7e14b00d91be",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_ocr_clearmont",
+      "file": "../parsebench/docs/text_ocr_clearmont.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "ocr",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_ocr_clearmont.json",
+      "source_id": "text_ocr_clearmont",
+      "sha256": "8cf16944d06c5f9bdb653c49f99cec9db83967a88170b2bbae57010e29295fe0",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_ocr_russina2",
+      "file": "../parsebench/docs/text_ocr_russina2.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "hard",
+        "ocr",
+        "parsebench",
+        "rules"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_ocr_russina2.json",
+      "source_id": "text_ocr_russina2",
+      "sha256": "70ff42e1bf7db8f5e7893d5ba60fc1760e6d62c0ff0c6a2c9a0f8f7246115024",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_simple_agreement",
+      "file": "../parsebench/docs/text_simple_agreement.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_simple_agreement.json",
+      "source_id": "text_simple_agreement",
+      "sha256": "c563e471664735e3313085d679be9b4f5eff91b3f4ff3427387e77de39a5865f",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_simple_predictive",
+      "file": "../parsebench/docs/text_simple_predictive.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_simple_predictive.json",
+      "source_id": "text_simple_predictive",
+      "sha256": "93dd5c1fc732dbc490101651cc2ede421c8ef01131edcc4d73b533061d1ad401",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_simple_wordforwords",
+      "file": "../parsebench/docs/text_simple_wordforwords.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "simple"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_simple_wordforwords.json",
+      "source_id": "text_simple_wordforwords",
+      "sha256": "c096ff3a6bb089f81341d1b21bc56309f5caadf341214fdc76e79d5a4df82c4b",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/text_sparse_note",
+      "file": "../parsebench/docs/text_sparse_note.pdf",
+      "truth": "",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "easy",
+        "parsebench",
+        "rules",
+        "sparse"
+      ],
+      "kind": "rules",
+      "rules": "../parsebench/rules/text_sparse_note.json",
+      "source_id": "text_sparse_note",
+      "sha256": "8cbc365f504c9d4e948725329dcec5d0c347ac7130c641104ed0c3f27f892069",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/victoria_secret_10_k_page1",
+      "file": "../parsebench/docs/victoria_secret_10_k_page1.pdf",
+      "truth": "../parsebench/truth/victoria_secret_10_k_page1.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "victoria_secret_10_k_page1",
+      "sha256": "0f45691c6f4c8e4af015b5f384969b86633db54f11326760e59d8b13e416c31e",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "parsebench/walmart_earnings_release_fy24_q4_page4",
+      "file": "../parsebench/docs/walmart_earnings_release_fy24_q4_page4.pdf",
+      "truth": "../parsebench/truth/walmart_earnings_release_fy24_q4_page4.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "easy",
+        "merged-cells",
+        "parsebench",
+        "table-only"
+      ],
+      "kind": "transcript",
+      "source_id": "walmart_earnings_release_fy24_q4_page4",
+      "sha256": "a2bc0664d56d6fca05e2ee0a10a3f6bc5234b919f08f263cf3354c5edc6a3242",
+      "license": "Apache-2.0",
+      "attribution": "ParseBench (LlamaIndex) — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo, arXiv:2604.08538, https://parsebench.ai · dataset https://huggingface.co/datasets/llamaindex/ParseBench · code https://github.com/run-llama/ParseBench · Apache-2.0."
+    },
+    {
+      "id": "synthetic/complex_table_001",
+      "file": "../synthetic-v1/docs/complex_table_001.png",
+      "truth": "../synthetic-v1/truth/complex_table_001.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table",
+        "wide_table"
+      ],
+      "kind": "transcript",
+      "source_id": "complex_table_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/complex_table_002",
+      "file": "../synthetic-v1/docs/complex_table_002.png",
+      "truth": "../synthetic-v1/truth/complex_table_002.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table",
+        "wide_table"
+      ],
+      "kind": "transcript",
+      "source_id": "complex_table_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/complex_table_003",
+      "file": "../synthetic-v1/docs/complex_table_003.png",
+      "truth": "../synthetic-v1/truth/complex_table_003.md",
+      "pages": 1,
+      "category": "complex_table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table",
+        "wide_table"
+      ],
+      "kind": "transcript",
+      "source_id": "complex_table_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/dense_001",
+      "file": "../synthetic-v1/docs/dense_001.png",
+      "truth": "../synthetic-v1/truth/dense_001.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "long",
+        "small_print",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "dense_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/dense_002",
+      "file": "../synthetic-v1/docs/dense_002.png",
+      "truth": "../synthetic-v1/truth/dense_002.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "long",
+        "small_print",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "dense_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/dense_003",
+      "file": "../synthetic-v1/docs/dense_003.png",
+      "truth": "../synthetic-v1/truth/dense_003.md",
+      "pages": 1,
+      "category": "dense",
+      "tags": [
+        "clean",
+        "long",
+        "small_print",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "dense_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/faded_001",
+      "file": "../synthetic-v1/docs/faded_001.png",
+      "truth": "../synthetic-v1/truth/faded_001.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "blur",
+        "degraded",
+        "jpeg",
+        "low_contrast",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "faded_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/faded_002",
+      "file": "../synthetic-v1/docs/faded_002.png",
+      "truth": "../synthetic-v1/truth/faded_002.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "blur",
+        "degraded",
+        "jpeg",
+        "low_contrast",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "faded_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/faded_003",
+      "file": "../synthetic-v1/docs/faded_003.png",
+      "truth": "../synthetic-v1/truth/faded_003.md",
+      "pages": 1,
+      "category": "faded",
+      "tags": [
+        "blur",
+        "degraded",
+        "jpeg",
+        "low_contrast",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "faded_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/headings_001",
+      "file": "../synthetic-v1/docs/headings_001.png",
+      "truth": "../synthetic-v1/truth/headings_001.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "list",
+        "structure",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "headings_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/headings_002",
+      "file": "../synthetic-v1/docs/headings_002.png",
+      "truth": "../synthetic-v1/truth/headings_002.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "list",
+        "structure",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "headings_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/headings_003",
+      "file": "../synthetic-v1/docs/headings_003.png",
+      "truth": "../synthetic-v1/truth/headings_003.md",
+      "pages": 1,
+      "category": "headings",
+      "tags": [
+        "clean",
+        "list",
+        "structure",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "headings_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/invoice_001",
+      "file": "../synthetic-v1/docs/invoice_001.png",
+      "truth": "../synthetic-v1/truth/invoice_001.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "key_value",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "invoice_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/invoice_002",
+      "file": "../synthetic-v1/docs/invoice_002.png",
+      "truth": "../synthetic-v1/truth/invoice_002.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "key_value",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "invoice_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/invoice_003",
+      "file": "../synthetic-v1/docs/invoice_003.png",
+      "truth": "../synthetic-v1/truth/invoice_003.md",
+      "pages": 1,
+      "category": "invoice",
+      "tags": [
+        "clean",
+        "key_value",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "invoice_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/low_res_001",
+      "file": "../synthetic-v1/docs/low_res_001.png",
+      "truth": "../synthetic-v1/truth/low_res_001.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "low_res_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/low_res_002",
+      "file": "../synthetic-v1/docs/low_res_002.png",
+      "truth": "../synthetic-v1/truth/low_res_002.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "low_res_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/low_res_003",
+      "file": "../synthetic-v1/docs/low_res_003.png",
+      "truth": "../synthetic-v1/truth/low_res_003.md",
+      "pages": 1,
+      "category": "low_res",
+      "tags": [
+        "degraded",
+        "low_res",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "low_res_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/multipage_001",
+      "file": "../synthetic-v1/docs/multipage_001.pdf",
+      "truth": "../synthetic-v1/truth/multipage_001.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "structure",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "multipage_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/multipage_002",
+      "file": "../synthetic-v1/docs/multipage_002.pdf",
+      "truth": "../synthetic-v1/truth/multipage_002.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "structure",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "multipage_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/multipage_003",
+      "file": "../synthetic-v1/docs/multipage_003.pdf",
+      "truth": "../synthetic-v1/truth/multipage_003.md",
+      "pages": 2,
+      "category": "multipage",
+      "tags": [
+        "clean",
+        "multipage",
+        "structure",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "multipage_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/noisy_scan_001",
+      "file": "../synthetic-v1/docs/noisy_scan_001.png",
+      "truth": "../synthetic-v1/truth/noisy_scan_001.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "blur",
+        "degraded",
+        "noise",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "noisy_scan_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/noisy_scan_002",
+      "file": "../synthetic-v1/docs/noisy_scan_002.png",
+      "truth": "../synthetic-v1/truth/noisy_scan_002.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "blur",
+        "degraded",
+        "noise",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "noisy_scan_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/noisy_scan_003",
+      "file": "../synthetic-v1/docs/noisy_scan_003.png",
+      "truth": "../synthetic-v1/truth/noisy_scan_003.md",
+      "pages": 1,
+      "category": "noisy_scan",
+      "tags": [
+        "blur",
+        "degraded",
+        "noise",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "noisy_scan_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/plain_001",
+      "file": "../synthetic-v1/docs/plain_001.png",
+      "truth": "../synthetic-v1/truth/plain_001.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "synthetic",
+        "text"
+      ],
+      "kind": "transcript",
+      "source_id": "plain_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/plain_002",
+      "file": "../synthetic-v1/docs/plain_002.png",
+      "truth": "../synthetic-v1/truth/plain_002.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "synthetic",
+        "text"
+      ],
+      "kind": "transcript",
+      "source_id": "plain_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/plain_003",
+      "file": "../synthetic-v1/docs/plain_003.png",
+      "truth": "../synthetic-v1/truth/plain_003.md",
+      "pages": 1,
+      "category": "plain",
+      "tags": [
+        "clean",
+        "synthetic",
+        "text"
+      ],
+      "kind": "transcript",
+      "source_id": "plain_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/receipt_001",
+      "file": "../synthetic-v1/docs/receipt_001.png",
+      "truth": "../synthetic-v1/truth/receipt_001.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "monospace",
+        "receipt",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "receipt_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/receipt_002",
+      "file": "../synthetic-v1/docs/receipt_002.png",
+      "truth": "../synthetic-v1/truth/receipt_002.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "monospace",
+        "receipt",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "receipt_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/receipt_003",
+      "file": "../synthetic-v1/docs/receipt_003.png",
+      "truth": "../synthetic-v1/truth/receipt_003.md",
+      "pages": 1,
+      "category": "receipt",
+      "tags": [
+        "degraded",
+        "monospace",
+        "receipt",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "receipt_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/skewed_001",
+      "file": "../synthetic-v1/docs/skewed_001.png",
+      "truth": "../synthetic-v1/truth/skewed_001.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "layout",
+        "rotation",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "skewed_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/skewed_002",
+      "file": "../synthetic-v1/docs/skewed_002.png",
+      "truth": "../synthetic-v1/truth/skewed_002.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "layout",
+        "rotation",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "skewed_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/skewed_003",
+      "file": "../synthetic-v1/docs/skewed_003.png",
+      "truth": "../synthetic-v1/truth/skewed_003.md",
+      "pages": 1,
+      "category": "skewed",
+      "tags": [
+        "degraded",
+        "layout",
+        "rotation",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "skewed_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/table_001",
+      "file": "../synthetic-v1/docs/table_001.png",
+      "truth": "../synthetic-v1/truth/table_001.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "table_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/table_002",
+      "file": "../synthetic-v1/docs/table_002.png",
+      "truth": "../synthetic-v1/truth/table_002.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "table_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/table_003",
+      "file": "../synthetic-v1/docs/table_003.png",
+      "truth": "../synthetic-v1/truth/table_003.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "clean",
+        "synthetic",
+        "table"
+      ],
+      "kind": "transcript",
+      "source_id": "table_003",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/two_column_001",
+      "file": "../synthetic-v1/docs/two_column_001.png",
+      "truth": "../synthetic-v1/truth/two_column_001.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "two_column_001",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/two_column_002",
+      "file": "../synthetic-v1/docs/two_column_002.png",
+      "truth": "../synthetic-v1/truth/two_column_002.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "two_column_002",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "synthetic/two_column_003",
+      "file": "../synthetic-v1/docs/two_column_003.png",
+      "truth": "../synthetic-v1/truth/two_column_003.md",
+      "pages": 1,
+      "category": "two_column",
+      "tags": [
+        "clean",
+        "layout",
+        "reading_order",
+        "synthetic"
+      ],
+      "kind": "transcript",
+      "source_id": "two_column_003",
+      "license": "CC0-1.0"
+    }
+  ]
+}

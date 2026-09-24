@@ -53,5 +53,5 @@ crates/liteocr-python/    PyO3 module `liteocr._core`
 python/liteocr/           public API, types, exceptions; python/tests/
 crates/liteocr-node/      napi-rs addon behind the npm package
 js/                       npm package `liteocr`: index.js + hand-written index.d.ts; js/test/
-benchmark/                generate_synthetic.py, datasets/, results/, site/, adapters/ (parsebench, olmocr, omnidocbench, combined)
+benchmark/                generate_synthetic.py, datasets/, results/, site/, adapters/ (parsebench, olmocr, omnidocbench, dpbench, combined)
 ```

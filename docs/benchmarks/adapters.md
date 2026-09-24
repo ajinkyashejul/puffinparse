@@ -16,7 +16,8 @@ Everything lives in [`benchmark/adapters/`](../../benchmark/adapters/):
 | `parsebench.py` | LlamaIndex ParseBench → `benchmark/datasets/parsebench/` |
 | `olmocr.py` | AI2 olmOCR-bench → `benchmark/datasets/olmocr/` (`kind: rules`) |
 | `omnidocbench.py` | OpenDataLab OmniDocBench → `benchmark/datasets/omnidocbench/` (`kind: transcript`, index only, fetched at run time) |
-| `combined.py` | union of the datasets → `benchmark/datasets/combined-v1/` (adapter `combined`, frozen) and `benchmark/datasets/combined-v2/` (adapter `combined-v2`) |
+| `dpbench.py` | Upstage DP-Bench → `benchmark/datasets/dpbench/` (`kind: transcript`, 40 PDFs committed) |
+| `combined.py` | union of the datasets → `benchmark/datasets/combined-v1/` (adapter `combined`, frozen), `benchmark/datasets/combined-v2/` (adapter `combined-v2`) and `benchmark/datasets/combined-v3/` (adapter `combined-v3`: v2 + dpbench) |
 | `__main__.py` | the `python -m benchmark.adapters` CLI |
 
 ## CLI
@@ -258,8 +259,10 @@ instead of aborting a build.
    `benchmark/adapters/__init__.py`.
 5. Use `Doc` / `Manifest` / `Rule` and `write_manifest` / `write_rules` so output stays
    byte-stable, and record every skip with `self.bump(...)` so the summary is honest.
-6. If the dataset belongs in `combined-v2`, add it to `SOURCES_V2` in `combined.py`.
-   `combined-v1` is frozen because it has committed results. Write a `README.md` in the dataset
+6. If the dataset belongs in the combined benchmark, add a new `SOURCES_V<n>` and
+   `CombinedV<n>Adapter` in `combined.py` (as `combined-v3` did for DP-Bench). Never change the
+   sources of an existing combined version: a result is only reproducible against the exact
+   manifest it scored. Write a `README.md` in the dataset
    directory with the license, and list the dataset in `benchmark/README.md`.
 7. Add the dataset to `crates/liteocr-core/tests/benchmark_datasets.rs`. Every rule must pass
    against a witness built from its own document, and every transcript must score 1.0 against
@@ -274,9 +277,8 @@ Not adaptable into either kind, per the
 - LongExtractBench: schema-driven extraction, a different mode.
 
 The [academic benchmark survey](academic-benchmarks.md) covers olmOCR-bench, OmniDocBench,
-DP-Bench, READoc, the Nanonets IDP leaderboard, Fox, CC-OCR and OCRBench v2. **DP-Bench** is the
-recommended next adapter: MIT-licensed, 200 single-page PDFs, with ground truth for every
-element in reading order.
+DP-Bench, READoc, the Nanonets IDP leaderboard, Fox, CC-OCR and OCRBench v2. DP-Bench is now
+adapted (below); READoc, as a long-document track, is the next candidate.
 
 ## olmOCR-bench mapping
 
@@ -332,6 +334,46 @@ and `truth/` are excluded from version control and produced by
 `python -m benchmark.adapters omnidocbench`. Every document carries the `fetch-required` tag.
 Details: [`benchmark/datasets/omnidocbench/README.md`](../../benchmark/datasets/omnidocbench/README.md).
 
+## DP-Bench mapping
+
+Upstream: [`upstage/dp-bench`](https://huggingface.co/datasets/upstage/dp-bench) at
+`24702c61a2fb13325534be664653bc6e60250d13` — data and `evaluate.py` pinned together. 200
+single-page PDFs and `dataset/reference.json`, which lists every layout element of a page
+(12 categories) in reading order (`id`), with `content.text` and, for tables, `content.html`.
+
+**Licence.** The card front-matter says `license: mit`; the repository has no `LICENSE` file at
+that revision. The adapter reads the card at the pinned revision and refuses to build if it no
+longer says MIT. The 20 Upstage-internal pages are covered only by that declaration.
+
+**Truth.** Each page becomes one `kind: transcript` document, following what upstream scores:
+
+| Upstream category | → truth | Why |
+|---|---|---|
+| `Heading1` | `# heading` | |
+| `Table` | pipe table from `content.html` (merged cells repeated, tag `merged-cells`) | upstream scores tables with TEDS; `table_score` / `teds_grid` do the same job |
+| `Equation` | LaTeX inside `$$ … $$` (tags `has-equation`, `has-formula`) | |
+| `Figure`, `Chart` | dropped | upstream's NID ignores `figure`, `table`, `chart` (`--ignore-classes-for-layout`) |
+| `Paragraph`, `Caption`, `List`, `Footnote`, `Index`, **`Header`, `Footer`** | `content.text` verbatim | NID scores every one of them, so headers and footers stay — unlike OmniDocBench, whose own matching drops them |
+
+No `rules` are emitted: a document has one kind, and the table truth inside the transcript is
+already scored by `table_score` and `teds_grid`.
+
+**Selection.** `category` is the page's dominant layout feature, in priority order `table` >
+`equation` > `chart` > `figure` > `index` > `list` > `text`. Upstream has 42 / 18 / 43 / 38 / 10 /
+9 / 40 pages in those buckets; the committed subset takes 10 / 5 / 6 / 5 / 3 / 4 / 7 (40 pages,
+4.5 MB of PDFs, 4 with merged-cell tables). Pages over 600 KB or past the 8 MB budget are skipped
+and counted. All 200 upstream pages convert (none skipped). Every element category present is a
+tag (`has-table`, `has-header`, `has-chart` …). The reference has no per-page source (Library of
+Congress / OER / Upstage) or domain, so neither can be tagged. Counts:
+`benchmark/datasets/dpbench/conversion-stats.json`.
+
+**Not comparable to published DP-Bench numbers**: upstream NID concatenates element text with
+newlines *removed* (not replaced by spaces) and compares with `rapidfuzz.fuzz.ratio`, on text
+only; LiteOCR scores a markdown transcript with its own normalisation, tables included.
+Upstream also discards predicted text that lies inside a ground-truth figure or chart region
+(`--filter-by-gt-area`). A transcript has no regions, so chart labels a parser transcribes count
+as extra text here: `tesseract/default` scores 65 on `chart` pages and 99 on `text` pages.
+
 ## Self-checks
 
 `crates/liteocr-core/tests/benchmark_datasets.rs` keeps the adapters honest:
@@ -343,7 +385,11 @@ Details: [`benchmark/datasets/omnidocbench/README.md`](../../benchmark/datasets/
   `absent-only`.
 - `omnidocbench_truth_scores_itself_perfectly` scores each locally built truth against itself
   and checks that the `has-table` tag agrees with `table_score`.
-- `combined_v2_references_resolve` checks every committed `../` path of `combined-v2`.
+- `dpbench_truth_scores_itself_perfectly` scores each committed truth against itself (1.0,
+  `table_score` and `teds_grid` 1.0 on `has-table` pages, tag agreement) and requires an empty
+  parse to score 0.
+- `combined_v2_references_resolve` / `combined_v3_references_resolve` check every committed
+  `../` path of `combined-v2` / `combined-v3`.
 - Two `#[ignore]`d helpers:
   - `LITEOCR_SELFCHECK_RULES_DIR` runs the witness check over any directory of rule files. On
     the full 824-document olmOCR conversion: 3,040 rules, 0 unsatisfiable.
@@ -357,6 +403,7 @@ Details: [`benchmark/datasets/omnidocbench/README.md`](../../benchmark/datasets/
 | `parsebench` | yes, Apache-2.0 (publisher's terms) | 40 documents + truth + rules |
 | `olmocr` | yes, ODC-BY-1.0 (attribution; AI2 Responsible Use Guidelines) | 40 PDFs + rules |
 | `omnidocbench` | **no**: no licence; "research only, not for commercial use" | manifest index only (`sha256`, `truth_sha256`); fetched at run time |
+| `dpbench` | yes, MIT (dataset card) | 40 PDFs + truth |
 | RealDoc-Bench / LongExtractBench | annotations only | would be manifest + `sha256` only |
 
 Rules for any future adapter:
