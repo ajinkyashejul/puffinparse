@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_table_00",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Field-born females",
+      "value": "Nonreprod"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_table_00"
+  },
+  {
+    "id": "1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_table_01",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Founder females",
+      "value": "48.96 ± 2.84"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_table_01"
+  },
+  {
+    "id": "1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_table_02",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Field-born females",
+      "value": "Reprod"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "1801ca1db8bc496d17aeb2ea9e21c685443c_pg5_table_02"
+  }
+]

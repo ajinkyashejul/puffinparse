@@ -1,0 +1,90 @@
+[
+  {
+    "id": "451680975a5b0e832d8fc8650189083384ce_pg10_table_00",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Generally, nonsurgical treatment is performed for isolated grade III injuries. If combined with an ACL tear, may attempt initial nonsurgical treatment. Tibial-based MCL tears are less likely to heal without residual laxity when treated nonsurgically, and reconstruction is recommended.",
+      "value": "MCL"
+    },
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "451680975a5b0e832d8fc8650189083384ce_pg10_table_00"
+  },
+  {
+    "id": "451680975a5b0e832d8fc8650189083384ce_pg10_table_01",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Reconstruction of grade III injuries and repair of displaced bony avulsions and retracted soft tissue avulsions of the biceps femoris.",
+      "value": "PLC"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "451680975a5b0e832d8fc8650189083384ce_pg10_table_01"
+  },
+  {
+    "id": "451680975a5b0e832d8fc8650189083384ce_pg10_table_02",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "ACL",
+      "value": "Reconstruction for grade III tears. Repair for bony avulsions from the tibia in pediatric or young adult patients"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "451680975a5b0e832d8fc8650189083384ce_pg10_table_02"
+  },
+  {
+    "id": "451680975a5b0e832d8fc8650189083384ce_pg10_table_03",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Ligament injury",
+      "value": "ACL"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "451680975a5b0e832d8fc8650189083384ce_pg10_table_03"
+  },
+  {
+    "id": "451680975a5b0e832d8fc8650189083384ce_pg10_table_05",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Finding",
+      "value": "Subluxation on radiograph or MRI"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "451680975a5b0e832d8fc8650189083384ce_pg10_table_05"
+  },
+  {
+    "id": "451680975a5b0e832d8fc8650189083384ce_pg10_table_06",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Possible clinical scenario",
+      "value": "Compromised integrity with graft tears that may require a two-stage revision with tunnel bone grafting followed by ligament reconstruction"
+    },
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "451680975a5b0e832d8fc8650189083384ce_pg10_table_06"
+  },
+  {
+    "id": "451680975a5b0e832d8fc8650189083384ce_pg10_table_08",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Possible clinical scenario",
+      "value": "Limited motion and terminal extension"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "451680975a5b0e832d8fc8650189083384ce_pg10_table_08"
+  },
+  {
+    "id": "451680975a5b0e832d8fc8650189083384ce_pg10_table_09",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "May indicate graft laxity; stress radiographs should be obtained to quantify laxity",
+      "value": "Subluxation on radiograph or MRI"
+    },
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "451680975a5b0e832d8fc8650189083384ce_pg10_table_09"
+  }
+]

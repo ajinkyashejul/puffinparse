@@ -1,0 +1,35 @@
+[
+  {
+    "id": "41_289786",
+    "type": "present",
+    "text": "(9th)-at 3 1/2 oclock.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "41_289786"
+  },
+  {
+    "id": "41_815934",
+    "type": "order",
+    "before": "(9th)-at 3 1/2 oclock.",
+    "after": "202 Olive",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "41_815934"
+  },
+  {
+    "id": "41_682097",
+    "type": "absent",
+    "text": "4203",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "41_682097"
+  },
+  {
+    "id": "41_366699",
+    "type": "present",
+    "text": "I shall expect you to dine with me tomorrow.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "41_366699"
+  }
+]

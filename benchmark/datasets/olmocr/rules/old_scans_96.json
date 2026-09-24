@@ -1,0 +1,61 @@
+[
+  {
+    "id": "96_686856",
+    "type": "present",
+    "text": "Camp near Falmouth, Va",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "96_686856"
+  },
+  {
+    "id": "96_324569",
+    "type": "order",
+    "before": "to Port Bergale and would most respectfully ask of yrs honored Dept permision",
+    "after": "Letter written by Miss Barton to a friend after Bull Run Clara Barton Memorial Association Mrs. John A. Logan, President",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "96_324569"
+  },
+  {
+    "id": "96_489434",
+    "type": "present",
+    "text": "and proceeded with the remainder of our luggage",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "96_489434"
+  },
+  {
+    "id": "96_341535",
+    "type": "present",
+    "text": "soon as the Boat was unloaded he came on board and spent the remainder of",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "96_341535"
+  },
+  {
+    "id": "96_984146",
+    "type": "present",
+    "text": "friends Mr Wells returns tomorrow, and I improve the opportunity to send a line by",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "96_984146"
+  },
+  {
+    "id": "96_798387",
+    "type": "order",
+    "before": "Capt (Maj.) Hall (of the 21st) was",
+    "after": "he came on board and spent the",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "96_798387"
+  },
+  {
+    "id": "96_991188",
+    "type": "order",
+    "before": "Sturgis (2nd) Division",
+    "after": "opportunity to send a line by him to you, not feeling quite",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "96_991188"
+  }
+]

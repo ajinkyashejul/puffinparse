@@ -1,0 +1,38 @@
+[
+  {
+    "id": "075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13_pdf_order_a9ddfea4",
+    "type": "order",
+    "before": "When other etiologic agents, such as intestinal parasites, Chlamydia, gonococci and HSV are suspected, patients should receive appropriate systemic medications.",
+    "after": "Non-Specific Inflammatory Conjunctivitis: Diagnosis",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13.pdf_order_a9ddfea4"
+  },
+  {
+    "id": "075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13_pdf_order_90121100",
+    "type": "order",
+    "before": "Patients with blepharitis often have dry eye syndrome as well, in which case the anti-inflammatory component of a combination drop can also be beneficial in treating the dry eye.",
+    "after": "Antibiotic ointments such as bacitracin or bacitracin–polymyxin B can be used twice daily in conjunction with warm compresses and eyelid scrubs.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13.pdf_order_90121100"
+  },
+  {
+    "id": "075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13_pdf_order_ff52ecc6",
+    "type": "order",
+    "before": "Although phlyctenular conjunctivitis can occur without obvious associated disease, patients with phlyctenueles may exhibit concurrent evidence of either dermatologic or systemic disease.",
+    "after": "Typically, they will say their eye \"doesnot feel right\" or perhaps friends have said their eyes look red.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13.pdf_order_ff52ecc6"
+  },
+  {
+    "id": "075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13_pdf_order_7ef6a8d9",
+    "type": "order",
+    "before": "can restore ocular surface health are misleading",
+    "after": "If the patient is experiencing significant pain and discomfort, a steroid ointment such as Lotemax ointment at night, in addition to the antibiotic/ steroid combination during the day, can help to relieve inflammation and pain.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "075cc4e94eb8bdd518b96fc27aaef00a64c8_page_13.pdf_order_7ef6a8d9"
+  }
+]

@@ -53,6 +53,14 @@ SOURCES = (
     Source(prefix="parsebench", directory="parsebench", name="parsebench"),
 )
 
+#: ``combined-v2`` adds the two academic benchmarks. ``combined-v1`` stays frozen: it has
+#: committed results, and a result is only reproducible against the exact manifest it scored.
+SOURCES_V2 = (
+    *SOURCES,
+    Source(prefix="olmocr", directory="olmocr", name="olmocr"),
+    Source(prefix="omnidocbench", directory="omnidocbench", name="omnidocbench"),
+)
+
 
 def _relative(from_dir: Path, to_dir: Path, rel_path: str) -> str:
     """Path of ``to_dir/rel_path`` expressed relative to ``from_dir``, with ``/`` separators."""
@@ -70,6 +78,26 @@ class CombinedAdapter(Adapter):
     license = "mixed (see `sources`)"
     default_out = "benchmark/datasets/combined-v1"
     description = "Union of every committed LiteOCR benchmark dataset, referenced in place."
+    #: Datasets folded in, and the manifest identity written out.
+    sources: tuple[Source, ...] = SOURCES
+    dataset_name = "combined-v1"
+    version = VERSION
+    manifest_description = (
+        "Union of the committed LiteOCR benchmark datasets (synthetic-v1 and the "
+        "redistributable ParseBench subset). No bytes are copied: every document is "
+        "referenced relatively in its own dataset directory, so the per-dataset and "
+        "combined runs score exactly the same files."
+    )
+    manifest_notes: tuple[str, ...] = (
+        "Document ids are `<source>/<upstream id>`; use `--filter synthetic` or "
+        "`--filter parsebench` to run one source.",
+        "`file` and `truth` are relative to this directory and start with `../`.",
+        'Documents with `kind: "rules"` have no markdown truth. A transcript-only '
+        "scorer must skip them; the current Rust CLI reports them as errors instead "
+        "(see docs/benchmarks/adapters.md).",
+        "A combined score mixes licences, difficulty and document kinds — always read "
+        "it next to the per-dataset scores.",
+    )
 
     def download(self, cache_dir: Path) -> Path:
         """Nothing to download: every source is already in the working tree."""
@@ -79,7 +107,7 @@ class CombinedAdapter(Adapter):
         datasets_dir = out_dir.parent
         documents: list[Doc] = []
         sources: list[dict[str, Any]] = []
-        for source in SOURCES:
+        for source in self.sources:
             src_dir = datasets_dir / source.directory
             manifest_path = src_dir / "manifest.json"
             if not manifest_path.is_file():
@@ -114,28 +142,14 @@ class CombinedAdapter(Adapter):
         self.stats["by_kind"] = kinds
 
         manifest = Manifest(
-            name="combined-v1",
-            version=VERSION,
-            description=(
-                "Union of the committed LiteOCR benchmark datasets (synthetic-v1 and the "
-                "redistributable ParseBench subset). No bytes are copied: every document is "
-                "referenced relatively in its own dataset directory, so the per-dataset and "
-                "combined runs score exactly the same files."
-            ),
+            name=self.dataset_name,
+            version=self.version,
+            description=self.manifest_description,
             license="mixed — per-document `license`, summarised in `sources`",
             documents=documents,
             generator="benchmark/adapters/combined.py",
             sources=sources,
-            notes=[
-                "Document ids are `<source>/<upstream id>`; use `--filter synthetic` or "
-                "`--filter parsebench` to run one source.",
-                "`file` and `truth` are relative to this directory and start with `../`.",
-                'Documents with `kind: "rules"` have no markdown truth. A transcript-only '
-                "scorer must skip them; the current Rust CLI reports them as errors instead "
-                "(see docs/benchmarks/adapters.md).",
-                "A combined score mixes licences, difficulty and document kinds — always read "
-                "it next to the per-dataset scores.",
-            ],
+            notes=list(self.manifest_notes),
         )
         write_manifest(out_dir / "manifest.json", manifest)
         return manifest
@@ -166,3 +180,34 @@ class CombinedAdapter(Adapter):
             attribution=entry.get("attribution") or raw.get("attribution"),
         )
         return doc
+
+
+@register
+class CombinedV2Adapter(CombinedAdapter):
+    """Builds ``benchmark/datasets/combined-v2``: v1 plus olmOCR-bench and OmniDocBench."""
+
+    name = "combined-v2"
+    default_out = "benchmark/datasets/combined-v2"
+    description = "combined-v1 plus the olmOCR-bench and OmniDocBench subsets, referenced in place."
+    sources = SOURCES_V2
+    dataset_name = "combined-v2"
+    version = "2.0.0"
+    manifest_description = (
+        "Union of the LiteOCR benchmark datasets: synthetic-v1, the ParseBench subset, the "
+        "olmOCR-bench subset and the OmniDocBench subset. No bytes are copied: every document is "
+        "referenced relatively in its own dataset directory, so the per-dataset and combined "
+        "runs score exactly the same files."
+    )
+    manifest_notes = (
+        "Document ids are `<source>/<upstream id>`; use `--filter synthetic/`, "
+        "`--filter parsebench/`, `--filter olmocr/` or `--filter omnidocbench/` to run one source.",
+        "`file`, `truth` and `rules` are relative to this directory and start with `../`.",
+        "The omnidocbench documents are NOT in the repository (research-only, non-commercial "
+        "data): run `python -m benchmark.adapters omnidocbench` first, or they fail as "
+        "file-not-found and the dataset sha256 no longer covers them. They carry the "
+        "`fetch-required` tag.",
+        "olmocr documents tagged `absent-only` pass for an empty parse; read the olmocr score "
+        "per category (docs/benchmarks/adapters.md).",
+        "A combined score mixes licences, difficulty and document kinds — always read it next "
+        "to the per-dataset scores.",
+    )

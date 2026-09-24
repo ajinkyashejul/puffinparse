@@ -1,0 +1,50 @@
+[
+  {
+    "id": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_00",
+    "type": "absent",
+    "text": "Schedule A (Form 990) 2022 13-3661416 Page 7",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_00"
+  },
+  {
+    "id": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_01",
+    "type": "absent",
+    "text": "Schedule A (Form 990) 2022",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_01"
+  },
+  {
+    "id": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_02",
+    "type": "absent",
+    "text": "232027 12-09-22",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_02"
+  },
+  {
+    "id": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_03",
+    "type": "absent",
+    "text": "09570509 153424 0183055-00003",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_03"
+  },
+  {
+    "id": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_04",
+    "type": "absent",
+    "text": "2022.05090 SMILE TRAIN, INC.",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_header_04"
+  },
+  {
+    "id": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21_pdf_manual_00",
+    "type": "absent",
+    "text": "01830551",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "8e9534831a9bffe85686f6c4f18d23fe1b08f1cd_page_21.pdf_manual_00"
+  }
+]

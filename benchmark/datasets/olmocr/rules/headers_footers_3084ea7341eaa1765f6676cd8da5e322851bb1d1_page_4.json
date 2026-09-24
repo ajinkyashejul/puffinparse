@@ -1,0 +1,26 @@
+[
+  {
+    "id": "3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4_header_00",
+    "type": "absent",
+    "text": "Jonathan Pritchard",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4_header_00"
+  },
+  {
+    "id": "3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4_header_01",
+    "type": "absent",
+    "text": "http://cap.stanford.edu/profiles/Jonathan_Pritchard/",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4_header_01"
+  },
+  {
+    "id": "3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4_pdf_manual_00",
+    "type": "absent",
+    "text": "Page 4 of 4",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "3084ea7341eaa1765f6676cd8da5e322851bb1d1_page_4.pdf_manual_00"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processed_pg1_header_00",
+    "type": "absent",
+    "text": "Minireview",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processed_pg1_header_00"
+  },
+  {
+    "id": "0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processed_pdf_manual_01",
+    "type": "absent",
+    "text": "Journal of Bacteriology",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processed.pdf_manual_01"
+  },
+  {
+    "id": "0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processed_pdf_manual_02",
+    "type": "absent",
+    "text": "Downloaded from http://jb.asm.org/ on July 5, 2017 by guest",
+    "case_sensitive": false,
+    "max_diffs": 2,
+    "source": "0cc2186f7eaf725f04d5ea575eaa5573539d2395_page_2_processed.pdf_manual_02"
+  }
+]

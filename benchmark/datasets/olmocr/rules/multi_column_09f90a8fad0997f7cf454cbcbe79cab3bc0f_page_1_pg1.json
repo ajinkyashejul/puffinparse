@@ -1,0 +1,47 @@
+[
+  {
+    "id": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pdf_order_0fde6cc6",
+    "type": "order",
+    "before": "Surprising quality is achieved when several lightweight knowledge-based NLP techniques complement mostly shallow, surface-based approaches.",
+    "after": "Resisting the temptation of merely porting and integrating existing IE and IR technologies into Q/A systems, the developers of the TREC Q/A systems have not only shaped new processing methods, but also inspired new research in the challenging integration of surface-text-based methods with knowledge-based text inference.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1.pdf_order_0fde6cc6"
+  },
+  {
+    "id": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pdf_order_2ff776a5",
+    "type": "order",
+    "before": "Typically, the templates model queries regarding who did what to whom, when and where, and eventually why.",
+    "after": "The idea of building open-domain Q/A systems that perform",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1.pdf_order_2ff776a5"
+  },
+  {
+    "id": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pdf_order_1565380e",
+    "type": "order",
+    "before": "Recently, a new trend in information processing from texts has emerged.",
+    "after": "The idea of building open-domain Q/A systems that perform on real-world document collections was initiated by the eighth Text REtrieval Conference (TREC-8), by organizing the first competition of answering fact-based questions such as \"Who came up with the name, El Niño?\".",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1.pdf_order_1565380e"
+  },
+  {
+    "id": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pdf_order_25b38a95",
+    "type": "order",
+    "before": "Textual Question Answering (Q/A) aims at identifying the answer of a question in large collections of on-line documents.",
+    "after": "More generally, these systems combine creatively components of the NLP basic research infrastructure developed in the 80s (e.g. the computational theory of Q/A reported in (Lehnert 1978) and the theory of abductive interpretation of texts reported in (Hobbs et al.1993)) with other shallow techniques that make possible the open-domain processing on real-world texts.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1.pdf_order_25b38a95"
+  },
+  {
+    "id": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1_pdf_order_43f3630f",
+    "type": "order",
+    "before": "Experiments with Open-Domain Textual Question Answering",
+    "after": "Section 5 presents the results and the evaluations whereas Section 6 concludes the paper.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "09f90a8fad0997f7cf454cbcbe79cab3bc0f_page_1.pdf_order_43f3630f"
+  }
+]

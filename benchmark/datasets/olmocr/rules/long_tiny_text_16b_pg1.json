@@ -1,0 +1,58 @@
+[
+  {
+    "id": "16b_pg1_text_00",
+    "type": "present",
+    "text": "DESERT emphasizes lack of water; it",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "16b_pg1_text_00"
+  },
+  {
+    "id": "16b_pg1_text_01",
+    "type": "present",
+    "text": "4. a nomination, appointment, or election.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "16b_pg1_text_01"
+  },
+  {
+    "id": "16b_pg1_text_02",
+    "type": "present",
+    "text": "des-ha-bille (dez'a bël, -bë), n. dishabille.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "16b_pg1_text_02"
+  },
+  {
+    "id": "16b_pg1_text_03",
+    "type": "present",
+    "text": "3. Physiol. to eliminate the natural",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "16b_pg1_text_03"
+  },
+  {
+    "id": "16b_pg1_text_05",
+    "type": "present",
+    "text": "2. (of military personnel) to run away from (service, duty,",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "16b_pg1_text_05"
+  },
+  {
+    "id": "16b_pg1_text_07",
+    "type": "present",
+    "text": "4. to form or conceive in the mind; contrive; plan.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "16b_pg1_text_07"
+  },
+  {
+    "id": "16b_pg1_text_08",
+    "type": "present",
+    "text": "or acquired reactivity or sensitivity of (an animal, organ,",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "16b_pg1_text_08"
+  }
+]

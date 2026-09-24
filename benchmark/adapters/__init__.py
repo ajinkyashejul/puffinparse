@@ -3,6 +3,8 @@
 Usage::
 
     python -m benchmark.adapters parsebench --limit 40
+    python -m benchmark.adapters olmocr
+    python -m benchmark.adapters omnidocbench
     python -m benchmark.adapters combined
     python -m benchmark.adapters --list
 
@@ -14,6 +16,8 @@ from __future__ import annotations
 
 # Importing the modules is what populates `registry` through the @register decorator.
 from . import combined as combined
+from . import olmocr as olmocr
+from . import omnidocbench as omnidocbench
 from . import parsebench as parsebench
 from .base import (
     KIND_RULES,
@@ -50,6 +54,8 @@ __all__ = [
     "combined",
     "default_cache_dir",
     "html_table_to_markdown",
+    "olmocr",
+    "omnidocbench",
     "parsebench",
     "pdf_page_count",
     "register",

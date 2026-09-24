@@ -1,0 +1,38 @@
+[
+  {
+    "id": "04e85af12e0a127ebe1a8875250b0f3ab052_page_1_pdf_order_4474aa39",
+    "type": "order",
+    "before": "C2: Humanities",
+    "after": "Ethnic & Racial Minorities",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "04e85af12e0a127ebe1a8875250b0f3ab052_page_1.pdf_order_4474aa39"
+  },
+  {
+    "id": "04e85af12e0a127ebe1a8875250b0f3ab052_page_1_pdf_order_74af9055",
+    "type": "order",
+    "before": "Examination of the history and legacy of Palestine Cultural Mural at San Francisco State University.",
+    "after": "U.S. History",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "04e85af12e0a127ebe1a8875250b0f3ab052_page_1.pdf_order_74af9055"
+  },
+  {
+    "id": "04e85af12e0a127ebe1a8875250b0f3ab052_page_1_pdf_order_e337125f",
+    "type": "order",
+    "before": "Course Attributes:",
+    "after": "GE-F: Ethnic Studies",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "04e85af12e0a127ebe1a8875250b0f3ab052_page_1.pdf_order_e337125f"
+  },
+  {
+    "id": "04e85af12e0a127ebe1a8875250b0f3ab052_page_1_pdf_order_ced264b8",
+    "type": "order",
+    "before": "Course Attributes:",
+    "after": "Ethnic & Racial Minorities",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "04e85af12e0a127ebe1a8875250b0f3ab052_page_1.pdf_order_ced264b8"
+  }
+]

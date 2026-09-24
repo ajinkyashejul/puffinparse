@@ -1,0 +1,47 @@
+[
+  {
+    "id": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pdf_order_056612f5",
+    "type": "order",
+    "before": "Journal of Clinical Endocrinology and Medicine 1980;",
+    "after": "85: 1851-6.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4.pdf_order_056612f5"
+  },
+  {
+    "id": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pdf_order_e3a661fc",
+    "type": "order",
+    "before": "82: 1147-53.",
+    "after": "52: 908-15.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4.pdf_order_e3a661fc"
+  },
+  {
+    "id": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pdf_order_7b8a720a",
+    "type": "order",
+    "before": "3. Lobo RA, Kletzky OA, Campeau JD & diZerega GS, Elevated bioactive luteinizing hormone in women with the polycystic ovary syndrome.",
+    "after": "9. Chang RJ, Nakamura RM, Judd HI & Kaplan SA, Insulin resistance in nonobese patients with polycystic ovary syndrome.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4.pdf_order_7b8a720a"
+  },
+  {
+    "id": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pdf_order_6c5c1442",
+    "type": "order",
+    "before": "24 [Epub ahead of print].",
+    "after": "Dahlgren E, Johansson PO, Lindstedt G & al, Women with polycystic ovary syndrome wedge resected in 1956 to 1965: a long-term follow-up focusing on natural history and circulating hormones.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4.pdf_order_6c5c1442"
+  },
+  {
+    "id": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4_pdf_order_722e5d3e",
+    "type": "order",
+    "before": "Lancet, 1988;",
+    "after": "Evaluated from a risk factor model based on a prospective population study of women.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "0b65b6a5c9e4533f7c7859dcbb1eede86907_page_4.pdf_order_722e5d3e"
+  }
+]

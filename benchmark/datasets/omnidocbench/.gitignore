@@ -1,0 +1,4 @@
+# OmniDocBench is research-only / non-commercial: images and derived truth are fetched
+# by `python -m benchmark.adapters omnidocbench`, never committed.
+/docs/
+/truth/

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "20_pg49_pg1_text_00",
+    "type": "present",
+    "text": "The Purchasing Managers' Index in December came in at 52.8, down from 53.4 in November and the weakest since September.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "20_pg49_pg1_text_00"
+  },
+  {
+    "id": "20_pg49_pg1_text_01",
+    "type": "present",
+    "text": "Infrastructure services firm Costain notched a record order book for 2018 as it hailed \"another year of progress\".",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "20_pg49_pg1_text_01"
+  },
+  {
+    "id": "20_pg49_pg1_text_02",
+    "type": "present",
+    "text": "Construction accounts for about 6 per cent of UK GDP.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "20_pg49_pg1_text_02"
+  },
+  {
+    "id": "20_pg49_pg1_text_03",
+    "type": "present",
+    "text": "The prices of tobacco products and sugary drinks in Qatar have gone up considerably after new taxes came in at the start of the year.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "20_pg49_pg1_text_03"
+  },
+  {
+    "id": "20_pg49_pg1_text_04",
+    "type": "present",
+    "text": "These esoteric instruments tradable permits to emit carbon dioxide have soared by 200 per cent in a year, a gain that is causing hand-wringing, nail-biting and even panic in businesses that consume a lot of energy.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "20_pg49_pg1_text_04"
+  },
+  {
+    "id": "20_pg49_pg1_text_05",
+    "type": "present",
+    "text": "Businesses purchase a set number of allowances to emit CO2 every year; if they reduce their emissions, they can sell the allowances on the ETS.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "20_pg49_pg1_text_05"
+  },
+  {
+    "id": "20_pg49_pg1_text_06",
+    "type": "present",
+    "text": "British steel-makers are up in arms; industry lobbyist UK Steel reckons its members pay power prices up to double those paid by French and German competitors.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "20_pg49_pg1_text_06"
+  }
+]

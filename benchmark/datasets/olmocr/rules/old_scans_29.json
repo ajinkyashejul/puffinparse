@@ -1,0 +1,43 @@
+[
+  {
+    "id": "29_231231",
+    "type": "present",
+    "text": "At this time, after having watched you",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "29_231231"
+  },
+  {
+    "id": "29_967492",
+    "type": "order",
+    "before": "My Dear Mr. Roosevelt",
+    "after": "at this time, after having",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "29_967492"
+  },
+  {
+    "id": "29_998712",
+    "type": "absent",
+    "text": "ack 5/27/14",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "29_998712"
+  },
+  {
+    "id": "29_928938",
+    "type": "present",
+    "text": "express to you my appreciation of your many and",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "29_928938"
+  },
+  {
+    "id": "29_762787",
+    "type": "present",
+    "text": "Roosevelt I want to express to you my appreciation of your many and notable",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "29_762787"
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "12_pg71_pg1_text_00",
+    "type": "present",
+    "text": "Pollard, K.S., Salama, S.R., King, B., et al., 2006a. Forces shaping the fastest evolving regions in the human genome.",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "12_pg71_pg1_text_00"
+  },
+  {
+    "id": "12_pg71_pg1_text_01",
+    "type": "present",
+    "text": "Nielsen, R., 2005. Molecular signatures of natural selection.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "12_pg71_pg1_text_01"
+  },
+  {
+    "id": "12_pg71_pg1_text_02",
+    "type": "present",
+    "text": "Rockman, M.V., Hahn, M.W., Soranzo, N., et al., 2005. Ancient and recent positive selection transformed opioid cis-regulation in humans.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "12_pg71_pg1_text_02"
+  },
+  {
+    "id": "12_pg71_pg1_text_03",
+    "type": "present",
+    "text": "Kim, Y., Stephan, W., 2002. Detecting a local signature of genetic hitchhiking along a recombining chromosome.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "12_pg71_pg1_text_03"
+  },
+  {
+    "id": "12_pg71_pg1_text_04",
+    "type": "present",
+    "text": "Lockless, S.W., Ranganathan, R., 1999. Evolutionarily conserved pathways of energetic connectivity in protein families.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "12_pg71_pg1_text_04"
+  },
+  {
+    "id": "12_pg71_pg1_text_07",
+    "type": "present",
+    "text": "Knudsen, B., Miyamoto, M.M., Laipis, P.J., Silverman, D.N., 2003. Using evolutionary rates to investigate protein functional divergence and conservation:",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "12_pg71_pg1_text_07"
+  },
+  {
+    "id": "12_pg71_pg1_text_08",
+    "type": "present",
+    "text": "Proceedings of the National Academy of Sciences of the United States of America 98 (25), 14512-14517.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "12_pg71_pg1_text_08"
+  }
+]

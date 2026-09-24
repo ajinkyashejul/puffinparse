@@ -1,0 +1,98 @@
+[
+  {
+    "id": "10a_pg1_text_00",
+    "type": "present",
+    "text": "tell A and B apart → APART",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "10a_pg1_text_00"
+  },
+  {
+    "id": "10a_pg1_text_01",
+    "type": "present",
+    "text": "template /'templert/ noun [C] 1 a shape cut out of",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "10a_pg1_text_01"
+  },
+  {
+    "id": "10a_pg1_text_02",
+    "type": "present",
+    "text": "tenant farmers (= ones who do not own their own",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "10a_pg1_text_02"
+  },
+  {
+    "id": "10a_pg1_text_05",
+    "type": "present",
+    "text": "tenant/'tenənt/ noun [C] a person who pays money",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "10a_pg1_text_05"
+  },
+  {
+    "id": "10a_pg1_text_06",
+    "type": "present",
+    "text": "tenacity/tə'næsəti/",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "10a_pg1_text_06"
+  },
+  {
+    "id": "10a_pg1_text_07",
+    "type": "present",
+    "text": "tell the time to read the time from a clock or watch",
+    "case_sensitive": true,
+    "max_diffs": 3,
+    "source": "10a_pg1_text_07"
+  },
+  {
+    "id": "10a_pg1_text_08",
+    "type": "present",
+    "text": "take sb's temperature (HEALTH) to measure the",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "10a_pg1_text_08"
+  },
+  {
+    "id": "10a_pg1_text_09",
+    "type": "present",
+    "text": "to do sth, even if it is wrong: His dream of riches had",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "10a_pg1_text_09"
+  },
+  {
+    "id": "10a_pg1_text_10",
+    "type": "present",
+    "text": "temptation 2 [C] a thing that",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "10a_pg1_text_10"
+  },
+  {
+    "id": "10a_pg1_text_11",
+    "type": "present",
+    "text": "temporarily /'temprərəli/adv.",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "10a_pg1_text_11"
+  },
+  {
+    "id": "10a_pg1_text_12",
+    "type": "present",
+    "text": "temperament /'temprəmənt/ noun [C,U] a",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "10a_pg1_text_12"
+  },
+  {
+    "id": "10a_pg1_text_13",
+    "type": "present",
+    "text": "My brother tends to talk a lot when he's nervous.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "10a_pg1_text_13"
+  }
+]

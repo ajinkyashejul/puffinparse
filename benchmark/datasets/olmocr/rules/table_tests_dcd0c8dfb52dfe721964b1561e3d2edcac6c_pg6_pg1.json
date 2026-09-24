@@ -1,0 +1,35 @@
+[
+  {
+    "id": "dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_table_01",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "NTRI",
+      "value": "Nitrite"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_table_01"
+  },
+  {
+    "id": "dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_table_02",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "PARAMETER NAME",
+      "value": "Silicate"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_table_02"
+  },
+  {
+    "id": "dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_table_03",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Silicate",
+      "value": "SLCAZZXX"
+    },
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "dcd0c8dfb52dfe721964b1561e3d2edcac6c_pg6_table_03"
+  }
+]

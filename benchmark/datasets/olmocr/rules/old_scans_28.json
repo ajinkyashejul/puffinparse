@@ -1,0 +1,52 @@
+[
+  {
+    "id": "28_43659",
+    "type": "present",
+    "text": "I know and have full and complete knowledge",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "28_43659"
+  },
+  {
+    "id": "28_854151",
+    "type": "present",
+    "text": "with the labor organizations and the common people with you ? Address",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "28_854151"
+  },
+  {
+    "id": "28_340776",
+    "type": "present",
+    "text": "The blind groupings of our legislators and",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "28_340776"
+  },
+  {
+    "id": "28_430651",
+    "type": "present",
+    "text": "Dear sir:-",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "28_430651"
+  },
+  {
+    "id": "28_290746",
+    "type": "order",
+    "before": "and remedy existing conditions with relation to monopoly are a joke to some of the",
+    "after": "the gradual destruction of all food and provision combinations, including all trusts and combinations",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "28_290746"
+  },
+  {
+    "id": "28_79403",
+    "type": "order",
+    "before": "Dorchester, Mass., May 22nd.",
+    "after": "author, or sponsor, grateful memory by the common people for a",
+    "case_sensitive": true,
+    "max_diffs": 0,
+    "source": "28_79403"
+  }
+]

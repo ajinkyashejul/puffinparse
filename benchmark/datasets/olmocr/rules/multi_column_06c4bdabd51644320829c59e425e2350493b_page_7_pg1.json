@@ -1,0 +1,38 @@
+[
+  {
+    "id": "06c4bdabd51644320829c59e425e2350493b_page_7_pdf_order_896d5dec",
+    "type": "order",
+    "before": "Hal ini menjadikan struktur tulang trabekular lemah sehingga lebih mudah fraktur.",
+    "after": "Olahraga pembebanan perlu dilakukan untuk memberikan stress mekanik pada tulang rangka, latihan ini efektif untuk mencegah kehilangan massa tulang karena penuaan.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "06c4bdabd51644320829c59e425e2350493b_page_7.pdf_order_896d5dec"
+  },
+  {
+    "id": "06c4bdabd51644320829c59e425e2350493b_page_7_pdf_order_49f5e7a0",
+    "type": "order",
+    "before": "Kebiasaan olahraga yang kurang dapat meningkatkan risiko osteoporosis.",
+    "after": "Adanya pembebanan mekanik pada tulang (skeletal load) menimbulkan stress mekanik dan strain (resultant tissue deformation).",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "06c4bdabd51644320829c59e425e2350493b_page_7.pdf_order_49f5e7a0"
+  },
+  {
+    "id": "06c4bdabd51644320829c59e425e2350493b_page_7_pdf_order_2e00848b",
+    "type": "order",
+    "before": "Kehilangan massa tulang yang terjadi pada wanita pascamenopause sebesar 0.5-1% per tahun dari berat tulang.",
+    "after": "15 Wanita pascamenopause juga akan mengalami penurunan tinggi badan hingga 20 cm antara usia 50-80 tahun, menimbulkan gambaran khas dowager hump (wanita tua yang bungkuk).",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "06c4bdabd51644320829c59e425e2350493b_page_7.pdf_order_2e00848b"
+  },
+  {
+    "id": "06c4bdabd51644320829c59e425e2350493b_page_7_pdf_order_c44bb31c",
+    "type": "order",
+    "before": "22 Hasil penelitian ini menunjukkan bahwa subjek yang berusia >60 tahun lebih banyak ditemukan pada kelompok kasus daripada kelompok kontrol.",
+    "after": "26 Olahraga (tegangan) dapat meningkatkan jumlah sel osteoblas dan menurunkan jumlah sel osteoklas melalui mekanisme mekanotransduksi.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "06c4bdabd51644320829c59e425e2350493b_page_7.pdf_order_c44bb31c"
+  }
+]

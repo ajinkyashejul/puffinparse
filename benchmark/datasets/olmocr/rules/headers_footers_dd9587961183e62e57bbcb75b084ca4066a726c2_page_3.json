@@ -1,0 +1,42 @@
+[
+  {
+    "id": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_header_00",
+    "type": "absent",
+    "text": "PHYSICAL REVIEW LETTERS",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_header_00"
+  },
+  {
+    "id": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_header_01",
+    "type": "absent",
+    "text": "week ending",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_header_01"
+  },
+  {
+    "id": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_header_02",
+    "type": "absent",
+    "text": "PRL 96, 105008 (2006)",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_header_02"
+  },
+  {
+    "id": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_header_03",
+    "type": "absent",
+    "text": "17 MARCH 2006",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_header_03"
+  },
+  {
+    "id": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3_pdf_manual_00",
+    "type": "absent",
+    "text": "105008-3",
+    "case_sensitive": false,
+    "max_diffs": 0,
+    "source": "dd9587961183e62e57bbcb75b084ca4066a726c2_page_3.pdf_manual_00"
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1_table_00",
+    "type": "table_cell",
+    "cell": {
+      "row_header": "Chief, Cardiac Catheterization Laboratory MedStar Union Memorial Hospital",
+      "value": "John Wang, M.D."
+    },
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1_table_00"
+  },
+  {
+    "id": "4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1_table_01",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Name",
+      "value": "Stafford Warren, M.D.1*"
+    },
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1_table_01"
+  },
+  {
+    "id": "4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1_table_02",
+    "type": "table_cell",
+    "cell": {
+      "col_header": "Title/Affiliation",
+      "value": "Maryland Certified Science Educator and Instructional Technologist"
+    },
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "4e51a97232ca26f3f9acad0e3b6f2b0b71bf_pg1_table_02"
+  }
+]

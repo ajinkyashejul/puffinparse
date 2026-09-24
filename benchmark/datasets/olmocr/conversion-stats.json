@@ -1,0 +1,39 @@
+{
+  "committed_docs": 40,
+  "committed_rules": 205,
+  "committed_rules_by_type": {
+    "absent": 39,
+    "order": 50,
+    "present": 80,
+    "table_cell": 36
+  },
+  "convertible_pdfs": 824,
+  "full_index_docs": 824,
+  "implicit_baseline_tests_skipped": 1394,
+  "outcome_by_type": {
+    "absent:converted": 622,
+    "absent:skipped:positional_absent": 201,
+    "baseline:skipped:baseline": 9,
+    "math:skipped:math": 3385,
+    "order:converted": 1061,
+    "present:converted": 721,
+    "table:converted": 309,
+    "table:relaxed:table_same_row": 327,
+    "table:skipped:table_vertical_neighbour": 384
+  },
+  "pdfs_without_convertible_rules": 579,
+  "rules_converted": 3040,
+  "rules_skipped": 3979,
+  "skipped_over_budget": 5,
+  "skipped_too_large": 3,
+  "upstream_pdfs": 1403,
+  "upstream_tests": 7019,
+  "upstream_tests_by_type": {
+    "absent": 823,
+    "baseline": 9,
+    "math": 3385,
+    "order": 1061,
+    "present": 721,
+    "table": 1020
+  }
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "031a888e402c82517f213222ae97147dd7dc_page_1_pdf_order_0a0c26a4",
+    "type": "order",
+    "before": "There are three main speaker change detection approaches [1], [2].",
+    "after": "The paper is organized as follows: In Section 2 the DISTBIC algorithm is briefly described.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "031a888e402c82517f213222ae97147dd7dc_page_1.pdf_order_0a0c26a4"
+  },
+  {
+    "id": "031a888e402c82517f213222ae97147dd7dc_page_1_pdf_order_a0d85190",
+    "type": "order",
+    "before": "2. DISTBIC algorithm",
+    "after": "In order to answer this question, the Kullback-Leibler distance can be used for example.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "031a888e402c82517f213222ae97147dd7dc_page_1.pdf_order_a0d85190"
+  },
+  {
+    "id": "031a888e402c82517f213222ae97147dd7dc_page_1_pdf_order_4f0bd541",
+    "type": "order",
+    "before": "The speaker changes are then detected as the instants when it is necessary to change the speaker model in order it match the speech signal.",
+    "after": "The last approach is the decoder-guided approach.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "031a888e402c82517f213222ae97147dd7dc_page_1.pdf_order_4f0bd541"
+  },
+  {
+    "id": "031a888e402c82517f213222ae97147dd7dc_page_1_pdf_order_e7c9be72",
+    "type": "order",
+    "before": "Abstract",
+    "after": "Finally, a conclusion is given in Section 5.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "031a888e402c82517f213222ae97147dd7dc_page_1.pdf_order_e7c9be72"
+  }
+]

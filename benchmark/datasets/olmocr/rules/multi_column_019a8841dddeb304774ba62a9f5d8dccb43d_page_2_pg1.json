@@ -1,0 +1,38 @@
+[
+  {
+    "id": "019a8841dddeb304774ba62a9f5d8dccb43d_page_2_pdf_order_00d331ca",
+    "type": "order",
+    "before": "L'examen clinique ne montre pas d'hypotension orthostatique.",
+    "after": "Sao Paulo Med J 2005;123:292–4.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "019a8841dddeb304774ba62a9f5d8dccb43d_page_2.pdf_order_00d331ca"
+  },
+  {
+    "id": "019a8841dddeb304774ba62a9f5d8dccb43d_page_2_pdf_order_2410e748",
+    "type": "order",
+    "before": "La prise en charge préventive des ascendants n'est pas codifiée.",
+    "after": "Tous droits réservés.",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "019a8841dddeb304774ba62a9f5d8dccb43d_page_2.pdf_order_2410e748"
+  },
+  {
+    "id": "019a8841dddeb304774ba62a9f5d8dccb43d_page_2_pdf_order_5a8cba0a",
+    "type": "order",
+    "before": "les patients porteurs de dysautonomie comme les parkinsoniens ou les patients institutionnalisés en Etablissement d'Hébergement pour Personnes Agées Dépendantes (EHPAD) où elle faite partie du bilan de chute [1].",
+    "after": "Cas Clinique.– Une patiente âgée de 82 ans, ayant pour habitude de jouer au golf à l'étranger, se plaint depuis un an environ de malaises avec liptohymie, survenant au décours de chacun des principaux repas et retentissant sur sa vie sociale.",
+    "case_sensitive": true,
+    "max_diffs": 2,
+    "source": "019a8841dddeb304774ba62a9f5d8dccb43d_page_2.pdf_order_5a8cba0a"
+  },
+  {
+    "id": "019a8841dddeb304774ba62a9f5d8dccb43d_page_2_pdf_order_6a2477bc",
+    "type": "order",
+    "before": "La thrombose intéressait la partie proximale de l'artère axillaire du côté dominant et le mode de découverte était chronique dans les trois cas.",
+    "after": "CA170 Ulcères chroniques des membres inférieurs sans maladie artérielle, veineuse ou lymphatique : penser au « Deck chair leg syndrome »",
+    "case_sensitive": true,
+    "max_diffs": 1,
+    "source": "019a8841dddeb304774ba62a9f5d8dccb43d_page_2.pdf_order_6a2477bc"
+  }
+]
