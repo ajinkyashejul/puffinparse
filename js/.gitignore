@@ -1,0 +1,5 @@
+node_modules/
+# Build outputs of `npm run build` (the addon and the napi-rs generated loader + typings).
+*.node
+native.js
+native.d.ts

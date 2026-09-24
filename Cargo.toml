@@ -4,6 +4,7 @@ members = [
     "crates/liteocr-core",
     "crates/liteocr-cli",
     "crates/liteocr-python",
+    "crates/liteocr-node",
 ]
 
 [workspace.package]
