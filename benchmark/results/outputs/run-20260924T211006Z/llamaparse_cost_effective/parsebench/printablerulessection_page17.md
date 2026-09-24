@@ -1,0 +1,777 @@
+# MASSACHUSETTS PRIVATE PASSENGER RESIDUAL MARKET AUTOMOBILE INSURANCE MANUAL
+**(Rule 18)**
+
+## SHORT RATE CANCELLATION OF SHORT TERM POLICIES
+### Percentages of Policy Premiums to be Retained by Insurance Company
+#### Policy Effective Date
+
+| No. of Daysin force | Jan. | Feb. | Mar. | Apr. | May | June | July | August1-15 | August16-31 | September1-15 | September16-30 | October1-15 | October16-31 | November1-15 | November16-30 | December1-15 | December16-31                                                             |
+| ------------------- | ---- | ---- | ---- | ---- | --- | ---- | ---- | ---------- | ----------- | ------------- | -------------- | ----------- | ------------ | ------------ | ------------- | ------------ | ------------------------------------------------------------------------- |
+| 1-10                | 9    | 9    | 10   | 11   | 13  | 15   | 16   | 17         | 18          | 19            | 20             | 22          | 25           | 29           | 37            | 54           | 73                                                                        |
+| 11-15               | 11   | 12   | 13   | 15   | 16  | 17   | 18   | 19         | 20          | 21            | 23             | 26          | 29           | 35           | 45            | 65           | 100                                                                       |
+| 16-20               | 15   | 16   | 16   | 17   | 18  | 19   | 21   | 22         | 24          | 26            | 28             | 31          | 37           | 44           | 59            | 83           |                                                                           |
+| 21-25               | 17   | 17   | 18   | 19   | 20  | 22   | 24   | 26         | 28          | 30            | 34             | 37          | 44           | 53           | 70            | 100          |                                                                           |
+| 26-30               | 18   | 19   | 20   | 21   | 22  | 24   | 27   | 29         | 32          | 35            | 39             | 43          | 51           | 62           | 81            | 100          |                                                                           |
+| 31-35               | 19   | 20   | 21   | 23   | 24  | 27   | 30   | 33         | 36          | 39            | 44             | 49          | 59           | 70           | 91            |              |                                                                           |
+| 36-40               | 21   | 22   | 23   | 25   | 27  | 29   | 33   | 36         | 40          | 43            | 49             | 55          | 65           | 77           | 100           |              |                                                                           |
+| 41-45               | 22   | 24   | 25   | 27   | 29  | 32   | 35   | 40         | 43          | 48            | 54             | 61          | 71           | 85           | 100           |              |                                                                           |
+| 46-50               | 24   | 25   | 27   | 29   | 31  | 34   | 38   | 43         | 47          | 52            | 59             | 66          | 76           | 92           |               |              |                                                                           |
+| 51-55               | 25   | 27   | 28   | 30   | 33  | 37   | 41   | 47         | 51          | 57            | 63             | 71          | 82           | 100          |               |              |                                                                           |
+| 56-60               | 27   | 28   | 30   | 32   | 35  | 39   | 44   | 50         | 55          | 61            | 67             | 76          | 88           | 100          |               |              |                                                                           |
+| 61-65               | 28   | 30   | 32   | 34   | 37  | 42   | 47   | 53         | 59          | 64            | 71             | 80          | 94           |              |               |              |                                                                           |
+| 66-70               | 30   | 31   | 33   | 36   | 40  | 44   | 50   | 57         | 62          | 68            | 76             | 85          | 100          |              |               |              |                                                                           |
+| 71-75               | 31   | 33   | 35   | 38   | 42  | 47   | 53   | 60         | 65          | 71            | 80             | 90          | 100          |              |               |              |                                                                           |
+| 76-80               | 32   | 35   | 37   | 40   | 44  | 49   | 56   | 63         | 68          | 75            | 84             | 94          |              |              |               |              |                                                                           |
+| 81-85               | 34   | 36   | 39   | 42   | 46  | 52   | 59   | 66         | 71          | 78            | 88             | 99          |              |              |               |              |                                                                           |
+| 86-90               | 35   | 38   | 40   | 44   | 48  | 54   | 62   | 69         | 75          | 82            | 92             | 100         |              |              |               |              |                                                                           |
+| 91-105              | 38   | 41   | 44   | 48   | 53  | 59   | 66   | 74         | 81          | 89            | 100            |             |              |              |               |              |                                                                           |
+| 106-120             | 42   | 45   | 49   | 54   | 59  | 65   | 74   | 82         | 90          | 100           |                |             |              |              |               |              |                                                                           |
+| 121-135             | 47   | 50   | 54   | 59   | 65  | 71   | 81   | 91         | 100         |               |                |             |              |              |               |              |                                                                           |
+| 136-150             | 51   | 55   | 59   | 64   | 70  | 78   | 88   |            |             |               |                |             |              |              |               |              |                                                                           |
+| 151-165             | 55   | 60   | 63   | 69   | 75  | 84   | 95   |            |             |               |                |             |              |              |               |              |                                                                           |
+| 166-180             | 59   | 63   | 68   | 72   | 80  | 90   | 100  |            |             |               |                |             |              |              |               |              |                                                                           |
+| 181-195             | 63   | 67   | 72   | 78   | 85  | 96   |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 196-210             | 67   | 71   | 76   | 83   | 91  | 100  |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 211-225             | 70   | 75   | 80   | 87   | 94  |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 226-240             | 73   | 78   | 84   | 92   | 100 |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 241-255             | 77   | 82   | 88   | 94   |     |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 256-270             | 80   | 86   | 92   | 100  |     |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 271-285             | 84   | 90   | 96   |      |     |      |      |            |             |               |                |             |              |              |               |              | TABLE 1<br/>(Motorcycles with Registration<br/>Expiration of December 31) |
+| 286-300             | 87   | 93   | 100  |      |     |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 301-315             | 90   | 97   |      |      |     |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 316-330             | 94   | 100  |      |      |     |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 331-360             | 99   |      |      |      |     |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+| 361-365             | 100  |      |      |      |     |      |      |            |             |               |                |             |              |              |               |              |                                                                           |
+
+
+<table>
+  <thead>
+    <tr>
+      <th>No. of Days<br>in force</th>
+      <th>Dec.</th>
+      <th>Jan.</th>
+      <th>Feb.</th>
+      <th>Mar.</th>
+      <th>Apr.</th>
+      <th>May</th>
+      <th>June</th>
+      <th>July<br>1-15</th>
+      <th>July<br>16-31</th>
+      <th>August<br>1-15</th>
+      <th>August<br>16-31</th>
+      <th>September<br>1-15</th>
+      <th>September<br>16-30</th>
+      <th>October<br>1-15</th>
+      <th>October<br>16-31</th>
+      <th>November<br>1-15</th>
+      <th>November<br>16-30</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1-10</td>
+<td>9</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>13</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>22</td>
+<td>25</td>
+<td>29</td>
+<td>37</td>
+<td>54</td>
+<td>73</td>
+    </tr>
+<tr>
+      <td>11-15</td>
+<td>11</td>
+<td>12</td>
+<td>13</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td>23</td>
+<td>26</td>
+<td>28</td>
+<td>31</td>
+<td>37</td>
+<td>44</td>
+<td>65</td>
+<td>100</td>
+    </tr>
+<tr>
+      <td>16-20</td>
+<td>15</td>
+<td>16</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>21</td>
+<td>22</td>
+<td>24</td>
+<td>26</td>
+<td>28</td>
+<td>30</td>
+<td>34</td>
+<td>37</td>
+<td>44</td>
+<td>53</td>
+<td>70</td>
+<td>100</td>
+    </tr>
+<tr>
+      <td>21-25</td>
+<td>17</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>22</td>
+<td>24</td>
+<td>26</td>
+<td>28</td>
+<td>30</td>
+<td>34</td>
+<td>37</td>
+<td>44</td>
+<td>53</td>
+<td>70</td>
+<td>100</td>
+<td></td>
+    </tr>
+<tr>
+      <td>26-30</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td>22</td>
+<td>24</td>
+<td>27</td>
+<td>29</td>
+<td>32</td>
+<td>35</td>
+<td>39</td>
+<td>43</td>
+<td>51</td>
+<td>62</td>
+<td>81</td>
+<td>100</td>
+<td></td>
+    </tr>
+<tr>
+      <td>31-35</td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td>23</td>
+<td>24</td>
+<td>27</td>
+<td>30</td>
+<td>33</td>
+<td>36</td>
+<td>39</td>
+<td>44</td>
+<td>49</td>
+<td>59</td>
+<td>70</td>
+<td>91</td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>36-40</td>
+<td>21</td>
+<td>22</td>
+<td>23</td>
+<td>25</td>
+<td>27</td>
+<td>29</td>
+<td>33</td>
+<td>36</td>
+<td>40</td>
+<td>43</td>
+<td>49</td>
+<td>55</td>
+<td>65</td>
+<td>77</td>
+<td>100</td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>41-45</td>
+<td>22</td>
+<td>24</td>
+<td>25</td>
+<td>27</td>
+<td>29</td>
+<td>32</td>
+<td>35</td>
+<td>40</td>
+<td>43</td>
+<td>48</td>
+<td>54</td>
+<td>61</td>
+<td>71</td>
+<td>85</td>
+<td>100</td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>46-50</td>
+<td>24</td>
+<td>25</td>
+<td>27</td>
+<td>29</td>
+<td>31</td>
+<td>34</td>
+<td>38</td>
+<td>43</td>
+<td>47</td>
+<td>52</td>
+<td>59</td>
+<td>66</td>
+<td>76</td>
+<td>92</td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>51-55</td>
+<td>25</td>
+<td>27</td>
+<td>28</td>
+<td>30</td>
+<td>33</td>
+<td>37</td>
+<td>41</td>
+<td>47</td>
+<td>51</td>
+<td>57</td>
+<td>63</td>
+<td>71</td>
+<td>82</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>56-60</td>
+<td>27</td>
+<td>28</td>
+<td>30</td>
+<td>32</td>
+<td>35</td>
+<td>39</td>
+<td>44</td>
+<td>50</td>
+<td>55</td>
+<td>61</td>
+<td>67</td>
+<td>76</td>
+<td>88</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>61-65</td>
+<td>28</td>
+<td>30</td>
+<td>32</td>
+<td>34</td>
+<td>37</td>
+<td>42</td>
+<td>47</td>
+<td>53</td>
+<td>59</td>
+<td>64</td>
+<td>71</td>
+<td>80</td>
+<td>94</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>66-70</td>
+<td>30</td>
+<td>31</td>
+<td>33</td>
+<td>36</td>
+<td>40</td>
+<td>44</td>
+<td>50</td>
+<td>57</td>
+<td>62</td>
+<td>68</td>
+<td>76</td>
+<td>85</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>71-75</td>
+<td>31</td>
+<td>33</td>
+<td>35</td>
+<td>38</td>
+<td>42</td>
+<td>47</td>
+<td>53</td>
+<td>60</td>
+<td>65</td>
+<td>71</td>
+<td>80</td>
+<td>90</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>76-80</td>
+<td>32</td>
+<td>35</td>
+<td>37</td>
+<td>40</td>
+<td>44</td>
+<td>49</td>
+<td>56</td>
+<td>63</td>
+<td>68</td>
+<td>75</td>
+<td>84</td>
+<td>94</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>81-85</td>
+<td>34</td>
+<td>36</td>
+<td>39</td>
+<td>42</td>
+<td>46</td>
+<td>52</td>
+<td>59</td>
+<td>66</td>
+<td>71</td>
+<td>78</td>
+<td>88</td>
+<td>99</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>86-90</td>
+<td>35</td>
+<td>38</td>
+<td>40</td>
+<td>44</td>
+<td>48</td>
+<td>54</td>
+<td>62</td>
+<td>69</td>
+<td>75</td>
+<td>82</td>
+<td>92</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>91-105</td>
+<td>38</td>
+<td>41</td>
+<td>44</td>
+<td>48</td>
+<td>53</td>
+<td>59</td>
+<td>66</td>
+<td>74</td>
+<td>81</td>
+<td>89</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>106-120</td>
+<td>42</td>
+<td>45</td>
+<td>49</td>
+<td>54</td>
+<td>59</td>
+<td>65</td>
+<td>74</td>
+<td>82</td>
+<td>90</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>121-135</td>
+<td>47</td>
+<td>50</td>
+<td>54</td>
+<td>59</td>
+<td>65</td>
+<td>71</td>
+<td>81</td>
+<td>91</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>136-150</td>
+<td>51</td>
+<td>55</td>
+<td>59</td>
+<td>64</td>
+<td>70</td>
+<td>78</td>
+<td>88</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>151-165</td>
+<td>55</td>
+<td>60</td>
+<td>63</td>
+<td>69</td>
+<td>75</td>
+<td>84</td>
+<td>95</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>166-180</td>
+<td>59</td>
+<td>63</td>
+<td>68</td>
+<td>72</td>
+<td>80</td>
+<td>90</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>181-195</td>
+<td>63</td>
+<td>67</td>
+<td>72</td>
+<td>78</td>
+<td>85</td>
+<td>96</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>196-210</td>
+<td>67</td>
+<td>71</td>
+<td>76</td>
+<td>83</td>
+<td>91</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>211-225</td>
+<td>70</td>
+<td>75</td>
+<td>80</td>
+<td>87</td>
+<td>94</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>226-240</td>
+<td>73</td>
+<td>78</td>
+<td>84</td>
+<td>92</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>241-255</td>
+<td>77</td>
+<td>82</td>
+<td>88</td>
+<td>94</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>256-270</td>
+<td>80</td>
+<td>86</td>
+<td>92</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>271-285</td>
+<td>84</td>
+<td>90</td>
+<td>96</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>TABLE 2<br>(All Vehicles with Registration<br>Expiration of November 30)</td>
+    </tr>
+<tr>
+      <td>286-300</td>
+<td>87</td>
+<td>93</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>301-315</td>
+<td>90</td>
+<td>97</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>316-330</td>
+<td>94</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>331-360</td>
+<td>99</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+<tr>
+      <td>361-365</td>
+<td>100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+    </tr>
+  </tbody>
+</table>
+
+12
+Commonwealth Automobile Reinsurers –May 1, 2024

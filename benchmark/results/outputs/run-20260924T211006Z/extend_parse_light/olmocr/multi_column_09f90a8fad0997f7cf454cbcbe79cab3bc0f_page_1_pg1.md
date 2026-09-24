@@ -1,0 +1,23 @@
+# Experiments with Open-Domain Textual Question Answering
+
+### Sanda M. Harabagiu and Marius A. Pasca and Steven J. Maiorano Department of Computer Science and Engineering Southern Methodist University Dallas, TX 75275-0122 {sanda, marius, steve}@renoir. seas. smu. edu
+
+### Abstract
+
+This paper describes the integration of several knowledge-based natural language processing tech- niques into a Question Answering system, capable of mining textual answers from large collections of texts. Surprizing quality is achieved when several lightweight knowledge-based NLP techniques com- plement mostly shallow, surface-based approaches.
+
+### 1 Background
+
+The last decade has witnessed great advances and interest in the area of Information Extraction (IE) from real-world texts. Systems that participated in the TIPSTER MUC competitions have been quite suc- cessful at extracting information from newswire mes- sages and filling templates with information pertain- ing to events or situations of interest. Typically, the templates model queries regarding who did what to whom, when and where, and eventually why.
+
+Recently, a new trend in information processing from texts has emerged. Textual Question Answer- ing (Q/A) aims at identifying the answer of a ques- tion in large collections of on-line documents. In- stead of extracting all events of interest and their re- lated entities, a Q/A system highlights only a short piece of text, accounting for the answer. Moreover, questions are expressed in natural language, are not constrained to a specific domain and are not limited to the six question types sought by IE systems (i.e. who1 did what2 to whom3, when and where5, and eventually why6).
+
+In open-domain Q/A systems, the finite-state technology and domain knowledge that made IE sys- tems successful are replaced by a combination of (1) knowledge-based question processing, (2) new forms of text indexing and (3) lightweight abduction of queries. More generally, these systems combine cre- atively components of the NLP basic research in- frastructure developed in the 80s (e.g. the compu- tational theory of Q/A reported in (Lehnert 1978) and the theory of abductive interpretation of texts reported in (Hobbs et al.1993)) with other shallow techniques that make possible the open-domain pro- cessing on real-world texts.
+
+The idea of building open-domain Q/A systems that perform on real-world document collections was initiated by the eighth Text REtrieval Conference (TREC-8), by organizing the first competition of an- swering fact-based questions such as "Who came up with the name, El Nino?". Resisting the tempta- tion of merely porting and integrating existing IE and IR technologies into Q/A systems, the develop- ers of the TREC Q/A systems have not only shaped new processing methods, but also inspired new re- search in the challenging integration of surface-text- based methods with knowledge-based text inference. In particular, two clear knowledge processing needs are presented: (1) capturing the semantics of open- domain questions and (2) justifying the correctness of answers.
+
+In this paper, we present our experiments with integrating knowledge-based NLP with shallow pro- cessing techniques for these two aspects of Q/A. Our research was motivated by the need to enhance the precision of an implemented Q/A system and by the requirement to prepare it for scaling to more com- plex questions than those presented in the TREC competition. In the remaining of the paper, we de- scribe a Q/A architecture that allows the integra- tion of knowledge-based NLP processing with shal- low processing and we detail their interactions. Sec- tion 2 presents the functionality of several knowledge processing modules and describes the NLP tech- niques for question and answer processing. Section 3 explains the semantic and logical interactions of processing questions and answers whereas Section 4 highlights the inference aspects that implement the justification option of a Q/A system. Section 5 presents the results and the evaluations whereas Section 6 concludes the paper.
+
+### 2 The NLP Techniques
+
+Surprising quality for open-domain textual Q/A can be achieved when several lightweight knowledge- based NLP techniques complement mostly shallow, surface-based approaches. The processing imposed by Q/A systems must be distinguished, on the one hand, from IR techniques, that locate sets of doc-

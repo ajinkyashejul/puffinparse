@@ -95,3 +95,13 @@ uploading (a PDF tool that rewrites the object, or the one-line patch above), or
 to LlamaParse. A provider-agnostic follow-up worth doing in the runner: flag a successful call
 whose text is empty (`empty_output: true`) so it stands out in the viewer instead of hiding among
 low scores.
+
+## Update 2026-09-24: the empty page is not deterministic
+
+In the first `combined-v2` run (run-20260924T211006Z) the same `parsebench/text_multicolumns_2col`
+PDF came back empty only from `reducto/standard` (and from `tesseract/default`, whose `pdftoppm`
+rasterisation hits the same degenerate `/BBox`); `reducto/r-1`, both Extend engines and both
+LlamaParse tiers returned the full text. Provider rendering paths evidently vary between runs or
+releases, so a single empty result is not a stable property of a model. Results now flag these
+cases as `empty_output: true` (shown as `(+N empty)` in the leaderboard) so they are visible rather
+than blending into a low score.

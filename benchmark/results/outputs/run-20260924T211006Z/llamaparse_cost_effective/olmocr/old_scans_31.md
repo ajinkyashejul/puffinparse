@@ -1,0 +1,11 @@
+Col, Roosevelt, 5-28-14 #2
+
+I wish I could be on an island somewhere, about ten feet square and speak out. I could tell you just what I think about Mexico. I lived on its border for fifteen years. I speak Spanish indifferently--read it--lived in Spain thirteen months, had a home in Madrid, and should accept the **invitation** of **Ambassador** and Mrs. **Willard** to the wedding breakfast, were it possible. I am one of the men, who is glad that you are going to visit Spain. I do not know your reasons, but I am dead certain that you have got **good ones**. I am also glad that you have been in South America. I tied that trip up with Root's trip under your **administration**, and have said once or twice on the public platform, it took four hundred years before these **Continents** found a man courageous enough to open the way to the East, The dream--Isabella pawned her **jewels** to help Columbus' adventure. We are in a remarkable position. We are at the parting of the way of our provincial outlook. We must effectually, courageously be the big brother of this Western galaxy of republics.
+
+There is a great chain of world events coming **together** here--you have been the leading almost the initial spirit in our Spanish and Southern development. Root sounded a just regret when he asked the country to let the old party open the canal they built. Of course, if it was not for Goethals you might still do that. Spain built a "Silver Fleet". England, the people of the North, colonized, these two points of view are still warring in North America.
+
+I cannot help but think of General Wood and Goethals when I think of you, and of these things. You do not need Goethals any longer at Panama. I may **be wrong**, but I **cannot but** think of him--I cannot think of anyone else for the Governorship of New York next Fall. **Mitchell**, the State, the **City--** need him. And Mexico must be put in order by you and General Wood. That job has got to be done and think of having the time, the place and the men.
+
+Well, Godspeed you on your way. I am sending Kermit a portfolio of photogravures, about thirty-eight of my productions. I shall anxiously watch
+
+[signature]

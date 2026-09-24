@@ -1,0 +1,110 @@
+ANNUAL REPORT 2022
+
+Community Engagement
+
+We're also continuing our long tradition of investing
+in our communities.
+
+In 2023, we mark the 15th anniversary of
+Goldman Sachs 10,000 Women, our ongoing
+initiative to foster economic growth by providing
+women entrepreneurs around the world with a
+business and management education and access
+to capital. The 70,000 Women in-person business
+education program was launched in 2008, and in
+2018, the curriculum was made available online
+through Coursera, further democratizing access. In
+2014, in partnership with the International Finance
+Corporation (IFC), 70,000 Women launched a
+first-of-its-kind global finance facility, the Women
+Entrepreneurs Opportunity Facility, to enable
+access to capital for more women entrepreneurs.
+As of March 2023, the facility had reached more
+than 164,000 women entrepreneurs, eclipsing the
+100,000 target set when the initiative was launched,
+and contributing to an over $4.5 billion increase in
+the volume of loans on-lent by financial institutions
+to women-owned businesses. Overall, Goldman
+Sachs 10,000 Women has reached more than
+200,000 women from over 150 countries.
+
+Building on what we learned from 10,000 Women,
+
+in 2009 we launched our signature entrepreneurship
+initiative, Goldman Sachs 10,000 Small Businesses.
+Today, the program has served more than 13,600
+small businesses in all 50 states through our
+education program, and it has also partnered with
+select Community Development Financial Institutions
+to provide loans to small businesses. In 2020, we
+launched a new advocacy initiative, Goldman Sachs
+10,000 Small Business Voices, to help small business
+owners in the U.S. advocate for policy changes that
+matter to them. In July 2022, we brought together
+more than 2,500 entrepreneurs at our summit in
+Washington, D.C. — the largest gathering of its
+
+kind — to hear from top business leaders, devise
+new strategies for business growth and meet
+
+with more than 300 members of Congress to call
+
+for policy action, specifically to modernize and
+reauthorize the Small Business Administration
+
+for the first time in more than 20 years.
+
+LETTER TO SHAREHOLDERS
+
+In 2021, we took what we had learned from both
+programs to launch our latest initiative, One Million
+Black Women. In the first two years, we’ve already
+seen progress and firmwide engagement. We’ve
+committed more than $1 billion of investment
+capital and more than $20 million in grant capital
+
+to 116 organizations, companies and projects, which
+puts us on track to directly impact the lives of more
+than 184,000 Black women and girls. Some examples
+include a growth equity investment in CareAcademy,
+a Black woman-led upskilling company; our
+Alternative Investment Management Black Equity
+Opportunities fund; and our people serving as
+executive coaches to Black women school principals
+through our partnership with New Leaders. From
+our experience, and with the guidance of our
+Advisory Council, we’ve learned that what we
+
+need most — more than good ideas — are
+
+partners. Only by combining our efforts can we
+hope to transform the economy we leave behind
+
+for the next generation.
+
+Sustainable Finance
+
+Another area where we've long been focused is
+sustainability. We have been a leading voice in
+
+the financial services industry addressing climate
+change and other critical environmental challenges
+going back to 2005, when we established our
+Environmental Policy Framework. In 2019, we set
+
+a target of $750 billion in financing, advisory and
+investing activity over the next 10 years across the
+themes of climate transition and inclusive growth.
+We have achieved approximately 55 percent of our
+target in three years. By connecting our experience
+as a financial institution with the insights gained
+through our work with clients and partners and our
+ongoing engagement with the public sector, we are
+enabling capital to move toward solutions that will
+help clients not only adapt but also take ownership
+to drive the transition to a low-carbon economy.
+
+At the same time, we cannot address market gaps
+at scale on our own, so we continue to identify
+strategic partners whose strengths and areas of
+focus complement our own.
