@@ -26,7 +26,7 @@
       "Without careful planning, our towns and villages will grow in an uncoordinated way without necessarily enhancing and improving the areas where we live",
       "signature:John Bennett"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_simple__wordForwords_missing_sentence_percent_0"
   },

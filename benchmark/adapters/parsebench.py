@@ -275,7 +275,10 @@ class ParseBenchAdapter(Adapter):
                 id=slugify(upstream_id, 96) or "rule",
                 type="bag_of_sentences",
                 sentences=sorted(sentences),
-                threshold=1.0,
+                # Upstream reports a percentage, not a pass/fail. 1.0 made the rule fail on one
+                # reference artifact (two lines fused into a "sentence"); 0.8 keeps it a check
+                # that most of the page's text is there. See liteocr_core::bench::BAG_DEFAULT_THRESHOLD.
+                threshold=0.8,
                 case_sensitive=False,
                 source=upstream_id,
             )

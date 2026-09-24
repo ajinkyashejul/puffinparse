@@ -46,7 +46,7 @@
       "t s renewal premium cap factor (if applicable",
       "to the nearest 1.00. Round all other steps to the nearest.10"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_misc__mark2_missing_sentence_percent_0"
   },

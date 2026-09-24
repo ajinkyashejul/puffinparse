@@ -46,7 +46,7 @@
       "Vous garantirez ainsi que les appareils dont vous vous débarrassez sont correctement récupérés, traités et recyclés et préviendrez de cette façon les impacts néfastes possibles sur l'environnement et la santé humaine",
       "Vérifier le câble d'alimentation de temps en temps"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_multilang__french2_missing_sentence_percent_0"
   },

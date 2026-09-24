@@ -7,7 +7,7 @@
       "Pomocí substituce x= a y= dostaneme pro spojitou funkci z=f(x,y)=f(,)=g",
       "Výpočet dvojného integrálu v polárních souřadnicích"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_handwritting__math2_missing_sentence_percent_0"
   },

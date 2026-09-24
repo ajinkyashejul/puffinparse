@@ -19,7 +19,7 @@
       "WHEREAS, after the Closing, as Buyer implements compliance with the Assigned DEP Consent Order, it will incrementally convert portions of the Sanitary Sewer System into assets integrated and connected into the MS4 System and will reconvey them incrementally back to the Seller, and the Parties herein provide for such reconveyances",
       "WHEREAS, previously in 2004, Seller sold to The Redevelopment Authority of The City of Johnstown, an agency incorporated under the Urban Redevelopment Law of the Commonwealth of Pennsylvania (the \" JRA \"), the Dornick Point Sewage Treatment Plant (the \" Dornick Plant \") and the interceptor sewer system owned by the JRA, comprising approximately 256,000 linear feet of interceptor sanitary sewer pipe ranging in size from 10 to 63 inches in diameter and approximately 770 interceptor utility holes accessing such pipes, all as owned by the JRA (the \" JRA Interceptor System \"), pursuant to 2004 Dornick Plant and Interceptor Sale Agreements (as defined in Exhibit A hereto"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_simple__agreement_missing_sentence_percent_0"
   },

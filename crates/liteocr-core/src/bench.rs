@@ -7,6 +7,39 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use unicode_normalization::UnicodeNormalization;
 
+pub mod tables;
+
+pub use tables::{extract_tables, teds_grid, Grid};
+
+/// Version of the scoring pipeline (normalisation, metrics, rule semantics).
+///
+/// Recorded in every result JSON as `scorer_version` and bumped whenever a change would move a
+/// committed score, so `liteocr bench rescore` can bring old runs up to date offline. Result files
+/// written before the field existed are version `1`.
+///
+/// * `1` — initial scorer (pipe tables only, exact rule matching, headline in `char_similarity`).
+/// * `2` — HTML tables, `teds_grid`, punctuation-spacing-insensitive rule matching, fuzzy
+///   `bag_of_sentences`, entity decoding, explicit `Summary::score`.
+pub const SCORER_VERSION: u32 = 2;
+
+/// A `bag_of_sentences` sentence counts as present when some window of the prediction is within
+/// this normalised character similarity of it (`1 - edit_distance / |sentence|`).
+///
+/// ParseBench's sentences are cut from its own reference extraction, so they carry that
+/// extraction's small artifacts (a hyphenation, a stray footnote marker, a dropped space). 0.8
+/// tolerates about one edit in five characters: enough for those artifacts, not enough for a
+/// different sentence to pass (two unrelated English sentences of equal length sit well below 0.5).
+pub const BAG_SENTENCE_MIN_SIMILARITY: f64 = 0.8;
+
+/// Fraction of a bag's sentences that must be present when the rule sets no `threshold`. The
+/// ParseBench adapter writes the same value explicitly.
+///
+/// A bag is every sentence of the page as cut by the publisher's reference extraction, which fuses
+/// neighbouring lines into one "sentence" now and then (`"j i 25 k"`). At 1.0 a single such
+/// artifact fails the rule for every model, which made it dead signal; at 0.8 it still fails output
+/// that lost a column, a script or most of the page.
+pub const BAG_DEFAULT_THRESHOLD: f64 = 0.8;
+
 /// Options for [`normalize`].
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct NormalizeOptions {
@@ -28,7 +61,8 @@ impl Default for NormalizeOptions {
 /// NFKC, optional markdown stripping, whitespace collapsing, optional lowercasing.
 pub fn normalize(s: &str, opts: NormalizeOptions) -> String {
     let s: String = s.nfkc().collect();
-    let s = if opts.strip_markdown { crate::types::markdown_to_text(&s) } else { s };
+    // Tags are stripped before entities are decoded, so `&lt;b&gt;` survives as text.
+    let s = if opts.strip_markdown { tables::decode_entities(&crate::types::markdown_to_text(&s)) } else { s };
     let s = s
         .replace(['\u{2018}', '\u{2019}'], "'")
         .replace(['\u{201C}', '\u{201D}'], "\"")
@@ -70,9 +104,14 @@ pub struct Metrics {
     /// Reading-order agreement of shared lines (1 = same order). `None` if < 2 shared lines.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub order_score: Option<f64>,
-    /// Similarity restricted to markdown table lines. `None` if the truth has no tables.
+    /// Similarity restricted to table rows (markdown pipe tables and HTML `<table>`s, both reduced
+    /// to rows of cells). `None` if the truth has no tables.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub table_score: Option<f64>,
+    /// TEDS over the row/cell grid of the tables ([`tables::teds_grid`]): table *structure* plus
+    /// cell content. `None` if the truth has no tables (and in result files older than scorer v2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub teds_grid: Option<f64>,
     pub pred_chars: usize,
     pub truth_chars: usize,
     /// `passed / total` of a rule-scored document ([`score_rules`]). `None` for transcript documents.
@@ -125,7 +164,7 @@ pub fn score(pred: &str, truth: &str, opts: NormalizeOptions) -> Metrics {
     };
 
     let order_score = order_agreement(pred, truth, opts);
-    let table_score = table_similarity(pred, truth, opts);
+    let (table_score, teds_grid) = table_scores(pred, truth, opts);
 
     Metrics {
         char_similarity,
@@ -136,6 +175,7 @@ pub fn score(pred: &str, truth: &str, opts: NormalizeOptions) -> Metrics {
         word_f1,
         order_score,
         table_score,
+        teds_grid,
         pred_chars: p_chars.len(),
         truth_chars: t_chars.len(),
         rule_pass_rate: None,
@@ -221,36 +261,59 @@ fn order_agreement(pred: &str, truth: &str, opts: NormalizeOptions) -> Option<f6
     Some(concordant as f64 / total as f64)
 }
 
-/// Similarity of the markdown-table rows only. `None` if the truth has no table rows.
-fn table_similarity(pred: &str, truth: &str, opts: NormalizeOptions) -> Option<f64> {
-    let rows = |s: &str| -> Vec<String> {
-        s.lines()
-            .map(str::trim)
-            .filter(|l| l.starts_with('|') && !l.chars().all(|c| matches!(c, '|' | '-' | ':' | ' ')))
-            .map(|l| normalize(l, NormalizeOptions { strip_markdown: false, ..opts }))
-            .map(|l| l.replace('|', " "))
-            .map(|l| l.split_whitespace().collect::<Vec<_>>().join(" "))
+/// Every table of a document (markdown and HTML) with each cell normalised.
+fn normalized_tables(s: &str, opts: NormalizeOptions) -> Vec<Grid> {
+    extract_tables(s)
+        .into_iter()
+        .map(|t| t.into_iter().map(|row| row.iter().map(|c| normalize(c, opts)).collect()).collect())
+        .collect()
+}
+
+/// `(table_score, teds_grid)`, both `None` if the truth has no table.
+///
+/// `table_score` is the character similarity of the table rows only — each row's cells joined by a
+/// space, rows by a newline — so text around the tables does not count. `teds_grid` compares the
+/// same tables as trees ([`tables::teds_grid`]).
+fn table_scores(pred: &str, truth: &str, opts: NormalizeOptions) -> (Option<f64>, Option<f64>) {
+    let t_tables = normalized_tables(truth, opts);
+    if t_tables.is_empty() {
+        return (None, None);
+    }
+    let p_tables = normalized_tables(pred, opts);
+    let rows = |tables: &[Grid]| -> Vec<char> {
+        tables
+            .iter()
+            .flatten()
+            .map(|row| row.iter().flat_map(|c| c.split_whitespace()).collect::<Vec<_>>().join(" "))
+            .collect::<Vec<_>>()
+            .join("\n")
+            .chars()
             .collect()
     };
-    let t = rows(truth);
-    if t.is_empty() {
-        return None;
-    }
-    let p = rows(pred);
-    let tj: Vec<char> = t.join("\n").chars().collect();
-    let pj: Vec<char> = p.join("\n").chars().collect();
+    let (tj, pj) = (rows(&t_tables), rows(&p_tables));
     let max_len = tj.len().max(pj.len());
-    if max_len == 0 {
-        return Some(1.0);
-    }
-    Some(1.0 - levenshtein(&pj, &tj) as f64 / max_len as f64)
+    let table_score = if max_len == 0 { 1.0 } else { 1.0 - levenshtein(&pj, &tj) as f64 / max_len as f64 };
+    (Some(table_score), teds_grid(&p_tables, &t_tables))
 }
 
 /// Aggregate of per-document metrics.
+///
+/// `score` is the headline: the mean over documents of each document's primary metric
+/// ([`headline`]: `table_score` for `table-only` documents, the pass rate for rule documents,
+/// `char_similarity` otherwise), failures counting 0; `overall = 100 × score`. `char_similarity` is
+/// the plain mean of the documents' `char_similarity` (for a rule document that field carries the
+/// pass rate, see [`metrics_from_rules`]).
+///
+/// Deserialising a result file written before `score` existed (scorer v1) fills it from
+/// `overall / 100`; in those files `char_similarity` held the headline too.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[serde(from = "SummaryWire")]
 pub struct Summary {
     pub documents: usize,
     pub failed: usize,
+    /// Headline accuracy in `0..=1` (see the type docs). Leaderboards rank on this.
+    pub score: f64,
+    /// Mean of per-document `char_similarity`; failures count as 0.
     pub char_similarity: f64,
     pub cer: f64,
     pub wer: f64,
@@ -259,11 +322,55 @@ pub struct Summary {
     pub order_score: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub table_score: Option<f64>,
+    /// Mean `teds_grid` over the documents whose truth has a table.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub teds_grid: Option<f64>,
     /// Mean rule pass rate over the documents that were rule-scored. `None` if there were none.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rule_pass_rate: Option<f64>,
-    /// `100 * mean(char_similarity)`; failures count as 0.
+    /// `100 * score`; failures count as 0.
     pub overall: f64,
+}
+
+/// The wire shape of [`Summary`], tolerant of files that predate `score`.
+#[derive(Deserialize)]
+struct SummaryWire {
+    documents: usize,
+    failed: usize,
+    #[serde(default)]
+    score: Option<f64>,
+    char_similarity: f64,
+    cer: f64,
+    wer: f64,
+    word_f1: f64,
+    #[serde(default)]
+    order_score: Option<f64>,
+    #[serde(default)]
+    table_score: Option<f64>,
+    #[serde(default)]
+    teds_grid: Option<f64>,
+    #[serde(default)]
+    rule_pass_rate: Option<f64>,
+    overall: f64,
+}
+
+impl From<SummaryWire> for Summary {
+    fn from(w: SummaryWire) -> Self {
+        Self {
+            documents: w.documents,
+            failed: w.failed,
+            score: w.score.unwrap_or(w.overall / 100.0),
+            char_similarity: w.char_similarity,
+            cer: w.cer,
+            wer: w.wer,
+            word_f1: w.word_f1,
+            order_score: w.order_score,
+            table_score: w.table_score,
+            teds_grid: w.teds_grid,
+            rule_pass_rate: w.rule_pass_rate,
+            overall: w.overall,
+        }
+    }
 }
 
 /// Mean over documents. `failed` documents (no metrics) count as zero accuracy.
@@ -275,7 +382,8 @@ pub fn summarize(metrics: &[Option<Metrics>]) -> Summary {
 ///
 /// `table-only` documents (ParseBench's table split: the truth is the page's *table*, the
 /// prediction is the whole page) must be scored on `table_score`; everything else on
-/// `char_similarity`. See `docs/benchmarks/adapters.md`.
+/// `char_similarity` (which [`metrics_from_rules`] sets to the pass rate for rule documents). See
+/// `docs/benchmarks/adapters.md`.
 pub fn headline(metrics: &Metrics, table_only: bool) -> f64 {
     if table_only {
         metrics.table_score.unwrap_or(metrics.char_similarity)
@@ -312,19 +420,21 @@ pub fn summarize_with(metrics: &[Option<Metrics>], table_only: &[bool]) -> Summa
             Some(vals.iter().sum::<f64>() / vals.len() as f64)
         }
     };
-    let char_similarity = if n == 0 { 0.0 } else { headlines.iter().sum::<f64>() / n as f64 };
+    let score = if n == 0 { 0.0 } else { headlines.iter().sum::<f64>() / n as f64 };
     Summary {
         documents: n,
         failed,
-        char_similarity,
+        score,
+        char_similarity: mean(&|m| m.char_similarity),
         // error rates: failures count as 1.0
         cer: if n == 0 { 0.0 } else { (ok.iter().map(|m| m.cer).sum::<f64>() + failed as f64) / n as f64 },
         wer: if n == 0 { 0.0 } else { (ok.iter().map(|m| m.wer).sum::<f64>() + failed as f64) / n as f64 },
         word_f1: mean(&|m| m.word_f1),
         order_score: mean_opt(&|m| m.order_score),
         table_score: mean_opt(&|m| m.table_score),
+        teds_grid: mean_opt(&|m| m.teds_grid),
         rule_pass_rate: mean_opt(&|m| m.rule_pass_rate),
-        overall: 100.0 * char_similarity,
+        overall: 100.0 * score,
     }
 }
 
@@ -345,9 +455,10 @@ pub enum RuleType {
     Absent,
     /// The prediction contains `before` and then `after`, in that order.
     Order,
-    /// The prediction has a markdown table whose matching cell equals `cell.value`.
+    /// The prediction has a table (markdown or HTML) whose matching cell equals `cell.value`.
     TableCell,
-    /// The prediction contains at least `threshold` of `sentences`.
+    /// The prediction contains at least `threshold` of `sentences`, each matched fuzzily
+    /// ([`BAG_SENTENCE_MIN_SIMILARITY`]).
     BagOfSentences,
 }
 
@@ -410,7 +521,7 @@ pub struct Rule {
     /// `bag_of_sentences`: the sentences to look for.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sentences: Vec<String>,
-    /// `bag_of_sentences`: required pass fraction, default `1.0`.
+    /// `bag_of_sentences`: required pass fraction, default [`BAG_DEFAULT_THRESHOLD`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub threshold: Option<f64>,
     /// Compare case-sensitively; overrides [`NormalizeOptions::case_insensitive`] for this rule.
@@ -458,11 +569,54 @@ pub struct RuleScore {
     pub failures: Vec<RuleFailure>,
 }
 
-/// One markdown table of the prediction, with every cell already normalised.
+/// One table of the prediction (markdown or HTML), with every cell already rule-normalised.
 #[derive(Debug, Clone, Default)]
 struct Table {
     header: Vec<String>,
     rows: Vec<Vec<String>>,
+}
+
+/// Is `c` punctuation for [`squeeze_punct_spaces`]? ASCII punctuation plus the Unicode quote,
+/// dash, bracket and CJK punctuation ranges (NFKC has already folded full-width forms to ASCII).
+fn is_punct(c: char) -> bool {
+    c.is_ascii_punctuation()
+        || matches!(c,
+            '\u{a1}' | '\u{a7}' | '\u{ab}' | '\u{b6}' | '\u{b7}' | '\u{bb}' | '\u{bf}'
+            | '\u{2010}'..='\u{2027}'
+            | '\u{2030}'..='\u{205e}'
+            | '\u{3001}'..='\u{3003}'
+            | '\u{3008}'..='\u{3011}'
+            | '\u{3014}'..='\u{301f}'
+            | '\u{0964}' | '\u{0965}' // Devanagari/Bengali danda
+        )
+}
+
+/// Drop every space that touches punctuation: `(this " agreement ")` → `(this"agreement")`.
+///
+/// ParseBench's rule text comes from a tokenised reference extraction, so quotes, brackets and
+/// commas are often spaced as separate tokens while the page (and a correct parse) has them tight
+/// — or the other way round. Applied to both the prediction and the rule text, this makes spaces
+/// adjacent to punctuation insignificant for rule matching, and nothing else. Input must already
+/// be whitespace-collapsed ([`normalize`]).
+fn squeeze_punct_spaces(s: &str) -> String {
+    let chars: Vec<char> = s.chars().collect();
+    let mut out = String::with_capacity(s.len());
+    for (i, &c) in chars.iter().enumerate() {
+        if c == ' ' {
+            let prev = i.checked_sub(1).map(|j| chars[j]);
+            let next = chars.get(i + 1).copied();
+            if prev.is_some_and(is_punct) || next.is_some_and(is_punct) {
+                continue;
+            }
+        }
+        out.push(c);
+    }
+    out
+}
+
+/// [`normalize`] followed by [`squeeze_punct_spaces`]: the normalisation every rule comparison uses.
+fn rule_normalize(s: &str, opts: NormalizeOptions) -> String {
+    squeeze_punct_spaces(&normalize(s, opts))
 }
 
 /// The prediction, normalised at most once per case-sensitivity variant.
@@ -474,12 +628,13 @@ struct PredictionCache<'a> {
     raw: &'a str,
     opts: NormalizeOptions,
     text: [std::cell::OnceCell<String>; 2],
+    chars: [std::cell::OnceCell<Vec<char>>; 2],
     tables: [std::cell::OnceCell<Vec<Table>>; 2],
 }
 
 impl<'a> PredictionCache<'a> {
     fn new(raw: &'a str, opts: NormalizeOptions) -> Self {
-        Self { raw, opts, text: Default::default(), tables: Default::default() }
+        Self { raw, opts, text: Default::default(), chars: Default::default(), tables: Default::default() }
     }
 
     /// Normalisation for a rule: the run's options with `case_insensitive` taken from the rule.
@@ -488,26 +643,80 @@ impl<'a> PredictionCache<'a> {
     }
 
     fn text(&self, case_sensitive: bool) -> &str {
-        self.text[usize::from(case_sensitive)].get_or_init(|| normalize(self.raw, self.opts_for(case_sensitive)))
+        self.text[usize::from(case_sensitive)].get_or_init(|| rule_normalize(self.raw, self.opts_for(case_sensitive)))
+    }
+
+    /// [`Self::text`] as chars, for fuzzy matching.
+    fn chars(&self, case_sensitive: bool) -> &[char] {
+        self.chars[usize::from(case_sensitive)].get_or_init(|| self.text(case_sensitive).chars().collect())
     }
 
     fn tables(&self, case_sensitive: bool) -> &[Table] {
-        self.tables[usize::from(case_sensitive)]
-            .get_or_init(|| parse_markdown_tables(self.raw, self.opts_for(case_sensitive)))
+        self.tables[usize::from(case_sensitive)].get_or_init(|| {
+            let opts = self.opts_for(case_sensitive);
+            extract_tables(self.raw)
+                .into_iter()
+                .map(|grid| {
+                    let mut rows: Vec<Vec<String>> =
+                        grid.iter().map(|row| row.iter().map(|c| rule_normalize(c, opts)).collect()).collect();
+                    let header = rows.remove(0);
+                    Table { header, rows }
+                })
+                .collect()
+        })
     }
 
     /// Normalise a rule's own needle with the same options as the prediction it is matched against.
     fn needle(&self, s: &str, case_sensitive: bool) -> String {
-        normalize(s, self.opts_for(case_sensitive))
+        rule_normalize(s, self.opts_for(case_sensitive))
     }
+}
+
+/// Smallest edit distance between `needle` and any substring of `hay` (Sellers' algorithm), stopping
+/// early once it is known to be `<= max`. Returns whether it is `<= max`.
+fn approx_contains(needle: &[char], hay: &[char], max: usize) -> bool {
+    let m = needle.len();
+    if m <= max {
+        return true;
+    }
+    // col[i] = best distance of needle[..i] against a substring of hay ending at the current char.
+    let mut col: Vec<usize> = (0..=m).collect();
+    for &h in hay {
+        let mut diag = 0; // col[i-1] of the previous column; col[0] is always 0 (free start)
+        for i in 1..=m {
+            let up = col[i];
+            let v = if needle[i - 1] == h { diag } else { 1 + diag.min(up).min(col[i - 1]) };
+            diag = up;
+            col[i] = v;
+        }
+        if col[m] <= max {
+            return true;
+        }
+    }
+    false
+}
+
+/// Is `sentence` (rule-normalised) present in the prediction, exactly or within
+/// [`BAG_SENTENCE_MIN_SIMILARITY`]?
+fn sentence_present(cache: &PredictionCache<'_>, sentence: &str, cs: bool) -> bool {
+    if sentence.is_empty() {
+        return false;
+    }
+    if cache.text(cs).contains(sentence) {
+        return true;
+    }
+    let needle: Vec<char> = sentence.chars().collect();
+    let max = ((1.0 - BAG_SENTENCE_MIN_SIMILARITY) * needle.len() as f64).floor() as usize;
+    max > 0 && approx_contains(&needle, cache.chars(cs), max)
 }
 
 /// Score a prediction against a document's rules.
 ///
 /// Every comparison happens after [`normalize`], with `case_insensitive = !rule.case_sensitive`
 /// (the rule's flag wins over `opts.case_insensitive`; `strip_markdown` and `strip_punctuation`
-/// come from `opts`). Because `normalize` collapses whitespace runs to a single space, runs of
-/// whitespace compare equal on both sides.
+/// come from `opts`), followed by `squeeze_punct_spaces` on both the prediction and the rule
+/// text. Because `normalize` collapses whitespace runs to a single space, runs of whitespace compare
+/// equal on both sides, and spaces touching punctuation do not matter at all.
 ///
 /// A malformed rule — one missing the fields its type needs, or whose text normalises away to
 /// nothing — counts as failed with the reason in [`RuleFailure::detail`].
@@ -579,16 +788,8 @@ fn check_rule(cache: &PredictionCache<'_>, rule: &Rule) -> Result<(), String> {
             if rule.sentences.is_empty() {
                 return Err("missing `sentences`".to_string());
             }
-            let threshold = rule.threshold.unwrap_or(1.0);
-            let hay = cache.text(cs);
-            let hits = rule
-                .sentences
-                .iter()
-                .filter(|s| {
-                    let n = cache.needle(s, cs);
-                    !n.is_empty() && hay.contains(&n)
-                })
-                .count();
+            let threshold = bag_threshold(rule.threshold);
+            let hits = rule.sentences.iter().filter(|s| sentence_present(cache, &cache.needle(s, cs), cs)).count();
             let fraction = hits as f64 / rule.sentences.len() as f64;
             // `>=` with a small epsilon: 2/3 must not fail a 0.666666… threshold.
             if fraction + 1e-9 >= threshold {
@@ -623,7 +824,7 @@ fn check_table_cell(cache: &PredictionCache<'_>, cell: &CellRule, cs: bool) -> R
     }
     let tables = cache.tables(cs);
     if tables.is_empty() {
-        return Err("prediction has no markdown table".to_string());
+        return Err("prediction has no table (markdown or HTML)".to_string());
     }
 
     let mut saw_row = false;
@@ -711,63 +912,9 @@ fn as_number(s: &str) -> Option<f64> {
     n.is_finite().then_some(n)
 }
 
-/// Split the prediction's markdown tables into normalised cells.
-///
-/// A table is a run of consecutive lines that start with `|`; separator rows (`|---|:--|`) are
-/// dropped and the first surviving row is the header.
-fn parse_markdown_tables(md: &str, opts: NormalizeOptions) -> Vec<Table> {
-    let mut tables: Vec<Table> = Vec::new();
-    let mut current: Vec<Vec<String>> = Vec::new();
-    let flush = |current: &mut Vec<Vec<String>>, tables: &mut Vec<Table>| {
-        if current.is_empty() {
-            return;
-        }
-        let mut rows = std::mem::take(current);
-        let header = rows.remove(0);
-        tables.push(Table { header, rows });
-    };
-    for line in md.lines() {
-        let t = line.trim();
-        if !t.starts_with('|') {
-            flush(&mut current, &mut tables);
-            continue;
-        }
-        if t.chars().all(|c| matches!(c, '|' | '-' | ':' | ' ')) {
-            continue; // separator row
-        }
-        current.push(split_row(t).into_iter().map(|c| normalize(&c, opts)).collect());
-    }
-    flush(&mut current, &mut tables);
-    tables
-}
-
-/// Split one `| a | b |` row into its cells, honouring `\|` escapes.
-fn split_row(line: &str) -> Vec<String> {
-    let mut cells = vec![String::new()];
-    let mut escaped = false;
-    for c in line.trim().trim_start_matches('|').chars() {
-        if escaped {
-            if c != '|' {
-                cells.last_mut().expect("non-empty").push('\\');
-            }
-            cells.last_mut().expect("non-empty").push(c);
-            escaped = false;
-        } else if c == '\\' {
-            escaped = true;
-        } else if c == '|' {
-            cells.push(String::new());
-        } else {
-            cells.last_mut().expect("non-empty").push(c);
-        }
-    }
-    if escaped {
-        cells.last_mut().expect("non-empty").push('\\');
-    }
-    // A trailing `|` leaves an empty cell that is formatting, not data.
-    if cells.last().is_some_and(|c| c.trim().is_empty()) && cells.len() > 1 {
-        cells.pop();
-    }
-    cells.iter().map(|c| c.trim().to_string()).collect()
+/// `bag_of_sentences`: the fraction of sentences that must be present.
+fn bag_threshold(rule_threshold: Option<f64>) -> f64 {
+    rule_threshold.unwrap_or(BAG_DEFAULT_THRESHOLD)
 }
 
 /// Shorten a string for an error message, on a character boundary.
@@ -797,6 +944,7 @@ pub fn metrics_from_rules(score: &RuleScore) -> Metrics {
         word_f1: r,
         order_score: score.by_type.get(RuleType::Order.as_str()).and_then(RuleTypeScore::rate),
         table_score: score.by_type.get(RuleType::TableCell.as_str()).and_then(RuleTypeScore::rate),
+        teds_grid: None,
         pred_chars: 0,
         truth_chars: 0,
         rule_pass_rate: Some(r),
@@ -982,7 +1130,7 @@ mod tests {
         let all =
             Rule { sentences: vec!["one fish".into(), "two fish".into()], ..rule("b1", RuleType::BagOfSentences) };
         assert_eq!(score_rules(doc, std::slice::from_ref(&all), NormalizeOptions::default()).passed, 1);
-        // Default threshold is 1.0, so a single miss fails.
+        // Default threshold is BAG_DEFAULT_THRESHOLD (0.8), so one miss out of two fails.
         let partial =
             Rule { sentences: vec!["one fish".into(), "red fish".into()], ..rule("b2", RuleType::BagOfSentences) };
         let s = score_rules(doc, std::slice::from_ref(&partial), NormalizeOptions::default());
@@ -1032,7 +1180,7 @@ mod tests {
         let none =
             score_rules("just prose", &[tc("t_none", cell(Some("a"), Some("b"), "1"))], NormalizeOptions::default());
         assert_eq!(none.passed, 0);
-        assert!(none.failures[0].detail.contains("no markdown table"), "{}", none.failures[0].detail);
+        assert!(none.failures[0].detail.contains("prediction has no table"), "{}", none.failures[0].detail);
     }
 
     #[test]
@@ -1128,8 +1276,10 @@ mod tests {
 
         let docs = [Some(m), Some(no_table), None];
         let s = summarize_with(&docs, &[true, true, true]);
-        assert!((s.char_similarity - (0.99 + 0.4) / 3.0).abs() < 1e-12);
+        // The headline lives in `score`/`overall`; `char_similarity` stays the literal mean.
+        assert!((s.score - (0.99 + 0.4) / 3.0).abs() < 1e-12);
         assert!((s.overall - 100.0 * (0.99 + 0.4) / 3.0).abs() < 1e-9);
+        assert!((s.char_similarity - (0.311 + 0.4) / 3.0).abs() < 1e-12);
         assert_eq!(s.documents, 3);
         assert_eq!(s.failed, 1);
         // Backward compatible: no flags (or all false) is exactly `summarize`.
@@ -1208,5 +1358,170 @@ mod tests {
         }
         assert!(files >= 15, "expected the committed parsebench rules files, found {files}");
         assert!(total > 3_000, "expected thousands of rules, found {total}");
+    }
+
+    // ---- scorer v2 ------------------------------------------------------------------------------
+
+    const HTML_TABLE_DOC: &str =
+        "Quarterly results\n\n<table><thead><tr><th>Item</th><th>Q1</th><th>Q2</th></tr></thead>\
+        <tbody><tr><td><b>Revenue</b></td><td>$1,234.00</td><td>2,000</td></tr>\
+        <tr><td>Costs</td><td>500</td><td>600</td></tr></tbody></table>\n\nEnd.";
+
+    #[test]
+    fn html_table_scores_like_the_equivalent_markdown_table() {
+        let truth = "| Item | Q1 | Q2 |\n|---|---|---|\n| Revenue | $1,234.00 | 2,000 |\n| Costs | 500 | 600 |";
+        let md = score(TABLE_DOC, truth, NormalizeOptions::default());
+        let html = score(HTML_TABLE_DOC, truth, NormalizeOptions::default());
+        assert_eq!(md.table_score, Some(1.0));
+        assert_eq!(html.table_score, Some(1.0), "an HTML table used to score 0 here");
+        assert_eq!(md.teds_grid, Some(1.0));
+        assert_eq!(html.teds_grid, Some(1.0));
+        // A wrong cell costs both metrics something.
+        let wrong = HTML_TABLE_DOC.replace("600", "900");
+        let w = score(&wrong, truth, NormalizeOptions::default());
+        assert!(w.table_score.unwrap() < 1.0 && w.teds_grid.unwrap() < 1.0);
+        // Headline for a table-only doc follows.
+        assert_eq!(headline(&html, true), 1.0);
+    }
+
+    /// The real Reducto `r-1` output for ParseBench `637951191e7b…_page1` (an HTML table with
+    /// `colspan`/`rowspan`), scored against the committed truth. Scorer v1 gave it `table_score` 0.
+    #[test]
+    fn real_reducto_r1_html_output_scores_against_parsebench_truth() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let pred = root.join(
+            "benchmark/results/outputs/run-20260911T111039Z/reducto_r-1/parsebench/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.md",
+        );
+        let truth =
+            root.join("benchmark/datasets/parsebench/truth/637951191e7b35ae07dbd4c76a2e6690c370_pg2_pg1_page1.md");
+        let (Ok(pred), Ok(truth)) = (std::fs::read_to_string(pred), std::fs::read_to_string(truth)) else {
+            return; // not in a packaged crate
+        };
+        let m = score(&pred, &truth, NormalizeOptions::default());
+        let t = m.table_score.expect("truth has a table");
+        assert!(t > 0.6, "HTML table must be read: table_score {t}");
+        let teds = m.teds_grid.expect("truth has a table");
+        // The content is right but the structure is not the truth's: Reducto splits `24 d` into two
+        // columns and `6.4 oz wt/a` into two, so TEDS is well below the flat similarity.
+        assert!(teds > 0.3 && teds < t, "teds_grid {teds} vs table_score {t}");
+    }
+
+    #[test]
+    fn table_cell_rules_read_html_tables() {
+        let cell = |row: &str, col: &str, value: &str| Rule {
+            cell: Some(CellRule { row_header: Some(row.into()), col_header: Some(col.into()), value: value.into() }),
+            ..rule("h", RuleType::TableCell)
+        };
+        let rules = [cell("Costs", "Q2", "600"), cell("revenue", "q1", "1234"), cell("Costs", "Q2", "601")];
+        let s = score_rules(HTML_TABLE_DOC, &rules, NormalizeOptions::default());
+        assert_eq!(s.by_type["table_cell"], RuleTypeScore { passed: 2, total: 3 });
+        // Spanned cells repeat, so a rowspan'd row header still labels the second row.
+        let spans = "<table><tr><th>Region</th><th>Year</th><th>Sales</th></tr>\
+            <tr><td rowspan=\"2\">North</td><td>2023</td><td>10</td></tr><tr><td>2024</td><td>12</td></tr></table>";
+        let r = Rule {
+            cell: Some(CellRule {
+                row_header: Some("north".into()),
+                col_header: Some("sales".into()),
+                value: "12".into(),
+            }),
+            ..rule("span", RuleType::TableCell)
+        };
+        assert_eq!(score_rules(spans, &[r], NormalizeOptions::default()).passed, 1);
+    }
+
+    #[test]
+    fn punctuation_spacing_is_insignificant_for_rules() {
+        // ParseBench-style tokenised rule text against the page as printed, and the reverse.
+        let doc = "THIS ASSET PURCHASE AGREEMENT (this \"Agreement\"), dated as of [June 23], 2020";
+        let tokenised =
+            present("tok", "THIS ASSET PURCHASE AGREEMENT (this \" Agreement \"), dated as of [ June 23 ] , 2020");
+        let s = score_rules(doc, &[tokenised], NormalizeOptions::default());
+        assert_eq!(s.passed, 1, "{:?}", s.failures);
+        let spaced_doc = "Total : $ 1,024 . 50 ( net )";
+        assert_eq!(
+            score_rules(spaced_doc, &[present("rev", "total: $1,024.50 (net)")], NormalizeOptions::default()).passed,
+            1
+        );
+        // Order rules get the same treatment.
+        let o = Rule {
+            before: Some("(this \" Agreement \")".into()),
+            after: Some("[ June 23 ]".into()),
+            ..rule("o", RuleType::Order)
+        };
+        assert_eq!(score_rules(doc, &[o], NormalizeOptions::default()).passed, 1);
+        // Words still need their spaces: this is not "ignore all whitespace".
+        assert_eq!(score_rules(doc, &[present("ws", "thisagreement")], NormalizeOptions::default()).passed, 0);
+        assert_eq!(squeeze_punct_spaces("a ( b ) c , d - e"), "a(b)c,d-e");
+        assert_eq!(squeeze_punct_spaces("plain words stay"), "plain words stay");
+        // Transcript metrics are untouched by it.
+        assert!(score("a ( b )", "a (b)", NormalizeOptions::default()).char_similarity < 1.0);
+    }
+
+    #[test]
+    fn bag_of_sentences_is_fuzzy_per_sentence_with_a_fraction_threshold() {
+        let doc = "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. \
+                   How vexingly quick daft zebras jump.";
+        let bag = |sentences: &[&str], threshold: Option<f64>| Rule {
+            sentences: sentences.iter().map(|s| s.to_string()).collect(),
+            threshold,
+            ..rule("bag", RuleType::BagOfSentences)
+        };
+        // One OCR slip per sentence (≥ 0.8 similar) still counts as present.
+        let slipped =
+            bag(&["The quick brown f0x jumps over the lazy dog", "Pack my b0x with five dozen liquor jugs"], Some(1.0));
+        assert_eq!(score_rules(doc, &[slipped], NormalizeOptions::default()).passed, 1);
+        // A different sentence does not.
+        let unrelated = bag(&["Sphinx of black quartz, judge my vow"], Some(1.0));
+        assert_eq!(score_rules(doc, &[unrelated], NormalizeOptions::default()).passed, 0);
+        // Default threshold 0.8: 4 of 5 present passes, 3 of 5 fails.
+        let five = [
+            "The quick brown fox jumps over the lazy dog",
+            "Pack my box with five dozen liquor jugs",
+            "How vexingly quick daft zebras jump",
+            "Sphinx of black quartz, judge my vow",
+            "Jackdaws love my big sphinx of quartz",
+        ];
+        assert_eq!(bag_threshold(None), BAG_DEFAULT_THRESHOLD);
+        let s = score_rules(doc, &[bag(&five, None)], NormalizeOptions::default());
+        assert_eq!(s.passed, 0);
+        assert!(s.failures[0].detail.contains("3/5"), "{}", s.failures[0].detail);
+        let doc4 = format!("{doc} Sphinx of black quartz, judge my vow.");
+        assert_eq!(score_rules(&doc4, &[bag(&five, None)], NormalizeOptions::default()).passed, 1);
+        // Sellers substring distance: exact, one edit, too many edits.
+        let c = |s: &str| s.chars().collect::<Vec<_>>();
+        assert!(approx_contains(&c("brown"), &c("the brown fox"), 0));
+        assert!(approx_contains(&c("brwn"), &c("the brown fox"), 1));
+        assert!(!approx_contains(&c("green"), &c("the brown fox"), 1));
+    }
+
+    #[test]
+    fn html_entities_decode_in_normalisation() {
+        let n = normalize("Pear &amp; Fig &lt;b&gt; &#233;t&eacute;", NormalizeOptions::default());
+        // Tags are stripped before decoding, so an escaped `<b>` stays text; unknown names stay as written.
+        assert_eq!(n, "pear & fig <b> ét&eacute;");
+    }
+
+    #[test]
+    fn summary_json_is_backward_compatible() {
+        // A scorer-v1 summary has no `score`: it is recovered from `overall`.
+        let old = r#"{"documents": 2, "failed": 0, "char_similarity": 0.9, "cer": 0.1, "wer": 0.1,
+                      "word_f1": 0.9, "table_score": 0.8, "overall": 90.0}"#;
+        let s: Summary = serde_json::from_str(old).unwrap();
+        assert!((s.score - 0.9).abs() < 1e-12);
+        assert_eq!(s.teds_grid, None);
+        // Round trip of a v2 summary keeps every field.
+        let m = score("| a |\n|---|\n| 1 |", "| a |\n|---|\n| 1 |", NormalizeOptions::default());
+        let v2 = summarize_with(&[Some(m), None], &[true, false]);
+        let json = serde_json::to_string(&v2).unwrap();
+        assert!(json.contains("\"score\":0.5"), "{json}");
+        assert!(json.contains("\"teds_grid\":1.0"), "{json}");
+        assert_eq!(serde_json::from_str::<Summary>(&json).unwrap(), v2);
+        // Old per-document metrics without `teds_grid` still load.
+        let m_old: Metrics = serde_json::from_str(
+            r#"{"char_similarity": 1.0, "cer": 0.0, "wer": 0.0, "word_recall": 1.0, "word_precision": 1.0,
+                "word_f1": 1.0, "table_score": 1.0, "pred_chars": 3, "truth_chars": 3}"#,
+        )
+        .unwrap();
+        assert_eq!(m_old.teds_grid, None);
     }
 }

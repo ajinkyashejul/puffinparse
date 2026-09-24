@@ -11,7 +11,7 @@
       "PHONE ( 716 - 694 - 8152",
       "Y 14304"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_handwritting__address_missing_sentence_percent_0"
   },

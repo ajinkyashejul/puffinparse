@@ -1,0 +1,33 @@
+{
+  "run_id": "run-20260101T000000Z",
+  "created_at": "2026-01-01T00:00:00Z",
+  "liteocr_version": "0.1.0",
+  "dataset": {"name": "tiny", "version": "0.0.1", "documents": 4, "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+  "normalize": {"case_insensitive": true, "strip_markdown": true, "strip_punctuation": false},
+  "models": [
+    {
+      "model": "reducto/r-1",
+      "docs": [
+        {"id": "failed", "category": "plain", "kind": "transcript", "table_only": false, "pages": 1,
+         "latency_ms": 0, "error": "provider error (503): upstream unavailable"},
+        {"id": "plain", "category": "plain", "kind": "transcript", "table_only": false, "pages": 1,
+         "metrics": {"char_similarity": 1.0, "cer": 0.0, "wer": 0.0, "word_recall": 1.0, "word_precision": 1.0,
+                     "word_f1": 1.0, "pred_chars": 26, "truth_chars": 26},
+         "latency_ms": 1200, "cost_usd": 0.01},
+        {"id": "rules", "category": "text", "kind": "rules", "table_only": false, "pages": 1,
+         "metrics": {"char_similarity": 0.5, "cer": 0.5, "wer": 0.5, "word_recall": 0.5, "word_precision": 0.5,
+                     "word_f1": 0.5, "pred_chars": 0, "truth_chars": 0, "rule_pass_rate": 0.5, "rules_passed": 1,
+                     "rules_total": 2},
+         "latency_ms": 3400, "cost_usd": 0.01},
+        {"id": "src/tbl", "category": "table", "kind": "transcript", "table_only": true, "pages": 2,
+         "metrics": {"char_similarity": 0.3, "cer": 1.5, "wer": 1.4, "word_recall": 1.0, "word_precision": 0.4,
+                     "word_f1": 0.57, "table_score": 0.0, "pred_chars": 90, "truth_chars": 40},
+         "latency_ms": 2300, "cost_usd": 0.02}
+      ],
+      "summary": {"documents": 4, "failed": 1, "char_similarity": 0.375, "cer": 0.75, "wer": 0.725,
+                  "word_f1": 0.5175, "table_score": 0.0, "rule_pass_rate": 0.5, "overall": 37.5,
+                  "latency_p50_ms": 2300, "latency_p95_ms": 3400, "latency_per_page_ms": 1725.0, "total_pages": 4,
+                  "total_cost_usd": 0.04, "cost_per_1k_pages_usd": 10.0, "by_category": {}}
+    }
+  ]
+}

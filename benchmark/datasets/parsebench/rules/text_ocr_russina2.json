@@ -28,7 +28,7 @@
       "ЭФФЕКТИВНОСТЬ ОПРЕДЕЛЕНИЯ ОБЪЕМОВ ЗЕМЛЯНЫХ РАБОТ ПО РЕЗУЛЬТАТАМ КАМЕРАЛЬНОГО И ПОЛЕВОГО ТРАССИРОВАНИЯ",
       "Ю П ДЕЙНЕКА, А"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_ocr__russina2_missing_sentence_percent_0"
   },

@@ -1,0 +1,14 @@
+{
+  "name": "tiny",
+  "version": "0.0.1",
+  "description": "Fixture for `bench rescore`: one transcript, one table-only page (HTML output), one rules page, one failed call.",
+  "license": "CC0-1.0",
+  "documents": [
+    {"id": "plain", "file": "docs/plain.txt", "truth": "truth/plain.md", "pages": 1, "category": "plain"},
+    {"id": "src/tbl", "file": "docs/tbl.txt", "truth": "truth/tbl.md", "pages": 1, "category": "table",
+     "tags": ["table-only"]},
+    {"id": "rules", "file": "docs/rules.txt", "kind": "rules", "rules": "rules/rules.json", "pages": 1,
+     "category": "text"},
+    {"id": "failed", "file": "docs/failed.txt", "truth": "truth/plain.md", "pages": 1, "category": "plain"}
+  ]
+}
