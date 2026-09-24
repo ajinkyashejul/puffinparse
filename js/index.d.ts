@@ -240,8 +240,10 @@ export interface Metrics {
   truthChars: number
   /** Reading-order agreement; `null` with fewer than 2 shared lines. */
   orderScore: number | null
-  /** Similarity on markdown table lines; `null` when the truth has no tables. */
+  /** Similarity on table rows (markdown or HTML tables); `null` when the truth has no tables. */
   tableScore: number | null
+  /** TEDS on the table row/cell grid (structure + content); `null` when the truth has no tables. */
+  tedsGrid: number | null
   /** `passed / total` of a rule-scored document; `null` for transcript documents. */
   rulePassRate: number | null
   rulesPassed: number | null

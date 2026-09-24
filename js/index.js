@@ -473,7 +473,7 @@ function camelize(v) {
   return v
 }
 
-const OPTIONAL_METRICS = ['orderScore', 'tableScore', 'rulePassRate', 'rulesPassed', 'rulesTotal']
+const OPTIONAL_METRICS = ['orderScore', 'tableScore', 'tedsGrid', 'rulePassRate', 'rulesPassed', 'rulesTotal']
 
 function toMetrics(d) {
   const m = camelize(d)

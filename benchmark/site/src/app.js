@@ -1595,9 +1595,60 @@
     return out.join("\n").replace(/\s+$/, "");
   }
 
+  // Scorer v2 (SCORER_VERSION = 2 in bench.rs): HTML entities decoded after markdown stripping,
+  // spaces touching punctuation dropped for rule matching, markdown *and* HTML tables, fuzzy
+  // bag_of_sentences (0.8 per sentence, default threshold 0.8) and olmOCR `max_diffs`.
+  var BAG_SENTENCE_MIN_SIMILARITY = 0.8;
+  var BAG_DEFAULT_THRESHOLD = 0.8;
+  var MAX_SPAN = 64;
+
+  var NAMED_ENTITIES = {
+    amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", ndash: "–", mdash: "—",
+    lsquo: "‘", rsquo: "’", ldquo: "“", rdquo: "”", hellip: "…", deg: "°",
+    plusmn: "±", times: "×", copy: "©", reg: "®", euro: "€", pound: "£",
+    cent: "¢", sect: "§", para: "¶", middot: "·", bull: "•",
+  };
+
+  /** `tables::decode_entities`. */
+  function decodeEntities(s) {
+    if (s.indexOf("&") === -1) return s;
+    var out = "";
+    var rest = s;
+    var i;
+    while ((i = rest.indexOf("&")) !== -1) {
+      out += rest.slice(0, i);
+      var tail = rest.slice(i);
+      var semi = tail.slice(0, 12).indexOf(";");
+      var ch = null;
+      if (semi !== -1) {
+        var name = tail.slice(1, semi);
+        if (name.charAt(0) === "#") {
+          var num = name.slice(1);
+          var code = null;
+          if (/^[xX]/.test(num)) {
+            if (/^\+?[0-9a-fA-F]+$/.test(num.slice(1))) code = parseInt(num.slice(1).replace("+", ""), 16);
+          } else if (/^\+?[0-9]+$/.test(num)) {
+            code = parseInt(num.replace("+", ""), 10);
+          }
+          if (code !== null && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff)) ch = String.fromCodePoint(code);
+        } else if (Object.prototype.hasOwnProperty.call(NAMED_ENTITIES, name)) {
+          ch = NAMED_ENTITIES[name];
+        }
+      }
+      if (ch !== null) {
+        out += ch;
+        rest = tail.slice(semi + 1);
+      } else {
+        out += "&";
+        rest = tail.slice(1);
+      }
+    }
+    return out + rest;
+  }
+
   function normalizeText(s, opts) {
     s = s.normalize ? s.normalize("NFKC") : s;
-    if (opts.strip_markdown) s = markdownToText(s);
+    if (opts.strip_markdown) s = decodeEntities(markdownToText(s));
     s = s.replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-");
     if (opts.case_insensitive) s = s.toLowerCase();
     var out = "";
@@ -1617,6 +1668,28 @@
       }
     }
     return out.trim();
+  }
+
+  /** `is_punct` in bench.rs. */
+  var PUNCT_RE = /[!-\/:-@\[-`{-~¡§«¶·»¿‐-‧‰-⁞、-〃〈-】〔-〟।॥]/;
+
+  /** `squeeze_punct_spaces`: drop every space that touches punctuation. */
+  function squeezePunctSpaces(s) {
+    var chars = Array.from(s);
+    var out = "";
+    for (var i = 0; i < chars.length; i++) {
+      if (chars[i] === " ") {
+        var prev = i > 0 ? chars[i - 1] : "";
+        var next = i + 1 < chars.length ? chars[i + 1] : "";
+        if ((prev && PUNCT_RE.test(prev)) || (next && PUNCT_RE.test(next))) continue;
+      }
+      out += chars[i];
+    }
+    return out;
+  }
+
+  function ruleNormalize(s, opts) {
+    return squeezePunctSpaces(normalizeText(s, opts));
   }
 
   function splitRow(line) {
@@ -1640,33 +1713,210 @@
     });
   }
 
-  function parseTables(md, opts) {
+  /** `tables::markdown_tables`: raw cells, separator rows dropped. */
+  function markdownTables(md) {
     var tables = [];
     var current = [];
-    function flush() {
-      if (!current.length) return;
-      tables.push({ header: current[0], rows: current.slice(1) });
-      current = [];
-    }
     md.split("\n").forEach(function (line) {
+      if (line.charAt(line.length - 1) === "\r") line = line.slice(0, -1);
       var t = line.trim();
       if (t.charAt(0) !== "|") {
-        flush();
+        if (current.length) tables.push(current);
+        current = [];
         return;
       }
       if (/^[|\-: ]*$/.test(t)) return;
-      current.push(
-        splitRow(t).map(function (c) {
-          return normalizeText(c, opts);
-        })
-      );
+      current.push(splitRow(t));
     });
-    flush();
+    if (current.length) tables.push(current);
     return tables;
   }
 
+  function asciiLower(s) {
+    return s.replace(/[A-Z]+/g, function (m) {
+      return m.toLowerCase();
+    });
+  }
+
+  function findTableOpen(lower, from) {
+    var at = from;
+    for (;;) {
+      var i = lower.indexOf("<table", at);
+      if (i === -1) return -1;
+      var next = lower.charAt(i + 6);
+      if (next === "" || /[\t\n\f\r >\/]/.test(next)) return i;
+      at = i + 6;
+    }
+  }
+
+  function spanAttr(attrs, key) {
+    var lower = asciiLower(attrs);
+    var from = 0;
+    var i;
+    while ((i = lower.indexOf(key, from)) !== -1) {
+      from = i + key.length;
+      var beforeOk = i === 0 || !/[A-Za-z0-9]/.test(lower.charAt(i - 1));
+      var rest = lower.slice(i + key.length).replace(/^\s+/, "");
+      if (!beforeOk || rest.charAt(0) !== "=") continue;
+      rest = rest.slice(1).replace(/^\s+/, "").replace(/^["']+/, "");
+      var digits = /^[0-9]*/.exec(rest)[0];
+      var n = digits ? parseInt(digits, 10) : NaN;
+      return n >= 1 && n <= MAX_SPAN ? n : 1;
+    }
+    return 1;
+  }
+
+  function collapseWs(s) {
+    return s.split(/\s+/).filter(Boolean).join(" ");
+  }
+
+  /** `tables::expand`: repeat spanning cells into every slot, pad, drop all-empty rows. */
+  function expandGrid(rows) {
+    var grid = [];
+    rows.forEach(function (row, r) {
+      while (grid.length <= r) grid.push([]);
+      var c = 0;
+      row.forEach(function (cell) {
+        while (grid[r][c] !== undefined && grid[r][c] !== null) c++;
+        var text = collapseWs(cell.text);
+        for (var dr = 0; dr < cell.rowspan; dr++) {
+          var rr = r + dr;
+          while (grid.length <= rr) grid.push([]);
+          for (var dc = 0; dc < cell.colspan; dc++) {
+            var cc = c + dc;
+            while (grid[rr].length <= cc) grid[rr].push(null);
+            grid[rr][cc] = text;
+          }
+        }
+        c += cell.colspan;
+      });
+    });
+    var width = grid.reduce(function (w, row) {
+      return Math.max(w, row.length);
+    }, 0);
+    return grid
+      .map(function (row) {
+        var out = [];
+        for (var i = 0; i < width; i++) out.push(row[i] == null ? "" : row[i]);
+        return out;
+      })
+      .filter(function (row) {
+        return row.some(function (c) {
+          return c !== "";
+        });
+      });
+  }
+
+  /** `tables::parse_html_table`: {grid, consumed}. */
+  function parseHtmlTable(html) {
+    var rows = [];
+    var row = null;
+    var cell = null;
+    var depth = 0;
+    var started = false;
+    var i = 0;
+    var textStart = 0;
+    function closeCell() {
+      if (cell) {
+        (row = row || []).push(cell);
+        cell = null;
+      }
+    }
+    function closeRow() {
+      closeCell();
+      if (row && row.length) rows.push(row);
+      row = null;
+    }
+    function addText(t) {
+      if (cell) cell.text += t;
+    }
+    while (i < html.length) {
+      if (html.charAt(i) !== "<") {
+        i++;
+        continue;
+      }
+      if (html.slice(i, i + 4) === "<!--") {
+        addText(decodeEntities(html.slice(textStart, i)));
+        var endc = html.indexOf("-->", i + 4);
+        i = endc === -1 ? html.length : endc + 3;
+        textStart = i;
+        continue;
+      }
+      var rel = html.indexOf(">", i);
+      if (rel === -1) break;
+      var tagEnd = rel + 1;
+      var inner = html.slice(i + 1, tagEnd - 1);
+      var closing = inner.charAt(0) === "/";
+      var rest = closing ? inner.slice(1) : inner;
+      var nameLen = /^[A-Za-z0-9]*/.exec(rest)[0].length;
+      var name = asciiLower(rest.slice(0, nameLen));
+      var attrs = rest.slice(nameLen);
+      if (!name || !/[A-Za-z]/.test(rest.charAt(0))) {
+        i++;
+        continue;
+      }
+      addText(decodeEntities(html.slice(textStart, i)));
+      i = tagEnd;
+      textStart = i;
+      if (!closing && name === "table") {
+        if (started) {
+          depth++;
+          addText(" ");
+        } else started = true;
+      } else if (closing && name === "table") {
+        if (depth > 0) {
+          depth--;
+          addText(" ");
+        } else {
+          closeRow();
+          return { grid: expandGrid(rows), consumed: tagEnd };
+        }
+      } else if (depth > 0) {
+        addText(" ");
+      } else if (name === "tr") {
+        closeRow();
+      } else if (!closing && (name === "td" || name === "th")) {
+        closeCell();
+        cell = { text: "", colspan: spanAttr(attrs, "colspan"), rowspan: spanAttr(attrs, "rowspan") };
+      } else if (closing && (name === "td" || name === "th")) {
+        closeCell();
+      } else if (name === "br" || name === "p" || name === "li" || name === "div") {
+        addText(" ");
+      }
+    }
+    addText(decodeEntities(html.slice(Math.min(textStart, html.length))));
+    closeRow();
+    return { grid: expandGrid(rows), consumed: html.length };
+  }
+
+  /** `tables::extract_tables`: markdown and HTML tables in document order, raw cells. */
+  function extractTables(doc) {
+    var lower = asciiLower(doc);
+    var out = [];
+    var pos = 0;
+    var start;
+    while ((start = findTableOpen(lower, pos)) !== -1) {
+      out = out.concat(markdownTables(doc.slice(pos, start)));
+      var parsed = parseHtmlTable(doc.slice(start));
+      if (parsed.grid.length) out.push(parsed.grid);
+      pos = start + Math.max(parsed.consumed, 1);
+    }
+    return out.concat(markdownTables(doc.slice(Math.min(pos, doc.length))));
+  }
+
+  function parseTables(md, opts) {
+    return extractTables(md).map(function (grid) {
+      var rows = grid.map(function (row) {
+        return row.map(function (c) {
+          return ruleNormalize(c, opts);
+        });
+      });
+      return { header: rows[0], rows: rows.slice(1) };
+    });
+  }
+
   function asNumber(s) {
-    var cleaned = s.replace(/[,$%  ]/g, "");
+    var cleaned = s.replace(/[,$%  ]/g, "");
     if (!cleaned) return null;
     var m = /^\((.*)\)$/.exec(cleaned);
     if (m) cleaned = "-" + m[1];
@@ -1682,6 +1932,78 @@
     return x !== null && y !== null && Math.abs(x - y) <= 1e-6 * Math.max(Math.abs(x), Math.abs(y), 1);
   }
 
+  function levenshtein(a, b) {
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+    var prev = [];
+    var cur = [];
+    for (var j = 0; j <= b.length; j++) prev.push(j);
+    for (var i = 0; i < a.length; i++) {
+      cur = [i + 1];
+      for (j = 0; j < b.length; j++) cur.push(Math.min(prev[j + 1] + 1, cur[j] + 1, prev[j] + (a[i] === b[j] ? 0 : 1)));
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+
+  /** `approx_contains`: some substring of `hay` within `max` edits of `needle` (char arrays). */
+  function approxContains(needle, hay, max) {
+    var m = needle.length;
+    if (m <= max) return true;
+    var col = [];
+    for (var i = 0; i <= m; i++) col.push(i);
+    for (var j = 0; j < hay.length; j++) {
+      var h = hay[j];
+      var diag = 0;
+      for (i = 1; i <= m; i++) {
+        var up = col[i];
+        var v = needle[i - 1] === h ? diag : 1 + Math.min(diag, up, col[i - 1]);
+        diag = up;
+        col[i] = v;
+      }
+      if (col[m] <= max) return true;
+    }
+    return false;
+  }
+
+  /** `approx_match_ends`: exclusive end positions of matches within `max` edits. */
+  function approxMatchEnds(needle, hay, max) {
+    var m = needle.length;
+    var ends = [];
+    var col = [];
+    for (var i = 0; i <= m; i++) col.push(i);
+    if (col[m] <= max) ends.push(0);
+    for (var j = 0; j < hay.length; j++) {
+      var h = hay[j];
+      var diag = 0;
+      for (i = 1; i <= m; i++) {
+        var up = col[i];
+        var v = needle[i - 1] === h ? diag : 1 + Math.min(diag, up, col[i - 1]);
+        diag = up;
+        col[i] = v;
+      }
+      if (col[m] <= max) ends.push(j + 1);
+    }
+    return ends;
+  }
+
+  /** `approx_match_start_range`: [earliest start, latest start] or null. */
+  function approxMatchStartRange(needle, hay, max) {
+    var ends = approxMatchEnds(Array.from(needle).reverse(), hay.slice().reverse(), max);
+    if (!ends.length) return null;
+    var n = hay.length;
+    return [n - Math.max.apply(null, ends), n - Math.min.apply(null, ends)];
+  }
+
+  function containsWithin(hay, needle, k) {
+    if (!k) return hay.indexOf(needle) !== -1;
+    return approxContains(Array.from(needle), Array.from(hay), k);
+  }
+
+  function valuesClose(a, b, k) {
+    return valuesEqual(a, b) || (k > 0 && levenshtein(Array.from(a), Array.from(b)) <= k);
+  }
+
   function snippet(s) {
     var chars = Array.from(s);
     return chars.length <= 60 ? JSON.stringify(s) : JSON.stringify(chars.slice(0, 60).join("")) + "…";
@@ -1690,14 +2012,20 @@
   function RuleChecker(prediction, opts) {
     var self = this;
     var texts = {};
+    var chars = {};
     var tables = {};
     function optsFor(cs) {
       return { case_insensitive: !cs, strip_markdown: opts.strip_markdown, strip_punctuation: opts.strip_punctuation };
     }
     self.text = function (cs) {
       var k = cs ? 1 : 0;
-      if (texts[k] === undefined) texts[k] = normalizeText(prediction, optsFor(cs));
+      if (texts[k] === undefined) texts[k] = ruleNormalize(prediction, optsFor(cs));
       return texts[k];
+    };
+    self.chars = function (cs) {
+      var k = cs ? 1 : 0;
+      if (chars[k] === undefined) chars[k] = Array.from(self.text(cs));
+      return chars[k];
     };
     self.tables = function (cs) {
       var k = cs ? 1 : 0;
@@ -1705,19 +2033,28 @@
       return tables[k];
     };
     self.needle = function (s, cs) {
-      return normalizeText(String(s), optsFor(cs));
+      return ruleNormalize(String(s), optsFor(cs));
     };
+  }
+
+  function sentencePresent(ck, sentence, cs) {
+    if (!sentence) return false;
+    if (ck.text(cs).indexOf(sentence) !== -1) return true;
+    var needle = Array.from(sentence);
+    var max = Math.floor((1 - BAG_SENTENCE_MIN_SIMILARITY) * needle.length);
+    return max > 0 && approxContains(needle, ck.chars(cs), max);
   }
 
   /** {ok, detail, found?: bool[]} for one rule. */
   function checkRule(ck, rule) {
     var cs = !!rule.case_sensitive;
+    var k = isNum(rule.max_diffs) ? rule.max_diffs : 0;
     var type = rule.type;
     if (type === "present" || type === "absent") {
       if (rule.text == null) return { ok: false, detail: "missing `text`" };
       var needle = ck.needle(rule.text, cs);
       if (!needle) return { ok: false, detail: "`text` " + snippet(rule.text) + " is empty after normalisation" };
-      var found = ck.text(cs).indexOf(needle) !== -1;
+      var found = k === 0 ? ck.text(cs).indexOf(needle) !== -1 : approxContains(Array.from(needle), ck.chars(cs), k);
       if (type === "present" && !found) return { ok: false, detail: "not found: " + snippet(needle) };
       if (type === "absent" && found) return { ok: false, detail: "present but must be absent: " + snippet(needle) };
       return { ok: true };
@@ -1728,6 +2065,14 @@
       var before = ck.needle(rule.before, cs);
       var after = ck.needle(rule.after, cs);
       if (!before || !after) return { ok: false, detail: "`before` or `after` is empty after normalisation" };
+      if (k > 0) {
+        var bRange = approxMatchStartRange(before, ck.chars(cs), k);
+        if (!bRange) return { ok: false, detail: "`before` not found within " + k + " edits: " + snippet(before) };
+        var aRange = approxMatchStartRange(after, ck.chars(cs), k);
+        if (!aRange) return { ok: false, detail: "`after` not found within " + k + " edits: " + snippet(after) };
+        if (bRange[0] < aRange[1]) return { ok: true };
+        return { ok: false, detail: snippet(after) + " occurs only before " + snippet(before) };
+      }
       var hay = ck.text(cs);
       var b = hay.indexOf(before);
       if (b === -1) return { ok: false, detail: "`before` not found: " + snippet(before) };
@@ -1738,12 +2083,10 @@
     if (type === "bag_of_sentences") {
       var sentences = rule.sentences || [];
       if (!sentences.length) return { ok: false, detail: "missing `sentences`" };
-      var threshold = isNum(rule.threshold) ? rule.threshold : 1;
-      var text = ck.text(cs);
+      var threshold = isNum(rule.threshold) ? rule.threshold : BAG_DEFAULT_THRESHOLD;
       var hits = 0;
       var marks = sentences.map(function (s) {
-        var n = ck.needle(s, cs);
-        var hit = !!n && text.indexOf(n) !== -1;
+        var hit = sentencePresent(ck, ck.needle(s, cs), cs);
         if (hit) hits++;
         return hit;
       });
@@ -1757,12 +2100,12 @@
     }
     if (type === "table_cell") {
       if (!rule.cell) return { ok: false, detail: "missing `cell`" };
-      return checkTableCell(ck, rule.cell, cs);
+      return checkTableCell(ck, rule.cell, cs, k);
     }
     return { ok: false, detail: "unknown rule type " + JSON.stringify(type) };
   }
 
-  function checkTableCell(ck, cell, cs) {
+  function checkTableCell(ck, cell, cs, k) {
     var value = ck.needle(cell.value == null ? "" : cell.value, cs);
     if (!value) return { ok: false, detail: "`cell.value` is empty after normalisation" };
     var rowH = cell.row_header != null ? ck.needle(cell.row_header, cs) : null;
@@ -1770,7 +2113,7 @@
     var colH = cell.col_header != null ? ck.needle(cell.col_header, cs) : null;
     if (colH === "") return { ok: false, detail: "`cell.col_header` is empty after normalisation" };
     var tables = ck.tables(cs);
-    if (!tables.length) return { ok: false, detail: "prediction has no markdown table" };
+    if (!tables.length) return { ok: false, detail: "prediction has no table (markdown or HTML)" };
     var sawRow = false;
     var sawCol = false;
     var seen = [];
@@ -1780,7 +2123,7 @@
       if (colH !== null) {
         col = -1;
         for (var h = 0; h < table.header.length; h++) {
-          if (table.header[h].indexOf(colH) !== -1) {
+          if (containsWithin(table.header[h], colH, k)) {
             col = h;
             break;
           }
@@ -1790,13 +2133,13 @@
       }
       for (var r = 0; r < table.rows.length; r++) {
         var row = table.rows[r];
-        if (rowH !== null && !row.some(function (c) { return c.indexOf(rowH) !== -1; })) continue;
+        if (rowH !== null && !row.some(function (c) { return containsWithin(c, rowH, k); })) continue;
         sawRow = true;
         if (col !== null) {
           if (col >= row.length) continue;
-          if (valuesEqual(row[col], value)) return { ok: true };
+          if (valuesClose(row[col], value, k)) return { ok: true };
           seen.push(row[col]);
-        } else if (row.some(function (c) { return valuesEqual(c, value); }) || row.join(" ").indexOf(value) !== -1) {
+        } else if (row.some(function (c) { return valuesClose(c, value, k); }) || containsWithin(row.join(" "), value, k)) {
           return { ok: true };
         }
       }
@@ -2110,6 +2453,7 @@
       tiles +=
         metricTile("Char sim", fixed(m.char_similarity, 4)) +
         metricTile("Table", fixed(m.table_score, 4)) +
+        metricTile("TEDS", fixed(m.teds_grid, 4), "TEDS on the row/cell grid: table structure plus cell content (scorer v2)") +
         metricTile("CER", fixed(m.cer, 4)) +
         metricTile("WER", fixed(m.wer, 4)) +
         metricTile("Word F1", fixed(m.word_f1, 4)) +
@@ -2149,7 +2493,7 @@
       var shown = order.slice(0, BAG_SENTENCE_CAP);
       var rest = sentences.length - shown.length;
       return (
-        '<span class="rk">at least ' + esc(fixed((isNum(rule.threshold) ? rule.threshold : 1) * 100, 0)) + "% of " + sentences.length + " sentences</span>" +
+        '<span class="rk">at least ' + esc(fixed((isNum(rule.threshold) ? rule.threshold : BAG_DEFAULT_THRESHOLD) * 100, 0)) + "% of " + sentences.length + " sentences</span>" +
         '<ul class="bag">' +
         shown
           .map(function (i) {

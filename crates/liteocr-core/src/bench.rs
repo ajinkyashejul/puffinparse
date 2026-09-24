@@ -1619,12 +1619,18 @@ mod tests {
         assert_eq!(score_rules(doc, std::slice::from_ref(&a), opts).passed, 1);
         assert_eq!(score_rules(doc, &[with(a, 1)], opts).passed, 0);
         // order: fuzzy on both sides; olmOCR semantics (some `before` start precedes some `after`).
-        let o =
-            Rule { before: Some("Westphalla".into()), after: Some("thirty yeers".into()), ..rule("o", RuleType::Order) };
+        let o = Rule {
+            before: Some("Westphalla".into()),
+            after: Some("thirty yeers".into()),
+            ..rule("o", RuleType::Order)
+        };
         assert_eq!(score_rules(doc, std::slice::from_ref(&o), opts).passed, 0);
         assert_eq!(score_rules(doc, &[with(o, 1)], opts).passed, 1);
-        let rev =
-            Rule { before: Some("thirty yeers".into()), after: Some("Westphalla".into()), ..rule("r", RuleType::Order) };
+        let rev = Rule {
+            before: Some("thirty yeers".into()),
+            after: Some("Westphalla".into()),
+            ..rule("r", RuleType::Order)
+        };
         let s = score_rules(doc, &[with(rev, 1)], opts);
         assert_eq!(s.passed, 0);
         assert!(s.failures[0].detail.contains("occurs only before"), "{}", s.failures[0].detail);

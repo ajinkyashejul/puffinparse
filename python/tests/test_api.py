@@ -218,6 +218,15 @@ def test_score_and_normalize() -> None:
     partial = liteocr.score("hello there world", "hello world")
     assert 0.5 < partial.char_similarity < 1.0
     assert partial.word_recall == 1.0
+    assert partial.teds_grid is None
+
+
+def test_score_reads_html_tables_and_reports_teds() -> None:
+    truth = "| a | b |\n|---|---|\n| 1 | 2 |"
+    html = "<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>"
+    m = liteocr.score(html, truth)
+    assert m.table_score == 1.0
+    assert m.teds_grid == 1.0
 
 
 # ---- native-format output (output_format) --------------------------------------------------------

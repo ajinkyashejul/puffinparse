@@ -108,6 +108,7 @@ describe('score', () => {
     assert.equal(m.wer, 0)
     assert.equal(m.wordF1, 1)
     assert.equal(m.tableScore, null)
+    assert.equal(m.tedsGrid, null)
     assert.equal(m.rulePassRate, null)
     assert.ok(!('char_similarity' in m))
   })
