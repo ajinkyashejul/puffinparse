@@ -33,6 +33,18 @@ enum Command {
     /// Run and report the open OCR benchmark (uses `parse` mode).
     #[command(subcommand)]
     Bench(bench::BenchCommand),
+    /// Run the HTTP gateway (virtual keys, budgets, fallbacks, metrics). See docs/SERVER.md.
+    Serve {
+        /// Config file (TOML). Defaults to ./liteocr.toml when it exists, else built-in defaults.
+        #[arg(short, long, env = "LITEOCR_CONFIG")]
+        config: Option<std::path::PathBuf>,
+        /// Override server.host.
+        #[arg(long)]
+        host: Option<String>,
+        /// Override server.port.
+        #[arg(long)]
+        port: Option<u16>,
+    },
 }
 
 /// Options shared by every mode.
@@ -190,7 +202,24 @@ async fn run(cli: Cli) -> Result<()> {
         Command::Extract(args) => extract(args).await,
         Command::Providers { mode, json } => providers(mode.as_deref(), json),
         Command::Bench(cmd) => bench::run(cmd).await,
+        Command::Serve { config, host, port } => serve(config, host, port).await,
     }
+}
+
+async fn serve(config: Option<std::path::PathBuf>, host: Option<String>, port: Option<u16>) -> Result<()> {
+    let default = std::path::Path::new("liteocr.toml");
+    let mut cfg = match config {
+        Some(p) => liteocr_server::Config::load(&p).map_err(anyhow::Error::msg)?,
+        None if default.exists() => liteocr_server::Config::load(default).map_err(anyhow::Error::msg)?,
+        None => liteocr_server::Config::default(),
+    };
+    if let Some(h) = host {
+        cfg.server.host = h;
+    }
+    if let Some(p) = port {
+        cfg.server.port = p;
+    }
+    liteocr_server::serve(cfg).await.map_err(anyhow::Error::msg)
 }
 
 async fn parse(args: ParseArgs) -> Result<()> {
