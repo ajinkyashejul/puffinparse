@@ -265,3 +265,20 @@ count with the recorded Rust score and flags any disagreement.
 The data contract (`data/index.json`, `data/runs/`, `data/outputs/…/<doc>.{md,json}`) is
 independent of the front-end, so this can be revisited without touching the build. The JS port
 must follow scorer changes in `bench.rs`; the mismatch badge makes drift visible.
+
+## ADR-18: Webhooks are exposed as primitives, not received
+
+**Context.** TASKS asked for "webhooks instead of polling". An SDK cannot host an HTTP endpoint,
+and providers differ: Reducto and LlamaParse accept a per-job webhook URL, Extend only has
+workspace-level webhook endpoints.
+
+**Decision.** LiteOCR offers `submit_parse` / `retrieve_parse` plus a pure `parse_webhook` /
+`resolve_webhook` that normalises a provider's webhook body into `JobStatus` (doing one retrieve
+when the body only names the job). `JobHandle` is serialisable and secret-free; credentials are
+resolved again at retrieve time. `DocumentRequest.webhook_url` maps to per-job provider webhooks
+where they exist and is rejected with an input error where they don't. Only `parse` mode has jobs
+for now.
+
+**Consequences.** Users wire LiteOCR into their own web handler; the gateway (ADR-15) can later add
+job endpoints on top of the same primitives. Webhook body shapes come from vendor docs until real
+deliveries are captured.

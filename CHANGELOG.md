@@ -11,6 +11,14 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **Async jobs API and webhooks.** Split a parse into submit and retrieve so the caller owns the
+  waiting (long documents, batches, webhook-driven pipelines). Rust: `submit_parse`,
+  `retrieve_parse` / `retrieve_parse_with`, `parse_webhook`, `resolve_webhook`, `JobHandle`
+  (serialisable, never holds a key), `JobStatus`, and `DocumentRequest.webhook_url`. Python:
+  `liteocr.submit` / `asubmit`, `retrieve` / `aretrieve`, `handle_webhook` / `ahandle_webhook` and
+  `liteocr.Job`. Covers Reducto, Extend and LlamaParse (live-verified); `webhook_url` maps to
+  Reducto `async.webhook` and the LlamaParse `webhook_url` field, and is rejected for Extend, which
+  only has workspace-level webhooks. SPEC §15.
 - **Benchmark viewer: verify every claim.** A per-document inspector at `#/<run>/<model>/<doc>` shows
   the page itself (pdf.js for PDFs, pinned with SRI, PNG fallback), every model's output side by
   side, a word diff against the truth, and a pass/fail rule checklist for rules documents that is
@@ -78,6 +86,8 @@ Python package `liteocr` share a single version.
 
 ### Changed
 
+- Internal: the vision-LLM providers (Gemini, OpenAI, Anthropic) share `providers/vlm.rs`; behaviour
+  and request bodies are unchanged.
 - Adapter HTML→markdown table conversion no longer doubles backslashes, so LaTeX in table cells reaches
   the scorer as a parser would print it.
 - **Modes.** Every call now names a mode — `parse` (markdown + typed blocks), `ocr`
@@ -96,6 +106,12 @@ Python package `liteocr` share a single version.
   `pricing.json`: every provider group carries its env var and verification status
   (live-verified vs docs-only), every model its modes, the default per mode and the list price
   per page for `parse · ocr · extract`.
+
+### Fixed
+
+- Extend `provider_options={"responseType": "url"}` is now sent as the `GET /parse_runs/{id}` query
+  parameter; it used to go in the request body, so the presigned-output path never triggered.
+  Reducto and Extend url-typed results are now covered by live-captured fixtures and loopback tests.
 
 ## [0.1.0] - 2026-09-11
 
