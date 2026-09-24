@@ -11,6 +11,9 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- Benchmark results flag a successful call that returned no text as `empty_output: true` (counted in
+  `summary.empty_outputs`, shown as `(+N empty)` in the leaderboard), and `bench rescore
+  --keep-missing` keeps the recorded scores of documents whose outputs are not committed.
 - **Scorer v2** (`scorer_version: 2` in result JSON). HTML `<table>` output is scored like markdown
   tables (it used to score 0, which ranked Reducto r-1 last); a new `teds_grid` metric (TEDS on the
   row/cell grid); rule matching ignores spaces next to punctuation (ParseBench rule text is

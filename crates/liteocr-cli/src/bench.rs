@@ -45,6 +45,11 @@ pub struct RescoreArgs {
     /// Where to write the re-scored result (default: overwrite `<result>` in place).
     #[arg(long)]
     out: Option<PathBuf>,
+    /// Keep the recorded scores of successful documents whose saved output is missing instead of
+    /// failing (for sources whose outputs are not committed, e.g. research-only datasets). The
+    /// number kept is reported and recorded as `rescore_kept_docs`.
+    #[arg(long)]
+    keep_missing: bool,
 }
 
 #[derive(clap::Args, Debug)]
@@ -188,6 +193,10 @@ pub struct RunResult {
     /// When `bench rescore` last rewrote the metrics (RFC 3339); absent for an un-rescored run.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rescored_at: Option<String>,
+    /// Documents whose recorded scores `bench rescore --keep-missing` kept because their saved
+    /// output was not available.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rescore_kept_docs: Option<usize>,
     pub dataset: DatasetInfo,
     pub normalize: NormalizeOptions,
     pub models: Vec<ModelResult>,
@@ -250,6 +259,10 @@ pub struct DocResult {
     /// RFC 3339 time the first call for this document started.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub started_at: Option<String>,
+    /// The call succeeded but returned no text (whitespace only). Scored as-is (usually ~0), and
+    /// flagged so an empty page is not mistaken for a merely poor parse.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub empty_output: bool,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -262,6 +275,9 @@ pub struct ModelSummary {
     pub total_pages: u32,
     pub total_cost_usd: f64,
     pub cost_per_1k_pages_usd: Option<f64>,
+    /// Successful calls that returned no text.
+    #[serde(default)]
+    pub empty_outputs: usize,
     pub by_category: BTreeMap<String, Summary>,
 }
 
@@ -478,6 +494,7 @@ async fn run_bench_with(args: &RunArgs, caller: Caller) -> Result<Option<RunResu
         liteocr_version: liteocr_core::VERSION.to_string(),
         scorer_version: SCORER_VERSION,
         rescored_at: None,
+        rescore_kept_docs: None,
         dataset: DatasetInfo {
             name: manifest.name.clone(),
             version: manifest.version.clone(),
@@ -624,6 +641,7 @@ async fn run_doc(ctx: &CallCtx, doc: &ManifestDoc, model: &str) -> DocResult {
                 cost_usd: resp.cost_usd,
                 provider_job_id: resp.provider_job_id.clone(),
                 cache_hit: cache_hit(Some(&resp.metadata), ctx.allow_cache),
+                empty_output: resp.markdown.trim().is_empty(),
                 ..DocResult::default()
             }
         }
@@ -652,7 +670,7 @@ fn rescore(args: RescoreArgs) -> Result<()> {
     let dataset = args.dataset.unwrap_or_else(|| PathBuf::from("benchmark/datasets").join(&run.dataset.name));
     let before: Vec<(String, f64)> = run.models.iter().map(|m| (m.model.clone(), m.summary.accuracy.overall)).collect();
     let old_version = run.scorer_version;
-    let rescored = rescore_run(run, &dataset, &args.outputs)?;
+    let rescored = rescore_run(run, &dataset, &args.outputs, args.keep_missing)?;
     let out = args.out.unwrap_or(args.result);
     std::fs::write(&out, serde_json::to_string_pretty(&rescored)? + "\n")
         .with_context(|| format!("writing {}", out.display()))?;
@@ -675,7 +693,8 @@ fn rescore(args: RescoreArgs) -> Result<()> {
 /// (refreshed from the manifest), and the summaries recomputed from them. Latency, cost, pages and
 /// errors are kept as measured. A document whose call failed stays failed. A missing output file
 /// for a successful document is an error, never a silent zero.
-fn rescore_run(mut run: RunResult, dataset: &Path, outputs: &Path) -> Result<RunResult> {
+fn rescore_run(mut run: RunResult, dataset: &Path, outputs: &Path, keep_missing: bool) -> Result<RunResult> {
+    let mut kept = 0usize;
     let (manifest, sha) = load_manifest(dataset)?;
     if manifest.name != run.dataset.name {
         bail!("{} is dataset `{}`, but the result was run on `{}`", dataset.display(), manifest.name, run.dataset.name);
@@ -697,9 +716,14 @@ fn rescore_run(mut run: RunResult, dataset: &Path, outputs: &Path) -> Result<Run
                 continue;
             }
             let path = dir.join(format!("{}.md", doc.id));
+            if keep_missing && !path.exists() {
+                kept += 1;
+                continue;
+            }
             let prediction = std::fs::read_to_string(&path).with_context(|| {
                 format!("reading saved output {} (was the run made with --save-outputs?)", path.display())
             })?;
+            doc.empty_output = prediction.trim().is_empty();
             if !scorings.contains_key(mdoc.id.as_str()) {
                 let s = load_scoring(dataset, mdoc).map_err(|e| anyhow::anyhow!("{}: {e}", mdoc.id))?;
                 scorings.insert(mdoc.id.as_str(), s);
@@ -719,6 +743,10 @@ fn rescore_run(mut run: RunResult, dataset: &Path, outputs: &Path) -> Result<Run
         );
         run.dataset.sha256 = sha;
     }
+    if kept > 0 {
+        eprintln!("kept the recorded scores of {kept} document(s) with no saved output (--keep-missing)");
+    }
+    run.rescore_kept_docs = (kept > 0).then_some(kept);
     run.scorer_version = SCORER_VERSION;
     run.rescored_at = Some(chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true));
     Ok(run)
@@ -758,6 +786,7 @@ fn summarize_model(docs: &[DocResult]) -> ModelSummary {
         total_pages,
         total_cost_usd: total_cost,
         cost_per_1k_pages_usd: if total_pages == 0 { None } else { Some(total_cost / f64::from(total_pages) * 1000.0) },
+        empty_outputs: docs.iter().filter(|d| d.error.is_none() && d.empty_output).count(),
         by_category: by_cat.into_iter().map(|(k, v)| (k, summarize_docs(v))).collect(),
     }
 }
@@ -790,7 +819,7 @@ fn render_markdown(runs: &[RunResult]) -> String {
         let opt = |v: Option<f64>| v.map(|x| format!("{x:.3}")).unwrap_or_else(|| "–".into());
         let pct = |v: Option<f64>| v.map(|x| format!("{:.1}%", 100.0 * x)).unwrap_or_else(|| "–".into());
         out.push_str(&format!(
-            "| {} | `{}` | **{:.2}** | {:.3} | {:.3} | {:.3} | {:.3} | {} | {} | {} | {} | {} ms | {} ms | {:.0} | {} | {}/{} | {} v{} |\n",
+            "| {} | `{}` | **{:.2}** | {:.3} | {:.3} | {:.3} | {:.3} | {} | {} | {} | {} | {} ms | {} ms | {:.0} | {} | {}/{}{} | {} v{} |\n",
             i + 1,
             m.model,
             s.accuracy.overall,
@@ -808,6 +837,7 @@ fn render_markdown(runs: &[RunResult]) -> String {
             s.cost_per_1k_pages_usd.map(|c| format!("${c:.2}")).unwrap_or_else(|| "–".into()),
             s.accuracy.failed,
             s.accuracy.documents,
+            if s.empty_outputs > 0 { format!(" (+{} empty)", s.empty_outputs) } else { String::new() },
             r.dataset.name,
             r.dataset.version,
         ));
@@ -1003,7 +1033,7 @@ mod tests {
         assert_eq!(old.scorer_version, 1, "files without the field are scorer v1");
         assert!((old.models[0].summary.accuracy.headline - 0.375).abs() < 1e-12, "score recovered from overall");
 
-        let new = rescore_run(old.clone(), &fixture("dataset"), &fixture("outputs")).expect("rescore");
+        let new = rescore_run(old.clone(), &fixture("dataset"), &fixture("outputs"), false).expect("rescore");
         assert_eq!(new.scorer_version, SCORER_VERSION);
         assert!(new.rescored_at.is_some());
         assert_eq!((new.run_id.as_str(), new.created_at.as_str()), (old.run_id.as_str(), old.created_at.as_str()));
@@ -1044,20 +1074,37 @@ mod tests {
         let json = serde_json::to_string_pretty(&new).unwrap();
         assert!(json.contains(&format!("\"scorer_version\": {SCORER_VERSION}")), "{json}");
         let back: RunResult = serde_json::from_str(&json).unwrap();
-        let again = rescore_run(back, &fixture("dataset"), &fixture("outputs")).unwrap();
+        let again = rescore_run(back, &fixture("dataset"), &fixture("outputs"), false).unwrap();
         assert_eq!(again.models[0].summary.accuracy, m_new.summary.accuracy);
         assert!(render_markdown(&[again]).contains("| TEDS |"));
+    }
+
+    #[test]
+    fn empty_outputs_are_counted_but_failures_are_not() {
+        let base = DocResult { id: "a".into(), category: "plain".into(), pages: 1, ..DocResult::default() };
+        let docs = vec![
+            DocResult { empty_output: true, ..base.clone() },
+            DocResult { id: "b".into(), ..base.clone() },
+            DocResult { id: "c".into(), empty_output: true, error: Some("boom".into()), ..base },
+        ];
+        assert_eq!(summarize_model(&docs).empty_outputs, 1);
+        let json = serde_json::to_value(&docs[1]).unwrap();
+        assert!(json.get("empty_output").is_none(), "false is not serialized");
     }
 
     #[test]
     fn rescore_refuses_missing_outputs_and_foreign_datasets() {
         let raw = std::fs::read_to_string(fixture("result.json")).unwrap();
         let run: RunResult = serde_json::from_str(&raw).unwrap();
-        let err = rescore_run(run.clone(), &fixture("dataset"), &fixture("no-such-outputs")).unwrap_err();
+        let err = rescore_run(run.clone(), &fixture("dataset"), &fixture("no-such-outputs"), false).unwrap_err();
         assert!(format!("{err:#}").contains("--save-outputs"), "{err:#}");
+        let kept = rescore_run(run.clone(), &fixture("dataset"), &fixture("no-such-outputs"), true).unwrap();
+        let ok_docs = run.models.iter().flat_map(|m| &m.docs).filter(|d| d.error.is_none()).count();
+        assert_eq!(kept.rescore_kept_docs, Some(ok_docs), "--keep-missing keeps every scored doc");
+        assert_eq!(kept.models[0].docs[0].metrics, run.models[0].docs[0].metrics, "recorded scores kept");
         let mut other = run;
         other.dataset.name = "something-else".into();
-        let err = rescore_run(other, &fixture("dataset"), &fixture("outputs")).unwrap_err();
+        let err = rescore_run(other, &fixture("dataset"), &fixture("outputs"), false).unwrap_err();
         assert!(err.to_string().contains("was run on `something-else`"), "{err}");
     }
 }

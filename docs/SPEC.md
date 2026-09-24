@@ -594,7 +594,11 @@ headline (table-only documents contributed `table_score`). `liteocr bench rescor
 outputs with the current scorer, without network access: metrics, headlines and summaries are
 recomputed, `kind`/`table_only`/`category` are refreshed from the manifest, latency, cost, pages
 and errors are kept as measured, `scorer_version` and `rescored_at` are set, and the dataset
-`sha256` is updated (with a warning) if the dataset changed since the run.
+`sha256` is updated (with a warning) if the dataset changed since the run. A missing output for a
+successful document is an error unless `--keep-missing` is given, which keeps that document's
+recorded scores and records how many in `rescore_kept_docs` (used for sources whose outputs are
+not committed, e.g. research-only datasets). A successful call that returned only whitespace is
+flagged `empty_output: true` and counted in `summary.empty_outputs`; it is scored, not failed.
 
 Each document record also carries audit fields (all optional, so older result files still load):
 `provider_job_id` (the provider's id for the call — Reducto job id, Extend parse run id,

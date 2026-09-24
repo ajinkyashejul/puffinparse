@@ -121,7 +121,10 @@ liteocr bench rescore benchmark/results/2026-09-11-combined-v1.json \
 
 `rescore` reads the saved per-document outputs, scores them with the current scorer, keeps latency,
 cost, pages and errors as measured, and sets `scorer_version` and `rescored_at`. It makes no
-network calls and refuses to guess: a missing output for a successful document is an error.
+network calls and refuses to guess: a missing output for a successful document is an error, unless
+`--keep-missing` is given — then that document keeps its recorded score and the count is recorded
+as `rescore_kept_docs`. That is how runs over research-only sources (OmniDocBench), whose outputs
+are not committed, are re-scored.
 
 Scoring a single pair without any network access:
 
@@ -169,7 +172,8 @@ OmniDocBench, DP-Bench, READoc and others; DP-Bench is the next adapter.
   model (see [`docs/benchmarks/findings.md`](../docs/benchmarks/findings.md)).
 - **An empty parse is scored, not failed.** A provider that returns HTTP 200 with no text (Reducto
   and Extend on ParseBench `text_multicolumns_2col`, whose page is one Form XObject with a
-  degenerate `/BBox`) scores 0 on that document but is not counted in **Failed**.
+  degenerate `/BBox`) scores 0 on that document but is not counted in **Failed**; it is flagged
+  `empty_output: true` and shown as `(+N empty)` next to the failure count.
 - **olmOCR `max_diffs` is honoured** since scorer v2 (fuzzy `present` / `absent` / `order` /
   `table_cell`, as upstream); its skipped tests (math, positional absences, vertical table
   neighbours, baseline) are counted in `datasets/olmocr/conversion-stats.json`. Its `absent-only`
