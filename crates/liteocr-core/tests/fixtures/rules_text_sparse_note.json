@@ -5,7 +5,7 @@
     "sentences": [
       "NOTE 23"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_sparse__note_missing_sentence_percent_0"
   },

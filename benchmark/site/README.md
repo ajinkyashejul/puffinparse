@@ -109,8 +109,11 @@ Every view is a shareable hash link:
     document the first tab is the **Rule checklist**: every assertion with pass/fail, the expected
     text, the reason it failed and, for `bag_of_sentences`, which sentences are missing. The
     checklist is a line-for-line JS port of `score_rules` / `normalize` / `markdown_to_text` in
-    `liteocr-core`; its `passed / total` is compared with the recorded score and flagged if they
-    ever differ (the recorded Rust score stays authoritative).
+    `liteocr-core` (scorer v2: HTML and markdown tables, punctuation-spacing-insensitive
+    matching, fuzzy `bag_of_sentences`, olmOCR `max_diffs`); its `passed / total` is compared with
+    the recorded score and flagged if they ever differ (the recorded Rust score stays
+    authoritative). Keep the port in step with `SCORER_VERSION`: a result re-scored by a newer
+    scorer than the port would show the mismatch badge.
   - the exact `liteocr parse` / `bench score` (or `bench run --filter`) commands for that pair.
 - Old `#/doc/<id>?run=…&model=…` links are redirected to the inspector.
 

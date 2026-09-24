@@ -4,7 +4,8 @@ use anyhow::{bail, Context, Result};
 use clap::Subcommand;
 use futures::stream::{self, StreamExt};
 use liteocr_core::bench::{
-    metrics_from_rules, score, score_rules, summarize_with, Metrics, NormalizeOptions, Rule, Summary,
+    headline, metrics_from_rules, score, score_rules, summarize_with, Metrics, NormalizeOptions, Rule, Summary,
+    SCORER_VERSION,
 };
 use liteocr_core::{DocumentRequest, OutputFormat};
 use serde::{Deserialize, Serialize};
@@ -22,6 +23,28 @@ pub enum BenchCommand {
     Report(ReportArgs),
     /// Score a single prediction file against a truth file (no network).
     Score { prediction: PathBuf, truth: PathBuf },
+    /// Re-score a committed run from its saved per-document outputs with the current scorer.
+    ///
+    /// No network: reads `<outputs>/<provider>_<model>/<doc_id>.md` (what `run --save-outputs`
+    /// wrote), scores it against the dataset's truth or rules, and rewrites the metrics and
+    /// summaries. Latency, cost, pages, errors and models are preserved; `scorer_version` is set to
+    /// the current scorer.
+    Rescore(RescoreArgs),
+}
+
+#[derive(clap::Args, Debug)]
+pub struct RescoreArgs {
+    /// Result JSON written by `bench run`.
+    result: PathBuf,
+    /// The run's saved outputs directory (`benchmark/results/outputs/<run_id>`).
+    #[arg(long)]
+    outputs: PathBuf,
+    /// Dataset directory (default: `benchmark/datasets/<dataset name from the result>`).
+    #[arg(long)]
+    dataset: Option<PathBuf>,
+    /// Where to write the re-scored result (default: overwrite `<result>` in place).
+    #[arg(long)]
+    out: Option<PathBuf>,
 }
 
 #[derive(clap::Args, Debug)]
@@ -128,6 +151,10 @@ fn one() -> u32 {
     1
 }
 
+fn scorer_v1() -> u32 {
+    1
+}
+
 fn kind_transcript() -> String {
     KIND_TRANSCRIPT.to_string()
 }
@@ -155,6 +182,12 @@ pub struct RunResult {
     pub run_id: String,
     pub created_at: String,
     pub liteocr_version: String,
+    /// [`SCORER_VERSION`] of the scorer that produced the metrics; `1` in files that predate it.
+    #[serde(default = "scorer_v1")]
+    pub scorer_version: u32,
+    /// When `bench rescore` last rewrote the metrics (RFC 3339); absent for an un-rescored run.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rescored_at: Option<String>,
     pub dataset: DatasetInfo,
     pub normalize: NormalizeOptions,
     pub models: Vec<ModelResult>,
@@ -188,6 +221,11 @@ pub struct DocResult {
     pub pages: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub metrics: Option<Metrics>,
+    /// This document's headline metric in `0..=1` ([`headline`]: `table_score` for `table-only`,
+    /// the pass rate for `rules`, `char_similarity` otherwise). Absent for failures and in scorer-v1
+    /// files.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub headline: Option<f64>,
     pub latency_ms: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost_usd: Option<f64>,
@@ -231,6 +269,7 @@ pub async fn run(cmd: BenchCommand) -> Result<()> {
     match cmd {
         BenchCommand::Run(args) => run_bench(args).await,
         BenchCommand::Report(args) => report(args),
+        BenchCommand::Rescore(args) => rescore(args),
         BenchCommand::Score { prediction, truth } => {
             let p =
                 std::fs::read_to_string(&prediction).with_context(|| format!("reading {}", prediction.display()))?;
@@ -437,6 +476,8 @@ async fn run_bench_with(args: &RunArgs, caller: Caller) -> Result<Option<RunResu
         run_id: header.run_id.clone(),
         created_at: header.created_at.clone(),
         liteocr_version: liteocr_core::VERSION.to_string(),
+        scorer_version: SCORER_VERSION,
+        rescored_at: None,
         dataset: DatasetInfo {
             name: manifest.name.clone(),
             version: manifest.version.clone(),
@@ -570,10 +611,7 @@ async fn run_doc(ctx: &CallCtx, doc: &ManifestDoc, model: &str) -> DocResult {
                     Err(e) => tracing::warn!(error = %e, "bench: could not serialize response"),
                 }
             }
-            let metrics = match &scoring {
-                Scoring::Transcript(truth) => score(&resp.markdown, truth, ctx.norm),
-                Scoring::Rules(rules) => metrics_from_rules(&score_rules(&resp.markdown, rules, ctx.norm)),
-            };
+            let metrics = score_doc(&scoring, &resp.markdown, ctx.norm);
             DocResult {
                 id: doc.id.clone(),
                 category: doc.category.clone(),
@@ -581,6 +619,7 @@ async fn run_doc(ctx: &CallCtx, doc: &ManifestDoc, model: &str) -> DocResult {
                 table_only: doc.table_only(),
                 pages: resp.usage.pages,
                 metrics: Some(metrics),
+                headline: Some(headline(&metrics, doc.table_only())),
                 latency_ms: resp.latency_ms,
                 cost_usd: resp.cost_usd,
                 provider_job_id: resp.provider_job_id.clone(),
@@ -597,6 +636,92 @@ async fn run_doc(ctx: &CallCtx, doc: &ManifestDoc, model: &str) -> DocResult {
     result.attempts = Some(attempts);
     result.started_at = Some(started_at);
     result
+}
+
+/// Score one prediction against a document's truth or rules.
+fn score_doc(scoring: &Scoring, prediction: &str, norm: NormalizeOptions) -> Metrics {
+    match scoring {
+        Scoring::Transcript(truth) => score(prediction, truth, norm),
+        Scoring::Rules(rules) => metrics_from_rules(&score_rules(prediction, rules, norm)),
+    }
+}
+
+fn rescore(args: RescoreArgs) -> Result<()> {
+    let raw = std::fs::read_to_string(&args.result).with_context(|| format!("reading {}", args.result.display()))?;
+    let run: RunResult = serde_json::from_str(&raw).with_context(|| format!("parsing {}", args.result.display()))?;
+    let dataset = args.dataset.unwrap_or_else(|| PathBuf::from("benchmark/datasets").join(&run.dataset.name));
+    let before: Vec<(String, f64)> = run.models.iter().map(|m| (m.model.clone(), m.summary.accuracy.overall)).collect();
+    let old_version = run.scorer_version;
+    let rescored = rescore_run(run, &dataset, &args.outputs)?;
+    let out = args.out.unwrap_or(args.result);
+    std::fs::write(&out, serde_json::to_string_pretty(&rescored)? + "\n")
+        .with_context(|| format!("writing {}", out.display()))?;
+    eprintln!(
+        "re-scored {} ({} models) with scorer v{} (was v{old_version}) -> {}",
+        rescored.run_id,
+        rescored.models.len(),
+        rescored.scorer_version,
+        out.display()
+    );
+    for (m, (model, old)) in rescored.models.iter().zip(before) {
+        eprintln!("  {model:<32} overall {old:>6.2} -> {:>6.2}", m.summary.accuracy.overall);
+    }
+    Ok(())
+}
+
+/// Re-score every document of `run` from `<outputs>/<model dir>/<doc id>.md` against `dataset`.
+///
+/// Only the accuracy fields change: `metrics`, `headline`, the `kind`/`table_only`/`category` labels
+/// (refreshed from the manifest), and the summaries recomputed from them. Latency, cost, pages and
+/// errors are kept as measured. A document whose call failed stays failed. A missing output file
+/// for a successful document is an error, never a silent zero.
+fn rescore_run(mut run: RunResult, dataset: &Path, outputs: &Path) -> Result<RunResult> {
+    let (manifest, sha) = load_manifest(dataset)?;
+    if manifest.name != run.dataset.name {
+        bail!("{} is dataset `{}`, but the result was run on `{}`", dataset.display(), manifest.name, run.dataset.name);
+    }
+    let by_id: BTreeMap<&str, &ManifestDoc> = manifest.documents.iter().map(|d| (d.id.as_str(), d)).collect();
+    let mut scorings: BTreeMap<&str, Scoring> = BTreeMap::new();
+    for model in &mut run.models {
+        let dir = outputs.join(model.model.replace('/', "_"));
+        for doc in &mut model.docs {
+            let Some(mdoc) = by_id.get(doc.id.as_str()) else {
+                bail!("document `{}` of {} is not in {}", doc.id, model.model, dataset.join("manifest.json").display());
+            };
+            doc.kind = mdoc.kind.clone();
+            doc.table_only = mdoc.table_only();
+            doc.category = mdoc.category.clone();
+            if doc.error.is_some() {
+                doc.metrics = None;
+                doc.headline = None;
+                continue;
+            }
+            let path = dir.join(format!("{}.md", doc.id));
+            let prediction = std::fs::read_to_string(&path).with_context(|| {
+                format!("reading saved output {} (was the run made with --save-outputs?)", path.display())
+            })?;
+            if !scorings.contains_key(mdoc.id.as_str()) {
+                let s = load_scoring(dataset, mdoc).map_err(|e| anyhow::anyhow!("{}: {e}", mdoc.id))?;
+                scorings.insert(mdoc.id.as_str(), s);
+            }
+            let metrics = score_doc(&scorings[mdoc.id.as_str()], &prediction, run.normalize);
+            doc.headline = Some(headline(&metrics, doc.table_only));
+            doc.metrics = Some(metrics);
+        }
+        model.summary = summarize_model(&model.docs);
+    }
+    if sha != run.dataset.sha256 {
+        eprintln!(
+            "warning: dataset {} has changed since the run (sha256 {}… -> {}…); recording the new hash",
+            run.dataset.name,
+            &run.dataset.sha256.get(..12).unwrap_or(&run.dataset.sha256),
+            &sha[..12]
+        );
+        run.dataset.sha256 = sha;
+    }
+    run.scorer_version = SCORER_VERSION;
+    run.rescored_at = Some(chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true));
+    Ok(run)
 }
 
 fn percentile(sorted: &[u64], p: f64) -> u64 {
@@ -658,14 +783,14 @@ fn render_markdown(runs: &[RunResult]) -> String {
         b.1.summary.accuracy.overall.partial_cmp(&a.1.summary.accuracy.overall).unwrap_or(std::cmp::Ordering::Equal)
     });
     let mut out = String::new();
-    out.push_str("| Rank | Model | Overall | Char sim | CER | WER | Word F1 | Order | Table | Rules | p50 latency | p95 latency | ms/page | $/1k pages | Failed | Dataset |\n");
-    out.push_str("|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|\n");
+    out.push_str("| Rank | Model | Overall | Char sim | CER | WER | Word F1 | Order | Table | TEDS | Rules | p50 latency | p95 latency | ms/page | $/1k pages | Failed | Dataset |\n");
+    out.push_str("|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|\n");
     for (i, (r, m)) in rows.iter().enumerate() {
         let s = &m.summary;
         let opt = |v: Option<f64>| v.map(|x| format!("{x:.3}")).unwrap_or_else(|| "–".into());
         let pct = |v: Option<f64>| v.map(|x| format!("{:.1}%", 100.0 * x)).unwrap_or_else(|| "–".into());
         out.push_str(&format!(
-            "| {} | `{}` | **{:.2}** | {:.3} | {:.3} | {:.3} | {:.3} | {} | {} | {} | {} ms | {} ms | {:.0} | {} | {}/{} | {} v{} |\n",
+            "| {} | `{}` | **{:.2}** | {:.3} | {:.3} | {:.3} | {:.3} | {} | {} | {} | {} | {} ms | {} ms | {:.0} | {} | {}/{} | {} v{} |\n",
             i + 1,
             m.model,
             s.accuracy.overall,
@@ -675,6 +800,7 @@ fn render_markdown(runs: &[RunResult]) -> String {
             s.accuracy.word_f1,
             opt(s.accuracy.order_score),
             opt(s.accuracy.table_score),
+            opt(s.accuracy.teds_grid),
             pct(s.accuracy.rule_pass_rate),
             s.latency_p50_ms,
             s.latency_p95_ms,
@@ -820,6 +946,7 @@ mod tests {
             table_only,
             pages: 1,
             metrics,
+            headline: None,
             latency_ms: 1,
             ..DocResult::default()
         };
@@ -861,5 +988,76 @@ mod tests {
         // No rule documents and a single source: `–` in Rules, no per-source table.
         assert!(md.contains(" – |"));
         assert!(!md.contains("by source"));
+    }
+
+    fn fixture(rel: &str) -> PathBuf {
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rescore").join(rel)
+    }
+
+    /// `bench rescore` on a tiny committed run: accuracy is recomputed from the saved outputs with
+    /// the current scorer; everything that was measured (latency, cost, pages, errors) survives.
+    #[test]
+    fn rescore_round_trip_on_a_fixture_run() {
+        let raw = std::fs::read_to_string(fixture("result.json")).unwrap();
+        let old: RunResult = serde_json::from_str(&raw).unwrap();
+        assert_eq!(old.scorer_version, 1, "files without the field are scorer v1");
+        assert!((old.models[0].summary.accuracy.headline - 0.375).abs() < 1e-12, "score recovered from overall");
+
+        let new = rescore_run(old.clone(), &fixture("dataset"), &fixture("outputs")).expect("rescore");
+        assert_eq!(new.scorer_version, SCORER_VERSION);
+        assert!(new.rescored_at.is_some());
+        assert_eq!((new.run_id.as_str(), new.created_at.as_str()), (old.run_id.as_str(), old.created_at.as_str()));
+        let (_, sha) = load_manifest(&fixture("dataset")).unwrap();
+        assert_eq!(new.dataset.sha256, sha, "the dataset hash is refreshed");
+
+        let (m_old, m_new) = (&old.models[0], &new.models[0]);
+        assert_eq!(m_new.model, m_old.model);
+        for (a, b) in m_old.docs.iter().zip(&m_new.docs) {
+            assert_eq!(
+                (&a.id, a.latency_ms, a.cost_usd, a.pages, &a.error),
+                (&b.id, b.latency_ms, b.cost_usd, b.pages, &b.error)
+            );
+        }
+        let doc = |id: &str| m_new.docs.iter().find(|d| d.id == id).unwrap();
+        // The failed call stays failed and unscored.
+        assert!(doc("failed").metrics.is_none() && doc("failed").headline.is_none());
+        assert_eq!(doc("plain").headline, Some(1.0));
+        // HTML table (with a rowspan) now reads; table-only headline is table_score.
+        let tbl = doc("src/tbl");
+        let tm = tbl.metrics.unwrap();
+        assert_eq!(tm.table_score, Some(1.0));
+        assert_eq!(tm.teds_grid, Some(1.0));
+        assert_eq!(tbl.headline, Some(1.0));
+        assert!(tm.char_similarity < 1.0, "char_similarity stays the literal whole-page similarity");
+        // The tokenised rule text matches now.
+        assert_eq!(doc("rules").metrics.unwrap().rule_pass_rate, Some(1.0));
+
+        let s = &m_new.summary;
+        assert!((s.accuracy.headline - 0.75).abs() < 1e-12, "3 perfect docs + 1 failure: {}", s.accuracy.headline);
+        assert!((s.accuracy.overall - 75.0).abs() < 1e-9);
+        assert_eq!(s.accuracy.teds_grid, Some(1.0));
+        assert_eq!((s.latency_p50_ms, s.total_pages), (m_old.summary.latency_p50_ms, m_old.summary.total_pages));
+        assert_eq!(s.total_cost_usd, m_old.summary.total_cost_usd);
+        assert_eq!(s.by_category["table"].headline, 1.0);
+
+        // Round trip through JSON, and a second rescore is a no-op on the accuracy.
+        let json = serde_json::to_string_pretty(&new).unwrap();
+        assert!(json.contains(&format!("\"scorer_version\": {SCORER_VERSION}")), "{json}");
+        let back: RunResult = serde_json::from_str(&json).unwrap();
+        let again = rescore_run(back, &fixture("dataset"), &fixture("outputs")).unwrap();
+        assert_eq!(again.models[0].summary.accuracy, m_new.summary.accuracy);
+        assert!(render_markdown(&[again]).contains("| TEDS |"));
+    }
+
+    #[test]
+    fn rescore_refuses_missing_outputs_and_foreign_datasets() {
+        let raw = std::fs::read_to_string(fixture("result.json")).unwrap();
+        let run: RunResult = serde_json::from_str(&raw).unwrap();
+        let err = rescore_run(run.clone(), &fixture("dataset"), &fixture("no-such-outputs")).unwrap_err();
+        assert!(format!("{err:#}").contains("--save-outputs"), "{err:#}");
+        let mut other = run;
+        other.dataset.name = "something-else".into();
+        let err = rescore_run(other, &fixture("dataset"), &fixture("outputs")).unwrap_err();
+        assert!(err.to_string().contains("was run on `something-else`"), "{err}");
     }
 }

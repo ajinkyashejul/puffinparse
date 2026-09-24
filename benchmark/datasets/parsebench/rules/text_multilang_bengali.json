@@ -98,7 +98,7 @@
       "হাসপাতাল আপনাকে একটি অর্থপ্রদানের পরিকল্পন",
       "হাসপাতাল আয়ের ভিত্তিতে যোগ্য ব্যক্তিদের"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_multilang__bengali_missing_sentence_percent_0"
   },

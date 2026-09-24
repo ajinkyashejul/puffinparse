@@ -62,11 +62,13 @@ manifest `notes`, so nothing is dropped silently.
 
 ## Read the scores carefully
 
-1. **Exact vs fuzzy matching.** Upstream allows `max_diffs` Levenshtein edits. The LiteOCR scorer
-   matches exactly after normalisation, which is **stricter** for `present` / `order` /
-   `table_cell` and **looser** for `absent` whenever `max_diffs > 0`. Every rule keeps its
-   `max_diffs` so a fuzzy scorer can use it later. All 34 `multi_column` order rules are
-   affected.
+1. **Fuzzy matching.** Upstream allows `max_diffs` Levenshtein edits. Since scorer v2
+   (`liteocr_core::bench::SCORER_VERSION = 2`) the LiteOCR scorer honours it the same way:
+   fuzzy substring search for `present` / `absent`, "some fuzzy `before` starts before some fuzzy
+   `after`" for `order`, and `max_diffs` edits tolerated in `table_cell` headers and values. A
+   scorer-v1 result (no `scorer_version`) matched exactly, which was stricter for `present` /
+   `order` / `table_cell` and looser for `absent`; re-score it with `liteocr bench rescore`. (The
+   manifest `notes` still carry the v1 sentence until the adapter is re-run.)
 2. **`absent-only` documents pass for an empty parse.** All 8 `headers_footers` documents assert
    only that running headers and footers are *absent*. Upstream guards against empty output with
    its baseline test, which has no analogue here. They carry the `absent-only` tag.

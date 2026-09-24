@@ -18,19 +18,20 @@ to `results/` and rendered into [`LEADERBOARD.md`](LEADERBOARD.md).
 
 ## Metrics
 
-Normalisation: NFKC, markdown syntax stripped (headings, emphasis, list bullets, table pipes and
-separator rows), curly quotes and dashes straightened, whitespace collapsed, lowercased
-(unless `--case-sensitive`).
+Normalisation: NFKC, markdown syntax and HTML tags stripped (headings, emphasis, list bullets,
+table pipes and separator rows), HTML entities decoded, curly quotes and dashes straightened,
+whitespace collapsed, lowercased (unless `--case-sensitive`).
 
 | Metric | Definition |
 |---|---|
-| **Overall** | `100 × mean(char_similarity)` over documents; a failed call scores 0 |
-| `char_similarity` | `1 − levenshtein(pred, truth) / max(|pred|, |truth|)` |
+| **Overall** | `100 × summary.headline`: the mean over documents of each document's headline metric (`char_similarity`, or `table_score` for `table-only`, or `rule_pass_rate` for `kind: rules`); a failed call scores 0 |
+| `char_similarity` | `1 − levenshtein(pred, truth) / max(|pred|, |truth|)`; the summary value is the literal mean, never the headline |
 | `cer` | `levenshtein(pred, truth) / |truth|` |
 | `wer` | word-level Levenshtein over whitespace tokens `/ |truth words|` |
 | `word_recall`, `word_precision`, `word_f1` | bag-of-words overlap |
 | `order_score` | Kendall-τ-style fraction of concordant pairs among lines present in both texts (reading order) |
-| `table_score` | `char_similarity` restricted to markdown table rows (only when the truth has tables) |
+| `table_score` | `char_similarity` restricted to table rows (only when the truth has tables). Markdown pipe tables and HTML `<table>`s (with `colspan`/`rowspan` repeated into every slot, like the ParseBench truth) are both read into rows of cells |
+| `teds_grid` | TEDS (tree-edit-distance similarity, Zhong et al. 2020) on the `table > row > cell` grid: `1 − TED / max(nodes)`, cell renames cost their normalised Levenshtein distance. Structure-aware where `table_score` is not: a merged or split row or column costs here even when the text is all there. It is TEDS without `thead`/`tbody` and span attributes, since the truth is markdown; each truth table is compared with its best-matching predicted table |
 | `rule_pass_rate` | `passed / total` over a rule-scored document's assertions (only for `kind: rules`) |
 
 ## Document kinds
@@ -101,9 +102,26 @@ dashboard), `cache_hit` (`false` when caches were disabled, the default), `attem
 `started_at`, and `error_kind` + `error` for failures. The run ends with a summary line: calls
 made, resumed, failed, total cost and wall time.
 
-`bench report` renders the leaderboard table (a **Rules** column shows the mean rule pass rate,
+`bench report` renders the leaderboard table (**TEDS** is the mean `teds_grid` over documents whose truth has a table, a **Rules** column shows the mean rule pass rate,
 `–` for datasets with no rule documents), then the per-category breakdown, and — for datasets
 whose ids carry a `<source>/` prefix — a per-source breakdown of documents and `Overall`.
+
+### Result JSON for consumers
+
+Each model's `summary` carries `headline` (0–1; rank on this, `overall = 100 × headline`),
+`char_similarity` (literal), `table_score`, `teds_grid`, `rule_pass_rate`, and each document its
+own `headline`. The run records `scorer_version` (`liteocr_core::bench::SCORER_VERSION`, currently
+`2`). Files without it are scorer v1: read `headline` as `overall / 100`; their
+`summary.char_similarity` held the headline, and they have no `teds_grid`. Re-score them offline:
+
+```bash
+liteocr bench rescore benchmark/results/2026-09-11-combined-v1.json \
+    --outputs benchmark/results/outputs/run-20260911T111039Z   # [--dataset <dir>] [--out <path>]
+```
+
+`rescore` reads the saved per-document outputs, scores them with the current scorer, keeps latency,
+cost, pages and errors as measured, and sets `scorer_version` and `rescored_at`. It makes no
+network calls and refuses to guess: a missing output for a successful document is an error.
 
 Scoring a single pair without any network access:
 
@@ -140,16 +158,22 @@ OmniDocBench, DP-Bench, READoc and others; DP-Bench is the next adapter.
   polling. Run from a different region or under load and numbers will move.
 - Prices are list prices. Volume discounts, batch queues and cache hits change real cost.
 - **A rule pass rate is a floor, not an accuracy.** ParseBench's assertions are generated from its
-  own reference extraction, so a rule's text can carry that extraction's artifacts: punctuation
-  spaced as separate tokens (`this " agreement "`), or two lines of the page concatenated into one
-  "sentence". Matching is exact substring after normalisation, so such a rule fails on output that
-  is in fact correct, and an `order` rule whose `before` never matches fails with it. The effect is
-  the same for every model, so it moves the absolute number far more than the ranking. The one
-  `bag_of_sentences` rule per ParseBench document asks for *every* sentence of the page at
-  `threshold: 1.0` and therefore fails almost always.
-- **olmOCR rules are matched exactly**, while upstream tolerates `max_diffs` edits; its skipped
-  tests (math, positional absences, vertical table neighbours, baseline) are counted in
-  `datasets/olmocr/conversion-stats.json`. Its `absent-only` documents pass for an empty parse.
+  own reference extraction, so a rule's text can carry that extraction's artifacts. Scorer v2
+  neutralises the commonest one — punctuation spaced as separate tokens (`this " agreement "`) —
+  by ignoring spaces next to punctuation on both sides, but others remain (two lines of the page
+  fused into one "sentence", a stray footnote marker), and `present` / `order` still match exact
+  substrings, so such a rule fails on correct output. The effect is the same for every model, so
+  it moves the absolute number far more than the ranking. The one `bag_of_sentences` rule per
+  ParseBench document matches each sentence fuzzily (≥ 0.8 similar) and passes at 80 % of the
+  page's sentences: at the adapter's original 1.0 a single fused "sentence" failed it for every
+  model (see [`docs/benchmarks/findings.md`](../docs/benchmarks/findings.md)).
+- **An empty parse is scored, not failed.** A provider that returns HTTP 200 with no text (Reducto
+  and Extend on ParseBench `text_multicolumns_2col`, whose page is one Form XObject with a
+  degenerate `/BBox`) scores 0 on that document but is not counted in **Failed**.
+- **olmOCR `max_diffs` is honoured** since scorer v2 (fuzzy `present` / `absent` / `order` /
+  `table_cell`, as upstream); its skipped tests (math, positional absences, vertical table
+  neighbours, baseline) are counted in `datasets/olmocr/conversion-stats.json`. Its `absent-only`
+  documents pass for an empty parse.
 - **OmniDocBench must be fetched** before a run (`python -m benchmark.adapters omnidocbench`);
   otherwise its documents fail as file-not-found and the dataset `sha256` does not cover them.
 - **A combined score mixes datasets, licences and document kinds.** Read `combined-v1` /

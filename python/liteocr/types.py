@@ -431,6 +431,8 @@ class Metrics:
     truth_chars: int
     order_score: Optional[float] = None
     table_score: Optional[float] = None
+    #: TEDS on the table row/cell grid (structure + content); ``None`` if the truth has no table.
+    teds_grid: Optional[float] = None
     #: ``passed / total`` of a rule-scored document; ``None`` for transcript documents.
     rule_pass_rate: Optional[float] = None
     #: Rules that passed, for a rule-scored document.
@@ -451,6 +453,7 @@ class Metrics:
             truth_chars=d["truth_chars"],
             order_score=d.get("order_score"),
             table_score=d.get("table_score"),
+            teds_grid=d.get("teds_grid"),
             rule_pass_rate=d.get("rule_pass_rate"),
             rules_passed=d.get("rules_passed"),
             rules_total=d.get("rules_total"),

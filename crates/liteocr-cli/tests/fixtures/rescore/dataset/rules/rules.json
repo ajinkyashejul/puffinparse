@@ -1,0 +1,4 @@
+[
+  {"id": "p1", "type": "present", "text": "(this \" Agreement \")", "case_sensitive": false},
+  {"id": "p2", "type": "present", "text": "Effective Date", "case_sensitive": false}
+]

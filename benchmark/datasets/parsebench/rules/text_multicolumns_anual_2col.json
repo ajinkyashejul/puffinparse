@@ -31,7 +31,7 @@
       "We're also continuing our long tradition of investing in our communities",
       "We've committed more than 1billionofinvestmentcapitalandmorethan20 million in grant capital to 116 organizations, companies and projects, which puts us on track to directly impact the lives of more than 184,000 Black women and girls"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_multicolumns__anual_2col_missing_sentence_percent_0"
   },

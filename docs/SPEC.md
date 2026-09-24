@@ -530,19 +530,43 @@ byte-reproducible; the truth is produced from the same source the pixels are ren
 
 ### 10.3 Metrics (computed in Rust, `liteocr_core::bench`)
 
-Given predicted `P` and truth `T` after **normalisation** (NFKC, collapse
-whitespace, strip markdown emphasis, lowercase for the `case_insensitive` variant):
+Given predicted `P` and truth `T` after **normalisation** (NFKC, strip markdown syntax and HTML
+tags, decode HTML entities, straighten quotes/dashes, collapse whitespace, lowercase for the
+`case_insensitive` variant):
 
-- `char_similarity = 1 - levenshtein(P, T) / max(|P|, |T|)` (primary score)
+- `char_similarity = 1 - levenshtein(P, T) / max(|P|, |T|)` (the primary metric of a plain
+  transcript document)
 - `cer = levenshtein(P, T) / |T|`
 - `wer = word_levenshtein(P_words, T_words) / |T_words|`
 - `word_recall` = fraction of truth word tokens present in prediction (bag-of-words)
 - `word_precision`, `word_f1`
-- `table_score` (when the truth has markdown table rows): char_similarity restricted to table rows
+- `table_score` (when the truth has a table): char_similarity restricted to table rows. Tables are
+  markdown pipe tables **or HTML `<table>`s** (thead/tbody, th/td, `colspan`/`rowspan` repeated
+  into every slot they cover, entities decoded), each reduced to rows of normalised cells; a row is
+  its cells joined by a space. `liteocr_core::bench::tables`.
+- `teds_grid` (when the truth has a table): TEDS (Zhong et al. 2020) computed on the grid tree
+  `table > row > cell` — `1 - TED / max(|Tp|, |Tt|)`, Zhang–Shasha tree edit distance, unit
+  insert/delete, cell rename = normalised Levenshtein of the contents. It is TEDS without
+  `thead`/`tbody` nodes and span attributes, because the ground truth is markdown. Each truth
+  table is matched to its best predicted table; extra predicted tables are not penalised.
 - `order_score`: Kendall-τ–like agreement of the order of lines shared by both texts
 
-Per document all metrics are recorded; aggregate = mean over docs, plus per
-category. **Overall score** = `100 * mean(char_similarity)`.
+Per document all metrics are recorded, plus the document's **headline**: `table_score` for
+`table-only` documents, the rule pass rate for `kind: rules`, `char_similarity` otherwise.
+Aggregate = mean over docs (failures count 0), plus per category. `Summary.headline` = mean of the
+document headlines (0–1), **Overall** = `100 * headline`; `Summary.char_similarity` is the plain
+mean of the documents' `char_similarity` (a rule document has no transcript, so its
+`char_similarity` field carries the pass rate).
+
+Rule matching (`score_rules`) normalises both sides with the run's options, then drops every
+space adjacent to punctuation, so tokenised rule text (`(this " agreement ")`) matches the printed
+page. `bag_of_sentences` counts a sentence as present when a window of the prediction is ≥ 0.8
+similar (`BAG_SENTENCE_MIN_SIMILARITY`); the rule passes when at least `threshold` of them are
+(default `BAG_DEFAULT_THRESHOLD = 0.8`). A rule's optional `max_diffs` (olmOCR-bench) allows that
+many Levenshtein edits in `present` / `absent` / `order` / `table_cell` matching.
+
+The scorer is versioned: `liteocr_core::bench::SCORER_VERSION` (currently `2`) is written to every
+result as `scorer_version` and bumped whenever a change would move a committed score.
 
 ### 10.4 Runner and outputs
 
@@ -553,12 +577,24 @@ liteocr bench run --dataset benchmark/datasets/synthetic-v1 \
 liteocr bench report benchmark/results/*.json --format markdown > benchmark/LEADERBOARD.md
 ```
 
-Result JSON: `{run_id, created_at, liteocr_version, dataset:{name, version, documents, sha256},
-normalize, models:[{model, docs:[{id, category, pages, metrics, latency_ms, cost_usd, error}],
-summary:{documents, failed, char_similarity, cer, wer, word_f1, order_score, table_score, overall,
-latency_p50_ms, latency_p95_ms, latency_per_page_ms, total_pages, total_cost_usd,
-cost_per_1k_pages_usd, by_category}}]}`. The `sha256` covers the manifest plus every input and
-truth file, so a result is tied to an exact dataset revision.
+Result JSON: `{run_id, created_at, liteocr_version, scorer_version, rescored_at?,
+dataset:{name, version, documents, sha256}, normalize, models:[{model, docs:[{id, category, kind,
+table_only, pages, metrics, headline, latency_ms, cost_usd, error}], summary:{documents, failed,
+headline, char_similarity, cer, wer, word_f1, order_score, table_score, teds_grid, rule_pass_rate,
+overall, latency_p50_ms, latency_p95_ms, latency_per_page_ms, total_pages, total_cost_usd,
+cost_per_1k_pages_usd, by_category}}]}`. The `sha256` covers the manifest plus every input, truth
+and rule file, so a result is tied to an exact dataset revision.
+
+Consumers (the viewer in `benchmark/site/`, `bench report`) rank on `summary.headline` (0–1) when
+present, else `overall / 100`, and show a document's `headline` when present. Compatibility with
+older files: a file without `scorer_version` is scorer v1; its `summary.headline` is read as
+`overall / 100`, `teds_grid` is absent, and — unlike v2 — its `summary.char_similarity` held the
+headline (table-only documents contributed `table_score`). `liteocr bench rescore <result.json>
+--outputs <dir> [--dataset <dir>] [--out <path>]` re-scores a run from its saved per-document
+outputs with the current scorer, without network access: metrics, headlines and summaries are
+recomputed, `kind`/`table_only`/`category` are refreshed from the manifest, latency, cost, pages
+and errors are kept as measured, `scorer_version` and `rescored_at` are set, and the dataset
+`sha256` is updated (with a warning) if the dataset changed since the run.
 
 Each document record also carries audit fields (all optional, so older result files still load):
 `provider_job_id` (the provider's id for the call — Reducto job id, Extend parse run id,
@@ -634,7 +670,7 @@ liteocr parse   <file|url> [--model reducto/standard] [--format markdown|text|js
 liteocr ocr     <file|url> [--model reducto/standard] [--format text|json]
 liteocr extract <file|url> --schema <file.json|inline JSON> [--instructions TEXT] [--citations]
 liteocr providers [--mode parse|ocr|extract] [--json]   # models, modes, per-mode pricing, key status
-liteocr bench run|report|score                          # see §10 (parse mode)
+liteocr bench run|report|score|rescore                  # see §10 (parse mode; rescore is offline)
 liteocr serve [--config liteocr.toml] [--host H] [--port P]   # HTTP gateway, see §14
 ```
 

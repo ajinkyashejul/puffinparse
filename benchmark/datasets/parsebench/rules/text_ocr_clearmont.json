@@ -29,7 +29,7 @@
       "Within an incredibly short time period the wire came down from over the little electric road and most all of the equipment was dissected for the various metals and scrapped",
       "which has since been converted into housing for the elderly"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_ocr__clearmont_missing_sentence_percent_0"
   },

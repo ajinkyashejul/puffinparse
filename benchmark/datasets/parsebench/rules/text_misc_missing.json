@@ -8,7 +8,7 @@
       "The Council on Environmental Quality submitted an advanced notice of proposed rulemaking on NEPA to the Federal Register last Friday",
       "The White House has taken the first official steps toward rewriting regulations for the National Environmental Policy Act"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_misc__missing_missing_sentence_percent_0"
   },

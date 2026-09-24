@@ -174,7 +174,7 @@
       "v Duran, et al",
       "vs EMILIO M"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_dense__legalnotices_missing_sentence_percent_0"
   },

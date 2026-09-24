@@ -21,7 +21,7 @@
       "The reported median dollar loss ($3,800) was the second highest of all scam types",
       "The reported median dollar loss rose from 1,411in2022to3,600 in 2023. In 2023, 65.7% of romance scam reports included a monetary loss compared to only 16.1% in 2022"
     ],
-    "threshold": 1.0,
+    "threshold": 0.8,
     "case_sensitive": false,
     "source": "text_multicolumns__2col_missing_sentence_percent_0"
   },
