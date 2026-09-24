@@ -10,7 +10,10 @@
 
 use liteocr_core::compat::Format;
 use liteocr_core::router::{Router as CoreRouter, RouterConfig, Strategy};
-use liteocr_core::{DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, Mode, ParseResponse};
+use liteocr_core::{
+    DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, JobHandle, JobStatus, Mode, ParseResponse,
+    RetrieveOptions,
+};
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyDict};
@@ -142,6 +145,92 @@ fn aextract<'py>(
         let resp = liteocr_core::extract(req).await.map_err(to_py_err)?;
         Python::attach(|py| to_py(py, &resp))
     })
+}
+
+// ---- asynchronous jobs ---------------------------------------------------------------------------
+
+fn build_job(job: &Bound<'_, PyDict>) -> PyResult<JobHandle> {
+    depythonize(job.as_any()).map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("invalid job: {e}")))
+}
+
+fn build_retrieve_options(options: Option<&Bound<'_, PyDict>>) -> PyResult<RetrieveOptions> {
+    match options {
+        None => Ok(RetrieveOptions::default()),
+        Some(o) => depythonize(o.as_any())
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("invalid retrieve options: {e}"))),
+    }
+}
+
+/// `Pending` → `{"status": "pending"}`, `Succeeded` → `{"status": "succeeded", "result": {...}}`;
+/// a failed job raises `CoreError` like any other failure.
+fn job_status_to_py(py: Python<'_>, status: JobStatus) -> PyResult<Py<PyAny>> {
+    match status {
+        JobStatus::Failed(e) => Err(to_py_err(e)),
+        other => to_py(py, &other),
+    }
+}
+
+/// Start a `parse` job and return the job handle as a dict (see `liteocr_core::submit_parse`).
+#[pyfunction]
+#[pyo3(signature = (request, data=None))]
+fn submit(py: Python<'_>, request: &Bound<'_, PyDict>, data: Option<&Bound<'_, PyBytes>>) -> PyResult<Py<PyAny>> {
+    let req = build_request(request, data)?;
+    let rt = pyo3_async_runtimes::tokio::get_runtime();
+    let job = py.detach(|| rt.block_on(liteocr_core::submit_parse(req))).map_err(to_py_err)?;
+    to_py(py, &job)
+}
+
+/// Async variant of [`submit`].
+#[pyfunction]
+#[pyo3(signature = (request, data=None))]
+fn asubmit<'py>(
+    py: Python<'py>,
+    request: &Bound<'py, PyDict>,
+    data: Option<&Bound<'py, PyBytes>>,
+) -> PyResult<Bound<'py, PyAny>> {
+    let req = build_request(request, data)?;
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
+        let job = liteocr_core::submit_parse(req).await.map_err(to_py_err)?;
+        Python::attach(|py| to_py(py, &job))
+    })
+}
+
+/// Check a submitted job once. Returns `{"status": "pending"}` or
+/// `{"status": "succeeded", "result": <ParseResponse dict>}`; raises on a failed job.
+#[pyfunction]
+#[pyo3(signature = (job, options=None))]
+fn retrieve(py: Python<'_>, job: &Bound<'_, PyDict>, options: Option<&Bound<'_, PyDict>>) -> PyResult<Py<PyAny>> {
+    let job = build_job(job)?;
+    let opts = build_retrieve_options(options)?;
+    let rt = pyo3_async_runtimes::tokio::get_runtime();
+    let status = py.detach(|| rt.block_on(liteocr_core::retrieve_parse_with(&job, &opts))).map_err(to_py_err)?;
+    job_status_to_py(py, status)
+}
+
+/// Async variant of [`retrieve`].
+#[pyfunction]
+#[pyo3(signature = (job, options=None))]
+fn aretrieve<'py>(
+    py: Python<'py>,
+    job: &Bound<'py, PyDict>,
+    options: Option<&Bound<'py, PyDict>>,
+) -> PyResult<Bound<'py, PyAny>> {
+    let job = build_job(job)?;
+    let opts = build_retrieve_options(options)?;
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
+        let status = liteocr_core::retrieve_parse_with(&job, &opts).await.map_err(to_py_err)?;
+        Python::attach(|py| job_status_to_py(py, status))
+    })
+}
+
+/// Interpret a provider webhook body (no network). Returns `{"job": <job dict> | None,
+/// "status": {"status": "pending" | "finished" | "succeeded" | "failed", "result": ...}}`.
+#[pyfunction]
+fn parse_webhook(py: Python<'_>, model: &str, payload: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let payload: serde_json::Value = depythonize(payload)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("invalid webhook payload: {e}")))?;
+    let event = liteocr_core::parse_webhook(model, &payload).map_err(to_py_err)?;
+    to_py(py, &event)
 }
 
 // ---- router --------------------------------------------------------------------------------------
@@ -421,6 +510,11 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(aocr, m)?)?;
     m.add_function(wrap_pyfunction!(extract, m)?)?;
     m.add_function(wrap_pyfunction!(aextract, m)?)?;
+    m.add_function(wrap_pyfunction!(submit, m)?)?;
+    m.add_function(wrap_pyfunction!(asubmit, m)?)?;
+    m.add_function(wrap_pyfunction!(retrieve, m)?)?;
+    m.add_function(wrap_pyfunction!(aretrieve, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_webhook, m)?)?;
     m.add_function(wrap_pyfunction!(output_formats, m)?)?;
     m.add_function(wrap_pyfunction!(validate_output_format, m)?)?;
     m.add_function(wrap_pyfunction!(render_parse, m)?)?;

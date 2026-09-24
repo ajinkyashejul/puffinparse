@@ -379,6 +379,45 @@ Response = Union[ParseResponse, TextResponse, ExtractResponse]
 
 
 @dataclass
+class Job:
+    """A submitted asynchronous ``parse`` job (mirrors ``liteocr_core::JobHandle``).
+
+    Returned by :func:`liteocr.submit`; pass it to :func:`liteocr.retrieve`. It never holds an API
+    key, so it is safe to store (``to_dict()`` / ``from_dict()``) and hand to another process.
+    """
+
+    provider: str
+    model: str
+    job_id: str
+    submitted_at: str
+    output: Literal["markdown", "text"] = "markdown"
+    include_raw: bool = False
+    base_url: Optional[str] = None
+    #: Non-secret provider options a later retrieve needs (e.g. Extend's ``workspace_id``).
+    provider_state: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> Job:
+        output = d.get("output", "markdown")
+        return cls(
+            provider=d["provider"],
+            model=d["model"],
+            job_id=d["job_id"],
+            submitted_at=d.get("submitted_at", ""),
+            output="text" if output == "text" else "markdown",
+            include_raw=bool(d.get("include_raw", False)),
+            base_url=d.get("base_url"),
+            provider_state=d.get("provider_state"),
+            metadata=dict(d.get("metadata", {}) or {}),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        d = asdict(self)
+        return {k: v for k, v in d.items() if v is not None}
+
+
+@dataclass
 class Metrics:
     """Benchmark metrics between a prediction and a ground truth (see ``liteocr.score``)."""
 
@@ -426,6 +465,7 @@ __all__ = [
     "Citation",
     "ExtractResponse",
     "FieldInfo",
+    "Job",
     "Line",
     "Metrics",
     "Mode",
