@@ -21,6 +21,13 @@ and against the implementation in `crates/liteocr-core/src/providers/`.
 | Upstage | [`upstage.md`](upstage.md) | `providers/upstage.rs` | `UPSTAGE_API_KEY` | `document-parse` *(default)*, `document-parse-nightly` | docs-only |
 | Landing AI (ADE) | [`landingai.md`](landingai.md) | `providers/landingai.rs` | `LANDINGAI_API_KEY` | `dpt-2` *(default)* | docs-only |
 | Google Document AI | [`google-documentai.md`](google-documentai.md) | `providers/google_documentai.rs` | `GOOGLE_DOCUMENTAI_ACCESS_TOKEN` (+ `_PROJECT`, `_LOCATION`, `_PROCESSOR_ID`) | `ocr` *(default)*, `layout`, `form`, `prebuilt` | docs-only |
+| Tesseract *(local)* | [`tesseract.md`](tesseract.md) | `providers/tesseract.rs` | none (`TESSERACT_CMD`, `PDFTOPPM_CMD`) | `default` | live-verified (local binary) |
+| Docling *(self-hosted)* | [`docling.md`](docling.md) | `providers/docling.rs` | none (`DOCLING_BASE_URL`; optional `DOCLING_API_KEY`) | `default` | live-verified (local docling-serve 1.35) |
+| PaddleOCR *(self-hosted)* | [`paddleocr.md`](paddleocr.md) | `providers/paddleocr.rs` | none (`PADDLEOCR_BASE_URL`, `PADDLEOCR_PARSE_BASE_URL`) | `default` | docs-only |
+
+The three self-hosted engines need no API key and are priced at $0/page (`liteocr providers` shows
+`local` in the Key column); they are the open baselines in the benchmark. Their shared helpers are
+in `providers/local.rs`.
 
 Every page follows the same structure: summary → models → request flow → response mapping → errors and
 limits → gotchas → `provider_options` examples → links.

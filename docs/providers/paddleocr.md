@@ -1,0 +1,143 @@
+# PaddleOCR (PaddleX serving, self-hosted)
+
+> **Status: docs-only.** Implemented from the PaddleOCR 3.x serving API reference (the
+> "Service-Based Deployment" sections of `docs/version3.x/pipeline_usage/OCR.en.md` and
+> `PP-StructureV3.en.md` in PaddlePaddle/PaddleOCR) and the PaddleX serving schemas
+> (`paddlex/inference/serving/infra/models.py`: `DataInfo`, `ImageInfo`, `PDFInfo`), read
+> 2026-09-24. No PaddleOCR server was run: the sandbox is CPU-only with limited disk and the
+> PaddlePaddle + PaddleX serving stack and models were not installed. The fixtures
+> `paddleocr_ocr.json` and `paddleocr_layout_parsing.json` are hand-built from those documented
+> shapes. Mark this page **verified** after the `#[ignore]`d live test in `providers/paddleocr.rs`
+> passes against a real server.
+
+## 1. Summary
+
+| | |
+|---|---|
+| Provider name | `paddleocr` (aliases `paddle`, `paddle_ocr`, `paddlex`) |
+| Runs | on your own PaddleOCR / PaddleX "basic serving" endpoints |
+| Base URL | `http://localhost:8080` (override: `base_url` on the request, or `PADDLEOCR_BASE_URL`) |
+| Parse base URL | `PADDLEOCR_PARSE_BASE_URL`, falling back to `PADDLEOCR_BASE_URL` (a `base_url` on the request wins for both modes) |
+| API key | none |
+| Price | $0 per page (`pricing.json` source `self-hosted`) |
+| Implementation | `crates/liteocr-core/src/providers/paddleocr.rs` |
+
+Each served pipeline is its own HTTP service, so ocr and parse usually run on two ports:
+
+```bash
+pip install "paddleocr[all]"          # or paddlex; plus paddlepaddle (CPU) or paddlepaddle-gpu
+paddlex --install serving
+paddlex --serve --pipeline OCR --port 8080              # → POST /ocr
+paddlex --serve --pipeline PP-StructureV3 --port 8081   # → POST /layout-parsing
+export PADDLEOCR_BASE_URL=http://localhost:8080 PADDLEOCR_PARSE_BASE_URL=http://localhost:8081
+```
+
+## 2. Models exposed by LiteOCR
+
+| Model | Modes | Endpoint | List price |
+|---|---|---|---|
+| `paddleocr/default` *(default)* | `ocr` (native) | `POST /ocr` — general OCR pipeline (PP-OCRv5 by default) | $0 |
+| | `parse` | `POST /layout-parsing` — PP-StructureV3 (layout, tables, formulas, reading order) | $0 |
+
+## 3. Request flow LiteOCR uses
+
+One synchronous JSON call per document:
+
+```json
+{"file": "<base64 of the file, or a URL the server can fetch>", "fileType": 0, "visualize": false}
+```
+
+`fileType` is `0` for PDF and `1` for images (from magic bytes, or from the URL's extension;
+omitted when unknown, and the server infers it). `visualize: false` stops the server from
+returning base64 visualisation images. `provider_options` are deep-merged into the body, so any
+documented field (`useDocOrientationClassify`, `useDocUnwarping`, `useTextlineOrientation`,
+`textDetLimitSideLen`, `textRecScoreThresh`, `useTableRecognition`, `returnMarkdownImages`, ...)
+passes through.
+
+Response envelope (both endpoints):
+
+```json
+{"logId": "<uuid>", "errorCode": 0, "errorMsg": "Success",
+ "result": {"ocrResults" | "layoutParsingResults": [ ...one per page... ], "dataInfo": {...}}}
+```
+
+`dataInfo` is `{"width", "height", "type": "image"}` or
+`{"numPages", "pages": [{"width", "height"}], "type": "pdf" | "tiff"}` — sizes of the images the
+pipeline actually ran on (PDF pages are rendered), i.e. the same pixel space as every box.
+
+## 4. Response mapping
+
+**ocr** — `result.ocrResults[i].prunedResult` (page `i + 1`):
+
+| Unified | Source |
+|---|---|
+| `Line.text` / `confidence` | `rec_texts[j]` / `rec_scores[j]`; empty texts dropped |
+| `Line.bbox` | `rec_boxes[j]` (`[x_min, y_min, x_max, y_max]`), else the enclosing box of `rec_polys[j]`, normalised by the page size from `dataInfo` |
+| `Word` | each line split on whitespace; no per-word geometry (PaddleOCR recognises lines), confidence = the line's |
+| `TextPage.text` | lines joined by `\n`, in PaddleOCR's order |
+
+**parse** — `result.layoutParsingResults[i].prunedResult.parsing_res_list[]`, already in reading
+order:
+
+| `block_label` | Block type / markdown |
+|---|---|
+| `doc_title` | `title`, `# …` |
+| `paragraph_title` | `section_header`, `## …` |
+| `text`, `content`, `abstract`, `reference`, `reference_content`, `aside_text`, unknown | `text` |
+| `table` | `table`; `block_content` is HTML → converted to a markdown table when simple (no spans), else kept as HTML; `text` is one line per row |
+| `image`, `chart`, `seal`, `header_image`, `footer_image` | `figure` |
+| `figure_title`, `table_title`, `chart_title` | `caption` |
+| `formula` | `formula`, wrapped in `$$ … $$` unless already delimited |
+| `header` / `footer`, `number` | `header` / `footer` |
+| `footnote`, `vision_footnote` | `footnote` |
+| `algorithm` | `other`, fenced |
+| `formula_number` | `other` |
+
+`block_bbox` (`[x_min, y_min, x_max, y_max]` pixels) is normalised by the page size from
+`dataInfo` (falling back to `prunedResult.width/height`). Page markdown is built from the blocks;
+PaddleOCR's own `markdown.text` is not used because it embeds tables and images as HTML.
+
+Both modes: `Usage.pages` = pages returned (after `pages` selection, applied client-side);
+metadata `paddleocr_log_id`, and `paddleocr_pages_truncated: {returned, document_pages}` when the
+server returned fewer pages than `dataInfo.numPages` (see §6); `raw` = the whole envelope.
+
+## 5. Errors and limits
+
+Failures come back as `{"logId", "errorCode": <HTTP status>, "errorMsg": "..."}`. LiteOCR maps
+the HTTP status (or `errorCode` if a 200 carries a non-zero code) through the usual table —
+401/403 → `authentication_error`, 422/4xx → `bad_request_error`, 5xx → `provider_error` — with
+`errorMsg` as the message, verbatim. A refused connection is a `network_error` that names the
+serving command and `PADDLEOCR_BASE_URL` / `PADDLEOCR_PARSE_BASE_URL`. Non-image, non-PDF input is
+an `input_error` before any request.
+
+## 6. Gotchas
+
+* **10-page limit.** By default the serving layer processes only the first 10 pages of a PDF or
+  multi-page TIFF. Set `Serving: extra: max_num_input_imgs: null` in the pipeline config to lift
+  it; LiteOCR flags truncation in `metadata.paddleocr_pages_truncated`.
+* **Two servers.** `ocr` and `parse` hit different pipelines. If only the OCR pipeline is
+  running, `parse` gets a 404; set `PADDLEOCR_PARSE_BASE_URL`.
+* **Image payloads.** Without `visualize: false` (LiteOCR sends it) the server returns several
+  base64 JPEGs per page. PP-StructureV3 also returns markdown images unless
+  `returnMarkdownImages: false` — pass it in `provider_options` to shrink responses.
+* `pages` is applied after the call (the serving API has no page-range field), so every page up to
+  the server's limit is processed.
+
+## 7. `provider_options` examples
+
+```python
+import liteocr
+
+liteocr.ocr("scan.png", model="paddleocr")
+liteocr.ocr("photo.jpg", model="paddleocr",
+            provider_options={"useDocOrientationClassify": True, "useTextlineOrientation": True})
+liteocr.parse("report.pdf", model="paddleocr",
+              provider_options={"returnMarkdownImages": False, "useChartRecognition": False})
+liteocr.parse("report.pdf", model="paddleocr", base_url="http://gpu-box:8081")
+```
+
+## 8. Links
+
+* OCR pipeline, serving API: <https://www.paddleocr.ai/latest/en/version3.x/pipeline_usage/OCR.html>
+* PP-StructureV3, serving API: <https://www.paddleocr.ai/latest/en/version3.x/pipeline_usage/PP-StructureV3.html>
+* Serving deployment guide: <https://www.paddleocr.ai/latest/en/version3.x/deployment/serving.html>

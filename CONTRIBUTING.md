@@ -143,6 +143,30 @@ code.
 The Python SDK needs no changes: it forwards whatever model string the core
 accepts.
 
+### Local and self-hosted engines
+
+Engines that run on the user's machine or their own server (`tesseract`,
+`docling`, `paddleocr`) follow the same steps, with these differences:
+
+- **No API key.** Add the provider name to `SELF_HOSTED` in `model.rs`; set
+  `env_var` to `""` (or to an *optional* key, as Docling does) and `base_url`
+  to the local default. `liteocr providers` then shows `local` in the Key
+  column instead of a missing-key cross. Read the base URL from
+  `<NAME>_BASE_URL` via `provider::resolve_base_url`.
+- **Price 0.** `pricing.json` gets `0.0` for each mode with
+  `"source": "self-hosted (...)"`.
+- **Local binaries** are run with `tokio::process` (never C bindings or FFI),
+  with the call's deadline and `kill_on_drop`. A missing binary must produce an
+  error that names the binary and how to install it or point at it
+  (`TESSERACT_CMD`). Shared helpers (download a URL input, base64, file-type
+  sniffing, a self-cleaning scratch directory) are in
+  `crates/liteocr-core/src/providers/local.rs`.
+- **Fixtures.** Capture a real output from a local install where you can (the
+  Tesseract TSV and docling-serve fixtures are real); otherwise shape it from
+  the server's documented schema and mark the doc page *docs-only*. The
+  `#[ignore]`d live test needs the binary or server rather than a key.
+- **Document** how to install or start the engine in `docs/providers/<name>.md`.
+
 ---
 
 ## 4. Adding a benchmark dataset

@@ -30,8 +30,10 @@ Status: `v0.1` — providers: **Reducto**, **Extend**, **LlamaParse**.
 ### Non-goals (v0.1)
 
 - A hosted service. (A self-hosted gateway now exists: `liteocr serve`, §14.)
-- Running local/open-weight OCR models (Tesseract, PaddleOCR). The provider
-  trait allows it later; v0.1 is API providers only.
+- Bundling or running OCR models in-process. Local and self-hosted engines are supported only
+  as providers that call *out* to them — the `tesseract` binary via `tokio::process`, a
+  docling-serve or PaddleOCR serving endpoint over HTTP (§8.4) — never through C bindings or an
+  embedded runtime.
 - A parsing-only scope. v0.1 specifies and wires three modes end to end (§3.1); which models
   serve `extract` is a registry fact reported by `list_models("extract")`, and the three
   original providers serve `parse` and `ocr` only. Classification and other vendor products
@@ -456,6 +458,22 @@ the captured payloads live in `crates/liteocr-core/tests/fixtures/` and drive un
 - Block types: `heading` lvl 1 → `title`, other headings → `section_header`, `text→text`,
   `table→table`, else `other`.
 - Errors: FastAPI `{"detail": "…"}` / `{"detail": [ValidationError]}`.
+
+### 8.4 Self-hosted engines (Tesseract, Docling, PaddleOCR)
+
+Listed in `model::SELF_HOSTED`; `ProviderInfo::self_hosted()` is `true`, no API key is required
+(`env_var` is empty, or names an optional key), prices are `0.0` with `source: "self-hosted"`, and
+`liteocr providers` shows `local` in the Key column (`self_hosted` / `key_required` in `--json`
+and in Python `providers()`).
+
+- `tesseract/default`: `tesseract <image> stdout ... tsv`, PDFs rasterised with `pdftoppm`; `ocr`
+  is native (TSV words/lines, confidences), `parse` is one `text` block per Tesseract paragraph.
+- `docling/default`: docling-serve `POST /v1/convert/source/async` → poll → `GET /v1/result`;
+  DoclingDocument items mapped to blocks, bottom-left boxes flipped to top-left.
+- `paddleocr/default`: PaddleX serving `POST /ocr` (ocr) and `POST /layout-parsing`
+  (PP-StructureV3, parse).
+
+Details, errors and limits: `docs/providers/{tesseract,docling,paddleocr}.md`.
 
 ---
 
