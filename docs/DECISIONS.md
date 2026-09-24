@@ -297,3 +297,22 @@ weights ship in LiteOCR. They are listed in `model::SELF_HOSTED`, need no key, a
 **Consequences.** `#![forbid(unsafe_code)]` and the no-SDK rule still hold. Benchmark latency for
 these engines depends on the user's hardware, so leaderboard rows need a hardware note. Live tests
 need a binary or a server rather than a key.
+
+## ADR-20: The scorer is versioned; committed runs are re-scored offline
+
+**Context.** The first combined run exposed scorer defects (HTML tables scored 0, tokenised
+punctuation in rule text, a dead `bag_of_sentences` threshold) that moved the leaderboard by up to
+four points. Re-calling providers to fix a scoring bug would cost money and change latency and
+provider versions at the same time.
+
+**Decision.** Any scorer change that moves scores bumps `SCORER_VERSION` in `liteocr-core` and
+re-scores committed runs from their saved outputs with `liteocr bench rescore`, never by
+re-calling providers; measured latency and cost are kept. Result JSON records `scorer_version`
+(absent = 1) and `rescored_at`. The viewer's JS rule checker follows every scorer version and
+flags any document where it disagrees with the recorded Rust score. The `bag_of_sentences`
+threshold of 0.8 is justified by sentences the reference extraction fused together. The table
+structure metric is TEDS on the row/cell grid and is named `teds_grid`, not TEDS, because the
+truth has no header/body or span structure.
+
+**Consequences.** Leaderboards stay comparable across scorer fixes at no cost, and a reader can see
+which scorer produced a number. Saved outputs are part of every committed run (already required).

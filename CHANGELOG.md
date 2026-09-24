@@ -11,6 +11,21 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **Scorer v2** (`scorer_version: 2` in result JSON). HTML `<table>` output is scored like markdown
+  tables (it used to score 0, which ranked Reducto r-1 last); a new `teds_grid` metric (TEDS on the
+  row/cell grid); rule matching ignores spaces next to punctuation (ParseBench rule text is
+  tokenised); `bag_of_sentences` matches sentences fuzzily (0.8) and passes at 0.8 (1.0 was dead
+  signal); olmOCR `max_diffs` tolerances are honoured; HTML entities are decoded; and results carry
+  an explicit `summary.headline` and per-document `headline`, so `char_similarity` means literal
+  character similarity again. Python and Node `Metrics` gain `teds_grid` / `tedsGrid`, and the
+  viewer's rule checker follows the same rules.
+- **`liteocr bench rescore`** re-scores a run from its saved outputs with the current scorer, no
+  network calls, keeping measured latency and cost. Both committed runs are re-scored and
+  `benchmark/LEADERBOARD.md` regenerated: on combined-v1, reducto/r-1 moves from last (87.19) to
+  second (91.37); llamaparse/agentic stays first (93.08).
+- `docs/benchmarks/findings.md`: why four models returned nothing for
+  `parsebench/text_multicolumns_2col` (a Form XObject with a ±2^1023 `/BBox` that 32-bit
+  renderers clip to empty; fixing the file fixes both Reducto and Extend, no option does).
 - **Self-hosted engines, no key, $0/page.** `tesseract/default` (local `tesseract` binary, PDFs via
   `pdftoppm`; native OCR with word/line boxes and confidences), `docling/default` (docling-serve v1
   async API; layout, tables, OCR) and `paddleocr/default` (PaddleOCR/PaddleX serving: `/ocr` and
