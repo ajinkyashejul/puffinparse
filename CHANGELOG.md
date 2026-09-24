@@ -11,6 +11,11 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **First `combined-v2` results** (7 models × 159 documents, 0 failures, $11.74): llamaparse/cost_effective
+  leads (83.79) ahead of llamaparse/agentic (83.05) and reducto/r-1 (81.32); `tesseract/default` is
+  the free baseline (48.68, 97.94 on synthetic). `benchmark/LEADERBOARD.md` now has one section per
+  dataset with `combined-v2` as the headline. The viewer shows research-only documents
+  (OmniDocBench) as scores only, with the command to fetch the data, instead of broken links.
 - **Jobs everywhere.** Gateway: `POST /v1/jobs` (parse body + `webhook_url`, 202 with a job id) and
   `GET /v1/jobs/{id}` (pending / succeeded / failed, `output_format` on retrieval); job ids are
   bound to the submitting key, cost is charged once when the job first succeeds, handles persist in

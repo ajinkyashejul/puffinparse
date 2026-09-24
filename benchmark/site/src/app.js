@@ -2248,7 +2248,7 @@
       '<span class="pager-label"></span>' +
       '<button type="button" class="btn sm" data-page="1" aria-label="Next page">›</button></div>' +
       '<button type="button" class="btn sm ov-toggle" aria-pressed="false" disabled>Layout boxes</button>' +
-      '<a class="sv-open" href="' + esc(opts.inputUrl) + '" rel="noopener" target="_blank">Open original ↗</a>' +
+      (opts.restricted ? "" : '<a class="sv-open" href="' + esc(opts.inputUrl) + '" rel="noopener" target="_blank">Open original ↗</a>') +
       "</div>" +
       '<div class="sv-stage"><div class="sv-page"><div class="sv-media"><p class="loading">Loading page…</p></div>' +
       '<svg class="ov" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"></svg></div></div>' +
@@ -2284,6 +2284,10 @@
 
   SourceViewer.prototype.initImage = function (src) {
     var self = this;
+    if (self.opts.restricted) {
+      self.media.innerHTML = '<p class="empty">Not redistributed (research-only licence). Fetch the dataset locally to view this page.</p>';
+      return;
+    }
     if (!src) {
       self.media.innerHTML = '<p class="empty">No inline preview. <a href="' + esc(self.opts.inputUrl) + '">Open the file</a>.</p>';
       return;
@@ -2635,6 +2639,11 @@
       var inputUrl = joinPath(datasetBase, entry.file);
       var previewUrl = entry.preview ? joinPath(datasetBase, entry.preview) : null;
       var isPdf = /\.pdf$/i.test(entry.file || "");
+      // Sources whose licence forbids redistribution (tag `fetch-required`, e.g. OmniDocBench) ship
+      // scores only: no input, truth or model output is served, so do not request them.
+      var restricted = (entry.tags || []).indexOf("fetch-required") !== -1;
+      var fetchCommand = "python -m benchmark.adapters " + (docId.split("/")[0] || datasetName);
+      if (restricted) truthUrl = null;
       function predUrl(m) {
         return url("data/outputs/" + run.run_id + "/" + slugOf(m.model) + "/" + docId + ".md");
       }
@@ -2643,6 +2652,7 @@
         return !inv || inv.missing.indexOf(docId) === -1;
       }
       function loadPred(m) {
+        if (restricted) return Promise.resolve(null);
         return hasPred(m) ? getText(predUrl(m)).catch(function () { return null; }) : Promise.resolve(null);
       }
       var jsonUrl = url("data/outputs/" + run.run_id + "/" + slugOf(model.model) + "/" + docId + ".json");
@@ -2778,6 +2788,13 @@
           return docHref(run.run_id, model.model, d.id, { tab: params.get("tab"), diff: params.get("diff"), ov: params.get("ov"), src: filters.src, cat: filters.cat, q: filters.q });
         }
 
+        if (restricted && !rulesDoc) {
+          body = '<p class="note">Not redistributed: this source\'s licence is research-only, so LiteOCR ' +
+            "publishes the recorded scores but not the page, its ground truth or model outputs. Fetch the " +
+            "data at the pinned revision to inspect it locally:</p>" + codeBlock(fetchCommand);
+          stats = "";
+        }
+
         var html =
           '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + esc(listHref("documents", run.run_id, filters)) + '">Documents</a>' +
           (filters.src ? " / " + esc(filters.src) : "") + (filters.cat ? " / " + esc(filters.cat) : "") + "</nav>" +
@@ -2818,10 +2835,10 @@
           "<p>" + (rulesDoc ? "Parse the page with the same model, then re-check the assertions (<code>bench score</code> compares transcripts only):" : "Parse the same document with the same model and score it locally:") + "</p>" +
           codeBlock(parseCommand) + codeBlock(scoreCommand) +
           '<p class="hint">Served from this site: ' +
-          (rulesDoc ? (rulesUrl ? '<a href="' + esc(rulesUrl) + '" rel="noopener">assertions</a>' : "no assertion file") : truthUrl ? '<a href="' + esc(truthUrl) + '" rel="noopener">ground truth</a>' : "no ground truth") +
+          (restricted ? "scores only (research-only source)" : rulesDoc ? (rulesUrl ? '<a href="' + esc(rulesUrl) + '" rel="noopener">assertions</a>' : "no assertion file") : truthUrl ? '<a href="' + esc(truthUrl) + '" rel="noopener">ground truth</a>' : "no ground truth") +
           (pred !== null ? ' · <a href="' + esc(predUrl(model)) + '" rel="noopener">model output</a>' : "") +
           (hasJson ? ' · <a href="' + esc(jsonUrl) + '" rel="noopener">unified JSON</a>' : "") +
-          ' · <a href="' + esc(inputUrl) + '" rel="noopener">input</a> · <a href="' + esc(url("data/runs/" + run.run_id + ".json")) + '" rel="noopener">run JSON</a>.</p>' +
+          (restricted ? "" : ' · <a href="' + esc(inputUrl) + '" rel="noopener">input</a>') + ' · <a href="' + esc(url("data/runs/" + run.run_id + ".json")) + '" rel="noopener">run JSON</a>.</p>' +
           "</section>";
 
         view.innerHTML = html;
@@ -2841,6 +2858,7 @@
             imageUrl: isPdf ? null : previewUrl || inputUrl,
             isPdf: isPdf,
             pages: entry.pages || 1,
+            restricted: restricted,
           });
         }
         document.getElementById("sv-slot").appendChild(SV.el);
