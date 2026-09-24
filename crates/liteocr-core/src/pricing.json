@@ -56,5 +56,8 @@
   "reducto/extract": { "extract": 0.035, "source": "https://docs.reducto.ai/reference/credit-usage (Extract $20/1k pages plus the parse it runs at $15/1k)", "updated": "2026-09-11" },
   "reducto/deep_extract": { "extract": 0.055, "source": "https://docs.reducto.ai/reference/credit-usage (Deep Extract $40/1k pages plus parse $15/1k)", "updated": "2026-09-11" },
   "extend/extraction_performance": { "extract": 0.0625, "source": "https://docs.extend.ai/credits (extract 3 credits + parse_performance 2 credits per page @ $0.0125)", "updated": "2026-09-11" },
-  "extend/extraction_light": { "extract": 0.015, "source": "https://docs.extend.ai/credits (extract 0.7 credits + parse_light 0.5 credits per page @ $0.0125)", "updated": "2026-09-11" }
+  "extend/extraction_light": { "extract": 0.015, "source": "https://docs.extend.ai/credits (extract 0.7 credits + parse_light 0.5 credits per page @ $0.0125)", "updated": "2026-09-11" },
+  "tesseract/default": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (local tesseract binary; your own compute)", "updated": "2026-09-24" },
+  "docling/default": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (your docling-serve; your own compute)", "updated": "2026-09-24" },
+  "paddleocr/default": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (your PaddleOCR/PaddleX serving; your own compute)", "updated": "2026-09-24" }
 }

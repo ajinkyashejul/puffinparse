@@ -1,0 +1,1620 @@
+{
+ "document": {
+  "filename": "multipage_001.pdf",
+  "md_content": "## A Short History of the Harbor\n\nShe kept detailed notes in a leather bound journal that traveled everywhere with her. Readers often skip the appendix, which is where the most interesting tables live. The orchestra rehearsed the final movement until the balance felt right.\n\n## Scope of the Study\n\nStudents designed a weather station using parts they found in the workshop. He learned to bake bread from his grandmother, who never once used a recipe. A quiet enthusiasm spread through the office once the results were announced. The committee met on Tuesday to review the proposed budget for the coming year. Sales of electric bicycles grew steadily in every region except the far north.\n\n## Site Measurement Log\n\nThe table below summarizes the figures collected during the reporting period.\n\n| Site         |   Samples |   Mean Depth |   Variance |\n|--------------|-----------|--------------|------------|\n| Hazel Bend   |       205 |         3.12 |      2.493 |\n| Ash Grove    |       195 |         8.26 |      1.458 |\n| Birch Hollow |       218 |         7.51 |      2.972 |\n| Elm Point    |       185 |         2.43 |      3.075 |\n| Cedar Flat   |       205 |         1.02 |      3.014 |\n| Gull Rock    |        50 |         9.99 |      0.492 |\n| Dunes East   |        69 |         6.00 |      1.665 |",
+  "json_content": {
+   "schema_name": "DoclingDocument",
+   "version": "1.10.0",
+   "name": "multipage_001",
+   "origin": {
+    "mimetype": "application/pdf",
+    "binary_hash": 15895090639667793534,
+    "filename": "multipage_001.pdf",
+    "uri": null
+   },
+   "furniture": {
+    "self_ref": "#/furniture",
+    "parent": null,
+    "children": [],
+    "content_layer": "furniture",
+    "meta": null,
+    "name": "_root_",
+    "label": "unspecified"
+   },
+   "body": {
+    "self_ref": "#/body",
+    "parent": null,
+    "children": [
+     {
+      "$ref": "#/texts/0"
+     },
+     {
+      "$ref": "#/texts/1"
+     },
+     {
+      "$ref": "#/texts/2"
+     },
+     {
+      "$ref": "#/texts/3"
+     },
+     {
+      "$ref": "#/texts/4"
+     },
+     {
+      "$ref": "#/texts/5"
+     },
+     {
+      "$ref": "#/tables/0"
+     }
+    ],
+    "content_layer": "body",
+    "meta": null,
+    "name": "_root_",
+    "label": "unspecified"
+   },
+   "groups": [],
+   "texts": [
+    {
+     "self_ref": "#/texts/0",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "section_header",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 35.666666666666664,
+        "t": 803.92,
+        "r": 386.6666666666667,
+        "b": 775.5866666666666,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        29
+       ]
+      }
+     ],
+     "orig": "A Short History of the Harbor",
+     "text": "A Short History of the Harbor",
+     "formatting": null,
+     "hyperlink": null,
+     "level": 1
+    },
+    {
+     "self_ref": "#/texts/1",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "text",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 36.666666666666664,
+        "t": 756.92,
+        "r": 549.6666666666666,
+        "b": 699.92,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        240
+       ]
+      }
+     ],
+     "orig": "She kept detailed notes in a leather bound journal that traveled everywhere with her. Readers often skip the appendix, which is where the most interesting tables live. The orchestra rehearsed the final movement until the balance felt right.",
+     "text": "She kept detailed notes in a leather bound journal that traveled everywhere with her. Readers often skip the appendix, which is where the most interesting tables live. The orchestra rehearsed the final movement until the balance felt right.",
+     "formatting": null,
+     "hyperlink": null
+    },
+    {
+     "self_ref": "#/texts/2",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "section_header",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 37.0,
+        "t": 684.92,
+        "r": 194.33333333333334,
+        "b": 663.2533333333333,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        18
+       ]
+      }
+     ],
+     "orig": "Scope of the Study",
+     "text": "Scope of the Study",
+     "formatting": null,
+     "hyperlink": null,
+     "level": 1
+    },
+    {
+     "self_ref": "#/texts/3",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "text",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 36.0,
+        "t": 647.2533333333333,
+        "r": 557.3333333333334,
+        "b": 548.92,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        389
+       ]
+      }
+     ],
+     "orig": "Students designed a weather station using parts they found in the workshop. He learned to bake bread from his grandmother, who never once used a recipe. A quiet enthusiasm spread through the office once the results were announced. The committee met on Tuesday to review the proposed budget for the coming year. Sales of electric bicycles grew steadily in every region except the far north.",
+     "text": "Students designed a weather station using parts they found in the workshop. He learned to bake bread from his grandmother, who never once used a recipe. A quiet enthusiasm spread through the office once the results were announced. The committee met on Tuesday to review the proposed budget for the coming year. Sales of electric bicycles grew steadily in every region except the far north.",
+     "formatting": null,
+     "hyperlink": null
+    },
+    {
+     "self_ref": "#/texts/4",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "section_header",
+     "prov": [
+      {
+       "page_no": 2,
+       "bbox": {
+        "l": 35.0,
+        "t": 806.92,
+        "r": 230.66666666666666,
+        "b": 780.5866666666666,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        20
+       ]
+      }
+     ],
+     "orig": "Site Measurement Log",
+     "text": "Site Measurement Log",
+     "formatting": null,
+     "hyperlink": null,
+     "level": 1
+    },
+    {
+     "self_ref": "#/texts/5",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "text",
+     "prov": [
+      {
+       "page_no": 2,
+       "bbox": {
+        "l": 35.666666666666664,
+        "t": 768.2533333333333,
+        "r": 507.3333333333333,
+        "b": 748.5866666666666,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        77
+       ]
+      }
+     ],
+     "orig": "The table below summarizes the figures collected during the reporting period.",
+     "text": "The table below summarizes the figures collected during the reporting period.",
+     "formatting": null,
+     "hyperlink": null
+    }
+   ],
+   "pictures": [],
+   "tables": [
+    {
+     "self_ref": "#/tables/0",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "table",
+     "prov": [
+      {
+       "page_no": 2,
+       "bbox": {
+        "l": 37.7564687024827,
+        "t": 734.9440428208738,
+        "r": 557.9567841600252,
+        "b": 505.40098146850875,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        0
+       ]
+      }
+     ],
+     "captions": [],
+     "references": [],
+     "footnotes": [],
+     "image": null,
+     "data": {
+      "table_cells": [
+       {
+        "bbox": {
+         "l": 42.666666666666664,
+         "t": 109.0,
+         "r": 76.0,
+         "b": 129.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 0,
+        "end_row_offset_idx": 1,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Site",
+        "column_header": true,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 229.66666666666666,
+         "t": 109.66666666666667,
+         "r": 290.6666666666667,
+         "b": 130.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 0,
+        "end_row_offset_idx": 1,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "Samples",
+        "column_header": true,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 346.0,
+         "t": 110.0,
+         "r": 431.3333333333333,
+         "b": 129.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 0,
+        "end_row_offset_idx": 1,
+        "start_col_offset_idx": 2,
+        "end_col_offset_idx": 3,
+        "text": "Mean Depth",
+        "column_header": true,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 488.3333333333333,
+         "t": 110.0,
+         "r": 551.0,
+         "b": 128.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 0,
+        "end_row_offset_idx": 1,
+        "start_col_offset_idx": 3,
+        "end_col_offset_idx": 4,
+        "text": "Variance",
+        "column_header": true,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 44.0,
+         "t": 139.0,
+         "r": 119.0,
+         "b": 156.66666666666669,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 1,
+        "end_row_offset_idx": 2,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Hazel Bend",
+        "column_header": false,
+        "row_header": true,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 260.0,
+         "t": 137.0,
+         "r": 290.6666666666667,
+         "b": 157.66666666666669,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 1,
+        "end_row_offset_idx": 2,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "205",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 398.3333333333333,
+         "t": 137.66666666666669,
+         "r": 433.3333333333333,
+         "b": 158.33333333333334,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 1,
+        "end_row_offset_idx": 2,
+        "start_col_offset_idx": 2,
+        "end_col_offset_idx": 3,
+        "text": "3.12",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 509.3333333333333,
+         "t": 137.66666666666669,
+         "r": 551.3333333333334,
+         "b": 157.66666666666669,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 1,
+        "end_row_offset_idx": 2,
+        "start_col_offset_idx": 3,
+        "end_col_offset_idx": 4,
+        "text": "2.493",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 44.66666666666667,
+         "t": 168.0,
+         "r": 114.33333333333333,
+         "b": 186.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 2,
+        "end_row_offset_idx": 3,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Ash Grove",
+        "column_header": false,
+        "row_header": true,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 260.33333333333337,
+         "t": 165.66666666666666,
+         "r": 292.0,
+         "b": 186.66666666666666,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 2,
+        "end_row_offset_idx": 3,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "195",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 398.6666666666667,
+         "t": 165.66666666666666,
+         "r": 433.6666666666667,
+         "b": 187.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 2,
+        "end_row_offset_idx": 3,
+        "start_col_offset_idx": 2,
+        "end_col_offset_idx": 3,
+        "text": "8.26",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 511.0,
+         "t": 166.33333333333334,
+         "r": 551.6666666666666,
+         "b": 186.66666666666666,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 2,
+        "end_row_offset_idx": 3,
+        "start_col_offset_idx": 3,
+        "end_col_offset_idx": 4,
+        "text": "1.458",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 44.66666666666667,
+         "t": 196.33333333333334,
+         "r": 129.33333333333331,
+         "b": 214.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 3,
+        "end_row_offset_idx": 4,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Birch Hollow",
+        "column_header": false,
+        "row_header": true,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 260.33333333333337,
+         "t": 195.0,
+         "r": 291.3333333333333,
+         "b": 215.66666666666666,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 3,
+        "end_row_offset_idx": 4,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "218",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 398.6666666666667,
+         "t": 195.33333333333334,
+         "r": 432.3333333333333,
+         "b": 215.33333333333334,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 3,
+        "end_row_offset_idx": 4,
+        "start_col_offset_idx": 2,
+        "end_col_offset_idx": 3,
+        "text": "7.51",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 509.6666666666667,
+         "t": 194.66666666666666,
+         "r": 551.3333333333334,
+         "b": 215.33333333333334,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 3,
+        "end_row_offset_idx": 4,
+        "start_col_offset_idx": 3,
+        "end_col_offset_idx": 4,
+        "text": "2.972",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 44.33333333333333,
+         "t": 225.0,
+         "r": 111.0,
+         "b": 243.33333333333334,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 4,
+        "end_row_offset_idx": 5,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Elm Point",
+        "column_header": false,
+        "row_header": true,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 261.33333333333337,
+         "t": 223.66666666666666,
+         "r": 291.0,
+         "b": 244.66666666666666,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 4,
+        "end_row_offset_idx": 5,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "185",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 399.0,
+         "t": 224.0,
+         "r": 433.0,
+         "b": 244.33333333333334,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 4,
+        "end_row_offset_idx": 5,
+        "start_col_offset_idx": 2,
+        "end_col_offset_idx": 3,
+        "text": "2.43",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 510.0,
+         "t": 223.66666666666666,
+         "r": 551.0,
+         "b": 244.33333333333334,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 4,
+        "end_row_offset_idx": 5,
+        "start_col_offset_idx": 3,
+        "end_col_offset_idx": 4,
+        "text": "3.075",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 44.66666666666667,
+         "t": 254.33333333333334,
+         "r": 113.66666666666667,
+         "b": 272.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 5,
+        "end_row_offset_idx": 6,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Cedar Flat",
+        "column_header": false,
+        "row_header": true,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 259.66666666666663,
+         "t": 251.66666666666666,
+         "r": 291.3333333333333,
+         "b": 273.33333333333337,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 5,
+        "end_row_offset_idx": 6,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "205",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 400.0,
+         "t": 253.0,
+         "r": 433.0,
+         "b": 273.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 5,
+        "end_row_offset_idx": 6,
+        "start_col_offset_idx": 2,
+        "end_col_offset_idx": 3,
+        "text": "1.02",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 509.6666666666667,
+         "t": 253.0,
+         "r": 551.3333333333334,
+         "b": 273.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 5,
+        "end_row_offset_idx": 6,
+        "start_col_offset_idx": 3,
+        "end_col_offset_idx": 4,
+        "text": "3.014",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 44.66666666666667,
+         "t": 283.0,
+         "r": 112.0,
+         "b": 301.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 6,
+        "end_row_offset_idx": 7,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Gull Rock",
+        "column_header": false,
+        "row_header": true,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 267.33333333333337,
+         "t": 280.66666666666663,
+         "r": 292.0,
+         "b": 303.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 6,
+        "end_row_offset_idx": 7,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "50",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 398.3333333333333,
+         "t": 280.33333333333337,
+         "r": 433.6666666666667,
+         "b": 302.6666666666667,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 6,
+        "end_row_offset_idx": 7,
+        "start_col_offset_idx": 2,
+        "end_col_offset_idx": 3,
+        "text": "9.99",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 509.3333333333333,
+         "t": 281.0,
+         "r": 551.6666666666666,
+         "b": 302.3333333333333,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 6,
+        "end_row_offset_idx": 7,
+        "start_col_offset_idx": 3,
+        "end_col_offset_idx": 4,
+        "text": "0.492",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 44.33333333333333,
+         "t": 312.0,
+         "r": 117.0,
+         "b": 329.6666666666667,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 7,
+        "end_row_offset_idx": 8,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Dunes East",
+        "column_header": false,
+        "row_header": true,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 268.0,
+         "t": 309.6666666666667,
+         "r": 291.3333333333333,
+         "b": 331.3333333333333,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 7,
+        "end_row_offset_idx": 8,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "69",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 399.0,
+         "t": 310.3333333333333,
+         "r": 433.0,
+         "b": 330.3333333333333,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 7,
+        "end_row_offset_idx": 8,
+        "start_col_offset_idx": 2,
+        "end_col_offset_idx": 3,
+        "text": "6.00",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 511.3333333333333,
+         "t": 311.0,
+         "r": 551.0,
+         "b": 330.0,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 7,
+        "end_row_offset_idx": 8,
+        "start_col_offset_idx": 3,
+        "end_col_offset_idx": 4,
+        "text": "1.665",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ],
+      "num_rows": 8,
+      "num_cols": 4,
+      "orientation": "rot_0",
+      "grid": [
+       [
+        {
+         "bbox": {
+          "l": 42.666666666666664,
+          "t": 109.0,
+          "r": 76.0,
+          "b": 129.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 0,
+         "end_row_offset_idx": 1,
+         "start_col_offset_idx": 0,
+         "end_col_offset_idx": 1,
+         "text": "Site",
+         "column_header": true,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 229.66666666666666,
+          "t": 109.66666666666667,
+          "r": 290.6666666666667,
+          "b": 130.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 0,
+         "end_row_offset_idx": 1,
+         "start_col_offset_idx": 1,
+         "end_col_offset_idx": 2,
+         "text": "Samples",
+         "column_header": true,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 346.0,
+          "t": 110.0,
+          "r": 431.3333333333333,
+          "b": 129.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 0,
+         "end_row_offset_idx": 1,
+         "start_col_offset_idx": 2,
+         "end_col_offset_idx": 3,
+         "text": "Mean Depth",
+         "column_header": true,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 488.3333333333333,
+          "t": 110.0,
+          "r": 551.0,
+          "b": 128.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 0,
+         "end_row_offset_idx": 1,
+         "start_col_offset_idx": 3,
+         "end_col_offset_idx": 4,
+         "text": "Variance",
+         "column_header": true,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        }
+       ],
+       [
+        {
+         "bbox": {
+          "l": 44.0,
+          "t": 139.0,
+          "r": 119.0,
+          "b": 156.66666666666669,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 1,
+         "end_row_offset_idx": 2,
+         "start_col_offset_idx": 0,
+         "end_col_offset_idx": 1,
+         "text": "Hazel Bend",
+         "column_header": false,
+         "row_header": true,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 260.0,
+          "t": 137.0,
+          "r": 290.6666666666667,
+          "b": 157.66666666666669,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 1,
+         "end_row_offset_idx": 2,
+         "start_col_offset_idx": 1,
+         "end_col_offset_idx": 2,
+         "text": "205",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 398.3333333333333,
+          "t": 137.66666666666669,
+          "r": 433.3333333333333,
+          "b": 158.33333333333334,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 1,
+         "end_row_offset_idx": 2,
+         "start_col_offset_idx": 2,
+         "end_col_offset_idx": 3,
+         "text": "3.12",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 509.3333333333333,
+          "t": 137.66666666666669,
+          "r": 551.3333333333334,
+          "b": 157.66666666666669,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 1,
+         "end_row_offset_idx": 2,
+         "start_col_offset_idx": 3,
+         "end_col_offset_idx": 4,
+         "text": "2.493",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        }
+       ],
+       [
+        {
+         "bbox": {
+          "l": 44.66666666666667,
+          "t": 168.0,
+          "r": 114.33333333333333,
+          "b": 186.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 2,
+         "end_row_offset_idx": 3,
+         "start_col_offset_idx": 0,
+         "end_col_offset_idx": 1,
+         "text": "Ash Grove",
+         "column_header": false,
+         "row_header": true,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 260.33333333333337,
+          "t": 165.66666666666666,
+          "r": 292.0,
+          "b": 186.66666666666666,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 2,
+         "end_row_offset_idx": 3,
+         "start_col_offset_idx": 1,
+         "end_col_offset_idx": 2,
+         "text": "195",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 398.6666666666667,
+          "t": 165.66666666666666,
+          "r": 433.6666666666667,
+          "b": 187.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 2,
+         "end_row_offset_idx": 3,
+         "start_col_offset_idx": 2,
+         "end_col_offset_idx": 3,
+         "text": "8.26",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 511.0,
+          "t": 166.33333333333334,
+          "r": 551.6666666666666,
+          "b": 186.66666666666666,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 2,
+         "end_row_offset_idx": 3,
+         "start_col_offset_idx": 3,
+         "end_col_offset_idx": 4,
+         "text": "1.458",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        }
+       ],
+       [
+        {
+         "bbox": {
+          "l": 44.66666666666667,
+          "t": 196.33333333333334,
+          "r": 129.33333333333331,
+          "b": 214.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 3,
+         "end_row_offset_idx": 4,
+         "start_col_offset_idx": 0,
+         "end_col_offset_idx": 1,
+         "text": "Birch Hollow",
+         "column_header": false,
+         "row_header": true,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 260.33333333333337,
+          "t": 195.0,
+          "r": 291.3333333333333,
+          "b": 215.66666666666666,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 3,
+         "end_row_offset_idx": 4,
+         "start_col_offset_idx": 1,
+         "end_col_offset_idx": 2,
+         "text": "218",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 398.6666666666667,
+          "t": 195.33333333333334,
+          "r": 432.3333333333333,
+          "b": 215.33333333333334,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 3,
+         "end_row_offset_idx": 4,
+         "start_col_offset_idx": 2,
+         "end_col_offset_idx": 3,
+         "text": "7.51",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 509.6666666666667,
+          "t": 194.66666666666666,
+          "r": 551.3333333333334,
+          "b": 215.33333333333334,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 3,
+         "end_row_offset_idx": 4,
+         "start_col_offset_idx": 3,
+         "end_col_offset_idx": 4,
+         "text": "2.972",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        }
+       ],
+       [
+        {
+         "bbox": {
+          "l": 44.33333333333333,
+          "t": 225.0,
+          "r": 111.0,
+          "b": 243.33333333333334,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 4,
+         "end_row_offset_idx": 5,
+         "start_col_offset_idx": 0,
+         "end_col_offset_idx": 1,
+         "text": "Elm Point",
+         "column_header": false,
+         "row_header": true,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 261.33333333333337,
+          "t": 223.66666666666666,
+          "r": 291.0,
+          "b": 244.66666666666666,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 4,
+         "end_row_offset_idx": 5,
+         "start_col_offset_idx": 1,
+         "end_col_offset_idx": 2,
+         "text": "185",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 399.0,
+          "t": 224.0,
+          "r": 433.0,
+          "b": 244.33333333333334,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 4,
+         "end_row_offset_idx": 5,
+         "start_col_offset_idx": 2,
+         "end_col_offset_idx": 3,
+         "text": "2.43",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 510.0,
+          "t": 223.66666666666666,
+          "r": 551.0,
+          "b": 244.33333333333334,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 4,
+         "end_row_offset_idx": 5,
+         "start_col_offset_idx": 3,
+         "end_col_offset_idx": 4,
+         "text": "3.075",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        }
+       ],
+       [
+        {
+         "bbox": {
+          "l": 44.66666666666667,
+          "t": 254.33333333333334,
+          "r": 113.66666666666667,
+          "b": 272.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 5,
+         "end_row_offset_idx": 6,
+         "start_col_offset_idx": 0,
+         "end_col_offset_idx": 1,
+         "text": "Cedar Flat",
+         "column_header": false,
+         "row_header": true,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 259.66666666666663,
+          "t": 251.66666666666666,
+          "r": 291.3333333333333,
+          "b": 273.33333333333337,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 5,
+         "end_row_offset_idx": 6,
+         "start_col_offset_idx": 1,
+         "end_col_offset_idx": 2,
+         "text": "205",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 400.0,
+          "t": 253.0,
+          "r": 433.0,
+          "b": 273.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 5,
+         "end_row_offset_idx": 6,
+         "start_col_offset_idx": 2,
+         "end_col_offset_idx": 3,
+         "text": "1.02",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 509.6666666666667,
+          "t": 253.0,
+          "r": 551.3333333333334,
+          "b": 273.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 5,
+         "end_row_offset_idx": 6,
+         "start_col_offset_idx": 3,
+         "end_col_offset_idx": 4,
+         "text": "3.014",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        }
+       ],
+       [
+        {
+         "bbox": {
+          "l": 44.66666666666667,
+          "t": 283.0,
+          "r": 112.0,
+          "b": 301.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 6,
+         "end_row_offset_idx": 7,
+         "start_col_offset_idx": 0,
+         "end_col_offset_idx": 1,
+         "text": "Gull Rock",
+         "column_header": false,
+         "row_header": true,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 267.33333333333337,
+          "t": 280.66666666666663,
+          "r": 292.0,
+          "b": 303.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 6,
+         "end_row_offset_idx": 7,
+         "start_col_offset_idx": 1,
+         "end_col_offset_idx": 2,
+         "text": "50",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 398.3333333333333,
+          "t": 280.33333333333337,
+          "r": 433.6666666666667,
+          "b": 302.6666666666667,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 6,
+         "end_row_offset_idx": 7,
+         "start_col_offset_idx": 2,
+         "end_col_offset_idx": 3,
+         "text": "9.99",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 509.3333333333333,
+          "t": 281.0,
+          "r": 551.6666666666666,
+          "b": 302.3333333333333,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 6,
+         "end_row_offset_idx": 7,
+         "start_col_offset_idx": 3,
+         "end_col_offset_idx": 4,
+         "text": "0.492",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        }
+       ],
+       [
+        {
+         "bbox": {
+          "l": 44.33333333333333,
+          "t": 312.0,
+          "r": 117.0,
+          "b": 329.6666666666667,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 7,
+         "end_row_offset_idx": 8,
+         "start_col_offset_idx": 0,
+         "end_col_offset_idx": 1,
+         "text": "Dunes East",
+         "column_header": false,
+         "row_header": true,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 268.0,
+          "t": 309.6666666666667,
+          "r": 291.3333333333333,
+          "b": 331.3333333333333,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 7,
+         "end_row_offset_idx": 8,
+         "start_col_offset_idx": 1,
+         "end_col_offset_idx": 2,
+         "text": "69",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 399.0,
+          "t": 310.3333333333333,
+          "r": 433.0,
+          "b": 330.3333333333333,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 7,
+         "end_row_offset_idx": 8,
+         "start_col_offset_idx": 2,
+         "end_col_offset_idx": 3,
+         "text": "6.00",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        },
+        {
+         "bbox": {
+          "l": 511.3333333333333,
+          "t": 311.0,
+          "r": 551.0,
+          "b": 330.0,
+          "coord_origin": "TOPLEFT"
+         },
+         "row_span": 1,
+         "col_span": 1,
+         "start_row_offset_idx": 7,
+         "end_row_offset_idx": 8,
+         "start_col_offset_idx": 3,
+         "end_col_offset_idx": 4,
+         "text": "1.665",
+         "column_header": false,
+         "row_header": false,
+         "row_section": false,
+         "fillable": false
+        }
+       ]
+      ]
+     },
+     "annotations": []
+    }
+   ],
+   "key_value_items": [],
+   "form_items": [],
+   "pages": {
+    "1": {
+     "size": {
+      "width": 595.2,
+      "height": 841.92
+     },
+     "image": null,
+     "page_no": 1
+    },
+    "2": {
+     "size": {
+      "width": 595.2,
+      "height": 841.92
+     },
+     "image": null,
+     "page_no": 2
+    }
+   }
+  },
+  "html_content": null,
+  "text_content": null,
+  "doctags_content": null,
+  "doclang_content": null
+ },
+ "status": "success",
+ "errors": [],
+ "processing_time": 17.72484573500003,
+ "timings": {},
+ "confidence": {
+  "parse_score": null,
+  "layout_score": 0.9516850809256236,
+  "table_score": null,
+  "ocr_score": 0.9943704117647059,
+  "mean_score": 0.9730277463451648,
+  "low_score": 0.9538193474675778,
+  "mean_grade": "excellent",
+  "low_grade": "excellent"
+ }
+}

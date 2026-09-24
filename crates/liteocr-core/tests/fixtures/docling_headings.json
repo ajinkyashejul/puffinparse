@@ -1,0 +1,356 @@
+{
+ "document": {
+  "filename": "headings_001.png",
+  "md_content": "## Notes on Coastal Erosion\n\nCareful measurement is the difference between a good estimate and a lucky guess. Students designed a weather station using parts they found in the workshop. She kept detailed notes in a leather bound journal that traveled everywhere with her. He described the process patiently, pausing whenever someone raised a hand.\n\n## Results and Discussion\n\nShe kept detailed notes in a leather bound journal that traveled everywhere with her. The doctor recommended shorter walks at first, followed by gradual increases. Her lecture on coastal erosion drew students from several neighboring departments. Volunteers planted more than four hundred saplings along the riverbank.\n\n- Keep spare cables and two fully charged batteries in the field kit. - Send the weekly summary to the committee by Friday afternoon. - Back up the field notes to the shared archive every evening. - Confirm the ferry timetable before planning a site visit.\n\n- Publish the revised schedule on the notice board each Monday.\n\n## Scope Study of\n\nShe argued that the simplest explanation was also the most useful one. Our supplier confirmed that the shipment will leave the port on Thursday morning. Most of the equipment arrived on time, although two crates were delayed in customs.",
+  "json_content": {
+   "schema_name": "DoclingDocument",
+   "version": "1.10.0",
+   "name": "headings_001",
+   "origin": {
+    "mimetype": "application/pdf",
+    "binary_hash": 5938331106083003782,
+    "filename": "headings_001.png",
+    "uri": null
+   },
+   "furniture": {
+    "self_ref": "#/furniture",
+    "parent": null,
+    "children": [],
+    "content_layer": "furniture",
+    "meta": null,
+    "name": "_root_",
+    "label": "unspecified"
+   },
+   "body": {
+    "self_ref": "#/body",
+    "parent": null,
+    "children": [
+     {
+      "$ref": "#/texts/0"
+     },
+     {
+      "$ref": "#/texts/1"
+     },
+     {
+      "$ref": "#/texts/2"
+     },
+     {
+      "$ref": "#/texts/3"
+     },
+     {
+      "$ref": "#/texts/4"
+     },
+     {
+      "$ref": "#/groups/0"
+     },
+     {
+      "$ref": "#/texts/6"
+     },
+     {
+      "$ref": "#/texts/7"
+     }
+    ],
+    "content_layer": "body",
+    "meta": null,
+    "name": "_root_",
+    "label": "unspecified"
+   },
+   "groups": [
+    {
+     "self_ref": "#/groups/0",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [
+      {
+       "$ref": "#/texts/5"
+      }
+     ],
+     "content_layer": "body",
+     "meta": null,
+     "name": "list",
+     "label": "list"
+    }
+   ],
+   "texts": [
+    {
+     "self_ref": "#/texts/0",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "section_header",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 72.0,
+        "t": 1685.0,
+        "r": 876.5943196614584,
+        "b": 1613.0,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        24
+       ]
+      }
+     ],
+     "orig": "Notes on Coastal Erosion",
+     "text": "Notes on Coastal Erosion",
+     "formatting": null,
+     "hyperlink": null,
+     "level": 1
+    },
+    {
+     "self_ref": "#/texts/1",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "text",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 75.32258065541585,
+        "t": 1578.3333333333333,
+        "r": 1120.1451822916667,
+        "b": 1329.7083333333333,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        318
+       ]
+      }
+     ],
+     "orig": "Careful measurement is the difference between a good estimate and a lucky guess. Students designed a weather station using parts they found in the workshop. She kept detailed notes in a leather bound journal that traveled everywhere with her. He described the process patiently, pausing whenever someone raised a hand.",
+     "text": "Careful measurement is the difference between a good estimate and a lucky guess. Students designed a weather station using parts they found in the workshop. She kept detailed notes in a leather bound journal that traveled everywhere with her. He described the process patiently, pausing whenever someone raised a hand.",
+     "formatting": null,
+     "hyperlink": null
+    },
+    {
+     "self_ref": "#/texts/2",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "section_header",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 72.66666666666667,
+        "t": 1303.3333333333333,
+        "r": 619.6666666666666,
+        "b": 1252.0,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        22
+       ]
+      }
+     ],
+     "orig": "Results and Discussion",
+     "text": "Results and Discussion",
+     "formatting": null,
+     "hyperlink": null,
+     "level": 1
+    },
+    {
+     "self_ref": "#/texts/3",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "text",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 76.02671368916829,
+        "t": 1220.3112970987954,
+        "r": 1143.302978515625,
+        "b": 1014.5336507161459,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        318
+       ]
+      }
+     ],
+     "orig": "She kept detailed notes in a leather bound journal that traveled everywhere with her. The doctor recommended shorter walks at first, followed by gradual increases. Her lecture on coastal erosion drew students from several neighboring departments. Volunteers planted more than four hundred saplings along the riverbank.",
+     "text": "She kept detailed notes in a leather bound journal that traveled everywhere with her. The doctor recommended shorter walks at first, followed by gradual increases. Her lecture on coastal erosion drew students from several neighboring departments. Volunteers planted more than four hundred saplings along the riverbank.",
+     "formatting": null,
+     "hyperlink": null
+    },
+    {
+     "self_ref": "#/texts/4",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "text",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 73.83518155415852,
+        "t": 986.9495035807291,
+        "r": 1148.23388671875,
+        "b": 822.5480550130208,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        256
+       ]
+      }
+     ],
+     "orig": "- Keep spare cables and two fully charged batteries in the field kit. - Send the weekly summary to the committee by Friday afternoon. - Back up the field notes to the shared archive every evening. - Confirm the ferry timetable before planning a site visit.",
+     "text": "- Keep spare cables and two fully charged batteries in the field kit. - Send the weekly summary to the committee by Friday afternoon. - Back up the field notes to the shared archive every evening. - Confirm the ferry timetable before planning a site visit.",
+     "formatting": null,
+     "hyperlink": null
+    },
+    {
+     "self_ref": "#/texts/5",
+     "parent": {
+      "$ref": "#/groups/0"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "list_item",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 76.57459704081218,
+        "t": 819.2379557291667,
+        "r": 1112.6215006510417,
+        "b": 780.6201578776042,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        63
+       ]
+      }
+     ],
+     "orig": "- Publish the revised schedule on the notice board each Monday.",
+     "text": "Publish the revised schedule on the notice board each Monday.",
+     "formatting": null,
+     "hyperlink": null,
+     "enumerated": false,
+     "marker": "-"
+    },
+    {
+     "self_ref": "#/texts/6",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "section_header",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 71.0,
+        "t": 763.0,
+        "r": 527.6666666666667,
+        "b": 703.3333333333333,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        14
+       ]
+      }
+     ],
+     "orig": "Scope Study of",
+     "text": "Scope Study of",
+     "formatting": null,
+     "hyperlink": null,
+     "level": 1
+    },
+    {
+     "self_ref": "#/texts/7",
+     "parent": {
+      "$ref": "#/body"
+     },
+     "children": [],
+     "content_layer": "body",
+     "meta": null,
+     "label": "text",
+     "prov": [
+      {
+       "page_no": 1,
+       "bbox": {
+        "l": 71.09979836146037,
+        "t": 677.3625005086262,
+        "r": 1159.900146484375,
+        "b": 507.5531209309895,
+        "coord_origin": "BOTTOMLEFT"
+       },
+       "charspan": [
+        0,
+        236
+       ]
+      }
+     ],
+     "orig": "She argued that the simplest explanation was also the most useful one. Our supplier confirmed that the shipment will leave the port on Thursday morning. Most of the equipment arrived on time, although two crates were delayed in customs.",
+     "text": "She argued that the simplest explanation was also the most useful one. Our supplier confirmed that the shipment will leave the port on Thursday morning. Most of the equipment arrived on time, although two crates were delayed in customs.",
+     "formatting": null,
+     "hyperlink": null
+    }
+   ],
+   "pictures": [],
+   "tables": [],
+   "key_value_items": [],
+   "form_items": [],
+   "pages": {
+    "1": {
+     "size": {
+      "width": 1240.0,
+      "height": 1754.0
+     },
+     "image": null,
+     "page_no": 1
+    }
+   }
+  },
+  "html_content": null,
+  "text_content": null,
+  "doctags_content": null,
+  "doclang_content": null
+ },
+ "status": "success",
+ "errors": [],
+ "processing_time": 31.160573949999957,
+ "timings": {},
+ "confidence": {
+  "parse_score": null,
+  "layout_score": 0.8340951949357986,
+  "table_score": null,
+  "ocr_score": 0.9956061538461539,
+  "mean_score": 0.9148506743909763,
+  "low_score": 0.8421707428813164,
+  "mean_grade": "excellent",
+  "low_grade": "good"
+ }
+}

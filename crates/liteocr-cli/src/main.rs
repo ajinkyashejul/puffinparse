@@ -327,6 +327,8 @@ fn providers(mode: Option<&str>, json: bool) -> Result<()> {
                     "display_name": p.display_name,
                     "env_var": p.env_var,
                     "key_configured": key_configured(p.env_var),
+                    "key_required": p.key_required(),
+                    "self_hosted": p.self_hosted(),
                     "base_url": p.base_url,
                     "docs": p.docs,
                     "models": p.models.iter().filter(|m| keep(m)).map(|m| {
@@ -353,7 +355,14 @@ fn providers(mode: Option<&str>, json: bool) -> Result<()> {
     table.load_style(comfy_table::presets::UTF8_FULL_CONDENSED);
     table.set_header(["Model", "Modes", "Default", "Key", "$/page", "Description"]);
     for p in liteocr_core::PROVIDERS {
-        let key = if key_configured(p.env_var) { "✓" } else { "✗" };
+        // Self-hosted engines need no key: show "local" instead of a missing-key cross.
+        let key = if p.self_hosted() {
+            "local"
+        } else if key_configured(p.env_var) {
+            "✓"
+        } else {
+            "✗"
+        };
         for m in p.models.iter().filter(|m| keep(m)) {
             let q = m.qualified();
             // With a --mode filter one number is enough; otherwise list the price of every mode.
@@ -387,7 +396,11 @@ fn providers(mode: Option<&str>, json: bool) -> Result<()> {
     }
     println!(
         "Keys are read from: {}",
-        liteocr_core::PROVIDERS.iter().map(|p| p.env_var).collect::<Vec<_>>().join(", ")
+        liteocr_core::PROVIDERS.iter().filter(|p| p.key_required()).map(|p| p.env_var).collect::<Vec<_>>().join(", ")
+    );
+    println!(
+        "Self-hosted (no key, $0/page; point them at your install): tesseract (TESSERACT_CMD), \
+         docling (DOCLING_BASE_URL), paddleocr (PADDLEOCR_BASE_URL)"
     );
     println!("Native output formats (--output-format, json only): {}", output_formats.join(" | "));
     Ok(())

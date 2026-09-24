@@ -1,0 +1,211 @@
+{
+ "logId": "9c6f0a52-6a8e-4c1e-b2b4-5d1f3f7e2d10",
+ "errorCode": 0,
+ "errorMsg": "Success",
+ "result": {
+  "layoutParsingResults": [
+   {
+    "prunedResult": {
+     "page_count": 12,
+     "width": 1000,
+     "height": 1400,
+     "model_settings": {
+      "use_doc_preprocessor": false,
+      "use_seal_recognition": false,
+      "use_table_recognition": true,
+      "use_formula_recognition": true,
+      "use_chart_recognition": false,
+      "use_region_detection": true
+     },
+     "parsing_res_list": [
+      {
+       "block_label": "header",
+       "block_content": "ACME Corp",
+       "block_bbox": [
+        100,
+        20,
+        400,
+        50
+       ],
+       "block_id": 0,
+       "block_order": null
+      },
+      {
+       "block_label": "doc_title",
+       "block_content": "Annual Summary",
+       "block_bbox": [
+        100,
+        70,
+        600,
+        120
+       ],
+       "block_id": 1,
+       "block_order": 2
+      },
+      {
+       "block_label": "paragraph_title",
+       "block_content": "1. Overview",
+       "block_bbox": [
+        100,
+        140,
+        400,
+        170
+       ],
+       "block_id": 2,
+       "block_order": 3
+      },
+      {
+       "block_label": "text",
+       "block_content": "Sales rose in both regions during the year.",
+       "block_bbox": [
+        100,
+        180,
+        900,
+        240
+       ],
+       "block_id": 3,
+       "block_order": 4
+      },
+      {
+       "block_label": "table_title",
+       "block_content": "Table 1: Sales by region",
+       "block_bbox": [
+        100,
+        260,
+        500,
+        285
+       ],
+       "block_id": 4,
+       "block_order": 5
+      },
+      {
+       "block_label": "table",
+       "block_content": "<html><body><table><tr><td>Region</td><td>Sales</td></tr><tr><td>North</td><td>120</td></tr><tr><td>South</td><td>95</td></tr></table></body></html>",
+       "block_bbox": [
+        100,
+        290,
+        700,
+        420
+       ],
+       "block_id": 5,
+       "block_order": 6
+      },
+      {
+       "block_label": "formula",
+       "block_content": "E = mc^{2}",
+       "block_bbox": [
+        300,
+        440,
+        600,
+        480
+       ],
+       "block_id": 6,
+       "block_order": 7
+      },
+      {
+       "block_label": "image",
+       "block_content": "",
+       "block_bbox": [
+        100,
+        500,
+        900,
+        900
+       ],
+       "block_id": 7,
+       "block_order": null
+      },
+      {
+       "block_label": "number",
+       "block_content": "1",
+       "block_bbox": [
+        480,
+        1350,
+        520,
+        1375
+       ],
+       "block_id": 8,
+       "block_order": null
+      }
+     ],
+     "layout_det_res": {
+      "boxes": [
+       {
+        "cls_id": 2,
+        "label": "text",
+        "score": 0.97,
+        "coordinate": [
+         100.0,
+         180.0,
+         900.0,
+         240.0
+        ]
+       }
+      ]
+     }
+    },
+    "markdown": {
+     "text": "# Annual Summary\n\n## 1. Overview\n\nSales rose in both regions during the year.\n\n<div style=\"text-align: center;\">Table 1: Sales by region</div>\n\n<html><body><table><tr><td>Region</td><td>Sales</td></tr><tr><td>North</td><td>120</td></tr><tr><td>South</td><td>95</td></tr></table></body></html>\n\n$$E = mc^{2}$$",
+     "isStart": true,
+     "isEnd": true,
+     "images": null
+    },
+    "outputImages": null,
+    "inputImage": null
+   }
+  ],
+  "dataInfo": {
+   "numPages": 12,
+   "pages": [
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    },
+    {
+     "width": 1000,
+     "height": 1400
+    }
+   ],
+   "type": "pdf"
+  }
+ }
+}

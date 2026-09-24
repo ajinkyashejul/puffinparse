@@ -18,6 +18,11 @@ pub mod unstructured;
 pub mod upstage;
 // Shared helpers for the vision-LLM providers (gemini, openai, anthropic).
 pub(crate) mod vlm;
+// Self-hosted / local engines (no API key).
+pub mod docling;
+pub(crate) mod local;
+pub mod paddleocr;
+pub mod tesseract;
 
 use crate::error::{Error, Result};
 use crate::provider::Provider;
@@ -41,6 +46,9 @@ pub fn build(name: &str) -> Result<Arc<dyn Provider>> {
         "upstage" => Ok(Arc::new(upstage::Upstage)),
         "landingai" => Ok(Arc::new(landingai::LandingAi)),
         "google_documentai" => Ok(Arc::new(google_documentai::GoogleDocumentAi)),
+        "tesseract" => Ok(Arc::new(tesseract::Tesseract)),
+        "docling" => Ok(Arc::new(docling::Docling)),
+        "paddleocr" => Ok(Arc::new(paddleocr::PaddleOcr)),
         other => Err(Error::unsupported_model(format!("unknown provider '{other}'"))),
     }
 }

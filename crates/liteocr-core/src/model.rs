@@ -28,14 +28,50 @@ impl ModelInfo {
 /// Shorthand for the common "layout parse, and plain text derived from it" pair.
 pub const PARSE_OCR: &[Mode] = &[Mode::Parse, Mode::Ocr];
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProviderInfo {
     pub name: &'static str,
     pub display_name: &'static str,
+    /// Environment variable holding the API key. Empty for self-hosted engines that need none;
+    /// for a self-hosted server with *optional* auth (Docling) it names that optional key.
     pub env_var: &'static str,
     pub base_url: &'static str,
     pub docs: &'static str,
     pub models: &'static [ModelInfo],
+}
+
+/// Providers that run on the caller's machine or their own server: no API key is required and
+/// the per-page price is 0. Kept as a list (rather than a field on every entry) so adding one
+/// does not touch the hosted providers' registry entries.
+pub const SELF_HOSTED: &[&str] = &["tesseract", "docling", "paddleocr"];
+
+impl ProviderInfo {
+    /// `true` for local / self-hosted engines (see [`SELF_HOSTED`]).
+    pub fn self_hosted(&self) -> bool {
+        SELF_HOSTED.contains(&self.name)
+    }
+
+    /// Whether calls need an API key from [`Self::env_var`].
+    pub fn key_required(&self) -> bool {
+        !self.self_hosted() && !self.env_var.is_empty()
+    }
+}
+
+// Serialized by hand so the derived `self_hosted` flag travels with the registry (Python
+// `providers()`, CLI JSON) without a field on every entry.
+impl Serialize for ProviderInfo {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> std::result::Result<S::Ok, S::Error> {
+        use serde::ser::SerializeStruct;
+        let mut st = s.serialize_struct("ProviderInfo", 7)?;
+        st.serialize_field("name", self.name)?;
+        st.serialize_field("display_name", self.display_name)?;
+        st.serialize_field("env_var", self.env_var)?;
+        st.serialize_field("base_url", self.base_url)?;
+        st.serialize_field("docs", self.docs)?;
+        st.serialize_field("self_hosted", &self.self_hosted())?;
+        st.serialize_field("models", self.models)?;
+        st.end()
+    }
 }
 
 pub const PROVIDERS: &[ProviderInfo] = &[
@@ -577,6 +613,51 @@ pub const PROVIDERS: &[ProviderInfo] = &[
             },
         ],
     },
+    ProviderInfo {
+        name: "tesseract",
+        display_name: "Tesseract (local)",
+        // Local binary: no key. TESSERACT_CMD / PDFTOPPM_CMD override the binaries.
+        env_var: "",
+        base_url: "",
+        docs: "https://tesseract-ocr.github.io/tessdoc/",
+        models: &[ModelInfo {
+            provider: "tesseract",
+            model: "default",
+            description: "Tesseract 5 via the local `tesseract` binary (PDFs via pdftoppm); free, no layout model",
+            default: true,
+            modes: &[Mode::Ocr, Mode::Parse],
+        }],
+    },
+    ProviderInfo {
+        name: "docling",
+        display_name: "Docling (docling-serve, self-hosted)",
+        // Optional: only when the server runs with DOCLING_SERVE_API_KEY. Base URL: DOCLING_BASE_URL.
+        env_var: "DOCLING_API_KEY",
+        base_url: "http://localhost:5001",
+        docs: "https://github.com/docling-project/docling-serve",
+        models: &[ModelInfo {
+            provider: "docling",
+            model: "default",
+            description: "Docling standard pipeline on your docling-serve (layout, tables, OCR); free, self-hosted",
+            default: true,
+            modes: PARSE_OCR,
+        }],
+    },
+    ProviderInfo {
+        name: "paddleocr",
+        display_name: "PaddleOCR (PaddleX serving, self-hosted)",
+        // No key. PADDLEOCR_BASE_URL (OCR pipeline), PADDLEOCR_PARSE_BASE_URL (PP-StructureV3).
+        env_var: "",
+        base_url: "http://localhost:8080",
+        docs: "https://www.paddleocr.ai/latest/en/version3.x/deployment/serving.html",
+        models: &[ModelInfo {
+            provider: "paddleocr",
+            model: "default",
+            description: "PaddleOCR 3 serving: OCR pipeline for ocr, PP-StructureV3 for parse; free, self-hosted",
+            default: true,
+            modes: &[Mode::Ocr, Mode::Parse],
+        }],
+    },
 ];
 
 /// A parsed, validated model reference.
@@ -614,6 +695,8 @@ impl ModelRef {
             "claude" => "anthropic".to_string(),
             "googledocumentai" | "google-documentai" | "docai" | "documentai" => "google_documentai".to_string(),
             "landing" | "landing_ai" | "landing-ai" | "ade" => "landingai".to_string(),
+            "paddle" | "paddle_ocr" | "paddle-ocr" | "paddlex" => "paddleocr".to_string(),
+            "docling_serve" | "docling-serve" => "docling".to_string(),
             other => other.to_string(),
         };
         let info = provider_info(&prov).ok_or_else(|| {
@@ -723,6 +806,22 @@ mod tests {
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 57);
+        assert_eq!(m.len(), 60);
+    }
+
+    #[test]
+    fn self_hosted_providers_need_no_key() {
+        for name in SELF_HOSTED {
+            let p = provider_info(name).unwrap_or_else(|| panic!("{name} is registered"));
+            assert!(p.self_hosted() && !p.key_required(), "{name}");
+        }
+        assert!(!provider_info("reducto").unwrap().self_hosted());
+        assert!(provider_info("reducto").unwrap().key_required());
+        assert_eq!(ModelRef::parse_for("tesseract", Mode::Ocr).unwrap().qualified(), "tesseract/default");
+        assert_eq!(ModelRef::parse_for("paddle", Mode::Parse).unwrap().qualified(), "paddleocr/default");
+        let v = serde_json::to_value(provider_info("docling").unwrap()).unwrap();
+        assert_eq!(v["self_hosted"], true);
+        assert_eq!(v["models"][0]["model"], "default");
+        assert_eq!(serde_json::to_value(provider_info("reducto").unwrap()).unwrap()["self_hosted"], false);
     }
 }

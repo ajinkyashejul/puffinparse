@@ -52,9 +52,18 @@ def test_providers_metadata() -> None:
     provs = liteocr.providers()
     names = {p["name"] for p in provs}
     assert names >= {"reducto", "extend", "llamaparse"}
+    assert {p["name"] for p in provs if p["self_hosted"]} == {"tesseract", "docling", "paddleocr"}
     for p in provs:
-        assert p["env_var"].isupper() and any(t in p["env_var"] for t in ("KEY", "TOKEN"))
-        assert p["base_url"].startswith("https://")
+        if p["self_hosted"]:
+            # Local engines need no key (docling names its optional one) and cost nothing.
+            assert p["env_var"] in ("", "DOCLING_API_KEY")
+            assert p["base_url"] == "" or p["base_url"].startswith("http://localhost")
+            for m in p["models"]:
+                for mode in m["modes"]:
+                    assert liteocr.estimate_cost(f"{p['name']}/{m['model']}", 10, mode) == 0.0
+        else:
+            assert p["env_var"].isupper() and any(t in p["env_var"] for t in ("KEY", "TOKEN"))
+            assert p["base_url"].startswith("https://")
         assert any(m["default"] for m in p["models"])
         # every mode a provider serves is reachable from a bare provider name
         for mode in liteocr.modes():

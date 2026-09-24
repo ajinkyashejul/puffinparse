@@ -1,0 +1,205 @@
+{
+ "logId": "3b1b2c7e-2f0e-4d7c-9a51-0f5ad0b8b0a1",
+ "errorCode": 0,
+ "errorMsg": "Success",
+ "result": {
+  "ocrResults": [
+   {
+    "prunedResult": {
+     "model_settings": {
+      "use_doc_preprocessor": false,
+      "use_textline_orientation": false
+     },
+     "dt_polys": [
+      [
+       [
+        100,
+        90
+       ],
+       [
+        400,
+        90
+       ],
+       [
+        400,
+        130
+       ],
+       [
+        100,
+        130
+       ]
+      ],
+      [
+       [
+        100,
+        150
+       ],
+       [
+        900,
+        150
+       ],
+       [
+        900,
+        185
+       ],
+       [
+        100,
+        185
+       ]
+      ]
+     ],
+     "text_det_params": {
+      "limit_side_len": 64,
+      "limit_type": "min",
+      "thresh": 0.3,
+      "max_side_limit": 4000,
+      "box_thresh": 0.6,
+      "unclip_ratio": 1.5
+     },
+     "text_type": "general",
+     "textline_orientation_angles": [
+      -1,
+      -1
+     ],
+     "text_rec_score_thresh": 0.0,
+     "rec_texts": [
+      "Quarterly Report",
+      "Revenue grew 12% over the prior quarter."
+     ],
+     "rec_scores": [
+      0.998,
+      0.987
+     ],
+     "rec_polys": [
+      [
+       [
+        100,
+        90
+       ],
+       [
+        400,
+        90
+       ],
+       [
+        400,
+        130
+       ],
+       [
+        100,
+        130
+       ]
+      ],
+      [
+       [
+        100,
+        150
+       ],
+       [
+        900,
+        150
+       ],
+       [
+        900,
+        185
+       ],
+       [
+        100,
+        185
+       ]
+      ]
+     ],
+     "rec_boxes": [
+      [
+       100,
+       90,
+       400,
+       130
+      ],
+      [
+       100,
+       150,
+       900,
+       185
+      ]
+     ]
+    },
+    "ocrImage": null,
+    "docPreprocessingImage": null,
+    "inputImage": null
+   },
+   {
+    "prunedResult": {
+     "model_settings": {
+      "use_doc_preprocessor": false,
+      "use_textline_orientation": false
+     },
+     "text_type": "general",
+     "text_rec_score_thresh": 0.0,
+     "rec_texts": [
+      "Page two text",
+      ""
+     ],
+     "rec_scores": [
+      0.95,
+      0.12
+     ],
+     "rec_polys": [
+      [
+       [
+        100,
+        90
+       ],
+       [
+        400,
+        90
+       ],
+       [
+        400,
+        130
+       ],
+       [
+        100,
+        130
+       ]
+      ],
+      [
+       [
+        0,
+        0
+       ],
+       [
+        1,
+        0
+       ],
+       [
+        1,
+        1
+       ],
+       [
+        0,
+        1
+       ]
+      ]
+     ]
+    },
+    "ocrImage": null,
+    "docPreprocessingImage": null,
+    "inputImage": null
+   }
+  ],
+  "dataInfo": {
+   "numPages": 2,
+   "pages": [
+    {
+     "width": 1224,
+     "height": 1584
+    },
+    {
+     "width": 1224,
+     "height": 1584
+    }
+   ],
+   "type": "pdf"
+  }
+ }
+}
