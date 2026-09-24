@@ -11,6 +11,13 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **`liteocr bench run --resume`**: every finished call is appended to `<out>.partial.jsonl`, so an
+  interrupted or partly failed run continues where it stopped and only re-runs missing or failed
+  (model, document) pairs. `--dry-run` prints the plan (calls, pages, list-price estimate) without
+  calling any provider; `--max-cost <usd>` aborts before the first call when the estimate is higher;
+  `--retries N` re-issues documents after retryable errors (off by default, since a retried job may
+  be billed twice). Result documents record `provider_job_id`, `cache_hit`, `attempts`,
+  `started_at` and `error_kind`, and the run ends with a summary line (calls, failures, cost, wall time).
 - **Native-format compatibility (`output_format`).** A response can be rendered in a
   provider's own JSON shape instead of the unified one, so an integration already written
   against Reducto, Extend or LlamaParse can switch the underlying provider without
