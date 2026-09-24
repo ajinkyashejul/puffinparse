@@ -738,7 +738,7 @@ fn rescore_run(mut run: RunResult, dataset: &Path, outputs: &Path, keep_missing:
         eprintln!(
             "warning: dataset {} has changed since the run (sha256 {}… -> {}…); recording the new hash",
             run.dataset.name,
-            &run.dataset.sha256.get(..12).unwrap_or(&run.dataset.sha256),
+            run.dataset.sha256.get(..12).unwrap_or(&run.dataset.sha256),
             &sha[..12]
         );
         run.dataset.sha256 = sha;
