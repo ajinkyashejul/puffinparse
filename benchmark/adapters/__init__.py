@@ -5,7 +5,9 @@ Usage::
     python -m benchmark.adapters parsebench --limit 40
     python -m benchmark.adapters olmocr
     python -m benchmark.adapters omnidocbench
+    python -m benchmark.adapters dpbench
     python -m benchmark.adapters combined
+    python -m benchmark.adapters combined-v3
     python -m benchmark.adapters --list
 
 See ``docs/benchmarks/adapters.md`` for the manifest extension, the rule schema and how to
@@ -16,6 +18,7 @@ from __future__ import annotations
 
 # Importing the modules is what populates `registry` through the @register decorator.
 from . import combined as combined
+from . import dpbench as dpbench
 from . import olmocr as olmocr
 from . import omnidocbench as omnidocbench
 from . import parsebench as parsebench
@@ -53,6 +56,7 @@ __all__ = [
     "Upstream",
     "combined",
     "default_cache_dir",
+    "dpbench",
     "html_table_to_markdown",
     "olmocr",
     "omnidocbench",

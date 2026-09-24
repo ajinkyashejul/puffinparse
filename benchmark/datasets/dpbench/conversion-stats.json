@@ -1,0 +1,44 @@
+{
+  "candidates_skipped_too_large": 1,
+  "committed_by_layout": {
+    "chart": 6,
+    "equation": 5,
+    "figure": 5,
+    "index": 3,
+    "list": 4,
+    "table": 10,
+    "text": 7
+  },
+  "committed_bytes": 4755755,
+  "committed_docs": 40,
+  "committed_merged_cells": 4,
+  "convertible_pages": 200,
+  "convertible_pages_by_layout": {
+    "chart": 43,
+    "equation": 18,
+    "figure": 38,
+    "index": 10,
+    "list": 9,
+    "table": 42,
+    "text": 40
+  },
+  "elements_dropped_figure_chart": 124,
+  "pages_skipped": 0,
+  "pages_skipped_by_reason": {},
+  "upstream_elements_by_category": {
+    "Caption": 154,
+    "Chart": 67,
+    "Equation": 58,
+    "Figure": 57,
+    "Footer": 168,
+    "Footnote": 63,
+    "Header": 101,
+    "Heading1": 194,
+    "Index": 10,
+    "List": 91,
+    "Paragraph": 804,
+    "Table": 55
+  },
+  "upstream_license": "mit (dataset card front-matter; no LICENSE file in the repo)",
+  "upstream_pages": 200
+}

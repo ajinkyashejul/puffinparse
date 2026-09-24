@@ -101,11 +101,37 @@ fn omnidocbench_truth_scores_itself_perfectly() {
 }
 
 #[test]
-fn combined_v2_references_resolve() {
-    let Some((dir, m)) = manifest("combined-v2") else { return };
+fn dpbench_truth_scores_itself_perfectly() {
+    let Some((dir, m)) = manifest("dpbench") else { return };
+    let docs = m["documents"].as_array().expect("documents");
+    assert!(docs.len() >= 30, "expected the committed dpbench subset, found {}", docs.len());
+    let mut tables = 0;
+    for d in docs {
+        let id = &d["id"];
+        assert_eq!(d["kind"], "transcript", "{id}");
+        assert!(d["rules"].is_null(), "{id}: dpbench emits no rules");
+        assert!(dir.join(d["file"].as_str().unwrap()).is_file(), "missing {}", d["file"]);
+        let truth = std::fs::read_to_string(dir.join(d["truth"].as_str().unwrap())).expect("truth is committed");
+        let s = score(&truth, &truth, NormalizeOptions::default());
+        assert_eq!(s.char_similarity, 1.0, "{id}");
+        let has_table = d["tags"].as_array().unwrap().iter().any(|t| t == "has-table");
+        assert_eq!(s.table_score.is_some(), has_table, "{id}: table tag disagrees with the truth");
+        if has_table {
+            tables += 1;
+            assert_eq!(s.table_score, Some(1.0), "{id}");
+            assert_eq!(s.teds_grid, Some(1.0), "{id}");
+        }
+        let empty = score("", &truth, NormalizeOptions::default());
+        assert_eq!(empty.char_similarity, 0.0, "{id}: an empty parse must score 0");
+    }
+    assert!(tables >= 5, "expected table pages in the subset, found {tables}");
+}
+
+fn combined_references_resolve(name: &str, n_sources: usize) {
+    let Some((dir, m)) = manifest(name) else { return };
     let docs = m["documents"].as_array().expect("documents");
     let sources = m["sources"].as_array().expect("sources");
-    assert_eq!(sources.len(), 4);
+    assert_eq!(sources.len(), n_sources);
     assert_eq!(docs.len() as u64, sources.iter().map(|s| s["documents"].as_u64().unwrap()).sum::<u64>());
     for d in docs {
         let fetch = d["tags"].as_array().unwrap().iter().any(|t| t == "fetch-required");
@@ -120,6 +146,16 @@ fn combined_v2_references_resolve() {
             }
         }
     }
+}
+
+#[test]
+fn combined_v2_references_resolve() {
+    combined_references_resolve("combined-v2", 4);
+}
+
+#[test]
+fn combined_v3_references_resolve() {
+    combined_references_resolve("combined-v3", 5);
 }
 
 /// The witness check over an arbitrary directory of rule files, e.g. a full (uncommitted)

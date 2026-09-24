@@ -1,0 +1,837 @@
+{
+  "name": "dpbench",
+  "version": "1.0.0",
+  "description": "Curated subset of Upstage DP-Bench: single-page PDFs with reading-order markdown truth built from every layout element (tables as pipe tables). Built by `python -m benchmark.adapters dpbench`.",
+  "license": "MIT",
+  "generator": "benchmark/adapters/dpbench.py",
+  "upstream": {
+    "repo_id": "upstage/dp-bench",
+    "revision": "24702c61a2fb13325534be664653bc6e60250d13",
+    "url": "https://huggingface.co/datasets/upstage/dp-bench",
+    "repo_type": "dataset"
+  },
+  "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents.",
+  "notes": [
+    "Upstream revision 24702c61a2fb13325534be664653bc6e60250d13 of upstage/dp-bench (data and evaluate.py pinned together).",
+    "Truth keeps what upstream's NID scores (every element's text except figure, table and chart, headers and footers included) plus the tables TEDS scores, as pipe tables. Figures and charts are dropped.",
+    "Heading1 becomes `# heading`; equations stay LaTeX inside $$…$$ (tag `has-formula`), which a text metric compares literally.",
+    "Merged table cells are flattened by repetition (tag `merged-cells`): `teds_grid` compares grids, not upstream's full HTML tree.",
+    "`category` is the page's dominant layout feature (table > equation > chart > figure > index > list > text); the reference has no per-page source or domain."
+  ],
+  "documents": [
+    {
+      "id": "01030000000016",
+      "file": "docs/01030000000016.pdf",
+      "truth": "truth/01030000000016.md",
+      "pages": 1,
+      "category": "index",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-heading1",
+        "has-index"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000016.pdf",
+      "upstream_path": "dataset/pdfs/01030000000016.pdf",
+      "sha256": "0592b0a1dff0c0b4a48b4504c035336bc9b30831fa2ac2ca8ef8b43a9b5df271",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000018",
+      "file": "docs/01030000000018.pdf",
+      "truth": "truth/01030000000018.md",
+      "pages": 1,
+      "category": "index",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-index"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000018.pdf",
+      "upstream_path": "dataset/pdfs/01030000000018.pdf",
+      "sha256": "321a42833cde040a5e4525c5f84ca2e7df18ee57649c9b47a0e5472e1357abb6",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000021",
+      "file": "docs/01030000000021.pdf",
+      "truth": "truth/01030000000021.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000021.pdf",
+      "upstream_path": "dataset/pdfs/01030000000021.pdf",
+      "sha256": "8cfcbba6c953185e59b1edf5dfab0d36df31ef74a32548308deca21a8a96e615",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000026",
+      "file": "docs/01030000000026.pdf",
+      "truth": "truth/01030000000026.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-header",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000026.pdf",
+      "upstream_path": "dataset/pdfs/01030000000026.pdf",
+      "sha256": "9720f5990852942d3d2e0c84e6dfb1db5c528f3811b1fce9d320e8fe55219b78",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000030",
+      "file": "docs/01030000000030.pdf",
+      "truth": "truth/01030000000030.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-header",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000030.pdf",
+      "upstream_path": "dataset/pdfs/01030000000030.pdf",
+      "sha256": "9c897807c023cf6c34295d03cccb262ed0cbef83bef63d4908ab6d3775b15597",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000031",
+      "file": "docs/01030000000031.pdf",
+      "truth": "truth/01030000000031.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-header",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000031.pdf",
+      "upstream_path": "dataset/pdfs/01030000000031.pdf",
+      "sha256": "a5b975710668800f4d4712155bc597a028f0ffbfe162efef92ded23cb2c23b9f",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000032",
+      "file": "docs/01030000000032.pdf",
+      "truth": "truth/01030000000032.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-equation",
+        "has-footnote",
+        "has-formula",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000032.pdf",
+      "upstream_path": "dataset/pdfs/01030000000032.pdf",
+      "sha256": "65be3f78649d4ee59fa39b9d2b94a44570e52ddbf31cb7213f92853bc23ceb16",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000045",
+      "file": "docs/01030000000045.pdf",
+      "truth": "truth/01030000000045.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-footer",
+        "has-footnote",
+        "has-header",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000045.pdf",
+      "upstream_path": "dataset/pdfs/01030000000045.pdf",
+      "sha256": "00f0adaaa8358a28b4b4e83bc97dcd83a01f7283605b140c2be8e8d47bba8b6b",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000047",
+      "file": "docs/01030000000047.pdf",
+      "truth": "truth/01030000000047.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-paragraph",
+        "has-table",
+        "merged-cells"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000047.pdf",
+      "upstream_path": "dataset/pdfs/01030000000047.pdf",
+      "sha256": "934fbf534914863f6431eef38f5bf66fa91afd439ddf20fb1af0cf3225159ac1",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000050",
+      "file": "docs/01030000000050.pdf",
+      "truth": "truth/01030000000050.md",
+      "pages": 1,
+      "category": "list",
+      "tags": [
+        "dpbench",
+        "has-header",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000050.pdf",
+      "upstream_path": "dataset/pdfs/01030000000050.pdf",
+      "sha256": "97d60e0c292030da220648b4ce7e8971adbe29731b7077d9c3c8d7c6dd778e42",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000059",
+      "file": "docs/01030000000059.pdf",
+      "truth": "truth/01030000000059.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-footer",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000059.pdf",
+      "upstream_path": "dataset/pdfs/01030000000059.pdf",
+      "sha256": "0687b8e7d87922833102a8e792d999184f73fd8ccbc147bba73ab036a28ca776",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000073",
+      "file": "docs/01030000000073.pdf",
+      "truth": "truth/01030000000073.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-figure",
+        "has-footer",
+        "has-footnote",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000073.pdf",
+      "upstream_path": "dataset/pdfs/01030000000073.pdf",
+      "sha256": "f99de206dc21ba8ea57548b1c0c007eb736da5f26c925dc99a4027806297bd8f",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000076",
+      "file": "docs/01030000000076.pdf",
+      "truth": "truth/01030000000076.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-footer",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000076.pdf",
+      "upstream_path": "dataset/pdfs/01030000000076.pdf",
+      "sha256": "6d5a00597cdd1d363b56eb0fdc9f239a462b44fcb0be53a93d62f0d6e35d428f",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000079",
+      "file": "docs/01030000000079.pdf",
+      "truth": "truth/01030000000079.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000079.pdf",
+      "upstream_path": "dataset/pdfs/01030000000079.pdf",
+      "sha256": "63111d8ed6b32c2b3473840ace01896244527d3dc306d81410a3cc7d87a45226",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000086",
+      "file": "docs/01030000000086.pdf",
+      "truth": "truth/01030000000086.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-footnote",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000086.pdf",
+      "upstream_path": "dataset/pdfs/01030000000086.pdf",
+      "sha256": "4f6d9c52848acf2346013388db8ef25c40e6e2fd1232c49f2abfa7a21f65c82c",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000091",
+      "file": "docs/01030000000091.pdf",
+      "truth": "truth/01030000000091.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-footnote",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000091.pdf",
+      "upstream_path": "dataset/pdfs/01030000000091.pdf",
+      "sha256": "475c037beeba4ba75b3e749b51f3781a67e8e8f9db6a31772f7bf2ed2bd05d00",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000095",
+      "file": "docs/01030000000095.pdf",
+      "truth": "truth/01030000000095.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-chart",
+        "has-footer",
+        "has-footnote",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000095.pdf",
+      "upstream_path": "dataset/pdfs/01030000000095.pdf",
+      "sha256": "c04c230b8dfa00d0fabbe9730c078c840ccaa27f5f270d5899f35405784a535d",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000100",
+      "file": "docs/01030000000100.pdf",
+      "truth": "truth/01030000000100.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-chart",
+        "has-footer",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000100.pdf",
+      "upstream_path": "dataset/pdfs/01030000000100.pdf",
+      "sha256": "7675bb9557d6e1e663237098f37aaecb61ab411b71034c2d397487ed0deb2ecd",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000101",
+      "file": "docs/01030000000101.pdf",
+      "truth": "truth/01030000000101.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-footnote",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000101.pdf",
+      "upstream_path": "dataset/pdfs/01030000000101.pdf",
+      "sha256": "c75d25277c58e07bf91528ae08deccc80715b6f7f13b5ed571cf226463b364e8",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000105",
+      "file": "docs/01030000000105.pdf",
+      "truth": "truth/01030000000105.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-figure",
+        "has-footer",
+        "has-heading1",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000105.pdf",
+      "upstream_path": "dataset/pdfs/01030000000105.pdf",
+      "sha256": "c8f35048844313b77c8c6d6a059b9f91a3b5e34f30e7a774a0f2d8fca82101eb",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000110",
+      "file": "docs/01030000000110.pdf",
+      "truth": "truth/01030000000110.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000110.pdf",
+      "upstream_path": "dataset/pdfs/01030000000110.pdf",
+      "sha256": "cd160a4e2296bd7c23f19c26af5bb6ed772f766ee1eacfe9998703c38146b494",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000118",
+      "file": "docs/01030000000118.pdf",
+      "truth": "truth/01030000000118.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-figure",
+        "has-footer",
+        "has-header",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000118.pdf",
+      "upstream_path": "dataset/pdfs/01030000000118.pdf",
+      "sha256": "39aec6caead187513fa9e2a26a3bbb54ba0a3a4ae8e879642ca1584330b0c285",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000122",
+      "file": "docs/01030000000122.pdf",
+      "truth": "truth/01030000000122.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-header",
+        "has-heading1",
+        "has-list",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000122.pdf",
+      "upstream_path": "dataset/pdfs/01030000000122.pdf",
+      "sha256": "770c9434a3530bfb67ef32510b63e1da347dfd6c51e5db9e0b13e90c8b287895",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000128",
+      "file": "docs/01030000000128.pdf",
+      "truth": "truth/01030000000128.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-footer",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000128.pdf",
+      "upstream_path": "dataset/pdfs/01030000000128.pdf",
+      "sha256": "a0edae1fa147c7bb78ebc493743a68ba4372b5ead31f2a2b146c35119462379e",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000136",
+      "file": "docs/01030000000136.pdf",
+      "truth": "truth/01030000000136.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-chart",
+        "has-footer",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000136.pdf",
+      "upstream_path": "dataset/pdfs/01030000000136.pdf",
+      "sha256": "ee0a6175753e8cfc2f35fcbb1c5f7666f56969fb8111e326757835f062c65bb0",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000143",
+      "file": "docs/01030000000143.pdf",
+      "truth": "truth/01030000000143.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-equation",
+        "has-formula",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000143.pdf",
+      "upstream_path": "dataset/pdfs/01030000000143.pdf",
+      "sha256": "b4d90b6cc2d96d952b49dd227148c08018baffbfebd8d204705384f0a4a0c8a3",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000146",
+      "file": "docs/01030000000146.pdf",
+      "truth": "truth/01030000000146.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-header",
+        "has-heading1",
+        "has-paragraph",
+        "has-table",
+        "merged-cells"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000146.pdf",
+      "upstream_path": "dataset/pdfs/01030000000146.pdf",
+      "sha256": "ba0e025d53c091e8d4bb87499ff69ed3428dcee325c8895ecdb40e973b4c835c",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000150",
+      "file": "docs/01030000000150.pdf",
+      "truth": "truth/01030000000150.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-header",
+        "has-heading1",
+        "has-table",
+        "merged-cells"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000150.pdf",
+      "upstream_path": "dataset/pdfs/01030000000150.pdf",
+      "sha256": "a46e40b2b04dc83e4014fca656dae6df20af1fe7a420df306406409ea8c0db31",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000152",
+      "file": "docs/01030000000152.pdf",
+      "truth": "truth/01030000000152.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-figure",
+        "has-footer",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000152.pdf",
+      "upstream_path": "dataset/pdfs/01030000000152.pdf",
+      "sha256": "16bc03112342160922798dc0b3220b260ad4ebe06deafb9ab3c67df528877717",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000155",
+      "file": "docs/01030000000155.pdf",
+      "truth": "truth/01030000000155.md",
+      "pages": 1,
+      "category": "index",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-index"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000155.pdf",
+      "upstream_path": "dataset/pdfs/01030000000155.pdf",
+      "sha256": "b2c11e30c537ecc6ac4d39ea937e512500882bc479ac6e5c3b380cf1627dc189",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000162",
+      "file": "docs/01030000000162.pdf",
+      "truth": "truth/01030000000162.md",
+      "pages": 1,
+      "category": "list",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000162.pdf",
+      "upstream_path": "dataset/pdfs/01030000000162.pdf",
+      "sha256": "165dfeaf31832cc4547b6b638a033c1057ddb6384874c16c4574c6278856dd30",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000167",
+      "file": "docs/01030000000167.pdf",
+      "truth": "truth/01030000000167.md",
+      "pages": 1,
+      "category": "equation",
+      "tags": [
+        "dpbench",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-heading1",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000167.pdf",
+      "upstream_path": "dataset/pdfs/01030000000167.pdf",
+      "sha256": "18fbe4800ce186f3338eade3d1800bde4e275396656df9781f0d84f4b6e22f0c",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000170",
+      "file": "docs/01030000000170.pdf",
+      "truth": "truth/01030000000170.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-equation",
+        "has-footer",
+        "has-formula",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000170.pdf",
+      "upstream_path": "dataset/pdfs/01030000000170.pdf",
+      "sha256": "4d5b682effaf9580928a7073980e3916687d168238bc96b6c17222f747eacde6",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000177",
+      "file": "docs/01030000000177.pdf",
+      "truth": "truth/01030000000177.md",
+      "pages": 1,
+      "category": "figure",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-figure",
+        "has-footer",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000177.pdf",
+      "upstream_path": "dataset/pdfs/01030000000177.pdf",
+      "sha256": "fbee4ae063533d20dc7339a3ffa2412d58504af06420fe15054657c87ed81a79",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000180",
+      "file": "docs/01030000000180.pdf",
+      "truth": "truth/01030000000180.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-paragraph",
+        "has-table"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000180.pdf",
+      "upstream_path": "dataset/pdfs/01030000000180.pdf",
+      "sha256": "4b5f23f97fd273cacb8de95fc1799ed4dc4d5c15e9ed86d707cdf4be53eb7c7c",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000181",
+      "file": "docs/01030000000181.pdf",
+      "truth": "truth/01030000000181.md",
+      "pages": 1,
+      "category": "list",
+      "tags": [
+        "dpbench",
+        "has-footer",
+        "has-heading1",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000181.pdf",
+      "upstream_path": "dataset/pdfs/01030000000181.pdf",
+      "sha256": "92ba5d5f6f6e627a3e9ddc00bcdd31b9c2c047e0461fff6c8fa08894a68b72da",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000187",
+      "file": "docs/01030000000187.pdf",
+      "truth": "truth/01030000000187.md",
+      "pages": 1,
+      "category": "table",
+      "tags": [
+        "dpbench",
+        "has-caption",
+        "has-heading1",
+        "has-paragraph",
+        "has-table",
+        "merged-cells"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000187.pdf",
+      "upstream_path": "dataset/pdfs/01030000000187.pdf",
+      "sha256": "29d883eb26e7b9d08250b4bab1c51092d74e310e6acfa955f8fe28f1008accf5",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000191",
+      "file": "docs/01030000000191.pdf",
+      "truth": "truth/01030000000191.md",
+      "pages": 1,
+      "category": "text",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000191.pdf",
+      "upstream_path": "dataset/pdfs/01030000000191.pdf",
+      "sha256": "196876d21778214061c0d970de83cf37204a90e0f58c3da7e9f3c8c7e803b770",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000195",
+      "file": "docs/01030000000195.pdf",
+      "truth": "truth/01030000000195.md",
+      "pages": 1,
+      "category": "list",
+      "tags": [
+        "dpbench",
+        "has-heading1",
+        "has-list",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000195.pdf",
+      "upstream_path": "dataset/pdfs/01030000000195.pdf",
+      "sha256": "2b12f031b9b42e6f54b76b7d4666df76b7c8410a676d63b0ad2afdb40388d623",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    },
+    {
+      "id": "01030000000199",
+      "file": "docs/01030000000199.pdf",
+      "truth": "truth/01030000000199.md",
+      "pages": 1,
+      "category": "chart",
+      "tags": [
+        "dpbench",
+        "has-chart",
+        "has-footer",
+        "has-footnote",
+        "has-header",
+        "has-heading1",
+        "has-paragraph"
+      ],
+      "kind": "transcript",
+      "source_id": "01030000000199.pdf",
+      "upstream_path": "dataset/pdfs/01030000000199.pdf",
+      "sha256": "8bfb767df3506b4bd76b31e8823f59714c7abfc2a34ab11018e66fa2d9b5ed29",
+      "license": "MIT",
+      "attribution": "DP-Bench: Document Parsing Benchmark (Upstage AI) · dataset https://huggingface.co/datasets/upstage/dp-bench · MIT (dataset card). Pages from the Library of Congress, Open Educational Resources and Upstage internal documents."
+    }
+  ]
+}
