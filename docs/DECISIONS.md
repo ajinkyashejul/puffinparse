@@ -282,3 +282,18 @@ for now.
 **Consequences.** Users wire LiteOCR into their own web handler; the gateway (ADR-15) can later add
 job endpoints on top of the same primitives. Webhook body shapes come from vendor docs until real
 deliveries are captured.
+
+## ADR-19: Local and self-hosted engines are out-of-process providers
+
+**Context.** SPEC §1 listed local models as a v0.1 non-goal, but LiteOCR was unusable without a
+paid key and the benchmark had no open baseline.
+
+**Decision.** Support local and self-hosted engines only as providers that call out of process: a
+CLI binary via `tokio::process` (Tesseract, with `pdftoppm` for PDFs) or an HTTP server the user
+runs (docling-serve, PaddleOCR/PaddleX serving). No C bindings, FFI, embedded runtimes or model
+weights ship in LiteOCR. They are listed in `model::SELF_HOSTED`, need no key, and are priced at
+0.0 with source "self-hosted".
+
+**Consequences.** `#![forbid(unsafe_code)]` and the no-SDK rule still hold. Benchmark latency for
+these engines depends on the user's hardware, so leaderboard rows need a hardware note. Live tests
+need a binary or a server rather than a key.

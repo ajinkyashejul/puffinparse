@@ -1,6 +1,6 @@
 # LiteOCR
 
-**One API for every OCR / document-parsing provider.** Rust core, Python SDK, CLI, and an open benchmark that ranks providers on accuracy, latency and cost.
+**One API for every OCR / document-parsing provider.** Rust core, Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost.
 
 ```python
 import liteocr
@@ -27,15 +27,17 @@ Two things make switching real rather than aspirational. **Modes**: every call n
 
 | | |
 |---|---|
-| **Providers (v0.1)** | 15 providers · 57 models · 3 modes. [Reducto](https://reducto.ai), [Extend](https://extend.ai) and [LlamaParse](https://cloud.llamaindex.ai) are live-verified; 12 more (Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI) ship from their API references — [full table](#model-names) |
+| **Providers (v0.1)** | 18 providers · 60 models · 3 modes. [Reducto](https://reducto.ai), [Extend](https://extend.ai) and [LlamaParse](https://cloud.llamaindex.ai) are live-verified; 12 more hosted APIs (Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI) ship from their API references; 3 self-hosted engines (Tesseract, Docling, PaddleOCR) need no key — [full table](#model-names) |
 | **Modes** | `parse` (markdown + blocks), `ocr` (plain text + boxes), `extract` (JSON from a schema) |
 | **Core** | Rust (`liteocr-core`): `reqwest` + `tokio`, no vendor SDKs, `#![forbid(unsafe_code)]` |
-| **SDK** | Python 3.9+ (`pip install liteocr`), sync + async, fully typed |
+| **SDKs** | Python 3.9+ (sync + async, fully typed) and Node.js / TypeScript ([`js/`](js/README.md)), both on the same Rust core |
+| **Gateway** | `liteocr serve`: one HTTP endpoint with aliases, fallbacks, virtual keys, budgets, rate limits, JSON logs and Prometheus metrics ([`docs/SERVER.md`](docs/SERVER.md)) |
+| **Long documents** | `submit` / `retrieve` jobs and provider webhooks instead of a blocking call ([below](#long-documents-jobs-and-webhooks)) |
 | **CLI** | `liteocr parse`, `liteocr ocr`, `liteocr extract`, `liteocr providers`, `liteocr bench` |
 | **Reliability** | Retries with jittered backoff, whole-call deadlines, `Router` with ordered fallbacks / round-robin |
 | **Compatibility** | `output_format` renders any provider's result in Reducto's, Extend's or LlamaParse's own JSON, so an existing integration keeps its parser ([`docs/COMPAT.md`](docs/COMPAT.md)) |
 | **Cost** | Embedded, overridable price table → `cost_usd` on every response |
-| **Benchmark** | Deterministic text metrics (char similarity, CER, WER, word F1, reading order, tables), latency p50/p95, $/1k pages |
+| **Benchmark** | One harness over synthetic data and public benchmarks (ParseBench, olmOCR-bench, OmniDocBench); deterministic metrics and rule checks, latency, $/1k pages; every output inspectable at [liteocr.vercel.app/benchmark-results](https://liteocr.vercel.app/benchmark-results/) |
 
 ## Install
 
@@ -49,6 +51,13 @@ Set the keys for the providers you use:
 export REDUCTO_API_KEY=...
 export EXTEND_API_KEY=...
 export LLAMA_API_KEY=llx-...      # LlamaCloud / LlamaParse
+```
+
+No key yet? The self-hosted engines work out of the box once installed:
+
+```bash
+sudo apt-get install tesseract-ocr poppler-utils     # or: brew install tesseract poppler
+liteocr ocr scan.png -m tesseract                    # free, local, word boxes + confidences
 ```
 
 Every provider reads its own variable: [`.env.example`](.env.example) lists all of them, the
@@ -149,6 +158,37 @@ text = await liteocr.aocr("scan.png", model="llamaparse/fast")
 ```
 
 Runs on the Rust runtime; the event loop is never blocked.
+
+### Long documents: jobs and webhooks
+
+`parse` waits for the provider. For long documents, batches or webhook-driven pipelines, split it:
+
+```python
+job = liteocr.submit("annual-report.pdf", model="reducto/standard",
+                     webhook_url="https://example.com/hooks/liteocr")   # optional
+store(job)                                  # a Job is plain data: serialisable, holds no key
+
+result = liteocr.retrieve(job)              # Job (still pending) or ParseResponse
+# ...or, in your web handler, turn the provider's webhook body into a result:
+result = liteocr.handle_webhook(request.json(), model="reducto")  # verify the signature first
+```
+
+Reducto, Extend and LlamaParse support jobs; `webhook_url` maps to each provider's per-job webhook
+where one exists (Extend only has workspace-level webhooks, so it is rejected there). See
+[`docs/SPEC.md`](docs/SPEC.md) §15.
+
+### TypeScript / Node.js
+
+The same core as a napi-rs addon, with camelCase typed responses:
+
+```ts
+import { parse, Router } from "liteocr";
+
+const doc = await parse("invoice.pdf", { model: "reducto/standard", fallbacks: ["llamaparse/agentic"] });
+console.log(doc.markdown, doc.usage.pages, doc.costUsd);
+```
+
+Build from source for now (`cd js && npm ci && npm run build`); see [`js/README.md`](js/README.md).
 
 ### Model names
 
@@ -301,6 +341,14 @@ reference page per provider.
 | `google_documentai/form` | parse, ocr, extract `*` | $0.03 · $0.03 · $0.03 | Form Parser processor: paragraphs + tables, entities as extraction |
 | `google_documentai/prebuilt` | parse, ocr, extract | $0.03 · $0.03 · $0.03 | Prebuilt or custom extractor (invoice, W2, ...): entities as extraction |
 
+**Self-hosted engines** · no key · $0/page — out-of-process: a local binary or a server you run.
+
+| Model | Modes | List price / page (parse · ocr · extract) | Notes |
+|---|---|---|---|
+| `tesseract/default` | ocr `*` (native), parse `*` | $0 · $0 · — | local `tesseract` binary (`TESSERACT_CMD`), PDFs via `pdftoppm`; word/line boxes + confidences, no layout model |
+| `docling/default` | parse `*`, ocr `*` | $0 · $0 · — | your docling-serve (`DOCLING_BASE_URL`): layout, tables, OCR |
+| `paddleocr/default` | ocr `*` (native), parse `*` (PP-StructureV3) | $0 · $0 · — | your PaddleOCR serving (`PADDLEOCR_BASE_URL`); docs-only |
+
 ### Keep your Reducto / Extend / LlamaParse code
 
 Already integrated with a vendor? Ask for its shape and LiteOCR renders the response into that
@@ -393,6 +441,23 @@ liteocr extract invoice.pdf -s schema.json --output-format extend   # Extend's e
 liteocr providers --json | jq '.output_formats'               # the vendor shapes this build renders
 ```
 
+### Gateway server
+
+Run LiteOCR as one HTTP endpoint so applications never hold provider keys:
+
+```bash
+liteocr serve --config liteocr.toml       # or: docker build -t liteocr . && docker run ...
+curl -H "Authorization: Bearer $TEAM_KEY" -F file=@invoice.pdf -F model=invoices \
+     http://localhost:4000/v1/parse
+```
+
+`liteocr.toml` defines aliases (`invoices = [reducto/standard, extend/parse_performance]` with
+ordered or round-robin fallback), provider keys as `env:` references, and virtual keys with model
+allow-lists, monthly USD budgets and per-minute limits. `/v1/models`, `/v1/usage`, `/health` and
+Prometheus `/metrics` are built in; request logs are JSON lines that never contain document content
+or secrets. Reference: [`docs/SERVER.md`](docs/SERVER.md), sample:
+[`examples/server/liteocr.toml`](examples/server/liteocr.toml).
+
 ### Rust
 
 ```rust
@@ -428,7 +493,15 @@ Metrics (after NFKC + markdown stripping + whitespace collapsing, case-insensiti
 - **Table**: character similarity restricted to markdown table rows
 - **Latency** p50 / p95 and ms per page; **$/1k pages** from the price table
 
-The current leaderboard is in [`benchmark/LEADERBOARD.md`](benchmark/LEADERBOARD.md). Dataset details are in [`benchmark/datasets/synthetic-v1/README.md`](benchmark/datasets/synthetic-v1/README.md). Adapters for public sets (olmOCR-bench, OmniDocBench) are on the roadmap; see [`docs/SPEC.md`](docs/SPEC.md).
+The current leaderboard is in [`benchmark/LEADERBOARD.md`](benchmark/LEADERBOARD.md), and every
+document, output, diff and rule check is browsable at
+[liteocr.vercel.app/benchmark-results](https://liteocr.vercel.app/benchmark-results/). Datasets:
+`synthetic-v1` (exact truth by construction) and `combined-v2`, which adds subsets of
+[ParseBench](https://github.com/run-llama/ParseBench), [olmOCR-bench](https://huggingface.co/datasets/allenai/olmOCR-bench)
+and [OmniDocBench](https://github.com/opendatalab/OmniDocBench) converted by
+[`benchmark/adapters/`](docs/benchmarks/adapters.md) at pinned revisions. Long runs are safe:
+`--dry-run` and `--max-cost` show and cap the spend before any call, and `--resume` continues an
+interrupted run.
 
 ## How it maps providers
 
@@ -448,22 +521,24 @@ Full details, including the exact wire formats verified against live responses, 
 crates/liteocr-core     Rust library: types, providers, router, pricing, benchmark metrics
 crates/liteocr-cli      `liteocr` binary
 crates/liteocr-python   PyO3 extension (liteocr._core)
+crates/liteocr-node     napi-rs addon for the Node.js SDK
+crates/liteocr-server   HTTP gateway behind `liteocr serve`
 python/liteocr          Python package (typed public API)
-benchmark/              dataset generator, datasets, results, leaderboard
+js/                     Node.js / TypeScript package
+benchmark/              dataset generator, adapters, datasets, results, leaderboard, viewer
 docs/SPEC.md            specification
 ```
 
 ## Roadmap
 
-- More providers: Mistral OCR, Azure Document Intelligence, AWS Textract, Google Document AI, Gemini / GPT vision, Mathpix, local Tesseract / PaddleOCR.
-- Hosted gateway (`liteocr serve`) with keys, budgets and logging, built on `Router`.
-- **Meta-benchmark.** Every vendor publishes a benchmark it wins (LlamaParse's ParseBench,
-  Extend's RealDocBench, Reducto's LongExtractBench). LiteOCR will ship adapters that convert
-  each open benchmark, plus olmOCR-bench and OmniDocBench, into the manifest format and run them
-  all through the same harness, so one neutral leaderboard covers every provider on every
-  public dataset, with per-dataset and combined scores.
-- LLM-judge as an optional plug-in for metrics that need it (e.g. figure descriptions).
-- Webhooks instead of polling for async providers.
+The live list is [`docs/TASKS.md`](docs/TASKS.md). Next up:
+
+- Publish to PyPI and npm with prebuilt wheels and addons.
+- More public benchmarks (DP-Bench next) and fuzzy rule matching to mirror upstream scorers.
+- Promote docs-only providers to live-verified as keys become available; more providers
+  (Nanonets, Mindee, Chunkr, ...).
+- Gateway: job endpoints for long documents, HTTP key management, optional metrics auth.
+- Optional LLM-judge plug-in for metrics that need one (e.g. figure descriptions).
 
 ## Contributing
 

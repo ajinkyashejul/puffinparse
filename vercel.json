@@ -57,6 +57,11 @@
       "permanent": true
     },
     {
+      "source": "/gateway/",
+      "destination": "/docs/gateway/",
+      "permanent": true
+    },
+    {
       "source": "/rust/",
       "destination": "/docs/rust/",
       "permanent": true
@@ -142,6 +147,21 @@
       "permanent": true
     },
     {
+      "source": "/providers/tesseract/",
+      "destination": "/docs/providers/tesseract/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/docling/",
+      "destination": "/docs/providers/docling/",
+      "permanent": true
+    },
+    {
+      "source": "/providers/paddleocr/",
+      "destination": "/docs/providers/paddleocr/",
+      "permanent": true
+    },
+    {
       "source": "/benchmark/",
       "destination": "/docs/benchmark/",
       "permanent": true
@@ -154,6 +174,16 @@
     {
       "source": "/benchmark/vendor-benchmarks/",
       "destination": "/docs/benchmark/vendor-benchmarks/",
+      "permanent": true
+    },
+    {
+      "source": "/benchmark/academic-benchmarks/",
+      "destination": "/docs/benchmark/academic-benchmarks/",
+      "permanent": true
+    },
+    {
+      "source": "/benchmark/adapters/",
+      "destination": "/docs/benchmark/adapters/",
       "permanent": true
     },
     {

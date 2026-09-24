@@ -2,7 +2,7 @@
   "site": {
     "title": "LiteOCR",
     "tagline": "One API for every OCR / document-parsing provider.",
-    "summary": "LiteOCR is one API for every OCR and document-parsing provider (Reducto, Extend, LlamaParse, ...). A Rust core, a typed Python SDK, a CLI, and an open benchmark that ranks providers on accuracy, latency and cost. Switching provider is a one-string change.",
+    "summary": "LiteOCR is one API for every OCR and document-parsing provider (Reducto, Extend, LlamaParse, Mistral, Azure, Textract, Tesseract, Docling, ...). A Rust core with typed Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost. Switching provider is a one-string change.",
     "repo": "https://github.com/ajinkyashejul/liteocr",
     "branch": "main",
     "license": "MIT"
@@ -48,6 +48,12 @@
           "title": "CLI",
           "source": "website/pages/cli.md",
           "description": "Every liteocr subcommand and flag: parse, ocr, extract, providers, and bench run / report / score."
+        },
+        {
+          "slug": "gateway",
+          "title": "Gateway server",
+          "source": "docs/SERVER.md",
+          "description": "liteocr serve: one HTTP endpoint with aliases, fallbacks, virtual keys, budgets, rate limits, JSON logs and Prometheus metrics."
         },
         {
           "slug": "rust",
@@ -157,6 +163,24 @@
           "title": "Google Document AI",
           "source": "docs/providers/google-documentai.md",
           "description": "Document OCR, Layout Parser, Form Parser and prebuilt processors."
+        },
+        {
+          "slug": "providers/tesseract",
+          "title": "Tesseract (local)",
+          "source": "docs/providers/tesseract.md",
+          "description": "Local Tesseract 5 via the tesseract binary: native OCR with word/line boxes and confidences, PDFs via pdftoppm. No key, $0."
+        },
+        {
+          "slug": "providers/docling",
+          "title": "Docling (self-hosted)",
+          "source": "docs/providers/docling.md",
+          "description": "Docling on your own docling-serve: layout parsing, tables and OCR over the v1 async API. No key, $0."
+        },
+        {
+          "slug": "providers/paddleocr",
+          "title": "PaddleOCR (self-hosted)",
+          "source": "docs/providers/paddleocr.md",
+          "description": "PaddleOCR / PaddleX serving: OCR pipeline and PP-StructureV3 layout parsing. No key, $0."
         }
       ]
     },
@@ -181,6 +205,18 @@
           "title": "Vendor benchmarks",
           "source": "docs/benchmarks/vendor-benchmarks.md",
           "description": "Survey of public OCR benchmarks and vendor-published results, with adapter notes for the combined dataset."
+        },
+        {
+          "slug": "benchmark/academic-benchmarks",
+          "title": "Academic benchmarks",
+          "source": "docs/benchmarks/academic-benchmarks.md",
+          "description": "Survey of olmOCR-bench, OmniDocBench, DP-Bench, READoc and others: what they measure, licences at pinned revisions, how they map to LiteOCR."
+        },
+        {
+          "slug": "benchmark/adapters",
+          "title": "Dataset adapters",
+          "source": "docs/benchmarks/adapters.md",
+          "description": "How public benchmarks are converted into LiteOCR manifests and rules, what is skipped and why."
         }
       ],
       "links": [
@@ -209,7 +245,7 @@
           "slug": "project/decisions",
           "title": "Decisions",
           "source": "docs/DECISIONS.md",
-          "description": "Architecture decision records \u2014 what was decided, why, and what it rules out."
+          "description": "Architecture decision records — what was decided, why, and what it rules out."
         },
         {
           "slug": "project/tasks",

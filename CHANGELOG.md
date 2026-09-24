@@ -11,6 +11,15 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **Self-hosted engines, no key, $0/page.** `tesseract/default` (local `tesseract` binary, PDFs via
+  `pdftoppm`; native OCR with word/line boxes and confidences), `docling/default` (docling-serve v1
+  async API; layout, tables, OCR) and `paddleocr/default` (PaddleOCR/PaddleX serving: `/ocr` and
+  PP-StructureV3 `/layout-parsing`; docs-only). Tesseract and Docling are live-verified locally.
+  `liteocr providers` shows `local` for them; `--json` and Python `providers()` include
+  `self_hosted`.
+- README, docs site and landing page cover the TypeScript SDK, the gateway, jobs/webhooks,
+  self-hosted engines and the new benchmark sources; the docs navigation gains the gateway,
+  the self-hosted provider pages, the academic-benchmark survey and the adapter notes.
 - **Async jobs API and webhooks.** Split a parse into submit and retrieve so the caller owns the
   waiting (long documents, batches, webhook-driven pipelines). Rust: `submit_parse`,
   `retrieve_parse` / `retrieve_parse_with`, `parse_webhook`, `resolve_webhook`, `JobHandle`

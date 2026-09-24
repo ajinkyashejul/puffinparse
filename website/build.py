@@ -376,8 +376,8 @@ def hero(site: Site, models: list[str]) -> str:
     span = f'<span id="swap" data-models="{swap}">{default}</span>'
     return f"""<section class="hero">
 <h1>{html.escape(site.title)}</h1>
-<p class="lede"><strong>{html.escape(site.tagline)}</strong> Rust core, Python SDK, CLI, and an open
-benchmark that ranks providers on accuracy, latency and cost.</p>
+<p class="lede"><strong>{html.escape(site.tagline)}</strong> Rust core, Python and TypeScript SDKs,
+CLI, gateway, and an open benchmark that ranks providers on accuracy, latency and cost.</p>
 <div class="codewrap"><pre><code class="language-python">import liteocr
 doc = liteocr.parse(&quot;invoice.pdf&quot;, model=&quot;{span}&quot;)
 print(doc.markdown, doc.cost_usd)</code></pre></div>
