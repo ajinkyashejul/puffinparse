@@ -19,7 +19,7 @@ export LLAMA_API_KEY=... # or REDUCTO_API_KEY, EXTEND_API_KEY, ...
 ```
 
 ```ts
-import { parse, extract, Router, listModels, estimateCost, UnsupportedModelError } from 'liteocr'
+import { parse, extract, submit, retrieve, handleWebhook, Router, listModels, estimateCost } from 'liteocr'
 
 const doc = await parse('invoice.pdf', { model: 'llamaparse/cost_effective' })
 console.log(doc.markdown)
@@ -41,6 +41,11 @@ router.stats()
 
 listModels('extract')
 estimateCost('reducto/standard', 100)   // USD at list price
+
+// Async jobs (reducto, extend, llamaparse): submit now, collect later or from a webhook.
+const job = await submit('200-pages.pdf', { model: 'reducto/standard', webhookUrl: 'https://example.com/hook' })
+const res = await retrieve(job)          // the same Job while running, then a ParseResponse
+await handleWebhook(req.body, { model: 'reducto' })   // in your webhook handler
 ```
 
 Errors reject as `LiteOCRError` subclasses (`AuthenticationError`, `RateLimitError`,

@@ -173,6 +173,13 @@ const ALLOWED_OPTIONS = {
   parse: new Set([...COMMON_OPTIONS, 'output']),
   ocr: new Set(COMMON_OPTIONS.filter((k) => k !== 'outputFormat')),
   extract: new Set([...COMMON_OPTIONS, 'schema', 'instructions', 'citations']),
+  // A job is one provider call on one model: no fallbacks, and the result shape is chosen at
+  // retrieve time.
+  submit: new Set([
+    ...COMMON_OPTIONS.filter((k) => k !== 'outputFormat' && k !== 'fallbacks'),
+    'output',
+    'webhookUrl',
+  ]),
 }
 // A router owns its models, so per-call `model` / `fallbacks` make no sense there.
 const ROUTER_EXCLUDED = new Set(['model', 'fallbacks'])
@@ -524,6 +531,156 @@ function extract(doc, options) {
   return run('extract', doc, options, 'extract()')
 }
 
+// ---- asynchronous jobs (SPEC §15) ----------------------------------------------------------------
+
+/** Core `JobHandle` JSON -> camelCase `Job`. `providerState` and `metadata` are kept verbatim. */
+function toJob(d) {
+  return {
+    provider: d.provider,
+    model: d.model,
+    jobId: d.job_id,
+    submittedAt: d.submitted_at ?? '',
+    output: d.output === 'text' ? 'text' : 'markdown',
+    includeRaw: Boolean(d.include_raw),
+    baseUrl: nul(d.base_url),
+    providerState: nul(d.provider_state),
+    metadata: d.metadata ?? {},
+  }
+}
+
+/** `Job` (or its JSON round trip) -> the core's `JobHandle` JSON. */
+function jobToCore(job, where) {
+  if (
+    !isPlainObject(job) ||
+    typeof job.provider !== 'string' ||
+    typeof job.model !== 'string' ||
+    typeof job.jobId !== 'string' ||
+    job.jobId === ''
+  ) {
+    throw new TypeError(`${where}: job must be a Job from submit() (provider, model and jobId strings), got ${describe(job)}`)
+  }
+  const d = {
+    provider: job.provider,
+    model: job.model,
+    job_id: job.jobId,
+    submitted_at: typeof job.submittedAt === 'string' ? job.submittedAt : '',
+    output: job.output === 'text' ? 'text' : 'markdown',
+    include_raw: Boolean(job.includeRaw),
+    metadata: isPlainObject(job.metadata) ? job.metadata : {},
+  }
+  if (typeof job.baseUrl === 'string') d.base_url = job.baseUrl
+  if (job.providerState !== undefined && job.providerState !== null) d.provider_state = job.providerState
+  return d
+}
+
+const RETRIEVE_OPTIONS = ['apiKey', 'baseUrl', 'timeout', 'maxRetries', 'outputFormat']
+
+/** Validate retrieve-style options; returns the core `RetrieveOptions` JSON and the output format. */
+function retrieveOptions(options, where, extra = []) {
+  if (options === undefined || options === null) options = {}
+  if (!isPlainObject(options)) throw new TypeError(`${where}: options must be a plain object, got ${describe(options)}`)
+  const allowed = [...RETRIEVE_OPTIONS, ...extra]
+  const unknown = Object.keys(options).filter((k) => !allowed.includes(k))
+  if (unknown.length) {
+    throw new TypeError(
+      `${where}: unknown option(s) ${unknown.map((k) => JSON.stringify(k)).join(', ')} (accepted: ${allowed
+        .sort()
+        .join(', ')})`,
+    )
+  }
+  const timeout = options.timeout ?? 120
+  if (typeof timeout !== 'number' || !Number.isFinite(timeout) || timeout <= 0) {
+    throw new TypeError(`${where}: timeout must be a positive number of seconds, got ${String(options.timeout)}`)
+  }
+  const maxRetries = options.maxRetries ?? 2
+  if (!Number.isInteger(maxRetries) || maxRetries < 0) {
+    throw new TypeError(`${where}: maxRetries must be a non-negative integer, got ${String(options.maxRetries)}`)
+  }
+  const opts = { timeout_secs: timeout, max_retries: maxRetries }
+  const apiKey = optString(options, 'apiKey', where)
+  if (apiKey !== undefined) opts.api_key = apiKey
+  const baseUrl = optString(options, 'baseUrl', where)
+  if (baseUrl !== undefined) opts.base_url = baseUrl
+  return { opts, outputFormat: outputFormatOption(options, where) }
+}
+
+/**
+ * Upload a document and start a `parse` job without waiting for it. Takes `parse()`'s options
+ * (minus `fallbacks` / `outputFormat`) plus `webhookUrl`; resolves to a `Job` for `retrieve()`.
+ */
+async function submit(doc, options) {
+  const where = 'submit()'
+  options = checkOptions(options, 'submit', where)
+  const model = modelOption(options, where)
+  const { req, data } = buildRequest(doc, options, 'parse', where, model)
+  const webhookUrl = optString(options, 'webhookUrl', where)
+  if (webhookUrl !== undefined) req.webhook_url = webhookUrl
+  const raw = await callNativeAsync(() => native.submit(req, data), 'parse')
+  return toJob(raw)
+}
+
+async function retrieveWith(job, core, opts, outputFormat) {
+  const status = await callNativeAsync(() => native.retrieve(core, opts), 'parse')
+  if (status.status === 'succeeded') return finish(status.result, 'parse', outputFormat)
+  return job
+}
+
+/**
+ * Check a submitted job once: resolves to the same `Job` while the provider is working, or the
+ * `ParseResponse` (vendor shape with `outputFormat`) once done. A failed job rejects with the
+ * typed error, `jobId` set. Credentials come from the environment unless `apiKey` is given.
+ */
+function retrieve(job, options) {
+  const where = 'retrieve()'
+  try {
+    const core = jobToCore(job, where)
+    const { opts, outputFormat } = retrieveOptions(options, where)
+    return retrieveWith(job, core, opts, outputFormat)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+function webhookPayload(payload, where) {
+  if (typeof payload === 'string' || isBytes(payload)) {
+    const text = typeof payload === 'string' ? payload : toBuffer(payload).toString('utf8')
+    try {
+      return JSON.parse(text)
+    } catch (e) {
+      throw new InputError(`${where}: webhook body is not JSON: ${e.message}`)
+    }
+  }
+  if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new TypeError(`${where}: payload must be the parsed JSON body (an object), a string or bytes`)
+  }
+  return payload
+}
+
+/**
+ * Turn the body a provider POSTed to your webhook into a `Job` (still running) or a result.
+ * `model` names the provider (`'reducto'`, `'extend'`, `'llamaparse'`) or one of its models.
+ * Bodies that only say a job finished trigger one `retrieve()`; a failure rejects with the typed
+ * error. Verify the provider's signature (or your own secret) before calling this.
+ */
+async function handleWebhook(payload, options) {
+  const where = 'handleWebhook()'
+  const body = webhookPayload(payload, where)
+  if (options !== undefined && options !== null && !isPlainObject(options)) {
+    throw new TypeError(`${where}: options must be a plain object, got ${describe(options)}`)
+  }
+  const { model: givenModel, ...rest } = options ?? {}
+  const model = modelOption({ model: givenModel }, where)
+  const { opts, outputFormat } = retrieveOptions(rest, where)
+  const event = callNative(() => native.parseWebhook(model, body), 'parse')
+  const status = event.status ?? {}
+  if (status.status === 'failed') throw errorFromCore(status.result ?? {})
+  if (status.status === 'succeeded') return finish(status.result, 'parse', outputFormat)
+  if (!event.job) throw new InputError(`${where}: the webhook payload names no job id`)
+  const job = toJob(event.job)
+  if (status.status === 'finished') return retrieveWith(job, jobToCore(job, where), opts, outputFormat)
+  return job
+}
+
 // ---- router --------------------------------------------------------------------------------------
 
 function fallbackKinds(list) {
@@ -731,6 +888,9 @@ module.exports = {
   parse,
   ocr,
   extract,
+  submit,
+  retrieve,
+  handleWebhook,
   Router,
   listModels,
   modes,

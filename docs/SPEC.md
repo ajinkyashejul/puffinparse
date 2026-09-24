@@ -776,6 +776,14 @@ liteocr.handle_webhook(body, model="reducto")   # -> Job | ParseResponse; raises
 # asubmit / aretrieve / ahandle_webhook are the async equivalents
 ```
 
+```ts
+const job = await submit('big.pdf', { model: 'reducto/standard', webhookUrl })  // -> Job (camelCase JobHandle)
+await retrieve(job, { apiKey?, outputFormat? })   // -> the same Job | ParseResponse; rejects on failure
+await handleWebhook(body, { model: 'reducto' })   // -> Job | ParseResponse; rejects on failure
+```
+
+Over HTTP the gateway exposes the same pair as `POST /v1/jobs` / `GET /v1/jobs/{id}` (§14).
+
 **`JobHandle`** (`Job` in Python): `provider`, `model` (qualified), `job_id` (the provider's id),
 `submitted_at` (RFC 3339), `output`, `include_raw`, `base_url`, `provider_state`, `metadata`.
 It never contains a secret: API keys are resolved again at retrieve time (env var or

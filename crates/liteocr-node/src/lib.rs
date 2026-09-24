@@ -16,7 +16,10 @@
 
 use liteocr_core::compat::Format;
 use liteocr_core::router::{Router as CoreRouter, RouterConfig, Strategy};
-use liteocr_core::{DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, Mode, ParseResponse};
+use liteocr_core::{
+    DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, JobHandle, JobStatus, Mode, ParseResponse,
+    RetrieveOptions,
+};
 use napi::bindgen_prelude::Buffer;
 use napi::{Error as NapiError, Result, Status};
 use napi_derive::napi;
@@ -98,6 +101,53 @@ pub async fn extract(request: Value, data: Option<Buffer>) -> Result<Value> {
     let req = build_extract_request(request, data.as_deref())?;
     let resp = liteocr_core::extract(req).await.map_err(core_err)?;
     to_value(&resp)
+}
+
+// ---- asynchronous jobs (SPEC §15) ----------------------------------------------------------------
+
+fn build_job(job: Value) -> Result<JobHandle> {
+    serde_json::from_value(job).map_err(|e| invalid_arg(format!("invalid job: {e}")))
+}
+
+fn retrieve_options(options: Option<Value>) -> Result<RetrieveOptions> {
+    match options {
+        None | Some(Value::Null) => Ok(RetrieveOptions::default()),
+        Some(v) => serde_json::from_value(v).map_err(|e| invalid_arg(format!("invalid retrieve options: {e}"))),
+    }
+}
+
+/// `{"status": "pending"}` or `{"status": "succeeded", "result": <ParseResponse>}`; a failed job
+/// rejects with the core error (job id set), like a failed `parse`.
+fn job_status_value(status: JobStatus) -> Result<Value> {
+    match status {
+        JobStatus::Failed(e) => Err(core_err(e)),
+        other => to_value(&other),
+    }
+}
+
+/// Start a `parse` job (`request` may carry `webhook_url`); resolves to the `JobHandle` JSON.
+#[napi]
+pub async fn submit(request: Value, data: Option<Buffer>) -> Result<Value> {
+    let req = build_request(request, data.as_deref())?;
+    let job = liteocr_core::submit_parse(req).await.map_err(core_err)?;
+    to_value(&job)
+}
+
+/// Check a submitted job once. `options` matches the core's `RetrieveOptions` JSON.
+#[napi]
+pub async fn retrieve(job: Value, options: Option<Value>) -> Result<Value> {
+    let job = build_job(job)?;
+    let opts = retrieve_options(options)?;
+    let status = liteocr_core::retrieve_parse_with(&job, &opts).await.map_err(core_err)?;
+    job_status_value(status)
+}
+
+/// Interpret a provider webhook body without any network call: `{"job": <JobHandle> | null,
+/// "status": {"status": "pending" | "finished" | "succeeded" | "failed", "result"?}}`.
+#[napi]
+pub fn parse_webhook(model: String, payload: Value) -> Result<Value> {
+    let event = liteocr_core::parse_webhook(&model, &payload).map_err(core_err)?;
+    to_value(&event)
 }
 
 // ---- router --------------------------------------------------------------------------------------
@@ -341,6 +391,22 @@ mod tests {
             }
             other => panic!("unexpected input {other:?}"),
         }
+    }
+
+    #[test]
+    fn jobs_round_trip_and_failed_status_is_an_error() {
+        let job = build_job(serde_json::json!({
+            "provider": "reducto", "model": "reducto/standard", "job_id": "j1", "submitted_at": "",
+        }))
+        .expect("job");
+        assert_eq!(job.job_id, "j1");
+        assert!(build_job(serde_json::json!({ "job_id": "j1" })).is_err());
+        let opts = retrieve_options(Some(serde_json::json!({ "api_key": "k", "timeout_secs": 5.0 }))).expect("opts");
+        assert_eq!((opts.api_key.as_deref(), opts.timeout_secs, opts.max_retries), (Some("k"), 5.0, 2));
+        assert_eq!(job_status_value(JobStatus::Pending).unwrap(), serde_json::json!({ "status": "pending" }));
+        let err = job_status_value(JobStatus::Failed(liteocr_core::Error::provider("boom").with_job_id("j1")))
+            .expect_err("failed jobs reject");
+        assert!(err.reason.starts_with(CORE_ERROR_PREFIX) && err.reason.contains("\"job_id\":\"j1\""));
     }
 
     #[test]

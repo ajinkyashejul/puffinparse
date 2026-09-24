@@ -22,6 +22,17 @@ async function usage(): Promise<void> {
   const routed: ParseResponse = await router.parse(new URL('file:///tmp/a.pdf'))
   const avg: number | null = router.stats()['reducto/standard'].avgLatencyMs
 
+  const job: liteocr.Job = await liteocr.submit('big.pdf', { model: 'reducto/standard', webhookUrl: 'https://h/x' })
+  const jobId: string = job.jobId
+  const later = await liteocr.retrieve(JSON.parse(JSON.stringify(job)) as liteocr.Job, { timeout: 30 })
+  if (!('jobId' in later)) {
+    const pages: number = later.pages.length
+    void pages
+  }
+  const shaped: liteocr.Job | NativeFormatResponse = await liteocr.retrieve(job, { outputFormat: 'reducto' })
+  const hooked = await liteocr.handleWebhook({ status: 'Completed', job_id: 'j' }, { model: 'reducto', apiKey: 'k' })
+  const hookedMd: string | undefined = 'markdown' in hooked ? hooked.markdown : undefined
+
   const cost: number | null = liteocr.estimateCost('reducto', 10, 'parse')
   const m = liteocr.score('a b', 'a b c')
   const f1: number = m.wordF1
@@ -37,6 +48,6 @@ async function usage(): Promise<void> {
       void status
     }
   }
-  void [md, box, vendor, words, total, cite, routed, avg, cost, f1, formats]
+  void [md, box, vendor, words, total, cite, routed, avg, cost, f1, formats, jobId, shaped, hookedMd]
 }
 void usage

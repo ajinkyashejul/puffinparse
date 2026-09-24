@@ -138,6 +138,64 @@ method for another mode (`router.ocr(...)` on a parse router) rejects with `Inpu
 options are the module-level ones minus `model` and `fallbacks`. When a fallback served the call,
 `response.metadata.liteocr_fallback_index` says which.
 
+## Async jobs and webhooks
+
+`parse()` waits for the provider (polling job-queue providers for you). For long documents,
+batches or webhook-driven pipelines, split the call in two and own the waiting yourself. Jobs are
+`parse` mode only and need a provider with a job queue: `reducto`, `extend`, `llamaparse`.
+
+```ts
+import { submit, retrieve, handleWebhook, type Job } from 'liteocr'
+
+const job: Job = await submit('200-pages.pdf', {
+  model: 'reducto/standard',
+  webhookUrl: 'https://example.com/hooks/liteocr',   // optional, see below
+})
+await queue.put(JSON.stringify(job))                  // a Job never holds an API key
+
+// later, anywhere:
+const result = await retrieve(JSON.parse(stored))     // the Job again while running, else ParseResponse
+if ('jobId' in result) console.log('still running', result.jobId)
+else console.log(result.markdown)
+```
+
+`submit(doc, options)` takes `parse()`'s options except `fallbacks` and `outputFormat`, plus
+`webhookUrl`; `timeout` covers the upload and submission only. It resolves to a `Job`:
+
+```ts
+interface Job {
+  provider: string; model: string; jobId: string; submittedAt: string
+  output: 'markdown' | 'text'; includeRaw: boolean; baseUrl: string | null
+  providerState: Record<string, unknown> | null   // non-secret options retrieve needs (Extend workspace_id)
+  metadata: Record<string, unknown>
+}
+```
+
+`retrieve(job, { apiKey?, baseUrl?, timeout = 120, maxRetries = 2, outputFormat? })` asks the
+provider once. It resolves to the **same** `Job` object while the job is pending, or to the
+`ParseResponse` (normalised exactly like `parse()`, `latencyMs` counted from submission; a
+vendor shape with `outputFormat`) once it is done. A job the provider reports as failed rejects
+with the typed `LiteOCRError`, `jobId` set, exactly like a failed `parse()`. The key is read from
+the environment again unless you pass `apiKey`.
+
+`webhookUrl` maps to Reducto `async.webhook` (direct mode) and LlamaParse `webhook_url`; Extend
+has no per-job webhook (register an endpoint in its dashboard) and rejects it with `InputError`.
+In your web handler, verify the provider's signature or your own secret first, then:
+
+```ts
+app.post('/hooks/liteocr', async (req, res) => {
+  const result = await handleWebhook(req.body, { model: 'reducto' })   // Job | ParseResponse
+  res.sendStatus(204)
+})
+```
+
+`handleWebhook(payload, { model = 'reducto', apiKey?, baseUrl?, timeout?, maxRetries?,
+outputFormat? })` accepts the parsed body, a JSON string or bytes. Bodies that carry the whole
+result (a LlamaParse `webhook_url` push) are normalised directly; bodies that only name a finished
+job (Reducto, Extend `parse_run.*`, LlamaCloud `parse.*` events) trigger one `retrieve()`; a
+pending event resolves to its `Job`; a failure event rejects with the typed error. See SPEC §15
+for every provider's body shape.
+
 ## Errors
 
 Every provider or core failure rejects with a subclass of `LiteOCRError`, mapped from the core's
@@ -189,7 +247,9 @@ liteocr.initLogging('debug')         // core tracing on stderr
 
 ## Differences from the Python SDK
 
-- Async only: every mode returns a `Promise` (there is no blocking variant).
+- Async only: every mode returns a `Promise` (there is no blocking variant); `submit` /
+  `retrieve` / `handleWebhook` match Python's `asubmit` / `aretrieve` / `ahandle_webhook`, and
+  `retrieve` / `handleWebhook` also take `outputFormat`.
 - `fallbacks` on a single call is a JavaScript convenience over `Router`.
 - Success/failure callbacks are not mirrored; wrap the promise instead.
 - Responses are plain objects, so the Python conveniences (`.tables`, `.num_pages`,

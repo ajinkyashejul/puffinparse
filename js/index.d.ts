@@ -280,6 +280,88 @@ export declare function extract<T = unknown>(
   options: ExtractOptions,
 ): Promise<ExtractResponse<T> | NativeFormatResponse>
 
+// ---- asynchronous jobs (SPEC §15) ----------------------------------------------------------------
+
+/**
+ * A submitted `parse` job (mirrors the core's `JobHandle`). It never holds an API key, so it is
+ * safe to `JSON.stringify`, store, and pass back to `retrieve()` later or in another process.
+ */
+export interface Job {
+  /** Provider name, e.g. `'reducto'`. */
+  provider: string
+  /** Fully-qualified model, e.g. `'reducto/standard'`. */
+  model: string
+  /** The provider's own job / run id. */
+  jobId: string
+  /** RFC 3339 UTC timestamp of the submission. */
+  submittedAt: string
+  output: 'markdown' | 'text'
+  includeRaw: boolean
+  /** Base URL used at submit time; `retrieve()` reuses it unless given another. */
+  baseUrl: string | null
+  /** Non-secret provider options a later retrieve needs (e.g. Extend's `workspace_id`), verbatim. */
+  providerState: Record<string, unknown> | null
+  /** The request metadata, echoed into the final response. */
+  metadata: Record<string, unknown>
+}
+
+export interface SubmitOptions extends Omit<CommonOptions, 'fallbacks'> {
+  output?: 'markdown' | 'text'
+  /**
+   * Ask the provider to POST to this URL when the job finishes: Reducto `async.webhook` (direct
+   * mode), LlamaParse `webhook_url`. Extend has no per-job webhook: passing one rejects with
+   * `InputError`.
+   */
+  webhookUrl?: string
+}
+
+/** Options of one status check. */
+export interface RetrieveOptions {
+  /** Otherwise read from the provider's env var (a `Job` never stores a key). */
+  apiKey?: string
+  /** Default: the `Job`'s `baseUrl`, then the env var, then the provider default. */
+  baseUrl?: string
+  /** Deadline in seconds, including a result download. Default `120`. */
+  timeout?: number
+  /** Default `2`. */
+  maxRetries?: number
+  /** Render a finished job's result in a vendor shape (see `ParseOptions.outputFormat`). */
+  outputFormat?: OutputFormat | (string & {}) | null
+}
+
+export interface HandleWebhookOptions extends RetrieveOptions {
+  /** The provider (`'reducto'`, `'extend'`, `'llamaparse'`) or one of its models. Default `'reducto'`. */
+  model?: string
+}
+
+/** Start a `parse` job without waiting (providers with a job queue: reducto, extend, llamaparse). */
+export declare function submit(doc: DocumentInput, options?: SubmitOptions): Promise<Job>
+
+/**
+ * Check a job once: the same `Job` while it runs, the `ParseResponse` (or vendor shape) once done.
+ * A failed job rejects with the typed `LiteOCRError` (`jobId` set).
+ */
+export declare function retrieve(job: Job, options?: RetrieveOptions & { outputFormat?: 'liteocr' | null }): Promise<Job | ParseResponse>
+export declare function retrieve(job: Job, options: RetrieveOptions & { outputFormat: VendorFormat }): Promise<Job | NativeFormatResponse>
+export declare function retrieve(job: Job, options?: RetrieveOptions): Promise<Job | ParseResponse | NativeFormatResponse>
+
+/**
+ * Interpret the JSON body a provider POSTed to your webhook (verify its signature first). Bodies
+ * that only name a finished job trigger one `retrieve()`; a failure rejects with the typed error.
+ */
+export declare function handleWebhook(
+  payload: Record<string, unknown> | string | Uint8Array,
+  options?: HandleWebhookOptions & { outputFormat?: 'liteocr' | null },
+): Promise<Job | ParseResponse>
+export declare function handleWebhook(
+  payload: Record<string, unknown> | string | Uint8Array,
+  options: HandleWebhookOptions & { outputFormat: VendorFormat },
+): Promise<Job | NativeFormatResponse>
+export declare function handleWebhook(
+  payload: Record<string, unknown> | string | Uint8Array,
+  options?: HandleWebhookOptions,
+): Promise<Job | ParseResponse | NativeFormatResponse>
+
 // ---- router (SPEC §7) ----------------------------------------------------------------------------
 
 export type Strategy = 'ordered' | 'round_robin'
