@@ -33,3 +33,6 @@ website/dist/
 .claude/worktrees/
 # in-progress `bench run` logs (removed when the run completes)
 *.partial.jsonl
+# Provider outputs for research-only sources (OmniDocBench) are never committed; their scores are
+# kept in the result JSON and re-scored with `bench rescore --keep-missing` (ADR-16).
+benchmark/results/outputs/*/*/omnidocbench/
