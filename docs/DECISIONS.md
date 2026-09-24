@@ -211,3 +211,20 @@ seconds, as in the other SDKs, and `LiteOCRError.kind` uses the ErrorKind serde 
 **Consequences.** One implementation behind three surfaces (Python, Node, CLI). No provider logic
 in JS. Prebuilt binaries per platform are required for `npm install` without a Rust toolchain;
 the release matrix builds them but publishing is not wired yet.
+
+## ADR-15: The gateway is a thin axum layer over the core, TOML-configured, with no database
+
+**Context.** LiteLLM's proxy is what teams actually deploy: one endpoint, central keys, budgets and
+logs. LiteOCR needed the same without growing a second implementation of providers.
+
+**Decision.** `crates/liteocr-server` (axum + tower-http, which are HTTP frameworks, not provider
+SDKs) calls `liteocr_core::{parse, ocr, extract}` and runs its own fallback loop, because the core
+`Router` cannot give each target its own credentials or base URL. Configuration is TOML (already
+idiomatic in Rust, lighter than YAML). Usage and budget state live in memory with an optional
+JSON state file; a database is out of scope. Clients may not send `api_key` or `base_url`, so they
+cannot redirect the gateway's credentials, and local file paths are refused. Provider credential
+failures map to 502, not 401, because the caller's own key was valid.
+
+**Consequences.** Single binary, no infrastructure to run. Budgets can be overshot by requests in
+flight, and key changes need a restart. A database, HTTP key management, async job endpoints and
+metrics auth are follow-ups, not blockers.

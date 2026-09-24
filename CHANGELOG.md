@@ -11,6 +11,15 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **Gateway server: `liteocr serve` (`crates/liteocr-server`).** An HTTP gateway in front of every
+  provider, the LiteOCR equivalent of the LiteLLM proxy: `POST /v1/parse|ocr|extract` (JSON or
+  multipart, `output_format`, `fallbacks`), `GET /v1/models`, `/v1/usage`, `/health` and
+  Prometheus `/metrics`. A `liteocr.toml` config defines model aliases with ordered or round-robin
+  fallback, provider keys as `env:` references, and virtual keys with model allow-lists, monthly
+  USD budgets and per-minute rate limits. Every request is logged as one JSON line (never document
+  content, provider error text or secrets), and all errors share one JSON body. Clients cannot
+  override `api_key`/`base_url` or read local files. Ships a multi-stage distroless `Dockerfile`
+  and `examples/server/liteocr.toml`; see [`docs/SERVER.md`](docs/SERVER.md).
 - **Node.js / TypeScript SDK.** The `liteocr` npm package in `js/` runs on a napi-rs addon over the
   same Rust core (`crates/liteocr-node`): async `parse` / `ocr` / `extract` (with `fallbacks`),
   `Router`, camelCase typed responses (`index.d.ts`), `LiteOCRError` subclasses mapped from the core
