@@ -315,31 +315,44 @@ def read_providers() -> list[dict[str, Any]]:
 
 
 def read_leaderboard(limit: int = 5) -> tuple[list[dict[str, Any]], str]:
-    """Top models across every committed benchmark result, best score per model."""
-    best: dict[str, dict[str, Any]] = {}
-    dataset = ""
+    """Top models of the headline run: the newest run on the newest ``combined-vN`` dataset.
+
+    Scores are only comparable within one dataset, so rows are never mixed across result files
+    (mixing let the easy synthetic set's 100s outrank every real-document score). Falls back to the
+    newest run of any dataset when no combined run exists.
+    """
+    runs: list[dict[str, Any]] = []
     for path in sorted(glob.glob(str(ROOT / "benchmark/results/*.json"))):
         try:
-            run = json.loads(Path(path).read_text(encoding="utf-8"))
+            runs.append(json.loads(Path(path).read_text(encoding="utf-8")))
         except (OSError, ValueError):
             continue
-        ds = run.get("dataset", {})
-        dataset = f"{ds.get('name', '?')} v{ds.get('version', '?')} · {ds.get('documents', '?')} documents"
-        for m in run.get("models", []):
-            s = m.get("summary", {})
-            row = {
+    if not runs:
+        return [], ""
+
+    def rank(run: dict[str, Any]) -> tuple[int, int, str]:
+        name = str(run.get("dataset", {}).get("name", ""))
+        match = re.fullmatch(r"combined-v(\d+)", name)
+        return (1 if match else 0, int(match.group(1)) if match else 0, str(run.get("created_at", "")))
+
+    run = max(runs, key=rank)
+    ds = run.get("dataset", {})
+    dataset = f"{ds.get('name', '?')} v{ds.get('version', '?')} · {ds.get('documents', '?')} documents"
+    rows = []
+    for m in run.get("models", []):
+        s = m.get("summary", {})
+        if s.get("overall") is None:
+            continue
+        rows.append(
+            {
                 "model": m.get("model", "?"),
                 "overall": s.get("overall"),
                 "p50": s.get("latency_p50_ms"),
                 "cost": s.get("cost_per_1k_pages_usd"),
             }
-            if row["overall"] is None:
-                continue
-            prev = best.get(row["model"])
-            if prev is None or row["overall"] > prev["overall"]:
-                best[row["model"]] = row
-    rows = sorted(best.values(), key=lambda r: -r["overall"])[:limit]
-    return rows, dataset
+        )
+    rows.sort(key=lambda r: -r["overall"])
+    return rows[:limit], dataset
 
 
 def leaderboard_card(site: Site) -> str:
