@@ -8,12 +8,14 @@
 //! Gemini is a language model, not a layout engine: it returns text, never geometry. Blocks are
 //! therefore one `text` block per page with `bbox: None`, and `ocr` mode is derived from `parse`.
 
+use super::vlm::{base64_encode, pdf_page_count, sniff_mime, strip_code_fence};
 use crate::error::{Error, ErrorKind, Result};
 use crate::http::{self, Deadline, Retry};
 use crate::provider::{self, Provider};
+#[cfg(test)]
+use crate::types::BlockType;
 use crate::types::{
-    Block, BlockType, DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, OutputFormat, Page,
-    ParseResponse, Usage,
+    DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, OutputFormat, Page, ParseResponse, Usage,
 };
 use crate::util::deep_merge;
 use async_trait::async_trait;
@@ -721,20 +723,13 @@ fn normalize_parse(
             OutputFormat::Markdown => md.clone(),
             OutputFormat::Text => plain.clone(),
         };
-        // Gemini reports no geometry: one text block per page, no bbox, no confidence.
-        let blocks = if content.is_empty() {
-            Vec::new()
-        } else {
-            vec![Block {
-                block_type: BlockType::Text,
-                content: content.clone(),
-                text: Some(plain.clone()),
-                bbox: None,
-                confidence: None,
-                page_number,
-            }]
-        };
-        pages.push(Page { page_number, width: None, height: None, markdown: content, text: plain, blocks });
+        // Gemini reports no geometry: one text block per page, no bbox, no confidence — and no
+        // block at all for a blank page.
+        let mut page = super::vlm::text_page(page_number, content, plain);
+        if page.markdown.is_empty() {
+            page.blocks.clear();
+        }
+        pages.push(page);
     }
     if pages.is_empty() {
         return Err(Error::provider("gemini returned no pages").with_provider(NAME));
@@ -849,14 +844,6 @@ fn response_text(wire: &GenerateContentResponse) -> Result<String> {
     Ok(text)
 }
 
-/// Defensive: `response_mime_type=application/json` should never fence, but prompts can be overridden.
-fn strip_code_fence(s: &str) -> &str {
-    let t = s.trim();
-    let Some(rest) = t.strip_prefix("```") else { return t };
-    let rest = rest.strip_prefix("json").unwrap_or(rest);
-    rest.trim_start_matches(['\r', '\n']).trim_end().trim_end_matches('`').trim_end()
-}
-
 // ---- token pricing ----------------------------------------------------------------------------------
 
 /// Public list prices in USD per 1M tokens (paid tier), used to fill `usage.provider_cost_usd`
@@ -892,72 +879,6 @@ fn token_cost(model: &str, usage: &UsageMetadata) -> Option<f64> {
     };
     let out_tokens = f64::from(usage.candidates_token_count) + f64::from(usage.thoughts_token_count);
     Some((f64::from(usage.prompt_token_count) * input + out_tokens * output) / 1e6)
-}
-
-// ---- small helpers ------------------------------------------------------------------------------------
-
-/// Standard base64 (with padding) — Gemini's `inline_data.data` encoding.
-fn base64_encode(input: &[u8]) -> String {
-    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut out = String::with_capacity(input.len().div_ceil(3) * 4);
-    for chunk in input.chunks(3) {
-        let b = [chunk[0], *chunk.get(1).unwrap_or(&0), *chunk.get(2).unwrap_or(&0)];
-        let n = (u32::from(b[0]) << 16) | (u32::from(b[1]) << 8) | u32::from(b[2]);
-        out.push(ALPHABET[(n >> 18) as usize & 63] as char);
-        out.push(ALPHABET[(n >> 12) as usize & 63] as char);
-        out.push(if chunk.len() > 1 { ALPHABET[(n >> 6) as usize & 63] as char } else { '=' });
-        out.push(if chunk.len() > 2 { ALPHABET[n as usize & 63] as char } else { '=' });
-    }
-    out
-}
-
-/// Trust the magic bytes over the extension: Gemini rejects a wrong `mime_type` outright.
-fn sniff_mime(data: &[u8], guessed: &str) -> String {
-    let sniffed = if data.starts_with(b"%PDF-") {
-        Some("application/pdf")
-    } else if data.starts_with(&[0x89, b'P', b'N', b'G']) {
-        Some("image/png")
-    } else if data.starts_with(&[0xFF, 0xD8, 0xFF]) {
-        Some("image/jpeg")
-    } else if data.len() > 12 && data.starts_with(b"RIFF") && &data[8..12] == b"WEBP" {
-        Some("image/webp")
-    } else if data.starts_with(b"GIF87a") || data.starts_with(b"GIF89a") {
-        Some("image/gif")
-    } else {
-        None
-    };
-    match sniffed {
-        Some(m) => m.to_string(),
-        None if guessed.is_empty() || guessed == "application/octet-stream" => "text/plain".to_string(),
-        None => guessed.to_string(),
-    }
-}
-
-/// Count `/Type /Page` objects in a PDF (ignoring `/Pages` nodes). Best effort: it misses pages in
-/// object streams of compressed PDFs, so it is only ever used as a sanity check / fallback.
-fn pdf_page_count(data: &[u8]) -> Option<u32> {
-    let needle = b"/Type";
-    let mut count = 0u32;
-    let mut i = 0usize;
-    while i + needle.len() < data.len() {
-        if &data[i..i + needle.len()] != needle {
-            i += 1;
-            continue;
-        }
-        let mut j = i + needle.len();
-        while j < data.len() && (data[j] == b' ' || data[j] == b'\r' || data[j] == b'\n' || data[j] == b'\t') {
-            j += 1;
-        }
-        if data[j..].starts_with(b"/Page") {
-            let after = data.get(j + 5).copied();
-            // `/Page` followed by a delimiter — not `/Pages`.
-            if !matches!(after, Some(b's') | Some(b'A'..=b'Z') | Some(b'a'..=b'z') | Some(b'0'..=b'9')) {
-                count += 1;
-            }
-        }
-        i = j.max(i + 1);
-    }
-    (count > 0).then_some(count)
 }
 
 #[cfg(test)]

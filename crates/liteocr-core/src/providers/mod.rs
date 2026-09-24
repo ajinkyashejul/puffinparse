@@ -16,6 +16,8 @@ pub mod openai;
 pub mod textract;
 pub mod unstructured;
 pub mod upstage;
+// Shared helpers for the vision-LLM providers (gemini, openai, anthropic).
+pub(crate) mod vlm;
 
 use crate::error::{Error, Result};
 use crate::provider::Provider;

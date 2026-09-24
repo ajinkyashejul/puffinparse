@@ -7,17 +7,16 @@
 //! `input`. `parse` uses a fixed `{"pages":[{"page_number":1,"markdown":"…"}]}` schema; `extract`
 //! uses the caller's schema; `ocr` is the default trait derivation from `parse`.
 //!
-//! NOTE: the private helper section at the bottom (base64, document loading, prompts, schema
-//! sanitising, token pricing) is duplicated in `providers/openai.rs` on purpose while the
-//! vision-LLM providers land in parallel; it is meant to be factored into a shared `vlm` module.
+//! Document loading, prompts, the strict-schema rewrite, page building and token pricing are
+//! shared with the other vision-LLM providers in [`super::vlm`].
 
+use super::vlm::{self, Answer, Completion};
 use crate::error::{Error, Result};
 use crate::http::{self, Deadline, Retry};
 use crate::provider::{self, Provider};
-use crate::types::{
-    Block, BlockType, DocumentInput, DocumentRequest, ExtractRequest, ExtractResponse, Mode, OutputFormat, Page,
-    ParseResponse, Usage,
-};
+#[cfg(test)]
+use crate::types::{BlockType, OutputFormat, Page};
+use crate::types::{DocumentRequest, ExtractRequest, ExtractResponse, Mode, ParseResponse};
 use async_trait::async_trait;
 use serde_json::{json, Value};
 
@@ -75,15 +74,7 @@ impl Provider for Anthropic {
         let tool =
             tool_definition(PARSE_TOOL, "Return the transcription of every page of the document.", pages_schema());
         let call = message(request, model, &prompt, PARSE_TOOL, tool).await?;
-        let mut resp = normalize_parse(&call.data, request.output, model);
-        resp.usage.provider_cost_usd = provider_cost(model, call.input_tokens, call.output_tokens);
-        resp.provider_job_id = Some(call.id);
-        resp.metadata.insert("anthropic_input_tokens".into(), json!(call.input_tokens));
-        resp.metadata.insert("anthropic_output_tokens".into(), json!(call.output_tokens));
-        if request.include_raw {
-            resp.raw = Some(call.raw);
-        }
-        Ok(resp)
+        Ok(vlm::parse_response(NAME, PRICES, request, model, call))
     }
 
     async fn extract(&self, request: &ExtractRequest, model: &str) -> Result<ExtractResponse> {
@@ -98,41 +89,20 @@ impl Provider for Anthropic {
             tool["strict"] = json!(true);
         }
         let call = message(doc, model, &prompt, EXTRACT_TOOL, tool).await?;
-        // The provider reports tokens, never pages: `usage.pages` stays 0 in extract mode and the
-        // cost comes from the token counts.
-        let usage = Usage {
-            pages: 0,
-            credits: None,
-            provider_cost_usd: provider_cost(model, call.input_tokens, call.output_tokens),
-        };
-        let mut resp = ExtractResponse::new(NAME, &format!("{NAME}/{model}"), call.data, usage);
-        resp.provider_job_id = Some(call.id);
-        resp.metadata.insert("anthropic_input_tokens".into(), json!(call.input_tokens));
-        resp.metadata.insert("anthropic_output_tokens".into(), json!(call.output_tokens));
-        if request.citations {
-            // Claude's citations feature grounds *text* answers in a document; it cannot be combined
-            // with the forced tool call LiteOCR uses for schema output, so `fields` stays empty.
-            resp.metadata.insert("anthropic_citations_unsupported".into(), json!(true));
-        }
-        if doc.include_raw {
-            resp.raw = Some(call.raw);
-        }
-        Ok(resp)
+        // Claude's citations feature grounds *text* answers in a document; it cannot be combined
+        // with the forced tool call LiteOCR uses for schema output, so `fields` stays empty.
+        Ok(vlm::extract_response(NAME, PRICES, request, model, call))
     }
 }
 
-/// What one `POST /v1/messages` round-trip yields.
-#[derive(Debug)]
-struct Call {
-    id: String,
-    data: Value,
-    input_tokens: u64,
-    output_tokens: u64,
-    raw: Value,
-}
-
 /// Send the document + prompt and decode the forced tool call's input.
-async fn message(request: &DocumentRequest, model: &str, prompt: &str, tool_name: &str, tool: Value) -> Result<Call> {
+async fn message(
+    request: &DocumentRequest,
+    model: &str,
+    prompt: &str,
+    tool_name: &str,
+    tool: Value,
+) -> Result<Completion> {
     let api_key = provider::resolve_api_key(request, ENV_KEY, NAME)?;
     let base = provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE);
     let deadline = Deadline::new(request.timeout_secs);
@@ -155,14 +125,7 @@ async fn message(request: &DocumentRequest, model: &str, prompt: &str, tool_name
 
     let id = raw.get("id").and_then(Value::as_str).unwrap_or_default().to_string();
     let data = tool_input(&raw, tool_name).map_err(|e| if id.is_empty() { e } else { e.with_job_id(id.clone()) })?;
-    let usage = raw.get("usage");
-    Ok(Call {
-        id,
-        data,
-        input_tokens: usage.and_then(|u| u.get("input_tokens")).and_then(Value::as_u64).unwrap_or(0),
-        output_tokens: usage.and_then(|u| u.get("output_tokens")).and_then(Value::as_u64).unwrap_or(0),
-        raw,
-    })
+    Ok(Completion::new(raw, data))
 }
 
 /// Send one request, decoding JSON on success and mapping the Anthropic error envelope otherwise.
@@ -270,7 +233,7 @@ fn tool_input(resp: &Value, tool_name: &str) -> Result<Value> {
 
 /// The document content block: `document` for PDFs, `image` for images.
 async fn document_block(request: &DocumentRequest, deadline: &Deadline, retry: Retry) -> Result<Value> {
-    let (data, mime) = load_document(request, deadline, retry).await?;
+    let (data, mime) = vlm::load_document(request, deadline, retry, NAME).await?;
     let encoded = base64_encode(&data);
     if mime == "application/pdf" {
         Ok(json!({
@@ -288,200 +251,46 @@ async fn document_block(request: &DocumentRequest, deadline: &Deadline, retry: R
     }
 }
 
-// ---- normalisation -----------------------------------------------------------------------------
+// ---- thin wrappers over the shared vision-LLM helpers -------------------------------------------
 
 /// Turn `{"pages":[{"page_number":1,"markdown":"…"}]}` into a [`ParseResponse`].
 ///
 /// Vision LLMs return text, not geometry: each page gets exactly one `text` block and no bboxes.
+#[cfg(test)]
 pub(crate) fn normalize_parse(data: &Value, fmt: OutputFormat, model: &str) -> ParseResponse {
-    let pages = pages_from_value(data, fmt);
-    let usage = Usage { pages: pages.len() as u32, credits: None, provider_cost_usd: None };
-    ParseResponse::from_pages(NAME, &format!("{NAME}/{model}"), pages, usage)
+    vlm::normalize_parse(NAME, data, fmt, model)
 }
 
-// ---- private helpers (duplicated with providers/openai.rs; see module docs) ---------------------
+#[cfg(test)]
+fn pages_from_value(data: &Value, fmt: OutputFormat) -> Vec<Page> {
+    vlm::pages_from_value(data, fmt)
+}
 
-/// Base64 (standard alphabet, padded). Small and dependency-free — the crate vendors no base64.
 fn base64_encode(input: &[u8]) -> String {
-    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut out = String::with_capacity(input.len().div_ceil(3) * 4);
-    for chunk in input.chunks(3) {
-        let b = [chunk[0], *chunk.get(1).unwrap_or(&0), *chunk.get(2).unwrap_or(&0)];
-        let n = (u32::from(b[0]) << 16) | (u32::from(b[1]) << 8) | u32::from(b[2]);
-        out.push(ALPHABET[(n >> 18) as usize & 63] as char);
-        out.push(ALPHABET[(n >> 12) as usize & 63] as char);
-        out.push(if chunk.len() > 1 { ALPHABET[(n >> 6) as usize & 63] as char } else { '=' });
-        out.push(if chunk.len() > 2 { ALPHABET[n as usize & 63] as char } else { '=' });
-    }
-    out
-}
-
-/// Read the document bytes and decide its MIME type. URLs are downloaded and inlined — neither
-/// vision API fetches a URL that needs the caller's credentials.
-async fn load_document(request: &DocumentRequest, deadline: &Deadline, retry: Retry) -> Result<(bytes::Bytes, String)> {
-    if let Some(data) = provider::load_bytes(&request.input).await? {
-        return Ok((data, request.input.mime_type()));
-    }
-    let DocumentInput::Url { url } = &request.input else {
-        unreachable!("load_bytes only returns None for URL inputs");
-    };
-    let url = url.clone();
-    let client = http::client();
-    let (data, content_type) = http::with_retry(NAME, retry, deadline, || {
-        let rb = client.get(&url).timeout(deadline.request_timeout());
-        let url = url.clone();
-        async move {
-            let resp = rb.send().await?;
-            let status = resp.status();
-            if !status.is_success() {
-                return Err(Error::input(format!("cannot download {url}: HTTP {}", status.as_u16())));
-            }
-            let content_type = resp
-                .headers()
-                .get(reqwest::header::CONTENT_TYPE)
-                .and_then(|v| v.to_str().ok())
-                .map(|v| v.split(';').next().unwrap_or(v).trim().to_ascii_lowercase());
-            Ok((resp.bytes().await?, content_type))
-        }
-    })
-    .await?;
-    if data.is_empty() {
-        return Err(Error::input(format!("{url} returned an empty body")).with_provider(NAME));
-    }
-    // The URL's own extension is more reliable than a generic `application/octet-stream`.
-    let mime = match content_type {
-        Some(ct) if ct != "application/octet-stream" && ct != "binary/octet-stream" => ct,
-        _ => request.input.mime_type(),
-    };
-    Ok((data, mime))
+    vlm::base64_encode(input)
 }
 
 /// The tool input schema for `parse` (already strict-compatible).
 fn pages_schema() -> Value {
-    json!({
-        "type": "object",
-        "properties": {
-            "pages": {
-                "type": "array",
-                "description": "Every page of the document, in order.",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "page_number": {"type": "integer", "description": "1-based page number in the document."},
-                        "markdown": {"type": "string", "description": "The full content of the page."},
-                    },
-                    "required": ["page_number", "markdown"],
-                    "additionalProperties": false,
-                },
-            },
-        },
-        "required": ["pages"],
-        "additionalProperties": false,
-    })
+    vlm::pages_schema()
 }
 
 fn parse_prompt(request: &DocumentRequest) -> String {
-    let mut p = String::from(
-        "Transcribe this document. Return one entry in `pages` for every page, in order.\n\n\
-         Rules:\n\
-         - Use the document's own 1-based page numbers.\n\
-         - `markdown` holds the complete content of that page as GitHub-Flavored Markdown: `#` headings, \
-         `-` lists, GFM pipe tables, fenced code, LaTeX between `$` for formulas.\n\
-         - Transcribe verbatim: same wording, numbers, casing and reading order (top to bottom; \
-         column by column on multi-column pages). Never summarise, translate, explain or invent content.\n\
-         - Describe a figure, photo or chart as one short italic line, e.g. \
-         `*Figure: bar chart of quarterly revenue.*`\n\
-         - Keep running headers, footers and printed page numbers where they appear.\n\
-         - A blank page gets an empty `markdown` string.",
-    );
-    if request.output == OutputFormat::Text {
-        p.push_str("\n- Exception: emit plain text only — no Markdown syntax, no table pipes, no `#`.");
-    }
-    if let Some(pages) = &request.pages {
-        p.push_str(&format!(
-            "\n- Transcribe only pages {pages} (1-based, inclusive ranges). Skip every other page and keep \
-             the original page numbers for the ones you return."
-        ));
-    }
-    if let Some(language) = &request.language {
-        p.push_str(&format!("\n- The document is mainly in {language}; transcribe it in that language."));
-    }
-    p
+    vlm::parse_prompt(request, Answer::Tool)
 }
 
 fn extract_prompt(request: &ExtractRequest) -> String {
-    let mut p = String::from(
-        "Extract the requested fields from this document and record them with the tool.\n\n\
-         Rules:\n\
-         - Use only values that appear in the document; never guess, infer or fabricate.\n\
-         - Use `null` for a value the document does not contain.\n\
-         - Numbers must be plain numbers (no thousands separators, no currency symbols); keep dates as \
-         written unless the schema says otherwise.",
-    );
-    if let Some(pages) = &request.document.pages {
-        p.push_str(&format!("\n- Only look at pages {pages} (1-based, inclusive ranges)."));
-    }
-    if let Some(language) = &request.document.language {
-        p.push_str(&format!("\n- The document is mainly in {language}."));
-    }
-    if let Some(instructions) = &request.instructions {
-        p.push_str("\n\nAdditional instructions from the caller:\n");
-        p.push_str(instructions);
-    }
-    p
+    vlm::extract_prompt(request, Answer::Tool)
 }
-
-/// Build pages (one text block each, no geometry) from the model's JSON answer.
-fn pages_from_value(data: &Value, fmt: OutputFormat) -> Vec<Page> {
-    let entries = data.get("pages").and_then(Value::as_array).cloned().unwrap_or_default();
-    entries
-        .iter()
-        .enumerate()
-        .map(|(i, entry)| {
-            let page_number = entry
-                .get("page_number")
-                .and_then(Value::as_u64)
-                .and_then(|n| u32::try_from(n).ok())
-                .filter(|&n| n > 0)
-                .unwrap_or(i as u32 + 1);
-            let content = entry.get("markdown").and_then(Value::as_str).unwrap_or_default().trim().to_string();
-            let text = match fmt {
-                OutputFormat::Markdown => crate::types::markdown_to_text(&content),
-                OutputFormat::Text => content.clone(),
-            };
-            let block = Block {
-                block_type: BlockType::Text,
-                content: content.clone(),
-                text: Some(text.clone()),
-                bbox: None,
-                confidence: None,
-                page_number,
-            };
-            Page { page_number, width: None, height: None, markdown: content, text, blocks: vec![block] }
-        })
-        .collect()
-}
-
-/// Keys of `provider_options` LiteOCR consumes instead of forwarding to the provider.
-const PRIVATE_OPTIONS: &[&str] = &["strict"];
 
 /// Strict tool use (`strict: true` + a sanitised schema) is opt-in here: Claude accepts JSON Schema
 /// keywords that strict mode rejects, so plain tool use is the safer default for caller schemas.
 fn strict_enabled(request: &DocumentRequest) -> bool {
-    request.option("strict").and_then(Value::as_bool).unwrap_or(false)
+    vlm::strict_enabled(request, false)
 }
 
 fn passthrough_options(request: &DocumentRequest) -> Option<Value> {
-    let mut opts = request.provider_options.clone()?;
-    if let Value::Object(map) = &mut opts {
-        for key in PRIVATE_OPTIONS {
-            map.remove(*key);
-        }
-        if map.is_empty() {
-            return None;
-        }
-    }
-    Some(opts)
+    vlm::passthrough_options(request)
 }
 
 fn supports_temperature(model: &str) -> bool {
@@ -492,48 +301,15 @@ fn supports_effort(model: &str) -> bool {
     EFFORT_MODELS.contains(&model)
 }
 
-/// Make a schema satisfy strict tool use: every object must set `additionalProperties: false` and
-/// list **all** of its properties in `required`.
+/// Make a schema satisfy strict tool use (see [`vlm::sanitize_strict_schema`]).
 pub(crate) fn sanitize_strict_schema(schema: &mut Value) {
-    const SCHEMA_MAPS: &[&str] = &["properties", "$defs", "definitions", "patternProperties"];
-    const SCHEMA_NODES: &[&str] =
-        &["items", "prefixItems", "anyOf", "oneOf", "allOf", "not", "if", "then", "else", "contains"];
-
-    let Value::Object(map) = schema else { return };
-    for key in SCHEMA_MAPS {
-        if let Some(Value::Object(children)) = map.get_mut(*key) {
-            for child in children.values_mut() {
-                sanitize_strict_schema(child);
-            }
-        }
-    }
-    for key in SCHEMA_NODES {
-        match map.get_mut(*key) {
-            Some(Value::Array(items)) => items.iter_mut().for_each(sanitize_strict_schema),
-            Some(child) if child.is_object() => sanitize_strict_schema(child),
-            _ => {}
-        }
-    }
-    let is_object = match map.get("type") {
-        Some(Value::String(t)) => t == "object",
-        Some(Value::Array(types)) => types.iter().any(|t| t.as_str() == Some("object")),
-        _ => map.contains_key("properties"),
-    };
-    if is_object {
-        map.insert("additionalProperties".to_string(), json!(false));
-        let required: Vec<Value> = map
-            .get("properties")
-            .and_then(Value::as_object)
-            .map(|p| p.keys().map(|k| Value::String(k.clone())).collect())
-            .unwrap_or_default();
-        map.insert("required".to_string(), Value::Array(required));
-    }
+    vlm::sanitize_strict_schema(schema)
 }
 
 /// Dollar cost of one call from the embedded per-token price table (see [`PRICES`]).
+#[cfg(test)]
 fn provider_cost(model: &str, input_tokens: u64, output_tokens: u64) -> Option<f64> {
-    let (_, input, output) = PRICES.iter().find(|(m, _, _)| *m == model)?;
-    Some((input_tokens as f64) * input / 1e6 + (output_tokens as f64) * output / 1e6)
+    vlm::token_cost(PRICES, model, input_tokens, output_tokens)
 }
 
 /// Per-page price estimate used to seed `pricing.json` (~1,500 input + ~700 output tokens/page).
