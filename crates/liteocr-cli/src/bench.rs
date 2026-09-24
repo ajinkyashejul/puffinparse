@@ -262,7 +262,8 @@ fn load_manifest(dir: &Path) -> Result<(Manifest, String)> {
             h.update(&f);
         }
     }
-    Ok((manifest, format!("{:x}", h.finalize())))
+    let hex: String = h.finalize().iter().map(|b| format!("{b:02x}")).collect();
+    Ok((manifest, hex))
 }
 
 /// How the run loop issues one parse call. The CLI uses [`liteocr_core::parse`]; tests inject a

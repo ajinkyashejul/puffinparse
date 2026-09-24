@@ -32,8 +32,8 @@ chrono = { version = "0.4", default-features = false, features = ["clock", "std"
 rand = "0.10"
 # AWS SigV4 request signing (providers/textract.rs). Deliberately not the aws-sdk-* crates:
 # SigV4 for a single fixed-shape POST is ~60 lines of HMAC-SHA256.
-hmac = "0.12"
-sha2 = "0.10"
+hmac = "0.13"
+sha2 = "0.11"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }
