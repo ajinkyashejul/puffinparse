@@ -723,7 +723,7 @@ async fn webhook_resolves_and_charges_the_job_owner_once() {
     // The mock answers Pending on the first status check, Completed after.
     let (s, _, ack, text) = send(&app, post_json("/v1/webhooks/reducto?token=whsec-test", None, hook.clone())).await;
     assert_eq!(s, StatusCode::OK, "{text}");
-    assert_eq!(ack, json!({ "id": id, "status": "pending" }));
+    assert_eq!(ack, json!({ "ids": [id], "status": "pending" }));
     let req = Request::post("/v1/webhooks/reducto")
         .header(header::CONTENT_TYPE, "application/json")
         .header("x-liteocr-webhook-secret", "whsec-test")

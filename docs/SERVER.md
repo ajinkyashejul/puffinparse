@@ -187,7 +187,10 @@ events, LlamaCloud `parse.*` events — authenticated by `?token=<secret>` or th
 `parse_webhook`; when it only says the job finished, the gateway makes one status check. The
 provider's job id must match a job submitted through this gateway (else 404); a success is
 charged to the job's owner (once, shared with `GET`), and the answer is an acknowledgement
-`{"id", "status"}` — clients still collect the result with `GET /v1/jobs/{id}`. Point a provider's
+`{"ids": [...], "status"}` — clients still collect the result with `GET /v1/jobs/{id}`. `ids` can
+hold several gateway jobs: LlamaParse returns the same (cached) job id for an identical upload, so
+two submissions of the same file share one provider job, and each is settled and charged to its
+own key. Point a provider's
 webhook at `https://<gateway>/v1/webhooks/reducto?token=<secret>` (per job via `webhook_url`, or a
 workspace-level endpoint for Extend / LlamaCloud). This is a shared secret, not the vendors' HMAC
 signatures: keep the URL private and serve the gateway over TLS. A LlamaParse `webhook_url`

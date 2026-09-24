@@ -250,22 +250,40 @@ async fn handle_webhook(state: &AppState, ctx: &mut Ctx, provider: &str, req: Re
     let named = event.job.ok_or_else(|| {
         ApiError::input("the webhook body names no job id, so the gateway cannot attribute it to a job")
     })?;
-    let (id, job) = state
-        .usage
-        .find_job(&named.provider, &named.job_id)
-        .ok_or_else(|| ApiError::not_found("no job submitted through this gateway matches this webhook"))?;
-    ctx.job_id = Some(id.clone());
-    ctx.requested = Some(job.handle.model.clone());
+    // Usually one job; several when the provider reused its id (LlamaParse caches identical uploads).
+    let jobs = state.usage.find_jobs(&named.provider, &named.job_id);
+    let Some((first_id, first)) = jobs.first().cloned() else {
+        return Err(ApiError::not_found("no job submitted through this gateway matches this webhook"));
+    };
+    ctx.job_id = Some(first_id);
+    ctx.requested = Some(first.handle.model.clone());
     ctx.model = ctx.requested.clone();
     // Read the body again with the job's own model, so a result it carries is priced for it.
-    let status = match liteocr_core::parse_webhook(&job.handle.model, &payload)?.status {
+    let status = match liteocr_core::parse_webhook(&first.handle.model, &payload)?.status {
         WebhookStatus::Pending => JobStatus::Pending,
         WebhookStatus::Succeeded(resp) => JobStatus::Succeeded(resp),
         WebhookStatus::Failed(e) => JobStatus::Failed(e),
-        WebhookStatus::Finished => retrieve_status(state, &job).await?,
+        WebhookStatus::Finished => retrieve_status(state, &first).await?,
     };
-    let mut served = settle(state, ctx, &id, &job, status, OutputShape::Liteocr);
-    // The provider only needs an acknowledgement; the result stays behind GET /v1/jobs/{id}.
-    served.body = json!({ "id": id, "status": ctx.job_status });
+    let mut served: Option<Served> = None;
+    let mut ids = Vec::with_capacity(jobs.len());
+    for (id, job) in &jobs {
+        let s = settle(state, ctx, id, job, status.clone(), OutputShape::Liteocr);
+        ids.push(id.clone());
+        served = Some(match served {
+            None => s,
+            Some(mut acc) => {
+                acc.pages += s.pages;
+                acc.cost_usd = match (acc.cost_usd, s.cost_usd) {
+                    (None, None) => None,
+                    (a, b) => Some(a.unwrap_or(0.0) + b.unwrap_or(0.0)),
+                };
+                acc
+            }
+        });
+    }
+    let mut served = served.expect("at least one job");
+    // The provider only needs an acknowledgement; results stay behind GET /v1/jobs/{id}.
+    served.body = json!({ "ids": ids, "status": ctx.job_status });
     Ok(served)
 }

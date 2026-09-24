@@ -169,13 +169,16 @@ impl UsageStore {
         self.lock().jobs.get(id).cloned()
     }
 
-    /// The gateway job for a provider's own job id (webhook bodies name only the provider's id).
-    pub fn find_job(&self, provider: &str, provider_job_id: &str) -> Option<(String, StoredJob)> {
+    /// The gateway jobs for a provider's own job id (webhook bodies name only the provider's id).
+    /// Usually one, but a provider may hand out the same id twice: LlamaParse returns the cached
+    /// job for an identical upload, so two keys submitting the same file share a provider job.
+    pub fn find_jobs(&self, provider: &str, provider_job_id: &str) -> Vec<(String, StoredJob)> {
         self.lock()
             .jobs
             .iter()
-            .find(|(_, j)| j.handle.provider == provider && j.handle.job_id == provider_job_id)
+            .filter(|(_, j)| j.handle.provider == provider && j.handle.job_id == provider_job_id)
             .map(|(id, j)| (id.clone(), j.clone()))
+            .collect()
     }
 
     /// Record a job's terminal state. Only the first call for a job has any effect: it returns
@@ -272,8 +275,10 @@ mod tests {
         s.insert_job("job_old", job("a", "p0", 1_000), 100);
         s.insert_job("job_1", job("a", "p1", 2_000), 100);
         assert!(s.job("job_old").is_none(), "expired on insert");
-        assert_eq!(s.find_job("reducto", "p1").unwrap().0, "job_1");
-        assert!(s.find_job("extend", "p1").is_none());
+        s.insert_job("job_2", job("b", "p1", 2_001), 100);
+        let ids: Vec<String> = s.find_jobs("reducto", "p1").into_iter().map(|(id, _)| id).collect();
+        assert_eq!(ids, ["job_1", "job_2"]);
+        assert!(s.find_jobs("extend", "p1").is_empty());
         assert!(s.settle_job("job_1", JobOutcome::Succeeded, 0.5, 2));
         assert!(!s.settle_job("job_1", JobOutcome::Succeeded, 0.5, 2), "charged only once");
         assert!(!s.settle_job("missing", JobOutcome::Failed, 0.0, 0));
