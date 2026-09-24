@@ -69,6 +69,7 @@ Crates:
 | `crates/liteocr-core` | Library. All provider logic, types, router, pricing, benchmark metrics. `#![forbid(unsafe_code)]`. |
 | `crates/liteocr-cli` | `liteocr` binary: `parse`, `ocr`, `extract`, `providers`, `bench run`, `bench report`. |
 | `crates/liteocr-python` | PyO3 extension module `liteocr._core`, built with maturin. |
+| `crates/liteocr-server` | HTTP gateway behind `liteocr serve` (axum): aliases, virtual keys, budgets, metrics. §14, `docs/SERVER.md`. |
 | `python/liteocr` | Pure-Python public API, dataclasses, callbacks, typing. |
 | `benchmark/` | Datasets, manifests, ground truth, results, leaderboard generator. |
 
@@ -610,6 +611,7 @@ liteocr ocr     <file|url> [--model reducto/standard] [--format text|json]
 liteocr extract <file|url> --schema <file.json|inline JSON> [--instructions TEXT] [--citations]
 liteocr providers [--mode parse|ocr|extract] [--json]   # models, modes, per-mode pricing, key status
 liteocr bench run|report|score                          # see §10 (parse mode)
+liteocr serve [--config liteocr.toml] [--host H] [--port P]   # HTTP gateway, see §14
 ```
 
 One subcommand per mode; `--model` must name a model that serves that subcommand's mode, and a
@@ -640,3 +642,34 @@ does not serve the requested mode).
   for unit tests; live tests skipped without keys.
 - CI: GitHub Actions on push/PR (Linux; wheels build matrix on tags).
 - Versioning: semver, single workspace version, `CHANGELOG.md` (Keep a Changelog).
+
+---
+
+## 14. Gateway server
+
+`liteocr serve` (crate `liteocr-server`) exposes the three modes over HTTP for clients that should
+not hold provider keys. Operator reference: [`SERVER.md`](SERVER.md). Contract:
+
+- **Endpoints.** `POST /v1/parse | /v1/ocr | /v1/extract` take the §4 fields (`model`, `pages`,
+  `language`, `output`, `output_format`, `provider_options`, `include_raw`, `timeout`,
+  `max_retries`, `metadata`; `schema` / `instructions` / `citations` for extract) plus
+  `fallbacks: [str]`, as JSON (`document_url`, or base64 `document` + `filename`) or multipart
+  (`file` part + the same fields). `api_key`, `base_url` and local paths are rejected. They return
+  the §5 response JSON unchanged, or the vendor shape for `output_format` (parse, extract). Also
+  `GET /v1/models`, `GET /v1/usage`, `GET /health`, `GET /metrics` (Prometheus text).
+- **Config.** One TOML file: `[server]`, `master_key`, `[providers.<name>]` (`api_key`,
+  `base_url`), `[[models]]` aliases (`name`, `targets`, `strategy`, `fallback_on`, with the §7
+  semantics and per-target credential overrides), `[[keys]]` virtual keys (`id`, `key`, `models`
+  allow-list with `provider/*` wildcards, `monthly_budget_usd`, `rpm`). Secrets may be
+  `env:VAR`. No master key and no keys means auth is off.
+- **Accounting.** Spend = response `cost_usd`, per key per UTC calendar month, checked before each
+  call (`402` once spent ≥ budget); `rpm` is a sliding 60 s window (`429` + `Retry-After`). State
+  is in memory, optionally persisted to a JSON `state_file`.
+- **Errors.** One body shape, `{"error": {type, message, provider, provider_status, job_id,
+  request_id}}`. `ErrorKind` → HTTP: input / bad_request / unsupported_model → 400, rate_limit →
+  429, timeout → 504, provider / network / authentication → 502 (provider credentials are the
+  operator's). Gateway-own types: `unauthorized` 401, `budget_exceeded` 402, `model_not_allowed`
+  403, `payload_too_large` 413, `key_rate_limited` 429. The provider's message is passed through.
+- **Logs.** One JSON line per request: `ts, request_id, key_id, method, path, mode, model,
+  served_model, provider, fallback_index, pages, cost_usd, latency_ms, status, error_type,
+  provider_status`. Never document content or URLs, provider error text, or any secret.

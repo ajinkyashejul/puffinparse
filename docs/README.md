@@ -10,6 +10,7 @@ without asking around is linked from this page; if something is missing, add it 
 | [`TASKS.md`](TASKS.md) | **Live task board.** Claim work here before starting; move items as they progress. |
 | [`DECISIONS.md`](DECISIONS.md) | Architecture decision records. Read before proposing a change to something listed there; add an ADR when you change direction. |
 | [`COMPAT.md`](COMPAT.md) | Native-format compatibility (`output_format="reducto"\|"extend"\|"llamaparse"`): what the vendor-shaped renders guarantee, which fields are always null, the coordinate-units rule, and migration examples. |
+| [`SERVER.md`](SERVER.md) | The HTTP gateway (`liteocr serve`): config file, virtual keys, budgets, rate limits, API, errors, metrics, Docker. |
 | [`providers/`](providers/README.md) | Per-provider reference: endpoints, request flow, response mapping, errors, gotchas, passthrough options. |
 | [`benchmarks/`](benchmarks/) | Survey of public OCR benchmarks and adapter notes for the combined dataset. |
 | [`../benchmark/README.md`](../benchmark/README.md) | Benchmark methodology, metrics, how to run, dataset format. |
@@ -43,7 +44,8 @@ crates/liteocr-core/src/
   router.rs       ordered / round-robin fallbacks, stats
   bench.rs        normalisation + metrics + summaries
   util.rs         deep_merge, page-range parsing
-crates/liteocr-cli/src/   main.rs (parse, providers), bench.rs (run, report, score)
+crates/liteocr-cli/src/   main.rs (parse, providers, serve), bench.rs (run, report, score)
+crates/liteocr-server/src/ api.rs (routes, auth, fallback loop), config.rs, usage.rs, metrics.rs, log.rs
 crates/liteocr-python/    PyO3 module `liteocr._core`
 python/liteocr/           public API, types, exceptions; python/tests/
 crates/liteocr-node/      napi-rs addon behind the npm package
