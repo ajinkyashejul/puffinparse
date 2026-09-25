@@ -1,6 +1,6 @@
 [package]
 name = "puffinparse-server"
-description = "PuffinParse gateway: an HTTP proxy in front of every OCR provider with virtual keys, budgets, rate limits, fallbacks and metrics."
+description = "PuffinParse gateway: an HTTP proxy in front of every document-parsing provider with virtual keys, budgets, rate limits, fallbacks and metrics."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

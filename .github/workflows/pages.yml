@@ -6,8 +6,10 @@ name: Pages
 # Pages mirrors https://puffinparse.vercel.app rather than publishing a different artefact.
 #
 # SETUP (one time, by a maintainer): in the repository settings open
-# Settings -> Pages and set "Source" to "GitHub Actions". Until that is done this
-# workflow builds fine but the deploy step fails with "Pages is not enabled".
+# Settings -> Pages and set "Source" to "GitHub Actions", then add the repository
+# variable PAGES_ENABLED=true (Settings -> Secrets and variables -> Actions -> Variables).
+# Until then pushes skip this workflow (configure-pages fails without Pages enabled);
+# a manual run still works.
 #
 # TODO: the viewer is moving to a React app (Extend UI) under benchmark/site/app/.
 # When that lands, add an `npm ci && npm run build` stage before the Python build
@@ -35,6 +37,7 @@ concurrency:
 jobs:
   build:
     name: Build site
+    if: github.event_name == 'workflow_dispatch' || vars.PAGES_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

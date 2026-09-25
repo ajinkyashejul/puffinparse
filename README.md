@@ -1,6 +1,6 @@
 # PuffinParse
 
-**One API for every OCR / document-parsing provider.** Rust core, Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost.
+**One API for every document parser: parse, OCR and extract.** Rust core, Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost.
 
 ```python
 import puffinparse
