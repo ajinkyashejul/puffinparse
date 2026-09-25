@@ -27,6 +27,7 @@
         } catch (e) {}
       })();
     </script>
+    <link rel="stylesheet" href="tokens.css" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -35,7 +36,7 @@
     <header class="top">
       <div class="topin">
         <a class="brand" id="brand" href="#/leaderboard"
-          ><span class="mark" aria-hidden="true"></span>LiteOCR<span class="brand-sub"
+          ><span class="scanline" aria-hidden="true"></span>LiteOCR<span class="brand-sub"
             >benchmark</span
           ></a
         >
@@ -91,36 +92,10 @@
 
     <footer class="site-footer">
       <div class="wrap">
-        <p>
-          Dataset <code id="footer-dataset">synthetic-v1</code> is published under
-          <span id="footer-license">CC0-1.0</span>.
-          <span id="footer-truth"
-            >Ground truth is exact by construction: the documents are rendered from the same source
-            the truth markdown is written from.</span
-          >
-        </p>
-        <p id="footer-attribution" hidden></p>
-        <p>
-          Latency is <strong>client-measured</strong> through each provider's public API — it
-          includes upload, queueing and polling, and every run is made with provider result caches
-          disabled. Prices are public pay-as-you-go list prices.
-        </p>
-        <p class="footer-links">
-          <a href="https://github.com/ajinkyashejul/liteocr" rel="noopener noreferrer">LiteOCR</a>
-          ·
-          <a
-            href="https://github.com/ajinkyashejul/liteocr/blob/main/benchmark/README.md"
-            rel="noopener noreferrer"
-            >Benchmark methodology</a
-          >
-          ·
-          <a
-            href="https://github.com/ajinkyashejul/liteocr/blob/main/LICENSE"
-            rel="noopener noreferrer"
-            >MIT licensed</a
-          >
-          · <span id="footer-generated"></span>
-        </p>
+        <a href="https://github.com/ajinkyashejul/liteocr/blob/main/benchmark/README.md" rel="noopener noreferrer"
+          >Methodology</a
+        >
+        · Code MIT, data under per-document licences<span id="footer-generated"></span>
       </div>
     </footer>
 

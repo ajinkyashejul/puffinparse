@@ -2,15 +2,18 @@
  *
  * Vanilla ES2018, no framework, no build step (ADR: the viewer stays vanilla). Everything is
  * fetched from the `data/` directory written by benchmark/site/build.py, through `url()`; the
- * prefix comes from `<meta name="liteocr-base">`. The only third-party code is pdf.js, loaded
- * lazily from cdnjs (pinned version + SRI) the first time a PDF input is opened; if it cannot
- * load, the viewer falls back to the build-time page-1 PNG preview.
+ * prefix comes from `<meta name="liteocr-base">`. PDF pages are shown from the page images the
+ * build renders; pdf.js (cdnjs, pinned + SRI) is loaded only for a page the build did not render.
+ *
+ * Design: docs/DESIGN.md. One primary number per view; everything secondary sits one click
+ * away in a native <details>. Documents are named by their human title ("Headers & footers
+ * 3"); the raw id stays in the URL and in Details.
  *
  * Routes (hash based, so every view is a shareable link and no rewrite rules are needed):
- *   #/leaderboard?run=<run_id>&sort=<col>&dir=asc|desc&x=cost|latency
- *   #/documents?run=<run_id>&src=<source>&cat=<category>&q=<text>&sort=<col>&dir=asc|desc
- *   #/<run_id>/<model_slug>/<doc_id…>?tab=diff|compare|truth|rules|output&diff=split|unified
- *                                      &ov=0|1&page=<n>&src=…&cat=…&q=…
+ *   #/leaderboard?run=<run_id>&sort=<col>&dir=asc|desc&x=cost|latency&cols=all
+ *   #/documents?run=<run_id>&src=<source>&cat=<category>&q=<text>&sort=<col>&dir=asc|desc&pm=1
+ *   #/<run_id>/<model_slug>/<doc_id…>?tab=rules|diff|output|truth|compare&diff=split|unified
+ *                                      &ov=0|1&page=<n>&rf=fail|pass|all&src=…&cat=…&q=…
  *   #/doc/<doc_id>?run=…&model=…   (old links; redirected to the canonical form above)
  */
 (function () {
@@ -19,7 +22,7 @@
   var REPO = "https://github.com/ajinkyashejul/liteocr";
   var METHODOLOGY = REPO + "/blob/main/benchmark/README.md";
   var DIFF_CELL_CAP = 6000000; // LCS table cells we are willing to allocate
-  var RULE_PAGE = 150; // checklist items rendered per "show more"
+  var RULE_PAGE = 60; // check rows rendered per "show more"
   var BAG_SENTENCE_CAP = 12; // sentences listed per bag_of_sentences rule before "+N more"
 
   // pdf.js is the one external dependency: pinned, integrity-checked, loaded on demand.
@@ -30,17 +33,21 @@
     workerSri: "sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2",
   };
 
-  // Unified block types folded into eight groups: one categorical hue each (fixed order).
+  // Unified block types folded into the eight `--box-*` hues of tokens.css (fixed order).
   var BLOCK_GROUPS = [
     { key: "text", label: "Text", types: ["text"] },
     { key: "heading", label: "Title / heading", types: ["title", "section_header"] },
     { key: "table", label: "Table", types: ["table"] },
-    { key: "figure", label: "Figure", types: ["figure"] },
-    { key: "list", label: "List", types: ["list"] },
-    { key: "furniture", label: "Header / footer", types: ["header", "footer", "footnote"] },
-    { key: "caption", label: "Caption", types: ["caption"] },
-    { key: "other", label: "Formula / other", types: ["formula", "other"] },
+    { key: "figure", label: "Figure / caption", types: ["figure", "caption", "picture", "image"] },
+    { key: "list", label: "List", types: ["list", "list_item"] },
+    { key: "furniture", label: "Header / footer", types: ["header", "footer", "footnote", "page_number"] },
+    { key: "formula", label: "Formula", types: ["formula", "equation"] },
+    { key: "other", label: "Other", types: ["other"] },
   ];
+
+  // Verdict thresholds (docs/DESIGN.md): good >= 90, fair 70-89.9, poor < 70.
+  var GOOD = 90;
+  var FAIR = 70;
 
   function meta(name, fallback) {
     var el = document.querySelector('meta[name="' + name + '"]');
@@ -62,7 +69,7 @@
   var manifestCache = {};
   var lastScrollKey = null;
   var KEYS = {}; // key handlers of the current view
-  var SV = null; // the persistent source viewer (kept across model / tab switches)
+  var SV = null; // the persistent page viewer (kept across model / tab switches)
 
   var view = document.getElementById("view");
 
@@ -91,11 +98,19 @@
 
   function msFmt(value) {
     if (!isNum(value)) return "—";
-    return value >= 10000 ? (value / 1000).toFixed(1) + " s" : Math.round(value) + " ms";
+    return value >= 1000 ? (value / 1000).toFixed(1) + " s" : Math.round(value) + " ms";
   }
 
   function moneyFmt(value) {
     return isNum(value) ? "$" + value.toFixed(2) : "—";
+  }
+
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  /** "2026-09-24T21:10:06Z" -> "24 Sep 2026". */
+  function dateFmt(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ""));
+    return m ? Number(m[3]) + " " + MONTHS[Number(m[2]) - 1] + " " + m[1] : String(iso || "");
   }
 
   function slugOf(model) {
@@ -133,6 +148,65 @@
   function isRulesDoc(entry) {
     return !!entry && (entry.kind === "rules" || (!entry.truth && !!entry.rules));
   }
+
+  function plural(n, one, many) {
+    return n + " " + (n === 1 ? one : many || one + "s");
+  }
+
+  /* ------------------------------------------------------------ human names */
+
+  function sentenceCase(raw) {
+    var s = String(raw || "").replace(/[_-]+/g, " ").trim();
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : "Uncategorised";
+  }
+
+  /** "olmocr" -> "olmOCR-bench", from the labels build.py writes into index.json. */
+  function srcLabel(src) {
+    var labels = (INDEX && INDEX.labels && INDEX.labels.sources) || {};
+    return labels[src] || String(src || "");
+  }
+
+  function catLabel(cat) {
+    var labels = (INDEX && INDEX.labels && INDEX.labels.categories) || {};
+    return labels[cat] || sentenceCase(cat);
+  }
+
+  /** "Headers & footers 3" (build.py names every manifest document). */
+  function docTitle(entry) {
+    if (!entry) return "";
+    return entry.title || (entry.category ? catLabel(entry.category) : entry.id);
+  }
+
+  /** "llamaparse/cost_effective" -> {p: "llamaparse", v: "cost_effective"}. */
+  function modelParts(model) {
+    var s = String(model);
+    var cut = s.indexOf("/");
+    return cut > 0 ? { p: s.slice(0, cut), v: s.slice(cut + 1) } : { p: "", v: s };
+  }
+
+  /* ------------------------------------------------------------ verdicts */
+
+  function verdictOf(value) {
+    if (!isNum(value)) return "";
+    return value >= GOOD ? "good" : value >= FAIR ? "fair" : "poor";
+  }
+
+  /** The CSS-drawn verdict dot; the number next to it carries the value. */
+  function vdot(value) {
+    var v = verdictOf(value);
+    return v ? '<span class="vd v-' + v + '" title="' + v + '" aria-hidden="true"></span>' : "";
+  }
+
+  function scoreHtml(value, digits) {
+    return '<span class="score">' + vdot(value) + '<span class="n">' + esc(fixed(value, digits)) + "</span></span>";
+  }
+
+  function barHtml(value) {
+    var w = isNum(value) ? Math.max(0, Math.min(100, value)) : 0;
+    return '<span class="bar" aria-hidden="true"><i style="width:' + w.toFixed(1) + '%"></i></span>';
+  }
+
+  /* ------------------------------------------------------------ fetching */
 
   function fetchOk(target) {
     return fetch(target, { cache: "no-cache" }).then(function (resp) {
@@ -210,9 +284,9 @@
     }
     if (isNum(value)) {
       if (value <= 1 && isNum(summary.overall) && summary.overall > 1) value *= 100;
-      return { value: value, headline: true, label: label || "Headline", title: title };
+      return { value: value, headline: true, label: label || "Score", title: title };
     }
-    return { value: summary.overall, headline: false, label: "Overall", title: null };
+    return { value: summary.overall, headline: false, label: "Score", title: null };
   }
 
   /** Per-document primary score on the 0–100 scale, as the scorer aggregates it. */
@@ -228,9 +302,33 @@
   function scoreBasis(rec) {
     if (!rec) return "";
     var m = rec.metrics || {};
-    if (isNum(m.rule_pass_rate)) return "rule pass rate";
+    if (isNum(m.rule_pass_rate)) return "share of checks that pass";
     if (rec.table_only && isNum(m.table_score)) return "table score (table-only document)";
     return "character similarity";
+  }
+
+  /** 0..1 -> "91" or "99.9": one decimal only where rounding would overstate the value. */
+  function pct(fraction) {
+    var v = fraction * 100;
+    return Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(1);
+  }
+
+  /** The one-line plain-English reading of a document score. */
+  function verdictLine(rec, rulesTotal) {
+    if (!rec) return "Not scored in this run";
+    if (rec.error) return "The call failed";
+    var m = rec.metrics || {};
+    if (isNum(m.rule_pass_rate)) {
+      var total = isNum(m.rules_total) ? m.rules_total : rulesTotal;
+      var passed = isNum(m.rules_passed) ? m.rules_passed : isNum(total) ? Math.round(m.rule_pass_rate * total) : null;
+      if (isNum(passed) && isNum(total)) return passed + " of " + plural(total, "check") + " pass";
+      return fixed(m.rule_pass_rate * 100, 0) + "% of checks pass";
+    }
+    if (rec.table_only && isNum(m.table_score)) {
+      return "Table " + pct(m.table_score) + "%" + (isNum(m.teds_grid) ? " · TEDS " + fixed(m.teds_grid, 2) : "");
+    }
+    if (isNum(m.char_similarity)) return fixed(m.char_similarity * 100, 1) + "% character match";
+    return "";
   }
 
   function sourceOf(docId, fallback) {
@@ -290,14 +388,24 @@
       };
     });
     Object.keys(catsBySource).forEach(function (src) {
-      catsBySource[src].sort();
+      catsBySource[src].sort(function (a, b) {
+        return catLabel(a).localeCompare(catLabel(b));
+      });
     });
-    run.sources = sources;
+    run.sources = sources.sort(function (a, b) {
+      return srcLabel(a).localeCompare(srcLabel(b));
+    });
     run.catsBySource = catsBySource;
   }
 
   function mean(b) {
     return b && b.docs ? b.sum / b.docs : null;
+  }
+
+  function byScore(models) {
+    return models.slice().sort(function (a, b) {
+      return (b.stats.head.value || 0) - (a.stats.head.value || 0);
+    });
   }
 
   /* ----------------------------------------------------------------- router */
@@ -371,9 +479,9 @@
   function showError(err) {
     view.removeAttribute("aria-busy");
     view.innerHTML =
-      '<div class="error"><h2>Something went wrong</h2><p>' +
+      '<div class="error"><h1>Something went wrong</h1><p>' +
       esc(err && err.message ? err.message : err) +
-      '</p><p class="hint">This page is static: it reads the JSON and markdown written by ' +
+      '</p><p class="caption">This page is static: it reads the JSON and markdown written by ' +
       "<code>benchmark/site/build.py</code>. Serve <code>dist/</code> over HTTP (for example " +
       "<code>python -m http.server -d benchmark/site/dist 8000</code>) rather than opening the " +
       "file directly.</p></div>";
@@ -384,29 +492,17 @@
   function runSelector(run) {
     var options = (INDEX.runs || [])
       .map(function (item) {
-        var label =
-          (item.dataset.name || "?") +
-          " v" +
-          (item.dataset.version || "?") +
-          " · " +
-          (item.created_at || "").slice(0, 10) +
-          " · " +
-          item.run_id;
+        var label = (item.dataset.name || "?") + " · " + dateFmt(item.created_at);
         return (
-          '<option value="' +
-          esc(item.run_id) +
-          '"' +
-          (item.run_id === run.run_id ? " selected" : "") +
-          ">" +
-          esc(label) +
-          "</option>"
+          '<option value="' + esc(item.run_id) + '"' + (item.run_id === run.run_id ? " selected" : "") +
+          ' title="' + esc(item.run_id) + '">' + esc(label) + "</option>"
         );
       })
       .join("");
     return (
-      '<div class="field"><label for="run-select">Run</label><select id="run-select">' +
+      '<label class="run-pick"><span class="sr-only">Run</span><select id="run-select" title="Benchmark run">' +
       options +
-      "</select></div>"
+      "</select></label>"
     );
   }
 
@@ -416,38 +512,6 @@
     select.addEventListener("change", function () {
       go(listHref(path, select.value));
     });
-  }
-
-  function runMeta(run) {
-    var sha = ((run.dataset && run.dataset.sha256) || "").slice(0, 12);
-    var normalize = run.normalize || {};
-    var flags = [];
-    if (normalize.case_insensitive) flags.push("case-insensitive");
-    if (normalize.strip_markdown) flags.push("markdown stripped");
-    if (normalize.strip_punctuation) flags.push("punctuation stripped");
-    return (
-      '<p class="run-meta">' +
-      "<span>Dataset <strong>" +
-      esc(run.dataset.name) +
-      "</strong> v" +
-      esc(run.dataset.version) +
-      "</span><span>" +
-      esc(run.dataset.documents) +
-      " documents</span><span>" +
-      esc((run.models || []).length) +
-      " models</span><span>LiteOCR " +
-      esc(run.liteocr_version) +
-      "</span>" +
-      (run.scorer_version ? "<span>scorer " + esc(run.scorer_version) + "</span>" : "") +
-      "<span>" +
-      esc(run.created_at) +
-      "</span>" +
-      '<span title="SHA-256 of the manifest, every input, truth and rule file">sha256 <code>' +
-      esc(sha) +
-      "…</code></span>" +
-      (flags.length ? "<span>" + esc(flags.join(", ")) + "</span>" : "") +
-      "</p>"
-    );
   }
 
   function codeBlock(command) {
@@ -460,6 +524,15 @@
     );
   }
 
+  function disclosure(summary, body, opts) {
+    opts = opts || {};
+    return (
+      '<details class="disclosure' + (opts.cls ? " " + opts.cls : "") + '"' + (opts.open ? " open" : "") +
+      (opts.id ? ' id="' + esc(opts.id) + '"' : "") + "><summary>" + summary + "</summary>" +
+      '<div class="disclosure-body">' + body + "</div></details>"
+    );
+  }
+
   function copyText(text, button, label) {
     var done = function () {
       button.textContent = "Copied";
@@ -467,7 +540,7 @@
       setTimeout(function () {
         button.textContent = label;
         button.classList.remove("done");
-      }, 1400);
+      }, 1500);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(done, function () {
@@ -490,12 +563,26 @@
   function wireCopyButtons(root) {
     root.querySelectorAll(".copy-btn").forEach(function (button) {
       button.addEventListener("click", function () {
-        copyText(button.getAttribute("data-copy") || "", button, "Copy");
+        copyText(button.getAttribute("data-copy") || "", button, button.getAttribute("data-label") || "Copy");
       });
     });
   }
 
-  /** Generic sortable table. `columns` describe cells; `rows` are opaque records. */
+  /** Keep a disclosure's open state across re-renders of the same view (per session). */
+  var OPEN = {};
+  function wireDisclosures(root) {
+    root.querySelectorAll("details[id]").forEach(function (d) {
+      if (OPEN[d.id]) d.open = true;
+      d.addEventListener("toggle", function () {
+        OPEN[d.id] = d.open;
+      });
+    });
+  }
+
+  /**
+   * Generic sortable table. `columns` describe cells; `rows` are opaque records. A column with
+   * `best: "max" | "min"` bolds its best value (docs/DESIGN.md: best in bold, never a heatmap).
+   */
   function sortableTable(options) {
     var columns = options.columns;
     var rows = options.rows.slice();
@@ -518,30 +605,36 @@
         return (av - bv) * sign;
       });
     }
+    var bests = {};
+    columns.forEach(function (col) {
+      if (!col.best || rows.length < 2) return;
+      var vals = rows.map(col.value).filter(isNum);
+      if (!vals.length) return;
+      var best = col.best === "min" ? Math.min.apply(null, vals) : Math.max.apply(null, vals);
+      var distinct = vals.some(function (v) {
+        return v !== best;
+      });
+      if (distinct) bests[col.key] = best;
+    });
 
     var head = columns
       .map(function (col) {
         var isSorted = col.key === sortKey;
+        var cls = ((col.num ? "num " : "") + (col.headCls || "")).trim();
         var attrs =
-          (col.num ? ' class="num"' : "") +
+          (cls ? ' class="' + cls + '"' : "") +
           (isSorted ? ' aria-sort="' + (sortDir === "asc" ? "ascending" : "descending") + '"' : "");
+        var label = col.labelHtml || esc(col.label);
         if (!col.value) {
-          return '<th scope="col"' + attrs + '><span class="sort-btn">' + esc(col.label) + "</span></th>";
+          return '<th scope="col"' + attrs + ">" + label + "</th>";
         }
         return (
-          '<th scope="col"' +
-          attrs +
-          '><button type="button" class="sort-btn" data-sort="' +
-          esc(col.key) +
-          '"' +
-          (col.asc ? ' data-asc="1"' : "") +
-          ' title="' +
-          esc(col.title || "Sort by " + col.label) +
-          '">' +
-          esc(col.label) +
-          '<span class="sort-arrow" aria-hidden="true">' +
-          (isSorted ? (sortDir === "asc" ? "▲" : "▼") : "") +
-          "</span></button></th>"
+          '<th scope="col"' + attrs + '><button type="button" class="sort-btn" data-sort="' + esc(col.key) + '"' +
+          (col.asc ? ' data-asc="1"' : "") + ' title="' + esc(col.title || "Sort by " + col.label) + '">' +
+          (col.num ? '<span class="sort-arrow" aria-hidden="true">' + (isSorted ? (sortDir === "asc" ? "↑" : "↓") : "") + "</span>" : "") +
+          label +
+          (col.num ? "" : '<span class="sort-arrow" aria-hidden="true">' + (isSorted ? (sortDir === "asc" ? "↑" : "↓") : "") + "</span>") +
+          "</button></th>"
         );
       })
       .join("");
@@ -551,20 +644,12 @@
         var cells = columns
           .map(function (col) {
             var cell = col.cell(row, position);
-            var cls = ((col.num ? "num " : "") + (cell.cls || "")).trim();
+            var best = col.key in bests && col.value(row) === bests[col.key];
+            var cls = ((col.num ? "num " : "") + (col.cls || "") + " " + (cell.cls || "") + (best ? " best" : "")).trim();
             var tag = col.rowHeader ? "th" : "td";
             return (
-              "<" +
-              tag +
-              (col.rowHeader ? ' scope="row"' : "") +
-              (cls ? ' class="' + esc(cls) + '"' : "") +
-              (cell.style ? ' style="' + esc(cell.style) + '"' : "") +
-              (cell.title ? ' title="' + esc(cell.title) + '"' : "") +
-              ">" +
-              cell.html +
-              "</" +
-              tag +
-              ">"
+              "<" + tag + (col.rowHeader ? ' scope="row"' : "") + (cls ? ' class="' + esc(cls) + '"' : "") +
+              (cell.title ? ' title="' + esc(cell.title) + '"' : "") + ">" + cell.html + "</" + tag + ">"
             );
           })
           .join("");
@@ -574,14 +659,11 @@
       .join("");
 
     return (
-      '<div class="table-wrap"><table' +
-      (options.id ? ' id="' + esc(options.id) + '"' : "") +
-      ">" +
-      (options.caption ? "<caption>" + options.caption + "</caption>" : "") +
-      "<thead><tr>" +
-      head +
-      "</tr></thead><tbody>" +
-      (body || '<tr><td colspan="' + columns.length + '" class="empty">No rows</td></tr>') +
+      '<div class="table-wrap"><table' + (options.cls ? ' class="' + esc(options.cls) + '"' : "") +
+      (options.id ? ' id="' + esc(options.id) + '"' : "") + ">" +
+      (options.caption ? '<caption class="sr-only">' + options.caption + "</caption>" : "") +
+      "<thead><tr>" + head + "</tr></thead><tbody>" +
+      (body || '<tr><td colspan="' + columns.length + '" class="empty">No documents match.</td></tr>') +
       "</tbody></table></div>"
     );
   }
@@ -594,38 +676,22 @@
         var dir;
         if (params.get("sort") === key) dir = params.get("dir") === "asc" ? "desc" : "asc";
         else dir = button.getAttribute("data-asc") === "1" ? "asc" : "desc";
-        go(hrefFor(key, dir));
+        go(hrefFor(key, dir), true);
       });
     });
-  }
-
-  /** Single-hue sequential scale (0..1) across a set of values; null for missing. */
-  function heatScale(values) {
-    var clean = values.filter(isNum);
-    var lo = clean.length ? Math.min.apply(null, clean) : 0;
-    var hi = clean.length ? Math.max.apply(null, clean) : 100;
-    if (hi - lo < 5) lo = hi - 5; // do not amplify sub-point noise into a full gradient
-    return function (value) {
-      if (!isNum(value)) return null;
-      return Math.max(0, Math.min(1, (value - lo) / (hi - lo || 1)));
-    };
-  }
-
-  function heatStyle(t) {
-    return t === null ? "" : "--t:" + t.toFixed(3);
   }
 
   /* ------------------------------------------------------------ leaderboard */
 
   var ASC_BY_DEFAULT = ["model", "cer", "wer", "p50", "p90", "p95", "per_page", "cost", "failed"];
 
-  function leaderboardColumns(run, rulesRun, headLabel, headTitle) {
+  function leaderboardColumns(run, opts) {
     function sum(key) {
       return function (row) {
         return row.summary[key];
       };
     }
-    function numCol(key, label, digits, title, fmt, getter) {
+    function numCol(key, label, digits, title, fmt, getter, best) {
       var get = getter || sum(key);
       return {
         key: key,
@@ -633,6 +699,7 @@
         num: true,
         title: title,
         asc: ASC_BY_DEFAULT.indexOf(key) !== -1,
+        best: best === undefined ? (ASC_BY_DEFAULT.indexOf(key) !== -1 ? "min" : "max") : best,
         value: get,
         cell: function (row) {
           var v = get(row);
@@ -653,6 +720,8 @@
         label: "Model",
         asc: true,
         rowHeader: true,
+        cls: "sticky-col",
+        headCls: "sticky-col",
         value: function (row) {
           return row.model;
         },
@@ -660,200 +729,156 @@
           var first = (row.docs || [])[0];
           return {
             html:
-              '<a class="model-link" href="' +
-              esc(first ? docHref(run.run_id, row.model, first.id, {}) : "#") +
-              '" title="Inspect this model document by document"><code>' +
-              esc(row.model) +
-              "</code></a>",
-            cls: "model",
+              '<a class="model-id" href="' + esc(first ? docHref(run.run_id, row.model, first.id, {}) : "#") +
+              '" title="Inspect ' + esc(row.model) + ' document by document">' + esc(row.model) + "</a>",
           };
         },
       },
       {
         key: "score",
-        label: headLabel,
+        label: "Score",
         num: true,
-        title: headTitle,
+        best: "max",
+        title: opts.headTitle,
         value: function (row) {
           return row.stats.head.value;
         },
         cell: function (row) {
-          return { html: esc(fixed(row.stats.head.value, 2)), cls: "primary" };
+          var v = row.stats.head.value;
+          var inner = '<span class="scorebar">' + scoreHtml(v, 1) + barHtml(v) + "</span>";
+          return { html: row === opts.leader ? '<span class="bbox">' + inner + "</span>" : inner, cls: "score-cell" };
         },
       },
-      numCol("char_similarity", "Char sim", 3, "Mean character similarity (scorer v2; in v1 files this column held the headline)"),
-      numCol("cer", "CER", 3, "Character error rate — lower is better"),
-      numCol("wer", "WER", 3, "Word error rate — lower is better"),
-      numCol("word_f1", "Word F1", 3),
-      numCol("order_score", "Order", 3, "Reading-order agreement of shared lines"),
-      numCol("table_score", "Table", 3, "Similarity restricted to table rows (markdown or HTML tables)"),
-      numCol("teds_grid", "TEDS", 3, "TEDS on the row/cell grid: table structure plus cell content (scorer v2)"),
     ];
-    if (rulesRun) {
-      cols.push(
-        numCol("rule_pass_rate", "Rules %", 1, "Mean assertion pass rate over rule-scored documents", function (v) {
-          return isNum(v) ? (v * 100).toFixed(1) : "—";
-        })
-      );
+    if ((run.sources || []).length > 1) {
+      run.sources.forEach(function (src) {
+        var n = (run.models[0] && run.models[0].stats.bySource[src]) || { docs: 0 };
+        cols.push({
+          key: "src:" + src,
+          label: srcLabel(src),
+          labelHtml: esc(srcLabel(src)),
+          num: true,
+          best: "max",
+          cls: "hide-narrow",
+          headCls: "hide-narrow src-h",
+          title: "Mean score on the " + n.docs + " " + srcLabel(src) + " documents. Each source is scored on its own ground truth; compare models within a column.",
+          value: function (row) {
+            return mean(row.stats.bySource[src]);
+          },
+          cell: function (row) {
+            var b = row.stats.bySource[src];
+            return { html: esc(fixed(mean(b), 1)), title: b && b.failed ? b.failed + " failed" : "" };
+          },
+        });
+      });
     }
     cols.push(
-      numCol("p50", "p50", 0, "Median client-measured latency", msFmt, function (row) {
-        return row.stats.p50;
-      }),
-      numCol("p90", "p90", 0, "90th percentile latency (computed from the per-document latencies)", msFmt, function (row) {
-        return row.stats.p90;
-      }),
-      numCol("p95", "p95", 0, "95th percentile latency", msFmt, function (row) {
-        return row.stats.p95;
-      }),
-      numCol("per_page", "ms/page", 0, "Total latency / pages", null, sum("latency_per_page_ms")),
       numCol("cost", "$/1k pages", 2, "Public list price per 1,000 pages", moneyFmt, sum("cost_per_1k_pages_usd")),
-      {
+      numCol("p50", "p50", 0, "Median client-measured latency, caches disabled", msFmt, function (row) {
+        return row.stats.p50;
+      })
+    );
+    if (opts.anyFailed) {
+      cols.push({
         key: "failed",
         label: "Failed",
         num: true,
         asc: true,
-        value: sum("failed"),
+        value: function (row) {
+          return (row.summary.failed || 0) + (row.summary.empty_outputs || 0);
+        },
         cell: function (row) {
           var failed = row.summary.failed || 0;
-          return { html: esc(failed + "/" + row.summary.documents), cls: failed ? "fail" : "muted" };
+          var empty = row.summary.empty_outputs || 0;
+          return {
+            html: esc(failed + empty ? String(failed + empty) : "0"),
+            cls: failed + empty ? "v-poor" : "muted",
+            title: failed + " failed calls, " + empty + " empty outputs, of " + row.summary.documents,
+          };
         },
+      });
+    }
+    if (opts.all) {
+      cols.push(
+        numCol("char_similarity", "Char sim", 3, "Mean character similarity"),
+        numCol("cer", "CER", 3, "Character error rate — lower is better"),
+        numCol("wer", "WER", 3, "Word error rate — lower is better"),
+        numCol("word_f1", "Word F1", 3),
+        numCol("order_score", "Order", 3, "Reading-order agreement of shared lines"),
+        numCol("table_score", "Table", 3, "Similarity restricted to table rows (markdown or HTML tables)"),
+        numCol("teds_grid", "TEDS", 3, "TEDS on the row/cell grid: table structure plus cell content")
+      );
+      if (opts.rulesRun) {
+        cols.push(
+          numCol("rule_pass_rate", "Rules %", 1, "Mean pass rate over rule-scored documents", function (v) {
+            return isNum(v) ? (v * 100).toFixed(1) : "—";
+          })
+        );
       }
-    );
+      cols.push(
+        numCol("p90", "p90", 0, "90th percentile latency (from the per-document latencies)", msFmt, function (row) {
+          return row.stats.p90;
+        }),
+        numCol("p95", "p95", 0, "95th percentile latency", msFmt, function (row) {
+          return row.stats.p95;
+        }),
+        numCol("per_page", "ms/page", 0, "Total latency / pages", null, sum("latency_per_page_ms"))
+      );
+    }
     return cols;
   }
 
-  function breakdownTables(run, orderedModels) {
-    var sources = run.sources || [];
-    var values = [];
-    orderedModels.forEach(function (model) {
-      sources.forEach(function (src) {
-        values.push(mean(model.stats.bySource[src]));
-      });
-    });
-    var hue = heatScale(values);
-    var srcHead = sources
-      .map(function (src) {
-        var n = (orderedModels[0] && orderedModels[0].stats.bySource[src]) || { docs: 0 };
+  /** Categories as rows (grouped by source), models as columns: plain numbers, best bold. */
+  function categoryTable(run, models) {
+    var head = models
+      .map(function (m) {
+        var parts = modelParts(m.model);
         return (
-          '<th scope="col" class="num"><a href="' +
-          esc(listHref("documents", run.run_id, { src: src })) +
-          '">' +
-          esc(src) +
-          '</a><span class="th-sub">' +
-          n.docs +
-          " docs</span></th>"
+          '<th scope="col" class="num"><span class="mhead" title="' + esc(m.model) + '"><span class="p">' + esc(parts.p) +
+          '</span><span class="v">' + esc(parts.v) + "</span></span></th>"
         );
       })
       .join("");
-    var srcBody = orderedModels
-      .map(function (model) {
+    var body = (run.sources || [])
+      .map(function (src) {
+        var cats = run.catsBySource[src] || [];
+        var group =
+          (run.sources.length > 1
+            ? '<tr><th scope="rowgroup" class="cat-group sticky-col" colspan="' + (models.length + 1) + '">' + esc(srcLabel(src)) + "</th></tr>"
+            : "");
         return (
-          '<tr><th scope="row" class="model"><code>' +
-          esc(model.model) +
-          "</code></th>" +
-          sources
-            .map(function (src) {
-              var b = model.stats.bySource[src];
-              var v = mean(b);
+          group +
+          cats
+            .map(function (cat) {
+              var key = src + "\u0000" + cat;
+              var vals = models.map(function (m) {
+                return mean(m.stats.byCat[key]);
+              });
+              var clean = vals.filter(isNum);
+              var best = clean.length ? Math.max.apply(null, clean) : null;
+              var distinct = clean.some(function (v) {
+                return v !== best;
+              });
+              var n = (models[0] && models[0].stats.byCat[key]) || { docs: 0 };
               return (
-                '<td class="num heat" style="' +
-                heatStyle(hue(v)) +
-                '" title="' +
-                esc(model.model + " · " + src + " · " + (b ? b.docs : 0) + " docs" + (b && b.failed ? " · " + b.failed + " failed" : "")) +
-                '">' +
-                esc(fixed(v, 1)) +
-                "</td>"
+                '<tr><th scope="row" class="sticky-col"><a href="' + esc(listHref("documents", run.run_id, { src: src, cat: cat })) + '">' +
+                esc(catLabel(cat)) + '</a> <span class="muted">' + n.docs + "</span></th>" +
+                vals
+                  .map(function (v) {
+                    return '<td class="num' + (distinct && v === best ? " best" : "") + '">' + esc(fixed(v, 1)) + "</td>";
+                  })
+                  .join("") +
+                "</tr>"
               );
             })
-            .join("") +
-          "</tr>"
+            .join("")
         );
       })
       .join("");
-
-    var catValues = [];
-    var cols = [];
-    sources.forEach(function (src) {
-      (run.catsBySource[src] || []).forEach(function (cat) {
-        cols.push({ src: src, cat: cat });
-      });
-    });
-    orderedModels.forEach(function (model) {
-      cols.forEach(function (c) {
-        catValues.push(mean(model.stats.byCat[c.src + "\u0000" + c.cat]));
-      });
-    });
-    var catHue = heatScale(catValues);
-    var groupHead = sources
-      .map(function (src) {
-        return (
-          '<th scope="colgroup" class="group" colspan="' +
-          (run.catsBySource[src] || []).length +
-          '">' +
-          esc(src) +
-          "</th>"
-        );
-      })
-      .join("");
-    var catHead = cols
-      .map(function (c) {
-        return (
-          '<th scope="col" class="num"><a href="' +
-          esc(listHref("documents", run.run_id, { src: c.src, cat: c.cat })) +
-          '">' +
-          esc(c.cat) +
-          "</a></th>"
-        );
-      })
-      .join("");
-    var catBody = orderedModels
-      .map(function (model) {
-        return (
-          '<tr><th scope="row" class="model"><code>' +
-          esc(model.model) +
-          "</code></th>" +
-          cols
-            .map(function (c) {
-              var b = model.stats.byCat[c.src + "\u0000" + c.cat];
-              var v = mean(b);
-              return (
-                '<td class="num heat" style="' +
-                heatStyle(catHue(v)) +
-                '" title="' +
-                esc(model.model + " · " + c.src + " / " + c.cat + " · " + (b ? b.docs : 0) + " docs") +
-                '">' +
-                esc(fixed(v, 1)) +
-                "</td>"
-              );
-            })
-            .join("") +
-          "</tr>"
-        );
-      })
-      .join("");
-
     return (
-      '<section class="block"><div class="panel-title"><h2>By source</h2>' +
-      '<span class="heat-legend">lower <span class="heat-bar"></span> higher</span></div>' +
-      '<div class="table-wrap"><table class="compact"><caption>Mean per-document score per dataset source. ' +
-      "Sources are scored on their own ground truth, so compare models within a column, not across columns.</caption>" +
-      '<thead><tr><th scope="col">Model</th>' +
-      srcHead +
-      "</tr></thead><tbody>" +
-      srcBody +
-      "</tbody></table></div></section>" +
-      '<section class="block"><div class="panel-title"><h2>By category</h2>' +
-      '<span class="hint">click a heading to list its documents</span></div>' +
-      '<div class="table-wrap"><table class="compact heatmap"><caption>Mean per-document score per source and category. ' +
-      "Shading is scaled across the whole table.</caption>" +
-      '<thead><tr><td></td>' +
-      groupHead +
-      '</tr><tr><th scope="col">Model</th>' +
-      catHead +
-      "</tr></thead><tbody>" +
-      catBody +
-      "</tbody></table></div></section>"
+      '<div class="table-wrap"><table class="cat-table"><caption class="sr-only">Mean score per category and model</caption>' +
+      '<thead><tr><th scope="col" class="sticky-col">Category</th>' + head + "</tr></thead><tbody>" + body + "</tbody></table></div>" +
+      '<p class="caption">Mean per-document score. The number after a category is its document count; open a category to list its documents.</p>'
     );
   }
 
@@ -871,8 +896,18 @@
     return ticks;
   }
 
+  function boxesOverlap(a, b) {
+    return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  }
+
+  function distToBox(box, x, y) {
+    var dx = Math.max(box.x - x, 0, x - (box.x + box.w));
+    var dy = Math.max(box.y - y, 0, y - (box.y + box.h));
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
   function scatterChart(run, models, xMode) {
-    var xLabel = xMode === "latency" ? "p50 latency (s)" : "List price, $ per 1,000 pages";
+    var xLabel = xMode === "latency" ? "p50 latency, seconds" : "List price, $ per 1,000 pages";
     var points = models
       .map(function (m) {
         var x = xMode === "latency" ? (isNum(m.stats.p50) ? m.stats.p50 / 1000 : null) : m.summary.cost_per_1k_pages_usd;
@@ -881,20 +916,25 @@
       .filter(function (p) {
         return isNum(p.x) && isNum(p.y);
       });
-    if (!points.length) return '<p class="empty">No cost data in this run.</p>';
+    if (!points.length) return '<p class="empty">No ' + (xMode === "latency" ? "latency" : "cost") + " data in this run.</p>";
 
-    var W = 720;
-    var H = 340;
-    var M = { l: 52, r: 24, t: 16, b: 46 };
+    // Drawn at the width it will be shown at (up to 640), so labels stay 11px on a phone.
+    var W = Math.round(Math.max(340, Math.min(640, view.clientWidth || 640)));
+    var H = W < 500 ? 280 : 300;
+    var M = { l: 40, r: 16, t: 12, b: 40 };
     var xMax = Math.max.apply(null, points.map(function (p) { return p.x; }));
     var yMin = Math.min.apply(null, points.map(function (p) { return p.y; }));
     var yMax = Math.max.apply(null, points.map(function (p) { return p.y; }));
-    var xTicks = niceTicks(0, xMax * 1.12 || 1, 5);
+    var xTicks = niceTicks(0, xMax * 1.08 || 1, 5);
+    // The last tick must reach past the right-most point, or that point sits off the axis.
+    if (xTicks.length > 1 && xTicks[xTicks.length - 1] < xMax) {
+      xTicks.push(+(xTicks[xTicks.length - 1] + xTicks[1] - xTicks[0]).toFixed(10));
+    }
     var x1 = xTicks[xTicks.length - 1] || 1;
     var y0 = Math.max(0, Math.floor((yMin - Math.max(2, (yMax - yMin) * 0.15)) / 5) * 5);
     var y1 = Math.min(100, Math.ceil((yMax + Math.max(1, (yMax - yMin) * 0.1)) / 5) * 5);
     if (y1 <= y0) y1 = y0 + 5;
-    var yTicks = niceTicks(y0, y1, 5);
+    var yTicks = niceTicks(y0, y1, 4);
     function sx(v) {
       return M.l + (v / x1) * (W - M.l - M.r);
     }
@@ -911,35 +951,81 @@
       p.front = p.y > best;
       if (p.front) best = p.y;
     });
-    var front = sorted.filter(function (p) {
-      return p.front;
-    });
-    var frontPath = front
+    var frontPath = sorted
+      .filter(function (p) {
+        return p.front;
+      })
       .map(function (p, i) {
-        // Step line: flat until the next frontier model, then up to it.
         return i === 0 ? "M" + sx(p.x) + "," + sy(p.y) : "H" + sx(p.x) + "V" + sy(p.y);
       })
       .join("");
 
-    // Direct labels, nudged apart vertically when they would collide.
-    var labels = points
-      .map(function (p) {
-        return { p: p, x: sx(p.x), y: sy(p.y) };
-      })
-      .sort(function (a, b) {
-        return a.y - b.y;
-      });
-    var placed = [];
-    labels.forEach(function (l) {
-      var ly = l.y + 4;
-      var right = l.x < W - 190;
-      placed.forEach(function (o) {
-        if (Math.abs(o.x - l.x) < 150 && o.right === right && Math.abs(o.ly - ly) < 14) ly = o.ly + 14;
-      });
-      l.ly = ly;
-      l.right = right;
-      placed.push(l);
+    // Direct labels with simple collision avoidance: try positions around the dot, keep the
+    // first that clears every dot and every label placed so far (higher scores place first).
+    var CHAR = 6.7;
+    var LH = 13;
+    var dots = points.map(function (p) {
+      return { x: sx(p.x) - 6, y: sy(p.y) - 6, w: 12, h: 12, p: p };
     });
+    // The frontier's segments are obstacles too, so no label is struck through by the line.
+    var placed = [];
+    var frontPts = sorted.filter(function (p) {
+      return p.front;
+    });
+    for (var f = 1; f < frontPts.length; f++) {
+      var ax = sx(frontPts[f - 1].x);
+      var ay = sy(frontPts[f - 1].y);
+      var bx = sx(frontPts[f].x);
+      var by = sy(frontPts[f].y);
+      placed.push({ x: ax, y: ay - 1.5, w: bx - ax, h: 3 });
+      placed.push({ x: bx - 1.5, y: by, w: 3, h: ay - by });
+    }
+    var labels = points
+      .slice()
+      .sort(function (a, b) {
+        return b.y - a.y;
+      })
+      .map(function (p) {
+        var cx = sx(p.x);
+        var cy = sy(p.y);
+        var w = String(p.model.model).length * CHAR;
+        var candidates = [
+          [cx + 10, cy - LH / 2, "start"],
+          [cx - 10 - w, cy - LH / 2, "end"],
+          [cx + 8, cy - LH - 7, "start"],
+          [cx + 8, cy + 7, "start"],
+          [cx - 8 - w, cy - LH - 7, "end"],
+          [cx - 8 - w, cy + 7, "end"],
+          [cx + 10, cy - LH / 2 - 15, "start"],
+          [cx + 10, cy - LH / 2 + 15, "start"],
+          [cx - 10 - w, cy - LH / 2 - 15, "end"],
+          [cx - 10 - w, cy - LH / 2 + 15, "end"],
+          [cx - w / 2, cy - LH - 10, "middle"],
+          [cx - w / 2, cy + 10, "middle"],
+        ];
+        var choice = null;
+        for (var i = 0; i < candidates.length && !choice; i++) {
+          var c = candidates[i];
+          var box = { x: c[0], y: c[1], w: w, h: LH };
+          if (box.x < 0 || box.x + box.w > W || box.y < 0 || box.y + box.h > H - M.b + 4) continue;
+          var clash = placed.some(function (o) {
+            return boxesOverlap(box, o);
+          }) || dots.some(function (d) {
+            return d.p !== p && boxesOverlap(box, d);
+          });
+          // A label must sit nearer its own point than any other, or it names the wrong one.
+          var own = distToBox(box, cx, cy);
+          var misleading = dots.some(function (d) {
+            return d.p !== p && distToBox(box, d.x + 6, d.y + 6) < own + 2;
+          });
+          if (!clash && !misleading) choice = { box: box, anchor: c[2] };
+        }
+        // No room anywhere (a narrow screen): leave the point unlabelled rather than overlap.
+        if (!choice) return { p: p, cx: cx, cy: cy, tx: null };
+        placed.push(choice.box);
+        var tx = choice.anchor === "start" ? choice.box.x : choice.anchor === "end" ? choice.box.x + w : choice.box.x + w / 2;
+        return { p: p, cx: cx, cy: cy, tx: tx, ty: choice.box.y + LH - 3, anchor: choice.anchor };
+      });
 
     var grid =
       yTicks
@@ -953,60 +1039,51 @@
       xTicks
         .map(function (t) {
           return (
-            '<text class="tick" x="' + sx(t) + '" y="' + (H - M.b + 18) + '" text-anchor="middle">' +
-            (xMode === "latency" ? t : "$" + t) +
-            "</text>"
+            '<text class="tick" x="' + sx(t) + '" y="' + (H - M.b + 16) + '" text-anchor="middle">' +
+            (xMode === "latency" ? t : "$" + t) + "</text>"
           );
         })
         .join("");
 
+    var top = byScore(models)[0];
+    var unlabelled = labels
+      .filter(function (l) {
+        return l.tx === null;
+      })
+      .map(function (l) {
+        return l.p.model.model;
+      });
     var marks = labels
       .map(function (l) {
         var p = l.p;
         var tip =
-          p.model.model +
-          " — " +
-          p.model.stats.head.label.toLowerCase() +
-          " " +
-          fixed(p.y, 2) +
-          " · $" +
-          fixed(p.model.summary.cost_per_1k_pages_usd, 2) +
-          "/1k pages · p50 " +
-          msFmt(p.model.stats.p50) +
-          (p.front ? " · on the frontier" : "");
+          p.model.model + " — score " + fixed(p.y, 1) + " · $" + fixed(p.model.summary.cost_per_1k_pages_usd, 2) +
+          "/1k pages · p50 " + msFmt(p.model.stats.p50) + (p.front ? " · on the frontier" : "");
         return (
-          '<g class="pt' +
-          (p.front ? " front" : "") +
-          '" tabindex="0" role="img" aria-label="' +
-          esc(tip) +
-          '" data-tip="' +
-          esc(tip) +
-          '">' +
-          '<circle class="hit" cx="' + l.x + '" cy="' + l.y + '" r="14"/>' +
-          '<circle class="dot" cx="' + l.x + '" cy="' + l.y + '" r="6"/>' +
-          '<text class="lbl" x="' + (l.right ? l.x + 11 : l.x - 11) + '" y="' + l.ly + '" text-anchor="' +
-          (l.right ? "start" : "end") + '">' + esc(p.model.model) + "</text></g>"
+          '<g class="pt' + (p.front ? " front" : "") + (p.model === top ? " top" : "") + '" tabindex="0" role="img" aria-label="' +
+          esc(tip) + '" data-tip="' + esc(tip) + '">' +
+          '<circle class="hit" cx="' + l.cx + '" cy="' + l.cy + '" r="12"/>' +
+          '<circle class="dot" cx="' + l.cx + '" cy="' + l.cy + '" r="4.5"/>' +
+          (l.tx === null
+            ? ""
+            : '<text class="lbl" x="' + l.tx.toFixed(1) + '" y="' + l.ty.toFixed(1) + '" text-anchor="' + l.anchor + '">' + esc(p.model.model) + "</text>") +
+          "</g>"
         );
       })
       .join("");
 
     return (
       '<div class="chart"><svg viewBox="0 0 ' + W + " " + H + '" role="group" aria-label="' +
-      esc(p0label(xMode)) + '">' +
+      esc(xMode === "latency" ? "Score against median latency, one point per model" : "Score against list price, one point per model") + '">' +
       grid +
       '<line class="axis" x1="' + M.l + '" x2="' + (W - M.r) + '" y1="' + (H - M.b) + '" y2="' + (H - M.b) + '"/>' +
       '<path class="frontier" d="' + frontPath + '"/>' +
       marks +
-      '<text class="axis-label" x="' + (M.l + (W - M.l - M.r) / 2) + '" y="' + (H - 8) + '" text-anchor="middle">' +
-      esc(xLabel) + "</text>" +
-      '<text class="axis-label" transform="translate(14 ' + (M.t + (H - M.t - M.b) / 2) + ') rotate(-90)" text-anchor="middle">' +
-      esc(models[0] ? models[0].stats.head.label : "Score") + "</text>" +
-      '</svg><div class="tip" role="status" hidden></div></div>'
+      '<text class="axis-label" x="' + (M.l + (W - M.l - M.r) / 2) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(xLabel) + "</text>" +
+      '<text class="axis-label" transform="translate(11 ' + (M.t + (H - M.t - M.b) / 2) + ') rotate(-90)" text-anchor="middle">Score</text>' +
+      '</svg><div class="tip" role="status" hidden></div></div>' +
+      (unlabelled.length ? '<p class="caption">Unlabelled for space: ' + esc(unlabelled.join(", ")) + ". Hover or tap a point for its details.</p>" : "")
     );
-  }
-
-  function p0label(xMode) {
-    return xMode === "latency" ? "Score against median latency, one point per model" : "Score against list price, one point per model";
   }
 
   function wireChart(root) {
@@ -1037,6 +1114,47 @@
     });
   }
 
+  function methodologyHtml(run, datasetInfo) {
+    return (
+      '<div class="prose"><p>Scores are deterministic text comparisons, no LLM judge. Predictions and ground truth are ' +
+      "normalised (NFKC, markdown syntax stripped, quotes and dashes straightened, whitespace collapsed" +
+      (run.normalize && run.normalize.case_insensitive ? ", lowercased" : "") +
+      "), then compared:</p><ul>" +
+      "<li><strong>Score</strong> is the mean per-document score, 0–100: character similarity " +
+      "<code>1 − levenshtein / max(len)</code>; the table score on a table-only document; the share of checks that pass on a rules document. A failed call scores 0.</li>" +
+      "<li><strong>CER / WER</strong> are edit rates over characters and whitespace tokens. <strong>Order</strong> is Kendall-τ-style agreement on the order of lines present in both texts.</li>" +
+      "<li><strong>Table</strong> is character similarity restricted to table rows (markdown or HTML); <strong>TEDS</strong> is tree-edit-distance similarity on the row/cell grid.</li>" +
+      "<li><strong>Checks</strong> follow each source benchmark's own assertions (present, absent, order, table cell, sentences), ignoring spaces next to punctuation and honouring upstream edit tolerances.</li>" +
+      "<li><strong>Latency</strong> is client-measured through each provider's public API: it includes upload, queueing and polling, and every run is made with provider result caches disabled. <strong>$/1k pages</strong> uses public pay-as-you-go list prices.</li></ul>" +
+      "<p>" +
+      (datasetInfo && (datasetInfo.sources || (datasetInfo.kinds || {}).rules)
+        ? "Each document keeps the ground truth its own source ships: an exact transcript, or machine-checkable assertions for pages that have no reference transcript. "
+        : "Ground truth is exact by construction: the documents are rendered from the same source the truth markdown is written from. ") +
+      "Sources are scored on their own ground truth, so compare models within a source rather than across sources.</p>" +
+      (datasetInfo && datasetInfo.license ? "<p>Dataset licence: " + esc(String(datasetInfo.license).replace(/`/g, "")) + ".</p>" : "") +
+      '<p>Full definitions and caveats: <a href="' + METHODOLOGY + '" rel="noopener noreferrer">benchmark/README.md</a>.</p></div>'
+    );
+  }
+
+  function runDetailsHtml(run, runInfo) {
+    var normalize = run.normalize || {};
+    var flags = [];
+    if (normalize.case_insensitive) flags.push("case-insensitive");
+    if (normalize.strip_markdown) flags.push("markdown stripped");
+    if (normalize.strip_punctuation) flags.push("punctuation stripped");
+    return (
+      '<dl class="kv">' +
+      "<dt>Run</dt><dd class=\"mono\">" + esc(run.run_id) + "</dd>" +
+      "<dt>Started</dt><dd>" + esc(run.created_at) + (run.rescored_at ? " · re-scored " + esc(run.rescored_at) : "") + "</dd>" +
+      "<dt>Dataset</dt><dd>" + esc(run.dataset.name) + " v" + esc(run.dataset.version) + " · " + esc(run.dataset.documents) + " documents</dd>" +
+      (run.dataset.sha256 ? '<dt>SHA-256</dt><dd class="mono" title="Of the manifest, every input, truth and rule file">' + esc(run.dataset.sha256) + "</dd>" : "") +
+      "<dt>Normalisation</dt><dd>" + esc(flags.join(", ") || "none") + "</dd>" +
+      "<dt>Versions</dt><dd>LiteOCR " + esc(run.liteocr_version) + (run.scorer_version ? " · scorer " + esc(run.scorer_version) : "") + "</dd>" +
+      '<dt>Result file</dt><dd><a href="' + esc(url(runInfo.file)) + '" rel="noopener">' + esc(runInfo.file) + "</a></dd>" +
+      "</dl>"
+    );
+  }
+
   function viewLeaderboard(runInfo, params) {
     document.title = "Leaderboard · LiteOCR Benchmark";
     setNav("leaderboard", runInfo.run_id);
@@ -1044,122 +1162,80 @@
       var sortKey = params.get("sort") || "score";
       var sortDir = params.get("dir") || (ASC_BY_DEFAULT.indexOf(sortKey) !== -1 ? "asc" : "desc");
       var xMode = params.get("x") === "latency" ? "latency" : "cost";
+      var all = params.get("cols") === "all";
       var rulesRun = (run.models || []).some(function (m) {
         return isNum((m.summary || {}).rule_pass_rate);
       });
-      var anyHead = (run.models || []).some(function (m) {
-        return m.stats.head.headline;
+      var anyFailed = (run.models || []).some(function (m) {
+        return (m.summary.failed || 0) + (m.summary.empty_outputs || 0) > 0;
       });
-      var head0 = run.models[0] ? run.models[0].stats.head : { label: "Overall" };
-      var headLabel = anyHead ? head0.label : "Overall";
-      var headTitle = anyHead
-        ? head0.title || "summary.headline from the result file"
-        : "100 × mean per-document score (character similarity; table score on table-only documents; pass rate on rule documents); a failed call scores 0";
-
-      var byScore = run.models.slice().sort(function (a, b) {
-        return (b.stats.head.value || 0) - (a.stats.head.value || 0);
-      });
+      var ordered = byScore(run.models);
+      var leader = ordered[0];
+      var head0 = leader ? leader.stats.head : {};
+      var headTitle =
+        head0.title ||
+        "Mean per-document score, 0–100: character similarity; table score on table-only documents; share of checks passed on rule documents. A failed call scores 0.";
+      var datasetInfo = (INDEX.datasets || {})[run.dataset.name];
+      var sources = run.sources || [];
 
       var reproduce =
-        "liteocr bench run \\\n    --dataset benchmark/datasets/" +
-        run.dataset.name +
-        " \\\n    --models " +
-        run.models
-          .map(function (m) {
-            return m.model;
-          })
-          .join(" ") +
+        "liteocr bench run \\\n    --dataset benchmark/datasets/" + run.dataset.name +
+        " \\\n    --models " + run.models.map(function (m) { return m.model; }).join(" ") +
         " \\\n    --concurrency 4 --save-outputs benchmark/results/outputs/<run_id>";
 
-      var leader = byScore[0];
-      var cheapestTop = null;
-      byScore.forEach(function (m) {
-        if (leader && m.stats.head.value >= leader.stats.head.value - 1) {
-          if (!cheapestTop || (m.summary.cost_per_1k_pages_usd || Infinity) < (cheapestTop.summary.cost_per_1k_pages_usd || Infinity)) cheapestTop = m;
-        }
-      });
+      var summary =
+        esc(run.dataset.name) + " · " + esc(run.dataset.documents) + " documents" +
+        (sources.length > 1 ? " from " + sources.length + " benchmarks" : "") +
+        " · " + plural(run.models.length, "model") + " · " + esc(dateFmt(run.created_at));
 
       view.innerHTML =
-        '<div class="page-head"><div><p class="eyebrow">Open benchmark · every number is inspectable</p>' +
-        "<h1>Leaderboard</h1></div>" +
-        '<div class="toolbar">' +
-        runSelector(runInfo) +
-        "</div></div>" +
-        runMeta(run) +
-        (leader
-          ? '<div class="stat-row">' +
-            '<div class="stat"><span class="stat-k">Top ' + esc(headLabel.toLowerCase()) + "</span>" +
-            '<span class="stat-v">' + esc(fixed(leader.stats.head.value, 1)) + "</span>" +
-            '<span class="stat-s"><code>' + esc(leader.model) + "</code></span></div>" +
-            (cheapestTop && cheapestTop !== leader
-              ? '<div class="stat"><span class="stat-k">Within 1 point, cheapest</span><span class="stat-v">' +
-                esc(moneyFmt(cheapestTop.summary.cost_per_1k_pages_usd)) +
-                '</span><span class="stat-s"><code>' + esc(cheapestTop.model) + "</code> per 1k pages</span></div>"
-              : "") +
-            '<div class="stat"><span class="stat-k">Documents</span><span class="stat-v">' +
-            esc(run.dataset.documents) +
-            '</span><span class="stat-s">' + esc((run.sources || []).join(" + ")) + "</span></div>" +
-            "</div>"
-          : "") +
+        '<header class="page-head"><div><h1>Leaderboard</h1><p class="lede">' + summary + "</p></div>" + runSelector(runInfo) + "</header>" +
+        '<div class="table-tools"><p class="caption">Ranked by score, the mean per-document score out of 100. Open a model to inspect it document by document.</p>' +
+        '<button type="button" class="toggle" id="all-metrics" aria-pressed="' + all + '">All metrics</button></div>' +
         sortableTable({
           id: "leaderboard",
-          columns: leaderboardColumns(run, rulesRun, headLabel, headTitle),
+          cls: "lb-table",
+          columns: leaderboardColumns(run, { rulesRun: rulesRun, anyFailed: anyFailed, all: all, leader: leader, headTitle: headTitle }),
           rows: run.models,
           sortKey: sortKey,
           sortDir: sortDir,
-          caption:
-            (anyHead
-              ? "<strong>" + esc(headLabel) + "</strong> is <code>summary.headline</code> from the result file. "
-              : "<strong>Overall</strong> = 100 × mean per-document score. ") +
-            "Click a heading to sort, a model to inspect it document by document. " +
-            "p90 is computed here from the per-document latencies; everything else is read from " +
-            "<code>" + esc(runInfo.file) + "</code>.",
+          caption: "Models ranked by score",
           rowClass: function (row) {
             return row === leader ? "leader" : "";
           },
         }) +
-        '<section class="block"><div class="panel-title"><h2>Score vs ' +
-        (xMode === "latency" ? "latency" : "cost") +
-        "</h2>" +
+        '<section class="section"><div class="section-head"><h2>Score vs ' + (xMode === "latency" ? "latency" : "cost") + "</h2>" +
         '<div class="seg" role="group" aria-label="X axis">' +
         '<button type="button" data-x="cost" aria-pressed="' + (xMode === "cost") + '">Cost</button>' +
         '<button type="button" data-x="latency" aria-pressed="' + (xMode === "latency") + '">Latency</button>' +
         "</div></div>" +
-        scatterChart(run, byScore, xMode) +
-        '<p class="hint">Up and to the left is better. The line joins the frontier: models no other model beats on both axes. ' +
-        "Prices are public list prices, latency is client-measured p50.</p></section>" +
-        breakdownTables(run, byScore) +
-        '<div class="grid-2">' +
-        '<section class="panel"><h2>Methodology</h2>' +
-        "<p>Scores are deterministic text comparisons — no LLM judge. Predictions and ground truth are " +
-        "normalised (NFKC, markdown syntax stripped, quotes and dashes straightened, whitespace collapsed" +
-        (run.normalize && run.normalize.case_insensitive ? ", lowercased" : "") +
-        "), then compared:</p><ul>" +
-        "<li><strong>Per document</strong>: character similarity <code>1 − levenshtein / max(len)</code>; " +
-        "on a <em>table-only</em> document the table score; on a <em>rules</em> document the share of assertions that pass. A failed call scores 0.</li>" +
-        "<li><strong>CER / WER</strong> are edit rates over characters and whitespace tokens.</li>" +
-        "<li><strong>Order</strong> is Kendall-τ-style agreement on the order of lines present in both texts.</li>" +
-        "<li><strong>Table</strong> is character similarity restricted to table rows (markdown pipe tables or HTML <code>&lt;table&gt;</code>); <strong>TEDS</strong> is tree-edit-distance similarity on the row/cell grid.</li>" +
-        "<li><strong>Rules</strong> follow each source benchmark's own assertions (present, absent, order, table cell, sentences), ignoring spaces next to punctuation and honouring upstream edit tolerances.</li>" +
-        "<li><strong>Latency</strong> is measured from the client with caches disabled; <strong>$/1k pages</strong> uses public list prices.</li></ul>" +
-        '<p>Full definitions and caveats: <a href="' + METHODOLOGY + '" rel="noopener noreferrer">benchmark/README.md</a>.</p>' +
-        "</section>" +
-        '<section class="panel"><h2>Reproduce this run</h2>' +
-        "<p>Install the CLI, set the provider keys you want to test, then:</p>" +
-        codeBlock(reproduce) +
-        '<p class="hint">Score one prediction offline: <code>liteocr bench score prediction.md truth.md</code>. ' +
-        "Every document page has the exact commands for that document.</p>" +
-        "</section></div>";
+        scatterChart(run, ordered, xMode) +
+        '<p class="caption">Up and to the left is better. The dashed line joins the models no other model beats on both axes.</p></section>' +
+        '<div class="bottom-disclosures">' +
+        disclosure("By category <span class=\"count\">" + Object.keys(ordered[0] ? ordered[0].stats.byCat : {}).length + "</span>", categoryTable(run, ordered), { id: "lb-cat" }) +
+        disclosure("Methodology", methodologyHtml(run, datasetInfo), { id: "lb-method" }) +
+        disclosure(
+          "Reproduce this run",
+          '<p class="note">Install the CLI, set the provider keys you want to test, then run:</p>' + codeBlock(reproduce) +
+            '<p class="caption">Score one prediction offline with <code>liteocr bench score prediction.md truth.md</code>. Every document page has the exact commands for that document.</p>',
+          { id: "lb-repro" }
+        ) +
+        disclosure("Run details", runDetailsHtml(run, runInfo), { id: "lb-run" }) +
+        "</div>";
 
       wireSorting(view, function (key, dir) {
-        return listHref("leaderboard", run.run_id, { sort: key, dir: dir, x: params.get("x") });
+        return listHref("leaderboard", run.run_id, { sort: key, dir: dir, x: params.get("x"), cols: params.get("cols") });
       });
       wireCopyButtons(view);
       wireRunSelect(view, "leaderboard");
       wireChart(view);
+      wireDisclosures(view);
+      view.querySelector("#all-metrics").addEventListener("click", function () {
+        go(listHref("leaderboard", run.run_id, { sort: params.get("sort"), dir: params.get("dir"), x: params.get("x"), cols: all ? null : "all" }), true);
+      });
       view.querySelectorAll("button[data-x]").forEach(function (b) {
         b.addEventListener("click", function () {
-          go(listHref("leaderboard", run.run_id, { sort: params.get("sort"), dir: params.get("dir"), x: b.getAttribute("data-x") }), true);
+          go(listHref("leaderboard", run.run_id, { sort: params.get("sort"), dir: params.get("dir"), cols: params.get("cols"), x: b.getAttribute("data-x") }), true);
         });
       });
       KEYS = {};
@@ -1183,7 +1259,7 @@
       if (src && sourceOf(doc.id, run.dataset.name) !== src) return false;
       if (cat && doc.category !== cat) return false;
       if (q) {
-        var hay = (doc.id + " " + doc.category + " " + (doc.tags || []).join(" ")).toLowerCase();
+        var hay = [doc.id, docTitle(doc), doc.category, doc.category_label, doc.source_label, (doc.tags || []).join(" ")].join(" ").toLowerCase();
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
@@ -1200,6 +1276,13 @@
     return byDoc;
   }
 
+  /** Sort key that orders documents by source, category and ordinal. */
+  function titleKey(doc, run) {
+    var n = String(doc.ordinal || 0);
+    while (n.length < 5) n = "0" + n;
+    return [doc.source_label || srcLabel(sourceOf(doc.id, run.dataset.name)), doc.category_label || catLabel(doc.category), n, doc.id].join("\u0000");
+  }
+
   function viewDocuments(runInfo, params) {
     document.title = "Documents · LiteOCR Benchmark";
     setNav("documents", runInfo.run_id);
@@ -1208,37 +1291,34 @@
       var manifest = loaded[1];
       var src = params.get("src") || "";
       var cat = params.get("cat") || "";
-      var models = run.models.slice().sort(function (a, b) {
-        return (b.stats.head.value || 0) - (a.stats.head.value || 0);
-      });
+      var perModel = params.get("pm") === "1";
+      var models = byScore(run.models);
       var byDoc = recordsByDoc(run);
       var filters = { src: src, cat: cat, q: params.get("q") };
+      var sources = run.sources || [];
+      var multiSource = sources.length > 1;
 
       var rows = docList(run, manifest, params).map(function (doc) {
         var scores = {};
         var sum = 0;
         var count = 0;
+        var top = null;
+        var ties = 0;
         models.forEach(function (model) {
           var rec = byDoc[doc.id] && byDoc[doc.id][model.model];
           var value = docScore(rec);
-          scores[model.model] = { value: value, error: rec && rec.error, rec: rec };
+          scores[model.model] = { value: value, error: rec && rec.error };
           if (isNum(value)) {
             sum += value;
             count += 1;
+            if (top === null || value > top.value + 1e-9) {
+              top = { model: model.model, value: value };
+              ties = 1;
+            } else if (Math.abs(value - top.value) <= 1e-9) ties += 1;
           }
         });
-        var any = (byDoc[doc.id] && byDoc[doc.id][models[0].model]) || {};
-        return { doc: doc, scores: scores, mean: count ? sum / count : null, tableOnly: any.table_only };
+        return { doc: doc, scores: scores, mean: count ? sum / count : null, top: top, ties: ties };
       });
-
-      var all = [];
-      rows.forEach(function (row) {
-        models.forEach(function (model) {
-          all.push(row.scores[model.model].value);
-        });
-      });
-      var hue = heatScale(all);
-      var topModel = models[0] ? models[0].model : "";
 
       var columns = [
         {
@@ -1246,130 +1326,136 @@
           label: "Document",
           asc: true,
           rowHeader: true,
+          cls: "doc-cell" + (perModel ? " sticky-col" : ""),
+          headCls: perModel ? "sticky-col" : "",
           value: function (row) {
-            return row.doc.id;
+            return titleKey(row.doc, run);
           },
           cell: function (row) {
             return {
               html:
-                '<a href="' +
-                esc(docHref(run.run_id, topModel, row.doc.id, filters)) +
-                '">' +
-                esc(row.doc.id) +
-                "</a>" +
-                (isRulesDoc(row.doc) ? ' <span class="tag">rules</span>' : "") +
-                (row.tableOnly ? ' <span class="tag">table-only</span>' : ""),
-              cls: "doc",
+                '<a href="' + esc(docHref(run.run_id, models[0].model, row.doc.id, filters)) + '">' + esc(docTitle(row.doc)) + "</a>" +
+                (multiSource && !src ? '<span class="src">' + esc(row.doc.source_label || srcLabel(sourceOf(row.doc.id, run.dataset.name))) + "</span>" : ""),
+              title: row.doc.id,
             };
           },
         },
         {
-          key: "category",
-          label: "Category",
-          asc: true,
-          value: function (row) {
-            return row.doc.category;
-          },
-          cell: function (row) {
-            return { html: esc(row.doc.category), cls: "muted" };
-          },
-        },
-        {
           key: "mean",
-          label: "Mean",
+          label: "Mean score",
           num: true,
           title: "Mean score across every model in this run",
           value: function (row) {
             return row.mean;
           },
           cell: function (row) {
-            return { html: esc(fixed(row.mean, 1)), cls: "primary" };
+            return { html: '<span class="scorebar">' + scoreHtml(row.mean, 1) + barHtml(row.mean) + "</span>" };
           },
         },
-      ].concat(
-        models.map(function (model) {
-          return {
+      ];
+      if (!perModel) {
+        columns.push({
+          key: "best",
+          label: "Best model",
+          cls: "best-cell hide-narrow",
+          headCls: "hide-narrow",
+          cell: function (row) {
+            if (!row.top) return { html: "—" };
+            if (row.ties === models.length && models.length > 1) return { html: '<span class="muted">all ' + row.ties + " tied</span>" };
+            return {
+              html:
+                '<a class="model-id" href="' + esc(docHref(run.run_id, row.top.model, row.doc.id, filters)) + '">' + esc(row.top.model) + "</a>" +
+                (row.ties > 1 ? ' <span class="muted">+' + (row.ties - 1) + "</span>" : ""),
+              title: row.ties > 1 ? row.ties + " models share the best score" : "",
+            };
+          },
+        });
+      } else {
+        models.forEach(function (model) {
+          var parts = modelParts(model.model);
+          columns.push({
             key: "m:" + model.model,
             label: model.model,
+            labelHtml: '<span class="mhead"><span class="p">' + esc(parts.p) + '</span><span class="v">' + esc(parts.v) + "</span></span>",
             num: true,
-            title: "Score of " + model.model + " on this document",
+            title: "Score of " + model.model + " on each document",
             value: function (row) {
               return row.scores[model.model].value;
             },
             cell: function (row) {
               var entry = row.scores[model.model];
-              if (entry.error) return { html: "failed", cls: "fail", title: entry.error };
+              if (entry.error) return { html: "failed", cls: "low", title: entry.error };
               if (!isNum(entry.value)) return { html: "—", cls: "muted" };
               return {
                 html: '<a href="' + esc(docHref(run.run_id, model.model, row.doc.id, filters)) + '">' + esc(fixed(entry.value, 1)) + "</a>",
-                cls: "heat",
-                style: heatStyle(hue(entry.value)),
+                cls: "pm-cell" + (entry.value < FAIR ? " low" : ""),
               };
             },
-          };
-        })
-      );
-
-      var sources = run.sources || [];
-      var cats = src ? run.catsBySource[src] || [] : Object.keys(
-        sources.reduce(function (acc, s) {
-          (run.catsBySource[s] || []).forEach(function (c) {
-            acc[c] = 1;
           });
-          return acc;
-        }, {})
-      ).sort();
+        });
+      }
 
-      function options(list, current, allLabel) {
+      var cats = src
+        ? run.catsBySource[src] || []
+        : Object.keys(
+            sources.reduce(function (acc, s) {
+              (run.catsBySource[s] || []).forEach(function (c) {
+                acc[c] = 1;
+              });
+              return acc;
+            }, {})
+          ).sort(function (a, b) {
+            return catLabel(a).localeCompare(catLabel(b));
+          });
+
+      function options(list, current, allLabel, labelOf) {
         return (
           '<option value="">' + esc(allLabel) + "</option>" +
           list
             .map(function (name) {
-              return '<option value="' + esc(name) + '"' + (name === current ? " selected" : "") + ">" + esc(name) + "</option>";
+              return '<option value="' + esc(name) + '"' + (name === current ? " selected" : "") + ">" + esc(labelOf(name)) + "</option>";
             })
             .join("")
         );
       }
 
       var sortKey = params.get("sort") || "id";
-      var sortDir = params.get("dir") || (sortKey === "id" || sortKey === "category" ? "asc" : "desc");
+      var sortDir = params.get("dir") || (sortKey === "id" ? "asc" : "desc");
+      var total = ((run.models[0] || {}).docs || []).length;
 
       view.innerHTML =
-        '<div class="page-head"><div><p class="eyebrow">' + esc(run.dataset.name) + " v" + esc(run.dataset.version) +
-        "</p><h1>Documents</h1></div>" +
-        '<div class="toolbar">' +
+        '<header class="page-head"><div><h1>Documents</h1><p class="lede">' +
+        (rows.length === total ? plural(total, "document") : rows.length + " of " + plural(total, "document")) +
+        " · open one to see the page, each model's output and why it scored what it did</p></div></header>" +
+        '<div class="filters" role="search">' +
         runSelector(runInfo) +
-        (sources.length > 1
-          ? '<div class="field"><label for="src-select">Source</label><select id="src-select">' + options(sources, src, "All sources") + "</select></div>"
+        (multiSource
+          ? '<label><span class="sr-only">Source</span><select id="src-select">' + options(sources, src, "All sources", srcLabel) + "</select></label>"
           : "") +
-        '<div class="field"><label for="cat-select">Category</label><select id="cat-select">' + options(cats, cat, "All categories") + "</select></div>" +
-        '<div class="field"><label for="doc-search">Filter</label><input id="doc-search" type="search" placeholder="id or tag" value="' +
-        esc(params.get("q") || "") +
-        '" /></div></div></div>' +
-        '<p class="hint">' +
-        rows.length +
-        " of " +
-        (manifest.documents || []).length +
-        " documents. Open one to see the page, every model's output, the diff or rule checklist, and the layout boxes.</p>" +
+        '<label><span class="sr-only">Category</span><select id="cat-select">' + options(cats, cat, "All categories", catLabel) + "</select></label>" +
+        '<label class="grow"><span class="sr-only">Filter</span><input id="doc-search" type="search" placeholder="Filter" value="' +
+        esc(params.get("q") || "") + '" /></label>' +
+        '<span class="spacer"></span>' +
+        '<button type="button" class="toggle" id="per-model" aria-pressed="' + perModel + '">Per-model scores</button>' +
+        "</div>" +
         sortableTable({
+          cls: "docs-table",
           columns: columns,
           rows: rows,
           sortKey: sortKey,
           sortDir: sortDir,
-          caption:
-            "Per-document score (0–100) for each model: character similarity, table score on table-only documents, " +
-            "assertion pass rate on rule documents. Click a score to open that document with that model.",
+          caption: "Documents with their mean score across models",
         });
 
       function refilter(values) {
-        var next = { src: src, cat: cat, q: params.get("q"), sort: params.get("sort"), dir: params.get("dir") };
+        var next = { src: src, cat: cat, q: params.get("q"), sort: params.get("sort"), dir: params.get("dir"), pm: params.get("pm") };
         Object.keys(values).forEach(function (k) {
           next[k] = values[k];
         });
         go(listHref("documents", run.run_id, next), true);
       }
       wireSorting(view, function (key, dir) {
-        return listHref("documents", run.run_id, { src: src, cat: cat, q: params.get("q"), sort: key, dir: dir });
+        return listHref("documents", run.run_id, { src: src, cat: cat, q: params.get("q"), sort: key, dir: dir, pm: params.get("pm") });
       });
       wireRunSelect(view, "documents");
       var srcSelect = view.querySelector("#src-select");
@@ -1380,6 +1466,9 @@
       var catSelect = view.querySelector("#cat-select");
       catSelect.addEventListener("change", function () {
         refilter({ cat: catSelect.value });
+      });
+      view.querySelector("#per-model").addEventListener("click", function () {
+        refilter({ pm: perModel ? null : "1" });
       });
       var search = view.querySelector("#doc-search");
       var timer = null;
@@ -2163,7 +2252,7 @@
     return { passed: passed, total: rules.length, results: results };
   }
 
-  /* ------------------------------------------------------- source viewer */
+  /* ------------------------------------------------------- page viewer */
 
   var pdfLib = null;
 
@@ -2228,40 +2317,45 @@
     return { pages: pages, count: count };
   }
 
+  function placeholder(title, body) {
+    return '<div class="placeholder"><strong>' + esc(title) + "</strong>" + (body ? "<span>" + body + "</span>" : "") + "</div>";
+  }
+
   /**
-   * The page panel: renders the input (an image, or a PDF page through pdf.js) and draws a
-   * model's layout blocks over it. Built once per document and kept while the model or tab
-   * changes, so switching models never re-renders the page.
+   * The page panel. Shows the input page (an image, or a page image the build rendered from the
+   * PDF; pdf.js only for a PDF page the build did not render) and draws a model's layout boxes
+   * over it. Boxes are drawn only once a page image is on screen, never over a placeholder.
+   * Built once per document and kept while the model or tab changes.
    */
   function SourceViewer(key, opts) {
     var self = this;
     self.key = key;
+    self.opts = opts;
     self.page = 1;
-    self.pages = opts.pages || 1;
+    self.pages = Math.max(1, opts.pages || 1, (opts.previews || []).length);
     self.overlay = null;
-    self.overlayOn = true;
+    self.overlayOn = false;
+    self.ready = false;
+    self.token = 0;
     self.el = document.createElement("div");
     self.el.className = "sv";
     self.el.innerHTML =
       '<div class="sv-bar">' +
-      '<div class="pager" hidden><button type="button" class="btn sm" data-page="-1" aria-label="Previous page">‹</button>' +
+      '<div class="pager" hidden><button type="button" class="iconbtn" data-page="-1" aria-label="Previous page ([)">‹</button>' +
       '<span class="pager-label"></span>' +
-      '<button type="button" class="btn sm" data-page="1" aria-label="Next page">›</button></div>' +
-      '<button type="button" class="btn sm ov-toggle" aria-pressed="false" disabled>Layout boxes</button>' +
-      (opts.restricted ? "" : '<a class="sv-open" href="' + esc(opts.inputUrl) + '" rel="noopener" target="_blank">Open original ↗</a>') +
+      '<button type="button" class="iconbtn" data-page="1" aria-label="Next page (])">›</button></div>' +
+      '<span class="spacer"></span>' +
+      '<button type="button" class="toggle ov-toggle" aria-pressed="false" hidden title="Layout boxes from the unified response (o)">Layout boxes</button>' +
+      (opts.restricted ? "" : '<a class="sv-open" href="' + esc(opts.inputUrl) + '" rel="noopener" target="_blank">Open original</a>') +
       "</div>" +
-      '<div class="sv-stage"><div class="sv-page"><div class="sv-media"><p class="loading">Loading page…</p></div>' +
-      '<svg class="ov" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"></svg></div></div>' +
-      '<div class="sv-legend" hidden></div>' +
-      '<p class="sv-note hint"></p>';
+      '<div class="sv-page"><div class="sv-media"></div>' +
+      '<svg class="ov" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true" style="display:none"></svg></div>' +
+      '<div class="sv-legend" hidden></div>';
     self.media = self.el.querySelector(".sv-media");
     self.svg = self.el.querySelector("svg.ov");
-    self.note = self.el.querySelector(".sv-note");
     self.legend = self.el.querySelector(".sv-legend");
     self.toggle = self.el.querySelector(".ov-toggle");
     self.pager = self.el.querySelector(".pager");
-    self.opts = opts;
-
     self.pager.querySelectorAll("button").forEach(function (b) {
       b.addEventListener("click", function () {
         self.onPage(self.page + Number(b.getAttribute("data-page")));
@@ -2277,100 +2371,108 @@
     self.onOverlay = function (on) {
       self.setOverlayOn(on);
     };
-
-    if (opts.isPdf) self.initPdf();
-    else self.initImage(opts.imageUrl);
+    self.load();
   }
 
-  SourceViewer.prototype.initImage = function (src) {
+  /** The image for the current page, or null when only pdf.js could show it. */
+  SourceViewer.prototype.imageFor = function (page) {
+    var o = this.opts;
+    if (!o.isPdf) return page === 1 ? o.imageUrl : null;
+    return (o.previews || [])[page - 1] || null;
+  };
+
+  SourceViewer.prototype.load = function () {
     var self = this;
+    var token = ++self.token;
+    self.ready = false;
+    self.drawOverlay();
+    self.updatePager();
     if (self.opts.restricted) {
-      self.media.innerHTML = '<p class="empty">Not redistributed (research-only licence). Fetch the dataset locally to view this page.</p>';
+      self.media.innerHTML = placeholder("Page not redistributed", "This source's licence is research-only. Fetch it locally to view the page.");
       return;
     }
-    if (!src) {
-      self.media.innerHTML = '<p class="empty">No inline preview. <a href="' + esc(self.opts.inputUrl) + '">Open the file</a>.</p>';
-      return;
-    }
-    var img = new Image();
-    img.alt = "Input document " + self.opts.docId;
-    img.decoding = "async";
-    img.onload = function () {
-      if (self.pdfShown) return; // pdf.js already painted the real page
-      self.media.innerHTML = "";
-      self.media.appendChild(img);
-      self.ready = true;
-      self.drawOverlay();
-    };
-    img.onerror = function () {
-      self.media.innerHTML = '<p class="empty">The input could not be displayed. <a href="' + esc(self.opts.inputUrl) + '">Open the file</a>.</p>';
-    };
-    img.src = src;
-    self.updatePager();
-  };
-
-  SourceViewer.prototype.initPdf = function () {
-    var self = this;
-    self.renderToken = 0;
-    self.updatePager();
-    // Paint the build-time page-1 PNG at once; pdf.js replaces it when it has rendered.
-    if (self.opts.previewUrl) self.initImage(self.opts.previewUrl);
-    loadPdfJs()
-      .then(function (lib) {
-        return lib.getDocument({ url: self.opts.inputUrl, isEvalSupported: false }).promise;
-      })
-      .then(function (pdf) {
-        self.pdf = pdf;
-        self.pages = pdf.numPages;
-        self.updatePager();
-        return self.renderPdfPage();
-      })
-      .catch(function (err) {
-        // Fall back to the page-1 PNG the build rendered, if any.
-        self.pdf = null;
-        self.pdfFailed = true;
-        if (self.opts.previewUrl) {
-          self.updatePager();
-          self.pdfNote = "pdf.js is unavailable (" + (err && err.message ? err.message : err) + "), so this is the build-time page-1 preview.";
-          self.updateNote();
-          self.drawOverlay();
-        } else {
-          self.media.innerHTML = '<p class="empty">This PDF cannot be rendered here. <a href="' + esc(self.opts.inputUrl) + '">Download it</a>.</p>';
-        }
-      });
-  };
-
-  SourceViewer.prototype.renderPdfPage = function () {
-    var self = this;
-    if (!self.pdf) return Promise.resolve();
-    var token = ++self.renderToken;
-    var number = Math.max(1, Math.min(self.page, self.pages));
-    return self.pdf.getPage(number).then(function (page) {
-      if (token !== self.renderToken) return;
-      var base = page.getViewport({ scale: 1 });
-      var cssWidth = Math.max(320, Math.min(self.el.clientWidth || 640, 1100));
-      var ratio = Math.min(window.devicePixelRatio || 1, 2);
-      var viewport = page.getViewport({ scale: (cssWidth / base.width) * ratio });
-      var canvas = document.createElement("canvas");
-      canvas.width = Math.floor(viewport.width);
-      canvas.height = Math.floor(viewport.height);
-      canvas.setAttribute("role", "img");
-      canvas.setAttribute("aria-label", "Page " + number + " of input document " + self.opts.docId);
-      return page.render({ canvasContext: canvas.getContext("2d"), viewport: viewport }).promise.then(function () {
-        if (token !== self.renderToken) return;
-        self.pdfShown = true;
+    var src = self.imageFor(self.page);
+    if (src) {
+      var img = new Image();
+      img.alt = "Page " + self.page + " of " + self.opts.title;
+      img.decoding = "async";
+      img.onload = function () {
+        if (token !== self.token) return;
         self.media.innerHTML = "";
-        self.media.appendChild(canvas);
+        self.media.appendChild(img);
         self.ready = true;
         self.drawOverlay();
+      };
+      img.onerror = function () {
+        if (token !== self.token) return;
+        self.media.innerHTML = placeholder("The page could not be displayed", '<a href="' + esc(self.opts.inputUrl) + '">Open the file</a>');
+      };
+      if (!self.media.firstChild) self.media.innerHTML = placeholder("Loading page…");
+      img.src = src;
+      return;
+    }
+    if (!self.opts.isPdf) {
+      self.media.innerHTML = placeholder("No inline preview", '<a href="' + esc(self.opts.inputUrl) + '">Open the file</a>');
+      return;
+    }
+    self.media.innerHTML = placeholder("Rendering page " + self.page + "…");
+    self.renderPdf(token);
+  };
+
+  /** pdf.js fallback for a PDF page the build did not render. */
+  SourceViewer.prototype.renderPdf = function (token) {
+    var self = this;
+    var docPromise = self.pdfDoc;
+    if (!docPromise) {
+      docPromise = self.pdfDoc = loadPdfJs().then(function (lib) {
+        return lib.getDocument({ url: self.opts.inputUrl, isEvalSupported: false }).promise;
       });
-    });
+      docPromise.catch(function () {
+        self.pdfDoc = null;
+      });
+    }
+    docPromise
+      .then(function (pdf) {
+        if (token !== self.token) return null;
+        if (pdf.numPages !== self.pages) {
+          self.pages = pdf.numPages;
+          self.updatePager();
+        }
+        return pdf.getPage(Math.max(1, Math.min(self.page, pdf.numPages))).then(function (page) {
+          if (token !== self.token) return null;
+          var base = page.getViewport({ scale: 1 });
+          var cssWidth = Math.max(320, Math.min(self.el.clientWidth || 640, 1100));
+          var ratio = Math.min(window.devicePixelRatio || 1, 2);
+          var viewport = page.getViewport({ scale: (cssWidth / base.width) * ratio });
+          var canvas = document.createElement("canvas");
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
+          canvas.setAttribute("role", "img");
+          canvas.setAttribute("aria-label", "Page " + self.page + " of " + self.opts.title);
+          return page.render({ canvasContext: canvas.getContext("2d"), viewport: viewport }).promise.then(function () {
+            if (token !== self.token) return;
+            self.media.innerHTML = "";
+            self.media.appendChild(canvas);
+            self.canvasShown = true;
+            self.ready = true;
+            self.drawOverlay();
+          });
+        });
+      })
+      .catch(function () {
+        if (token !== self.token) return;
+        self.media.innerHTML = placeholder("This page cannot be shown here", '<a href="' + esc(self.opts.inputUrl) + '">Download the PDF</a>');
+      });
+  };
+
+  SourceViewer.prototype.rerender = function () {
+    if (this.canvasShown && !this.imageFor(this.page)) this.load();
   };
 
   SourceViewer.prototype.updatePager = function () {
-    var multi = this.pages > 1 && !this.pdfFailed;
+    var multi = this.pages > 1 && !this.opts.restricted;
     this.pager.hidden = !multi;
-    this.pager.querySelector(".pager-label").textContent = "Page " + this.page + " / " + this.pages;
+    this.pager.querySelector(".pager-label").textContent = this.page + " / " + this.pages;
     this.pager.querySelector('[data-page="-1"]').disabled = this.page <= 1;
     this.pager.querySelector('[data-page="1"]').disabled = this.page >= this.pages;
   };
@@ -2379,21 +2481,14 @@
     n = Math.max(1, Math.min(n || 1, this.pages));
     if (n === this.page) return;
     this.page = n;
-    this.updatePager();
-    if (this.pdf) this.renderPdfPage();
-    else this.drawOverlay();
+    this.load();
   };
 
   SourceViewer.prototype.setOverlay = function (overlay, message) {
-    this.overlay = overlay;
-    this.toggle.disabled = !overlay || !overlay.count;
-    this.ovMessage = message || "";
-    this.updateNote();
+    this.overlay = overlay && overlay.count ? overlay : null;
+    this.toggle.hidden = !this.overlay || this.opts.restricted;
+    this.toggle.title = (message || "Layout boxes") + " (o)";
     this.drawOverlay();
-  };
-
-  SourceViewer.prototype.updateNote = function () {
-    this.note.innerHTML = (this.ovMessage || "") + (this.pdfNote ? " " + esc(this.pdfNote) : "");
   };
 
   SourceViewer.prototype.setOverlayOn = function (on) {
@@ -2402,11 +2497,10 @@
   };
 
   SourceViewer.prototype.drawOverlay = function () {
-    var active = !!(this.overlay && this.overlay.count && this.overlayOn);
-    this.toggle.setAttribute("aria-pressed", String(active));
+    var available = !!this.overlay;
+    var active = available && this.overlayOn && this.ready;
+    this.toggle.setAttribute("aria-pressed", String(available && this.overlayOn));
     var blocks = active ? this.overlay.pages[this.page] || [] : [];
-    // The saved image preview of a PDF only shows page 1.
-    if (this.opts.isPdf && !this.pdfShown && this.page !== 1) blocks = [];
     var used = {};
     this.svg.innerHTML = blocks
       .map(function (block, i) {
@@ -2419,7 +2513,7 @@
         var h = Math.abs(b.y1 - b.y0) * 1000;
         var text = String(block.text || block.content || "").replace(/\s+/g, " ").slice(0, 160);
         return (
-          '<rect class="bt bt-' + g.key + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) +
+          '<rect class="bt-' + g.key + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) +
           '" height="' + h.toFixed(1) + '" vector-effect="non-scaling-stroke"><title>' +
           esc("#" + (i + 1) + " " + (block.type || "?") + (isNum(block.confidence) ? " (" + block.confidence.toFixed(2) + ")" : "") + " — " + text) +
           "</title></rect>"
@@ -2430,146 +2524,231 @@
     var keys = BLOCK_GROUPS.filter(function (g) {
       return used[g.key];
     });
-    this.legend.hidden = !active || !keys.length;
-    this.legend.innerHTML = keys
-      .map(function (g) {
-        return '<span class="lg"><span class="sw bt-' + g.key + '"></span>' + esc(g.label) + "</span>";
-      })
-      .join("") + (active ? '<span class="lg muted">' + blocks.length + " blocks on this page</span>" : "");
+    this.legend.hidden = !active;
+    this.legend.innerHTML = active
+      ? keys
+          .map(function (g) {
+            return '<span><span class="sw bt-' + g.key + '"></span>' + esc(g.label) + "</span>";
+          })
+          .join("") + "<span>" + plural(blocks.length, "box", "boxes") + " on this page</span>"
+      : "";
   };
 
   /* ---------------------------------------------------------- inspector */
 
-  function metricTile(label, value, title) {
+  function metricsList(rec) {
+    var m = (rec && rec.metrics) || {};
+    var items = [];
+    function add(label, value, title) {
+      if (value !== null && value !== undefined && value !== "—") items.push([label, value, title]);
+    }
+    if (isNum(m.rules_total)) add("Checks passed", m.rules_passed + " / " + m.rules_total);
+    if (isNum(m.char_similarity) && !isNum(m.rule_pass_rate)) add("Char similarity", fixed(m.char_similarity, 4));
+    if (isNum(m.table_score)) add("Table", fixed(m.table_score, 4), "Similarity restricted to table rows");
+    if (isNum(m.teds_grid)) add("TEDS", fixed(m.teds_grid, 4), "Tree-edit-distance similarity on the row/cell grid");
+    if (!isNum(m.rule_pass_rate)) {
+      if (isNum(m.cer)) add("CER", fixed(m.cer, 4), "Character error rate, lower is better");
+      if (isNum(m.wer)) add("WER", fixed(m.wer, 4), "Word error rate, lower is better");
+      if (isNum(m.word_f1)) add("Word F1", fixed(m.word_f1, 4));
+    }
+    if (isNum(m.order_score)) add("Order", fixed(m.order_score, isNum(m.rule_pass_rate) ? 3 : 4), isNum(m.rule_pass_rate) ? "Pass rate of the order checks" : "Reading-order agreement of shared lines");
+    if (isNum(m.pred_chars) && (m.pred_chars || m.truth_chars)) add("Characters", m.pred_chars + " / " + m.truth_chars, "Output / truth characters after normalisation");
+    if (rec) {
+      add("Latency", msFmt(rec.latency_ms), "Client-measured, caches disabled");
+      if (isNum(rec.cost_usd)) add("Cost", "$" + rec.cost_usd.toFixed(4), "List price for this document");
+      if (isNum(rec.attempts) && rec.attempts > 1) add("Attempts", String(rec.attempts));
+    }
     return (
-      '<div class="metric"' + (title ? ' title="' + esc(title) + '"' : "") + "><dt>" + esc(label) + "</dt><dd>" + esc(value) + "</dd></div>"
+      '<dl class="metrics">' +
+      items
+        .map(function (it) {
+          return "<div" + (it[2] ? ' title="' + esc(it[2]) + '"' : "") + "><dt>" + esc(it[0]) + "</dt><dd>" + esc(it[1]) + "</dd></div>";
+        })
+        .join("") +
+      "</dl>" +
+      (rec ? '<p class="caption">The score is the ' + esc(scoreBasis(rec)) + ", times 100.</p>" : "")
     );
   }
 
-  function metricTiles(rec) {
-    var m = (rec && rec.metrics) || {};
-    var rules = isNum(m.rule_pass_rate);
-    var score = docScore(rec);
-    var tiles = metricTile("Score", fixed(score, 2), "Primary per-document score: " + scoreBasis(rec));
-    if (rules) {
-      tiles +=
-        metricTile("Rules passed", (m.rules_passed != null ? m.rules_passed : "—") + " / " + (m.rules_total != null ? m.rules_total : "—")) +
-        metricTile("Order", fixed(m.order_score, 3), "Pass rate of the order rules");
-    } else {
-      tiles +=
-        metricTile("Char sim", fixed(m.char_similarity, 4)) +
-        metricTile("Table", fixed(m.table_score, 4)) +
-        metricTile("TEDS", fixed(m.teds_grid, 4), "TEDS on the row/cell grid: table structure plus cell content (scorer v2)") +
-        metricTile("CER", fixed(m.cer, 4)) +
-        metricTile("WER", fixed(m.wer, 4)) +
-        metricTile("Word F1", fixed(m.word_f1, 4)) +
-        metricTile("Order", fixed(m.order_score, 4)) +
-        metricTile("Chars", (m.pred_chars != null ? m.pred_chars : "—") + " / " + (m.truth_chars != null ? m.truth_chars : "—"), "Predicted / truth characters after normalisation");
-    }
-    tiles +=
-      metricTile("Latency", rec ? msFmt(rec.latency_ms) : "—", "Client-measured, caches disabled") +
-      metricTile("Cost", rec && isNum(rec.cost_usd) ? "$" + rec.cost_usd.toFixed(4) : "—", "List price for this document");
-    return '<dl class="metrics-grid">' + tiles + "</dl>";
+  function q(text) {
+    return "“" + esc(text) + "”";
   }
 
-  function ruleExpected(rule, result) {
-    if (rule.type === "present") return '<span class="rk">must contain</span> <q>' + esc(rule.text) + "</q>";
-    if (rule.type === "absent") return '<span class="rk">must not contain</span> <q>' + esc(rule.text) + "</q>";
-    if (rule.type === "order")
-      return '<q>' + esc(rule.before) + '</q> <span class="rk">then</span> <q>' + esc(rule.after) + "</q>";
+  function clip(text, n) {
+    var chars = Array.from(String(text == null ? "" : text));
+    return chars.length <= n ? chars.join("") : chars.slice(0, n).join("") + "…";
+  }
+
+  var RULE_GROUPS = [
+    { type: "present", label: "Text present" },
+    { type: "absent", label: "Text absent" },
+    { type: "order", label: "Reading order" },
+    { type: "table_cell", label: "Table cells" },
+    { type: "bag_of_sentences", label: "Sentences" },
+  ];
+
+  function ruleGroupOf(type) {
+    for (var i = 0; i < RULE_GROUPS.length; i++) if (RULE_GROUPS[i].type === type) return i;
+    return RULE_GROUPS.length;
+  }
+
+  /** A check as one plain sentence (docs/DESIGN.md, check row). */
+  function ruleSentence(rule) {
+    var fuzzy = isNum(rule.max_diffs) && rule.max_diffs > 0 ? ' <span class="muted">(±' + rule.max_diffs + ")</span>" : "";
+    if (rule.type === "present") return "Should contain " + q(rule.text) + fuzzy;
+    if (rule.type === "absent") return "Should not contain " + q(rule.text) + fuzzy;
+    if (rule.type === "order") return q(clip(rule.before, 80)) + " should come before " + q(clip(rule.after, 80)) + fuzzy;
     if (rule.type === "table_cell") {
       var c = rule.cell || {};
-      return (
-        '<span class="rk">cell</span> ' +
-        (c.row_header != null ? "row <q>" + esc(c.row_header) + "</q> " : "") +
-        (c.col_header != null ? "column <q>" + esc(c.col_header) + "</q> " : "") +
-        '<span class="rk">=</span> <q>' + esc(c.value) + "</q>"
-      );
+      var where = [];
+      if (c.row_header != null) where.push("in row " + q(c.row_header));
+      if (c.col_header != null) where.push("under header " + q(c.col_header));
+      return "Table cell " + q(c.value) + (where.length ? " " + where.join(" ") : "") + fuzzy;
     }
     if (rule.type === "bag_of_sentences") {
-      var sentences = rule.sentences || [];
-      var found = (result && result.found) || [];
-      var order = sentences.map(function (s, i) {
-        return i;
-      });
-      // Missing sentences first: they are what explains a failure.
-      order.sort(function (a, b) {
-        return (found[a] ? 1 : 0) - (found[b] ? 1 : 0) || a - b;
-      });
-      var shown = order.slice(0, BAG_SENTENCE_CAP);
-      var rest = sentences.length - shown.length;
-      return (
-        '<span class="rk">at least ' + esc(fixed((isNum(rule.threshold) ? rule.threshold : BAG_DEFAULT_THRESHOLD) * 100, 0)) + "% of " + sentences.length + " sentences</span>" +
-        '<ul class="bag">' +
-        shown
-          .map(function (i) {
-            return '<li class="' + (found[i] ? "ok" : "no") + '"><span class="mk">' + (found[i] ? "✓" : "✗") + "</span>" + esc(sentences[i]) + "</li>";
-          })
-          .join("") +
-        (rest > 0 ? '<li class="more">… ' + rest + " more</li>" : "") +
-        "</ul>"
-      );
+      var t = isNum(rule.threshold) ? rule.threshold : BAG_DEFAULT_THRESHOLD;
+      return "≥" + fixed(t * 100, 0) + "% of " + plural((rule.sentences || []).length, "sentence") + " present";
     }
     return "<code>" + esc(JSON.stringify(rule)) + "</code>";
   }
 
+  /** The failure reason, only when it says more than the sentence already does. */
+  function ruleReason(rule, r) {
+    if (r.ok || !r.detail) return "";
+    var d = r.detail;
+    if (/^not found: /.test(d) && rule.type === "present") return "";
+    if (/^present but must be absent/.test(d)) return "";
+    if (/^`before` not found/.test(d)) return "The first text is missing";
+    if (/^`after` not found/.test(d)) return "The second text is missing";
+    if (/ occurs only before /.test(d)) return "Both are present, in the wrong order";
+    if (/^prediction has no table/.test(d)) return "The output has no table";
+    var cell = /^cell is (".*") , expected/.exec(d);
+    if (cell) return "The cell reads " + esc(cell[1].replace(/^"|"$/g, "“").replace(/"$/, "”"));
+    if (/^no column matching/.test(d)) return "No column with that header";
+    if (/^no row matching/.test(d)) return "No row with that header";
+    return esc(d.replace(/`/g, ""));
+  }
+
+  function bagDetail(rule, r) {
+    var sentences = rule.sentences || [];
+    var found = (r && r.found) || [];
+    var hits = found.filter(Boolean).length;
+    var order = sentences.map(function (s, i) {
+      return i;
+    });
+    // Missing sentences first: they are what explains a failure.
+    order.sort(function (a, b) {
+      return (found[a] ? 1 : 0) - (found[b] ? 1 : 0) || a - b;
+    });
+    var shown = order.slice(0, BAG_SENTENCE_CAP);
+    var rest = sentences.length - shown.length;
+    return (
+      "<details><summary>" + hits + " of " + sentences.length + " found</summary><ul class=\"bag\">" +
+      shown
+        .map(function (i) {
+          return '<li class="' + (found[i] ? "ok" : "no") + '"><span class="mk">' + (found[i] ? "✓" : "✗") + "</span>" + esc(sentences[i]) + "</li>";
+        })
+        .join("") +
+      (rest > 0 ? "<li>… " + rest + " more</li>" : "") +
+      "</ul></details>"
+    );
+  }
+
+  function checkRow(rule, r) {
+    var reason = rule.type === "bag_of_sentences" ? "" : ruleReason(rule, r);
+    var full = rule.type === "order" ? rule.before + " → " + rule.after : rule.text || (rule.cell && rule.cell.value) || "";
+    return (
+      '<li class="check ' + (r.ok ? "pass" : "fail") + '"' + (full && String(full).length > 120 ? ' title="' + esc(full) + '"' : "") + ">" +
+      '<span class="ck" role="img" aria-label="' + (r.ok ? "pass" : "fail") + '">' + (r.ok ? "✓" : "✗") + "</span>" +
+      '<span class="ct">' + ruleSentence(rule) + "</span>" +
+      (reason ? '<span class="why">' + reason + "</span>" : "") +
+      (rule.type === "bag_of_sentences" ? bagDetail(rule, r) : "") +
+      "</li>"
+    );
+  }
+
   function rulesChecklist(rules, scored, rec, filter, limit) {
-    if (!rules) return '<p class="empty">The assertion file for this document could not be loaded.</p>';
-    if (!scored) return '<p class="empty">No saved output to check the assertions against.</p>';
+    if (!rules) return '<p class="empty">The checks for this document could not be loaded.</p>';
+    if (!scored) return '<p class="empty">No saved output to run the checks against.</p>';
     var m = (rec && rec.metrics) || {};
     var matches = m.rules_passed === scored.passed && m.rules_total === scored.total;
     var failing = scored.total - scored.passed;
     var items = [];
+    var groupTotals = {};
     rules.forEach(function (rule, i) {
       var r = scored.results[i];
+      var g = ruleGroupOf(rule.type);
+      var t = (groupTotals[g] = groupTotals[g] || { p: 0, n: 0 });
+      t.n++;
+      if (r.ok) t.p++;
       if (filter === "fail" && r.ok) return;
       if (filter === "pass" && !r.ok) return;
-      items.push({ rule: rule, r: r, i: i });
+      items.push({ rule: rule, r: r, i: i, g: g });
     });
-    var byType = {};
-    rules.forEach(function (rule, i) {
-      var t = (byType[rule.type] = byType[rule.type] || { p: 0, n: 0 });
-      t.n++;
-      if (scored.results[i].ok) t.p++;
+    var grouped = Object.keys(groupTotals).length > 1;
+    if (grouped)
+      items.sort(function (a, b) {
+        return a.g - b.g || a.i - b.i;
+      });
+    var shown = items.slice(0, limit);
+    var html = "";
+    var current = -1;
+    shown.forEach(function (it) {
+      if (grouped && it.g !== current) {
+        if (current !== -1) html += "</ul></div>";
+        current = it.g;
+        var t = groupTotals[it.g];
+        html +=
+          '<div class="check-group"><h3>' + esc(it.g < RULE_GROUPS.length ? RULE_GROUPS[it.g].label : "Other") +
+          ' <span class="gc">· ' + t.p + " of " + t.n + " pass</span></h3><ul class=\"checks\">";
+      } else if (!grouped && current === -1) {
+        current = 0;
+        html += '<div class="check-group"><ul class="checks">';
+      }
+      html += checkRow(it.rule, it.r);
     });
+    if (current !== -1) html += "</ul></div>";
     return (
-      '<div class="rules-summary">' +
-      '<span class="big">' + scored.passed + " / " + scored.total + "</span> assertions pass" +
-      (m.rules_total != null
-        ? matches
-          ? ' <span class="badge ok">✓ matches the recorded score</span>'
-          : ' <span class="badge warn">recorded ' + esc(m.rules_passed) + " / " + esc(m.rules_total) + " — re-check in the browser differs; the recorded Rust score is authoritative</span>"
-        : "") +
-      '<span class="types">' +
-      Object.keys(byType)
-        .sort()
-        .map(function (t) {
-          return esc(t) + " " + byType[t].p + "/" + byType[t].n;
-        })
-        .join(" · ") +
-      "</span></div>" +
-      '<div class="seg" role="group" aria-label="Show">' +
+      '<div class="tool-row"><div class="seg" role="group" aria-label="Show">' +
       '<button type="button" data-rf="fail" aria-pressed="' + (filter === "fail") + '">Failing ' + failing + "</button>" +
       '<button type="button" data-rf="pass" aria-pressed="' + (filter === "pass") + '">Passing ' + scored.passed + "</button>" +
       '<button type="button" data-rf="all" aria-pressed="' + (filter === "all") + '">All ' + scored.total + "</button></div>" +
+      (m.rules_total != null
+        ? matches
+          ? '<span class="recheck ok" id="recheck">Re-checked in your browser: matches the recorded score</span>'
+          : '<span class="recheck warn" id="recheck">Re-checked in your browser: ' + scored.passed + " / " + scored.total + ", recorded " + esc(m.rules_passed) + " / " + esc(m.rules_total) + " (the recorded score is authoritative)</span>"
+        : "") +
+      "</div>" +
       (items.length
-        ? '<ol class="checklist">' +
-          items
-            .slice(0, limit)
-            .map(function (it) {
-              return (
-                '<li class="' + (it.r.ok ? "pass" : "fail") + '" value="' + (it.i + 1) + '">' +
-                '<span class="verdict">' + (it.r.ok ? "✓ pass" : "✗ fail") + "</span>" +
-                '<span class="rule-type">' + esc(it.rule.type) + "</span>" +
-                '<div class="rule-body">' + ruleExpected(it.rule, it.r) +
-                (!it.r.ok && it.r.detail ? '<div class="why">' + esc(it.r.detail) + "</div>" : "") +
-                "</div></li>"
-              );
-            })
-            .join("") +
-          "</ol>" +
-          (items.length > limit ? '<button type="button" class="btn more-rules">Show ' + Math.min(RULE_PAGE, items.length - limit) + " more of " + (items.length - limit) + "</button>" : "")
-        : '<p class="empty">No ' + (filter === "fail" ? "failing" : filter === "pass" ? "passing" : "") + " assertions.</p>")
+        ? html + (items.length > limit ? '<button type="button" class="btn more-rules">Show ' + Math.min(RULE_PAGE, items.length - limit) + " more of " + (items.length - limit) + "</button>" : "")
+        : '<p class="empty">No ' + (filter === "fail" ? "failing" : filter === "pass" ? "passing" : "") + " checks.</p>")
+    );
+  }
+
+  function modelSwitcher(models, model, byDoc, hrefFor) {
+    var chips = models
+      .map(function (m) {
+        var r = byDoc[m.model];
+        var s = docScore(r);
+        return (
+          '<a class="chip' + (m === model ? " on" : "") + '" href="' + esc(hrefFor(m)) + '"' + (m === model ? ' aria-current="true"' : "") +
+          ' title="' + esc(m.model + (r && r.error ? " — failed: " + r.error : "")) + '">' +
+          "<code>" + esc(m.model) + '</code><span class="chip-s">' + (r && r.error ? "failed" : esc(fixed(s, 1))) + "</span></a>"
+        );
+      })
+      .join("");
+    var options = models
+      .map(function (m) {
+        var r = byDoc[m.model];
+        return (
+          '<option value="' + esc(hrefFor(m)) + '"' + (m === model ? " selected" : "") + ">" +
+          esc(m.model + " — " + (r && r.error ? "failed" : fixed(docScore(r), 1))) + "</option>"
+        );
+      })
+      .join("");
+    return (
+      '<div class="models"><nav class="chips" aria-label="Models (m / M to cycle)">' + chips + "</nav>" +
+      '<label class="model-select"><span class="sr-only">Model</span><select id="model-select">' + options + "</select></label></div>"
     );
   }
 
@@ -2585,9 +2764,7 @@
       });
       if (!entry) throw new Error("Document " + docId + " is not in dataset " + datasetName);
 
-      var models = run.models.slice().sort(function (a, b) {
-        return (b.stats.head.value || 0) - (a.stats.head.value || 0);
-      });
+      var models = byScore(run.models);
       var model = null;
       models.forEach(function (candidate) {
         if (slugOf(candidate.model) === slug || candidate.model === slug) model = candidate;
@@ -2623,27 +2800,30 @@
         if (d.id === docId) pos = i;
       });
       var filters = { src: params.get("src"), cat: params.get("cat"), q: params.get("q") };
-      var tabs = rulesDoc
-        ? [["rules", "Rule checklist"], ["compare", "All models"], ["output", "Output"]]
-        : [["diff", "Diff vs truth"], ["compare", "All models"], ["truth", "Ground truth"], ["output", "Output"]];
+      // Sources whose licence forbids redistribution (tag `fetch-required`, e.g. OmniDocBench) ship
+      // scores only: no input, truth or model output is served, so none of them is requested.
+      var restricted = (entry.tags || []).indexOf("fetch-required") !== -1;
+      var tabs = restricted
+        ? []
+        : rulesDoc
+          ? [["rules", "Checks"], ["output", "Output"], ["compare", "Compare models"]]
+          : [["diff", "Diff"], ["output", "Output"], ["truth", "Truth"], ["compare", "Compare models"]];
       var tab = params.get("tab");
-      if (!tabs.some(function (t) { return t[0] === tab; })) tab = tabs[0][0];
+      if (!tabs.some(function (t) { return t[0] === tab; })) tab = tabs.length ? tabs[0][0] : null;
       var diffMode = params.get("diff") === "unified" ? "unified" : "split";
-      var ovOn = params.get("ov") !== "0";
+      var ovOn = params.get("ov") === "1";
       var page = parseInt(params.get("page") || "1", 10) || 1;
       var ruleFilter = params.get("rf") || "fail";
 
       var datasetBase = url("data/datasets/" + datasetName + "/");
-      var truthUrl = entry.truth ? joinPath(datasetBase, entry.truth) : null;
+      var truthUrl = entry.truth && !restricted ? joinPath(datasetBase, entry.truth) : null;
       var rulesUrl = entry.rules ? joinPath(datasetBase, entry.rules) : null;
       var inputUrl = joinPath(datasetBase, entry.file);
-      var previewUrl = entry.preview ? joinPath(datasetBase, entry.preview) : null;
+      var previews = (entry.previews || (entry.preview ? [entry.preview] : [])).map(function (p) {
+        return joinPath(datasetBase, p);
+      });
       var isPdf = /\.pdf$/i.test(entry.file || "");
-      // Sources whose licence forbids redistribution (tag `fetch-required`, e.g. OmniDocBench) ship
-      // scores only: no input, truth or model output is served, so do not request them.
-      var restricted = (entry.tags || []).indexOf("fetch-required") !== -1;
       var fetchCommand = "python -m benchmark.adapters " + (docId.split("/")[0] || datasetName);
-      if (restricted) truthUrl = null;
       function predUrl(m) {
         return url("data/outputs/" + run.run_id + "/" + slugOf(m.model) + "/" + docId + ".md");
       }
@@ -2656,79 +2836,59 @@
         return hasPred(m) ? getText(predUrl(m)).catch(function () { return null; }) : Promise.resolve(null);
       }
       var jsonUrl = url("data/outputs/" + run.run_id + "/" + slugOf(model.model) + "/" + docId + ".json");
-      var hasJson = inventory.json.indexOf(docId) !== -1;
-      var anyJson = Object.keys(runInfo.outputs || {}).some(function (k) {
-        return (runInfo.outputs[k].json || []).length;
-      });
+      var hasJson = !restricted && inventory.json.indexOf(docId) !== -1;
 
-      var needAll = tab === "compare";
+      var needTruth = !rulesDoc && (tab === "diff" || tab === "truth" || tab === "compare");
       return Promise.all([
-        truthUrl ? getText(truthUrl).catch(function () { return null; }) : Promise.resolve(null),
-        loadPred(model),
-        rulesUrl ? getRules(rulesUrl) : Promise.resolve(null),
+        truthUrl && needTruth ? getText(truthUrl).catch(function () { return null; }) : Promise.resolve(null),
+        tab === "compare" || !tab ? Promise.resolve(null) : loadPred(model),
+        rulesUrl && !restricted ? getRules(rulesUrl) : Promise.resolve(null),
         hasJson ? getJSON(jsonUrl).catch(function () { return null; }) : Promise.resolve(null),
-        needAll ? Promise.all(models.map(loadPred)) : Promise.resolve(null),
+        tab === "compare" ? Promise.all(models.map(loadPred)) : Promise.resolve(null),
       ]).then(function (got) {
         var truth = got[0];
         var pred = got[1];
         var ruleList = got[2];
         var unified = got[3];
         var allPreds = got[4];
+        if (tab === "compare" && allPreds) pred = allPreds[models.indexOf(model)];
         var opts = run.normalize || {};
-        document.title = docId + " · " + model.model + " · LiteOCR Benchmark";
+        var title = docTitle(entry);
+        var srcKey = sourceOf(docId, datasetName);
+        var srcName = entry.source_label || srcLabel(srcKey);
+        document.title = title + " · " + srcName + " · " + model.model + " · LiteOCR Benchmark";
 
-        /* ---- model chips */
-        var chips = models
-          .map(function (m, i) {
-            var r = byDoc[m.model];
-            var s = docScore(r);
-            return (
-              '<a class="chip' + (m === model ? " on" : "") + '" href="' + esc(canonical(m)) + '"' +
-              (m === model ? ' aria-current="true"' : "") + ' title="' + esc(m.model + (r && r.error ? " — failed: " + r.error : "")) + '">' +
-              "<code>" + esc(m.model) + "</code>" +
-              '<span class="chip-s' + (r && r.error ? " fail" : "") + '">' + (r && r.error ? "failed" : esc(fixed(s, 1))) + "</span></a>"
-            );
-          })
-          .join("");
-
-        /* ---- analysis body */
+        /* ---- the result body of the current tab */
         var body = "";
-        var stats = "";
         if (tab === "diff") {
           if (pred === null) {
             body = '<p class="empty">No saved output for <code>' + esc(model.model) + "</code> on this document" +
-              (rec && rec.error ? " — the call failed: " + esc(rec.error) : "") + ".</p>";
+              (rec && rec.error ? ": the call failed." : ".") + "</p>";
           } else if (truth === null) {
             body = '<p class="empty">The ground truth could not be loaded.</p>';
           } else {
             var d = wordDiff(truth, pred);
-            stats = d.eq + " words match · <del>" + d.del + " missing</del> · <ins>" + d.ins + " extra</ins>";
             body =
-              '<div class="bar"><div class="seg" role="group" aria-label="Diff layout">' +
+              '<div class="tool-row"><div class="seg" role="group" aria-label="Diff layout">' +
               '<button type="button" data-diff="split" aria-pressed="' + (diffMode === "split") + '">Side by side</button>' +
               '<button type="button" data-diff="unified" aria-pressed="' + (diffMode === "unified") + '">Unified</button></div>' +
-              '<p class="hint">' + stats + "</p></div>" +
-              '<div class="diff-legend"><span><span class="swatch del"></span>in the truth, missing from the output</span>' +
-              '<span><span class="swatch ins"></span>in the output, not in the truth</span>' +
-              "<span>word-level LCS, same case/markdown normalisation as the scorer</span></div>" +
+              '<span class="stats">' + d.eq + " words match · <del>" + d.del + " missing</del> · <ins>" + d.ins + " extra</ins></span></div>" +
               (rec && rec.table_only
-                ? '<p class="note">Table-only document: the score is the <strong>table score</strong> (table rows only); the diff shows the whole text.</p>'
+                ? '<p class="note">Table-only document: the score counts table rows only; the diff shows the whole text.</p>'
                 : "") +
               (diffMode === "unified"
-                ? '<div class="pane tall" tabindex="0" role="region" aria-label="Unified word diff">' + renderUnified(d) + "</div>"
-                : '<div class="grid-2 tight"><div><div class="pane-head"><h3>Ground truth</h3></div>' +
-                  '<div class="pane tall" tabindex="0" role="region" aria-label="Ground truth, missing words marked">' + renderSide(d.t, d.tMarks, "del") + "</div></div>" +
-                  '<div><div class="pane-head"><h3>' + esc(model.model) + "</h3></div>" +
-                  '<div class="pane tall" tabindex="0" role="region" aria-label="Model output, extra words marked">' + renderSide(d.p, d.pMarks, "ins") + "</div></div></div>");
+                ? '<div class="pane" tabindex="0" role="region" aria-label="Unified word diff">' + renderUnified(d) + "</div>"
+                : '<div class="split"><div><div class="pane-head">Truth</div>' +
+                  '<div class="pane" tabindex="0" role="region" aria-label="Truth, missing words struck through">' + renderSide(d.t, d.tMarks, "del") + "</div></div>" +
+                  '<div><div class="pane-head">Output</div>' +
+                  '<div class="pane" tabindex="0" role="region" aria-label="Output, extra words underlined">' + renderSide(d.p, d.pMarks, "ins") + "</div></div></div>") +
+              '<p class="caption">Struck through: in the truth but missing from the output. Underlined: extra in the output. Words are compared after the scorer\'s normalisation.</p>';
           }
         } else if (tab === "rules") {
           var scored = pred !== null && ruleList ? scoreRules(pred, ruleList, opts) : null;
           body = rulesChecklist(ruleList, scored, rec, ruleFilter, RULE_PAGE);
         } else if (tab === "compare") {
           body =
-            '<p class="hint">Every model on this document. ' +
-            (rulesDoc ? "Pass counts are re-checked in your browser." : "Highlighted words are not in the ground truth.") +
-            "</p>" +
             '<div class="compare">' +
             models
               .map(function (m, i) {
@@ -2736,11 +2896,11 @@
                 var r = byDoc[m.model];
                 var inner;
                 var sub = "";
-                if (p === null) inner = '<p class="empty">' + (r && r.error ? "Failed: " + esc(r.error) : "No saved output.") + "</p>";
+                if (p === null) inner = '<p class="empty">' + (r && r.error ? "The call failed." : "No saved output.") + "</p>";
                 else if (rulesDoc) {
                   if (ruleList) {
                     var sc = scoreRules(p, ruleList, opts);
-                    sub = sc.passed + " / " + sc.total + " rules";
+                    sub = sc.passed + " of " + plural(sc.total, "check") + " pass";
                   }
                   inner = esc(p);
                 } else if (truth !== null) {
@@ -2749,97 +2909,135 @@
                   inner = renderSide(dd.p, dd.pMarks, "ins");
                 } else inner = esc(p);
                 return (
-                  '<div class="col' + (m === model ? " on" : "") + '"><div class="col-head"><a href="' + esc(canonical(m, { tab: "compare" })) + '"><code>' +
-                  esc(m.model) + "</code></a>" +
-                  '<span class="col-s">' + esc(fixed(docScore(r), 1)) + "</span></div>" +
-                  (sub ? '<div class="col-sub hint">' + esc(sub) + "</div>" : "") +
-                  (p === null ? inner : '<div class="pane tall" tabindex="0" role="region" aria-label="' + esc(m.model) + ' output">' + inner + "</div>") +
+                  '<div class="col' + (m === model ? " on" : "") + '"><div class="col-head"><a href="' + esc(canonical(m, { tab: "compare" })) + '" title="' + esc(m.model) + '">' +
+                  esc(m.model) + "</a>" + scoreHtml(docScore(r), 1) + "</div>" +
+                  (sub ? '<div class="col-sub">' + esc(sub) + "</div>" : "") +
+                  (p === null ? inner : '<div class="pane" tabindex="0" role="region" aria-label="' + esc(m.model) + ' output">' + inner + "</div>") +
                   "</div>"
                 );
               })
               .join("") +
-            "</div>";
+            "</div>" +
+            '<p class="caption">' + (rulesDoc ? "Pass counts are re-checked in your browser." : "Underlined words are not in the truth.") + "</p>";
         } else if (tab === "truth") {
           body =
             truth === null
               ? '<p class="empty">The ground truth could not be loaded.</p>'
-              : '<div class="pane-head"><h3>Ground truth</h3><a class="hint" href="' + esc(truthUrl) + '" rel="noopener">' + esc(pathLabel(entry.truth)) + "</a></div>" +
-                '<div class="pane tall" tabindex="0" role="region" aria-label="Ground truth markdown source">' + esc(truth) + "</div>" +
-                '<p class="hint">Markdown <em>source</em> — the exact text the metrics compare against.</p>';
-        } else {
+              : '<div><div class="pane-head"><span>Markdown source the metrics compare against</span><a href="' + esc(truthUrl) + '" rel="noopener">raw</a></div>' +
+                '<div class="pane" tabindex="0" role="region" aria-label="Ground truth markdown">' + esc(truth) + "</div></div>";
+        } else if (tab === "output") {
           body =
             pred === null
-              ? '<p class="empty">No saved output' + (rec && rec.error ? " — the call failed: " + esc(rec.error) : "") + ".</p>"
-              : '<div class="pane-head"><h3>' + esc(model.model) + '</h3><a class="hint" href="' + esc(predUrl(model)) + '" rel="noopener">raw .md</a></div>' +
-                '<div class="pane tall" tabindex="0" role="region" aria-label="Model output">' + esc(pred) + "</div>";
+              ? '<p class="empty">No saved output' + (rec && rec.error ? ": the call failed." : ".") + "</p>"
+              : '<div><div class="pane-head"><span class="model-id">' + esc(model.model) + '</span><a href="' + esc(predUrl(model)) + '" rel="noopener">raw</a></div>' +
+                '<div class="pane" tabindex="0" role="region" aria-label="Model output">' + esc(pred) + "</div></div>";
+        } else {
+          body =
+            '<p class="note">This source\'s licence is research-only, so LiteOCR publishes the recorded scores but not the page, ' +
+            "its ground truth or the model outputs. Fetch the data at the pinned revision to inspect it locally:</p>" + codeBlock(fetchCommand);
         }
 
-        /* ---- verify commands */
+        /* ---- reproduce */
         var repoBase = "benchmark/datasets/" + datasetName + "/";
         var predFile = docId.replace(/\//g, "_") + ".pred.md";
         var parseCommand = "liteocr parse " + joinPath(repoBase, entry.file) + " -m " + model.model + " > " + predFile;
         var scoreCommand = rulesDoc
           ? "liteocr bench run --dataset benchmark/datasets/" + datasetName + " \\\n    --models " + model.model + " --filter " + docId
           : "liteocr bench score " + predFile + " " + joinPath(repoBase, entry.truth);
+        var served = [];
+        if (!restricted) {
+          if (rulesDoc && rulesUrl) served.push('<a href="' + esc(rulesUrl) + '" rel="noopener">checks</a>');
+          if (!rulesDoc && truthUrl) served.push('<a href="' + esc(truthUrl) + '" rel="noopener">truth</a>');
+          if (hasPred(model)) served.push('<a href="' + esc(predUrl(model)) + '" rel="noopener">output</a>');
+          if (hasJson) served.push('<a href="' + esc(jsonUrl) + '" rel="noopener">unified JSON</a>');
+          served.push('<a href="' + esc(inputUrl) + '" rel="noopener">input</a>');
+        }
+        served.push('<a href="' + esc(url("data/runs/" + run.run_id + ".json")) + '" rel="noopener">run JSON</a>');
+        var reproduce = disclosure(
+          "Reproduce this score",
+          (restricted ? '<p class="note">After fetching the data:</p>' : "") +
+            '<p class="note">' + (rulesDoc ? "Parse the page with the same model, then re-run its checks:" : "Parse the page with the same model and score it locally:") + "</p>" +
+            codeBlock(parseCommand) + codeBlock(scoreCommand) +
+            '<p class="links">Files behind this page: ' + served.join(" · ") + "</p>",
+          { id: "doc-repro", cls: "reproduce" }
+        );
 
+        /* ---- header */
         var prev = pos > 0 ? list[pos - 1] : null;
         var next = pos >= 0 && pos < list.length - 1 ? list[pos + 1] : null;
         function docLink(d) {
-          return docHref(run.run_id, model.model, d.id, { tab: params.get("tab"), diff: params.get("diff"), ov: params.get("ov"), src: filters.src, cat: filters.cat, q: filters.q });
+          return docHref(run.run_id, model.model, d.id, { tab: params.get("tab"), diff: params.get("diff"), ov: params.get("ov"), rf: params.get("rf"), src: filters.src, cat: filters.cat, q: filters.q });
         }
+        var rulesTotal = ruleList ? ruleList.length : (rec && rec.metrics && rec.metrics.rules_total);
+        var metaBits = [plural(entry.pages || 1, "page")];
+        if (rulesDoc) {
+          if (isNum(rulesTotal)) metaBits.push(plural(rulesTotal, "check"));
+        } else metaBits.push(rec && rec.table_only ? "scored on its table" : "scored against a transcript");
+        if (entry.license) metaBits.push(entry.license);
+        else if (manifest.license && !/mixed/i.test(manifest.license)) metaBits.push(manifest.license);
 
-        if (restricted && !rulesDoc) {
-          body = '<p class="note">Not redistributed: this source\'s licence is research-only, so LiteOCR ' +
-            "publishes the recorded scores but not the page, its ground truth or model outputs. Fetch the " +
-            "data at the pinned revision to inspect it locally:</p>" + codeBlock(fetchCommand);
-          stats = "";
-        }
+        var ordinal = entry.ordinal;
+        var h1 = entry.title && ordinal
+          ? esc(entry.category_label || catLabel(entry.category)) + ' <span class="ord">' + esc(ordinal) + "</span>"
+          : esc(title);
+        var detailRows =
+          '<dt>Document id</dt><dd><span class="idline"><code>' + esc(docId) + '</code><button type="button" class="copy-btn inline" data-copy="' + esc(docId) + '">Copy</button></span></dd>' +
+          "<dt>Source</dt><dd>" + esc(srcName) + " · " + esc(entry.category_label || catLabel(entry.category)) + " · dataset " + esc(datasetName) + " v" + esc(manifest.version) + "</dd>" +
+          "<dt>Scored by</dt><dd>" + (rulesDoc ? "checks (machine-checkable assertions)" : rec && rec.table_only ? "table score (table rows only)" : "character similarity to the transcript") + "</dd>" +
+          "<dt>Input</dt><dd class=\"mono\">" + esc(pathLabel(entry.file)) + "</dd>" +
+          (entry.source_url ? '<dt>Original</dt><dd><a href="' + esc(entry.source_url) + '" rel="noopener noreferrer">' + esc(entry.source_url) + "</a></dd>" : "") +
+          ((entry.tags || []).length
+            ? '<dt>Tags</dt><dd><span class="tag-list">' + entry.tags.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</span></dd>"
+            : "") +
+          (entry.license ? "<dt>Licence</dt><dd>" + esc(entry.license) + "</dd>" : "") +
+          (entry.attribution ? "<dt>Attribution</dt><dd>" + esc(entry.attribution) + "</dd>" : "");
+
+        /* ---- summary: the one number */
+        var score = docScore(rec);
+        var aside = [];
+        if (rec && isNum(rec.latency_ms)) aside.push('<span title="Client-measured latency, caches disabled">' + esc(msFmt(rec.latency_ms)) + "</span>");
+        if (rec && isNum(rec.cost_usd)) aside.push('<span title="List price for this document">$' + esc(rec.cost_usd.toFixed(4)) + "</span>");
 
         var html =
           '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + esc(listHref("documents", run.run_id, filters)) + '">Documents</a>' +
-          (filters.src ? " / " + esc(filters.src) : "") + (filters.cat ? " / " + esc(filters.cat) : "") + "</nav>" +
-          '<div class="doc-head"><h1>' + esc(docId) + "</h1>" +
+          '<span aria-hidden="true">›</span><a href="' + esc(listHref("documents", run.run_id, { src: srcKey })) + '">' + esc(srcName) + "</a></nav>" +
+          '<div class="doc-head"><h1>' + h1 + "</h1>" +
           '<div class="doc-nav">' +
-          (prev ? '<a class="btn sm" href="' + esc(docLink(prev)) + '" title="Previous document (k)">‹ Prev</a>' : '<span class="btn sm" aria-disabled="true">‹ Prev</span>') +
-          '<span class="pos">' + (pos + 1) + " / " + list.length + "</span>" +
-          (next ? '<a class="btn sm" href="' + esc(docLink(next)) + '" title="Next document (j)">Next ›</a>' : '<span class="btn sm" aria-disabled="true">Next ›</span>') +
-          '<button type="button" class="btn sm" id="copy-link" title="Copy a link to exactly this view">Copy link</button>' +
+          (prev ? '<a class="iconbtn" href="' + esc(docLink(prev)) + '" aria-label="Previous document: ' + esc(docTitle(prev)) + ' (k)" title="' + esc(docTitle(prev)) + ' (k)">‹</a>' : '<span class="iconbtn" aria-disabled="true">‹</span>') +
+          '<span class="pos">' + (pos + 1) + "/" + list.length + "</span>" +
+          (next ? '<a class="iconbtn" href="' + esc(docLink(next)) + '" aria-label="Next document: ' + esc(docTitle(next)) + ' (j)" title="' + esc(docTitle(next)) + ' (j)">›</a>' : '<span class="iconbtn" aria-disabled="true">›</span>') +
+          '<button type="button" class="iconbtn" id="copy-link" aria-label="Copy a link to this view" title="Copy a link to this view">' +
+          '<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">' +
+          '<path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></button>' +
           "</div></div>" +
-          '<ul class="badges">' +
-          '<li class="badge strong">' + esc(entry.category) + "</li>" +
-          '<li class="badge">' + esc(entry.pages) + (entry.pages === 1 ? " page" : " pages") + "</li>" +
-          (rulesDoc ? '<li class="badge strong">rule-scored</li>' : "") +
-          (rec && rec.table_only ? '<li class="badge strong">table-only</li>' : "") +
-          (entry.tags || []).map(function (t) { return '<li class="badge">' + esc(t) + "</li>"; }).join("") +
-          '<li class="badge">' + esc(datasetName) + " v" + esc(manifest.version) + "</li>" +
-          (entry.license ? '<li class="badge">' + esc(entry.license) + "</li>" : "") +
-          "</ul>" +
-          (entry.attribution ? '<p class="hint attr">' + esc(entry.attribution) + "</p>" : "") +
-          '<div class="chips" role="navigation" aria-label="Models (m / M to cycle)">' + chips + "</div>" +
-          '<div class="inspector">' +
-          '<section class="panel source" aria-label="Input document"><div class="panel-title"><h2>Input</h2><span class="hint">' +
-          esc(pathLabel(entry.file)) + "</span></div><div id=\"sv-slot\"></div></section>" +
-          '<section class="panel analysis" aria-label="Analysis">' +
-          metricTiles(rec) +
-          (rec && rec.error ? '<p class="note fail">This call failed: ' + esc(rec.error) + "</p>" : "") +
-          '<div class="tabs" role="tablist">' +
-          tabs
-            .map(function (t, i) {
-              return '<a role="tab" class="tab" href="' + esc(canonical(model, { tab: t[0] })) + '" aria-selected="' + (t[0] === tab) + '" title="' + t[1] + " (" + (i + 1) + ')">' + esc(t[1]) + "</a>";
-            })
-            .join("") +
-          "</div>" +
-          '<div class="tab-body" role="tabpanel">' + body + "</div>" +
-          "</section></div>" +
-          '<section class="panel"><h2>Verify it yourself</h2>' +
-          "<p>" + (rulesDoc ? "Parse the page with the same model, then re-check the assertions (<code>bench score</code> compares transcripts only):" : "Parse the same document with the same model and score it locally:") + "</p>" +
-          codeBlock(parseCommand) + codeBlock(scoreCommand) +
-          '<p class="hint">Served from this site: ' +
-          (restricted ? "scores only (research-only source)" : rulesDoc ? (rulesUrl ? '<a href="' + esc(rulesUrl) + '" rel="noopener">assertions</a>' : "no assertion file") : truthUrl ? '<a href="' + esc(truthUrl) + '" rel="noopener">ground truth</a>' : "no ground truth") +
-          (pred !== null ? ' · <a href="' + esc(predUrl(model)) + '" rel="noopener">model output</a>' : "") +
-          (hasJson ? ' · <a href="' + esc(jsonUrl) + '" rel="noopener">unified JSON</a>' : "") +
-          (restricted ? "" : ' · <a href="' + esc(inputUrl) + '" rel="noopener">input</a>') + ' · <a href="' + esc(url("data/runs/" + run.run_id + ".json")) + '" rel="noopener">run JSON</a>.</p>' +
-          "</section>";
+          '<p class="doc-meta">' + esc(metaBits.join(" · ")) + "</p>" +
+          disclosure("Details", '<dl class="kv">' + detailRows + "</dl>", { id: "doc-details", cls: "doc-details" }) +
+          modelSwitcher(models, model, byDoc, function (m) {
+            return canonical(m);
+          }) +
+          '<div class="insp">' +
+          '<section class="pagecol" aria-label="Page"><div id="sv-slot"></div></section>' +
+          '<section class="summary" aria-label="Score">' +
+          '<div class="hero bbox"><div class="hero-n' + (verdictOf(score) ? " v-" + verdictOf(score) : "") + '">' + vdot(score) +
+          '<span class="n">' + esc(fixed(score, 1)) + '</span><span class="of">/ 100</span></div></div>' +
+          '<p class="verdict">' + esc(verdictLine(rec, rulesTotal)) + "</p>" +
+          (rec && rec.error ? '<p class="failnote">' + esc(rec.error) + "</p>" : "") +
+          (aside.length ? '<p class="aside">' + aside.join(" · ") + "</p>" : "") +
+          disclosure("All metrics", metricsList(rec), { id: "doc-metrics" }) +
+          "</section>" +
+          '<section class="work" aria-label="Evidence">' +
+          (tabs.length
+            ? '<div class="tabs" role="tablist">' +
+              tabs
+                .map(function (t, i) {
+                  return '<a role="tab" class="tab" href="' + esc(canonical(model, { tab: t[0] })) + '" aria-selected="' + (t[0] === tab) + '" title="' + t[1] + " (" + (i + 1) + ')">' + esc(t[1]) + "</a>";
+                })
+                .join("") +
+              "</div>"
+            : "") +
+          '<div class="tab-body" role="' + (tabs.length ? "tabpanel" : "region") + '">' + body + "</div>" +
+          reproduce +
+          "</section></div>";
 
         view.innerHTML = html;
         var chipRow = view.querySelector(".chips");
@@ -2848,14 +3046,15 @@
           chipRow.scrollLeft = onChip.offsetLeft - chipRow.offsetLeft - 16;
         }
 
-        /* ---- source viewer: reuse across model / tab switches */
+        /* ---- page viewer: reuse across model / tab switches */
         var svKey = run.run_id + "|" + docId;
         if (!SV || SV.key !== svKey) {
           SV = new SourceViewer(svKey, {
             docId: docId,
+            title: title,
             inputUrl: inputUrl,
-            previewUrl: previewUrl,
-            imageUrl: isPdf ? null : previewUrl || inputUrl,
+            previews: isPdf ? previews : [],
+            imageUrl: isPdf ? null : previews[0] || inputUrl,
             isPdf: isPdf,
             pages: entry.pages || 1,
             restricted: restricted,
@@ -2866,22 +3065,31 @@
           go(canonical(model, { page: n > 1 ? String(n) : null }), true);
         };
         SV.onOverlay = function (on) {
-          go(canonical(model, { ov: on ? null : "0" }), true);
+          go(canonical(model, { ov: on ? "1" : null }), true);
         };
         SV.overlayOn = ovOn;
         if (page !== SV.page) SV.showPage(page);
         var overlay = unified ? blocksByPage(unified) : null;
-        var message;
-        if (overlay && overlay.count) message = "Layout boxes: <code>" + esc(model.model) + "</code>, " + overlay.count + " blocks from the unified response.";
-        else if (overlay) message = "The unified response of <code>" + esc(model.model) + "</code> has no block bounding boxes.";
-        else if (anyJson) message = "No unified JSON was saved for <code>" + esc(model.model) + "</code> on this document, so there are no layout boxes.";
-        else message = "Layout boxes need the unified JSON response; this run saved markdown only.";
-        SV.setOverlay(overlay, message);
+        SV.setOverlay(overlay, overlay && overlay.count ? plural(overlay.count, "layout box", "layout boxes") + " from the unified response of " + model.model : "");
 
         /* ---- wiring */
         wireCopyButtons(view);
+        wireDisclosures(view);
         view.querySelector("#copy-link").addEventListener("click", function (e) {
-          copyText(location.href, e.currentTarget, "Copy link");
+          var button = e.currentTarget;
+          var done = function () {
+            button.setAttribute("title", "Copied");
+            button.style.color = "var(--good)";
+            setTimeout(function () {
+              button.setAttribute("title", "Copy a link to this view");
+              button.style.color = "";
+            }, 1500);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(location.href).then(done, function () {});
+        });
+        var modelSelect = view.querySelector("#model-select");
+        modelSelect.addEventListener("change", function () {
+          go(modelSelect.value, true);
         });
         view.querySelectorAll("button[data-diff]").forEach(function (b) {
           b.addEventListener("click", function () {
@@ -2899,7 +3107,7 @@
           var again = view.querySelector(".more-rules");
           if (again)
             again.addEventListener("click", function () {
-              var n = view.querySelectorAll(".checklist > li").length + RULE_PAGE;
+              var n = view.querySelectorAll(".check").length + RULE_PAGE;
               view.querySelector(".tab-body").innerHTML = rulesChecklist(ruleList, scoreRules(pred, ruleList, opts), rec, ruleFilter, n);
               wireRuleBody();
             });
@@ -2923,7 +3131,7 @@
             if (tab === "diff") go(canonical(model, { diff: diffMode === "split" ? "unified" : null }), true);
           },
           o: function () {
-            if (SV.overlay && SV.overlay.count) SV.onOverlay(!SV.overlayOn);
+            if (SV.overlay) SV.onOverlay(!SV.overlayOn);
           },
           "[": function () {
             SV.onPage(SV.page - 1);
@@ -3051,7 +3259,7 @@
     window.addEventListener("resize", function () {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
-        if (SV && SV.pdf && document.body.contains(SV.el)) SV.renderPdfPage();
+        if (SV && document.body.contains(SV.el)) SV.rerender();
       }, 250);
     });
   }
@@ -3061,27 +3269,8 @@
     getJSON(url("data/index.json")).then(
       function (data) {
         INDEX = data;
-        var first = (data.runs || [])[0];
-        var dataset = first ? (data.datasets || {})[first.dataset.name] : null;
-        if (dataset) {
-          var nameEl = document.getElementById("footer-dataset");
-          var licenseEl = document.getElementById("footer-license");
-          if (nameEl) nameEl.textContent = dataset.name + " v" + dataset.version;
-          if (licenseEl) licenseEl.textContent = dataset.license || "see the repository";
-          var truthEl = document.getElementById("footer-truth");
-          if (truthEl && (dataset.sources || (dataset.kinds || {}).rules)) {
-            truthEl.textContent =
-              "Each document keeps the ground truth its own source ships: an exact transcript, or " +
-              "machine-checkable assertions for pages that have no reference transcript.";
-          }
-          var attrEl = document.getElementById("footer-attribution");
-          if (attrEl && dataset.attribution) {
-            attrEl.textContent = dataset.attribution;
-            attrEl.hidden = false;
-          }
-        }
         var generated = document.getElementById("footer-generated");
-        if (generated && data.generated_at) generated.textContent = "site built " + data.generated_at;
+        if (generated && data.generated_at) generated.textContent = " · built " + dateFmt(data.generated_at);
         window.addEventListener("hashchange", render);
         render();
       },
