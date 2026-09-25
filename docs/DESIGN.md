@@ -32,7 +32,7 @@ properties. This page explains what the tokens are for.
 | Ink | `--ink`, `--ink-2`, `--ink-3` | `#14171c` `#4f5866` `#687180` | Primary text (18:1); secondary (7.2:1); labels and captions (4.9:1) |
 | Rules | `--rule`, `--rule-2` | `#e3e6eb` `#eef0f3` | Borders and hairlines; dividers inside a component |
 | Scan (accent) | `--scan`, `--scan-ink`, `--scan-wash`, `--scan-edge` | `#ff5230` `#c43818` `#fff1ec` `#ffc9b9` | Marks, bars, the scan line (graphic); accent text (5.3:1); selected ground; selected border |
-| Verdict | `--good`, `--fair`, `--poor` (+ `-wash`) | `#16794a` `#9a6200` `#b42346` | Score states. Always paired with a shape: ● good, ◐ fair, ○ poor |
+| Verdict | `--good`, `--fair`, `--poor` (+ `-wash`) | `#16794a` `#9a6200` `#b42346` | Score states. Always paired with a CSS-drawn shape: filled dot good, half-filled dot fair, ring poor |
 | Proof marks | `--proof-del`, `--proof-ins` (+ `-wash`) | `#b42346` `#16794a` | Diff: missing from the output is struck through; extra in the output is underlined |
 | Modes | `--mode-parse`, `--mode-ocr`, `--mode-extract` | `#b8431c` `#2c5fd6` `#6b3fc0` | Labels for the three modes only |
 | Layout boxes | `--box-*` (8 hues) | see tokens | Block-type overlays on a page: text, title, table, figure, list, furniture, formula, other |
@@ -73,6 +73,8 @@ use `text-wrap: balance`. Reading text stays within `--measure` (68ch).
   `--r-pill` only for segmented controls. Documents are rectangles; nothing is a bubble.
 - **Borders over shadows.** A hairline `--rule` separates; `--lift` is only for things that float
   above the page (menus, dialogs). Most sections need neither: whitespace separates them.
+- **Focus:** a solid 2px `--scan-ink` outline offset by 2px on every interactive element (3:1 or
+  better on every ground in both themes). Never remove focus styles.
 - **Motion:** `--dur` 160ms with `--ease`, for state changes only (tab, disclosure, hover). No
   entrance animations in tools. Everything is disabled under `prefers-reduced-motion`.
 
