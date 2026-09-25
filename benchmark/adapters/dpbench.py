@@ -1,4 +1,4 @@
-"""DP-Bench adapter — Upstage's document-parsing benchmark → LiteOCR transcripts.
+"""DP-Bench adapter — Upstage's document-parsing benchmark → PuffinParse transcripts.
 
 Upstream: https://huggingface.co/datasets/upstage/dp-bench (MIT, per the dataset card). Data and
 the evaluation code (``evaluate.py``, ``src/layout_evaluation.py``, ``src/table_evaluation.py``)

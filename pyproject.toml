@@ -3,13 +3,13 @@ requires = ["maturin>=1.5,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "liteocr"
+name = "puffinparse"
 version = "0.1.0"
 description = "One API for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, ...). Rust core, Python SDK, open benchmark."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
-authors = [{ name = "LiteOCR contributors" }]
+authors = [{ name = "PuffinParse contributors" }]
 keywords = ["ocr", "document-parsing", "pdf", "reducto", "extend", "llamaparse", "benchmark"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -35,9 +35,9 @@ Issues = "https://github.com/ajinkyashejul/liteocr/issues"
 Changelog = "https://github.com/ajinkyashejul/liteocr/blob/main/CHANGELOG.md"
 
 [tool.maturin]
-manifest-path = "crates/liteocr-python/Cargo.toml"
+manifest-path = "crates/puffinparse-python/Cargo.toml"
 python-source = "python"
-module-name = "liteocr._core"
+module-name = "puffinparse._core"
 features = ["pyo3/extension-module"]
 strip = true
 
@@ -56,7 +56,7 @@ strict = true
 warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
-module = "liteocr._core"
+module = "puffinparse._core"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

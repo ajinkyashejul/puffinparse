@@ -3,7 +3,7 @@
 > **Status: live-verified locally.** Tesseract 5.3.4 and poppler-utils 24.02 (Ubuntu 24.04
 > packages) were installed in the development sandbox on 2026-09-24; the `#[ignore]`d live test
 > in `providers/tesseract.rs` passes and the fixture
-> `crates/liteocr-core/tests/fixtures/tesseract_headings.tsv` is real `tesseract ... tsv` output for
+> `crates/puffinparse-core/tests/fixtures/tesseract_headings.tsv` is real `tesseract ... tsv` output for
 > `benchmark/datasets/synthetic-v1/docs/headings_001.png`.
 
 ## 1. Summary
@@ -14,10 +14,10 @@
 | Runs | locally, by shelling out to the `tesseract` binary (no C bindings, no FFI) |
 | Binaries | `tesseract` (≥ 4; 5.x recommended), plus `pdftoppm` from poppler for PDFs |
 | Configuration | `TESSERACT_CMD` (default `tesseract`), `PDFTOPPM_CMD` (default `pdftoppm`) |
-| API key | none — `liteocr providers` shows `local` in the Key column |
+| API key | none — `puffinparse providers` shows `local` in the Key column |
 | Price | $0 per page (`pricing.json` source `self-hosted`); the cost is your CPU time |
 | Docs | <https://tesseract-ocr.github.io/tessdoc/> |
-| Implementation | `crates/liteocr-core/src/providers/tesseract.rs` (+ shared helpers in `providers/local.rs`) |
+| Implementation | `crates/puffinparse-core/src/providers/tesseract.rs` (+ shared helpers in `providers/local.rs`) |
 
 Install:
 
@@ -32,13 +32,13 @@ point in the benchmark. It has **no layout model** — no headings, tables, figu
 analysis beyond its own page segmentation — so expect good character accuracy on clean scans and
 a near-zero table score.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
 | Model | Modes | List price |
 |---|---|---|
 | `tesseract/default` *(default)* | `ocr` (native), `parse` (derived) | $0 |
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 1. The input is loaded (a URL input is downloaded first) and sniffed by magic bytes, then by
    extension. Anything that is not an image or a PDF is an `input` error.
@@ -68,7 +68,7 @@ word (5), each with a pixel box `left top width height`, and a 0–100 confidenc
 | `Block` (parse mode) | one `text` block per paragraph (level 3); `content` = its lines joined by `\n`; box from the paragraph row; confidence = mean word confidence |
 | `Page.markdown` | paragraphs joined by a blank line (no markdown syntax is invented) |
 | `Usage.pages` | pages OCR'd |
-| metadata | `tesseract_lang`, `tesseract_psm` (when set), `tesseract_pdf_dpi` (PDFs); parse responses also carry `liteocr_derived_from: "ocr"` |
+| metadata | `tesseract_lang`, `tesseract_psm` (when set), `tesseract_pdf_dpi` (PDFs); parse responses also carry `puffinparse_derived_from: "ocr"` |
 | `raw` (`include_raw=True`) | `{"engine": "tesseract", "format": "tsv", "pages": [{"page_number", "tsv"}]}` |
 
 Boxes are normalised by the page's pixel size, origin top-left, clamped to 0..1.
@@ -85,7 +85,7 @@ Boxes are normalised by the page's pixel size, origin top-left, clamped to 0..1.
 
 There is no concurrency limit beyond your CPU. Tesseract uses OpenMP threads by default, which
 oversubscribe the CPU when several pages run in parallel (one small PNG took 70 s instead of 0.7 s
-on 4 cores), so LiteOCR starts `tesseract` with `OMP_THREAD_LIMIT=1` unless `OMP_THREAD_LIMIT` is
+on 4 cores), so PuffinParse starts `tesseract` with `OMP_THREAD_LIMIT=1` unless `OMP_THREAD_LIMIT` is
 already set in the environment. Set it yourself (e.g. `OMP_THREAD_LIMIT=4`) to give a single large
 document more threads.
 
@@ -106,14 +106,14 @@ document more threads.
 ## 7. `provider_options` examples
 
 ```python
-import liteocr
+import puffinparse
 
-liteocr.ocr("scan.png", model="tesseract/default")                                   # defaults
-liteocr.ocr("scan.png", model="tesseract", provider_options={"lang": "eng+fra", "psm": 6})
-liteocr.parse("book.pdf", model="tesseract", provider_options={"dpi": 400, "oem": 1})
-liteocr.ocr("form.png", model="tesseract",
+puffinparse.ocr("scan.png", model="tesseract/default")                                   # defaults
+puffinparse.ocr("scan.png", model="tesseract", provider_options={"lang": "eng+fra", "psm": 6})
+puffinparse.parse("book.pdf", model="tesseract", provider_options={"dpi": 400, "oem": 1})
+puffinparse.ocr("form.png", model="tesseract",
             provider_options={"config": {"preserve_interword_spaces": 1}})         # -c k=v
-liteocr.ocr("scan.png", model="tesseract", provider_options={"cmd": "/opt/tesseract/bin/tesseract"})
+puffinparse.ocr("scan.png", model="tesseract", provider_options={"cmd": "/opt/tesseract/bin/tesseract"})
 ```
 
 | Option | Meaning |

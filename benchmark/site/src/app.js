@@ -1,8 +1,8 @@
-/* LiteOCR benchmark results viewer.
+/* PuffinParse benchmark results viewer.
  *
  * Vanilla ES2018, no framework, no build step (ADR: the viewer stays vanilla). Everything is
  * fetched from the `data/` directory written by benchmark/site/build.py, through `url()`; the
- * prefix comes from `<meta name="liteocr-base">`. PDF pages are shown from the page images the
+ * prefix comes from `<meta name="puffinparse-base">`. PDF pages are shown from the page images the
  * build renders; pdf.js (cdnjs, pinned + SRI) is loaded only for a page the build did not render.
  *
  * Design: docs/DESIGN.md. One primary number per view; everything secondary sits one click
@@ -56,11 +56,11 @@
   }
 
   var BASE = (function () {
-    var value = meta("liteocr-base", "./");
+    var value = meta("puffinparse-base", "./");
     return value.charAt(value.length - 1) === "/" ? value : value + "/";
   })();
-  var HOME = meta("liteocr-home", "");
-  var DOCS = meta("liteocr-docs", "");
+  var HOME = meta("puffinparse-home", "");
+  var DOCS = meta("puffinparse-docs", "");
 
   var INDEX = null;
   var runCache = {};
@@ -336,7 +336,7 @@
     return cut > 0 ? String(docId).slice(0, cut) : fallback;
   }
 
-  /** Nearest-rank percentile, identical to `percentile` in crates/liteocr-cli/src/bench.rs. */
+  /** Nearest-rank percentile, identical to `percentile` in crates/puffinparse-cli/src/bench.rs. */
   function percentile(sorted, p) {
     if (!sorted.length) return null;
     var idx = Math.round((sorted.length - 1) * p);
@@ -1150,14 +1150,14 @@
       "<dt>Dataset</dt><dd>" + esc(run.dataset.name) + " v" + esc(run.dataset.version) + " · " + esc(run.dataset.documents) + " documents</dd>" +
       (run.dataset.sha256 ? '<dt>SHA-256</dt><dd class="mono" title="Of the manifest, every input, truth and rule file">' + esc(run.dataset.sha256) + "</dd>" : "") +
       "<dt>Normalisation</dt><dd>" + esc(flags.join(", ") || "none") + "</dd>" +
-      "<dt>Versions</dt><dd>LiteOCR " + esc(run.liteocr_version) + (run.scorer_version ? " · scorer " + esc(run.scorer_version) : "") + "</dd>" +
+      "<dt>Versions</dt><dd>PuffinParse " + esc(run.puffinparse_version) + (run.scorer_version ? " · scorer " + esc(run.scorer_version) : "") + "</dd>" +
       '<dt>Result file</dt><dd><a href="' + esc(url(runInfo.file)) + '" rel="noopener">' + esc(runInfo.file) + "</a></dd>" +
       "</dl>"
     );
   }
 
   function viewLeaderboard(runInfo, params) {
-    document.title = "Leaderboard · LiteOCR Benchmark";
+    document.title = "Leaderboard · PuffinParse Benchmark";
     setNav("leaderboard", runInfo.run_id);
     return getRun(runInfo.run_id).then(function (run) {
       var sortKey = params.get("sort") || "score";
@@ -1186,7 +1186,7 @@
       var sources = run.sources || [];
 
       var reproduce =
-        "liteocr bench run \\\n    --dataset benchmark/datasets/" + run.dataset.name +
+        "puffinparse bench run \\\n    --dataset benchmark/datasets/" + run.dataset.name +
         " \\\n    --models " + run.models.map(function (m) { return m.model; }).join(" ") +
         " \\\n    --concurrency 4 --save-outputs benchmark/results/outputs/<run_id>";
 
@@ -1224,7 +1224,7 @@
         disclosure(
           "Reproduce this run",
           '<p class="note">Install the CLI, set the provider keys you want to test, then run:</p>' + codeBlock(reproduce) +
-            '<p class="caption">Score one prediction offline with <code>liteocr bench score prediction.md truth.md</code>. Every document page has the exact commands for that document.</p>',
+            '<p class="caption">Score one prediction offline with <code>puffinparse bench score prediction.md truth.md</code>. Every document page has the exact commands for that document.</p>',
           { id: "lb-repro" }
         ) +
         disclosure("Run details", runDetailsHtml(run, runInfo), { id: "lb-run" }) +
@@ -1291,7 +1291,7 @@
   }
 
   function viewDocuments(runInfo, params) {
-    document.title = "Documents · LiteOCR Benchmark";
+    document.title = "Documents · PuffinParse Benchmark";
     setNav("documents", runInfo.run_id);
     return Promise.all([getRun(runInfo.run_id), getManifest(runInfo.dataset.name)]).then(function (loaded) {
       var run = loaded[0];
@@ -1639,7 +1639,7 @@
 
   /* ------------------------------------------- rule checker (mirror of bench.rs) */
   // A line-for-line port of `normalize`, `markdown_to_text` and `score_rules` in
-  // crates/liteocr-core, so every assertion can be shown passing or failing. The recorded
+  // crates/puffinparse-core, so every assertion can be shown passing or failing. The recorded
   // `rules_passed` from the Rust scorer stays authoritative; the viewer says when they differ.
 
   function stripHtmlTags(s) {
@@ -2863,7 +2863,7 @@
         var title = docTitle(entry);
         var srcKey = sourceOf(docId, datasetName);
         var srcName = entry.source_label || srcLabel(srcKey);
-        document.title = title + " · " + srcName + " · " + model.model + " · LiteOCR Benchmark";
+        document.title = title + " · " + srcName + " · " + model.model + " · PuffinParse Benchmark";
 
         /* ---- the result body of the current tab */
         var body = "";
@@ -2940,17 +2940,17 @@
                 '<div class="pane" tabindex="0" role="region" aria-label="Model output">' + esc(pred) + "</div></div>";
         } else {
           body =
-            '<p class="note">This source\'s licence is research-only, so LiteOCR publishes the recorded scores but not the page, ' +
+            '<p class="note">This source\'s licence is research-only, so PuffinParse publishes the recorded scores but not the page, ' +
             "its ground truth or the model outputs. Fetch the data at the pinned revision to inspect it locally:</p>" + codeBlock(fetchCommand);
         }
 
         /* ---- reproduce */
         var repoBase = "benchmark/datasets/" + datasetName + "/";
         var predFile = docId.replace(/\//g, "_") + ".pred.md";
-        var parseCommand = "liteocr parse " + joinPath(repoBase, entry.file) + " -m " + model.model + " > " + predFile;
+        var parseCommand = "puffinparse parse " + joinPath(repoBase, entry.file) + " -m " + model.model + " > " + predFile;
         var scoreCommand = rulesDoc
-          ? "liteocr bench run --dataset benchmark/datasets/" + datasetName + " \\\n    --models " + model.model + " --filter " + docId
-          : "liteocr bench score " + predFile + " " + joinPath(repoBase, entry.truth);
+          ? "puffinparse bench run --dataset benchmark/datasets/" + datasetName + " \\\n    --models " + model.model + " --filter " + docId
+          : "puffinparse bench score " + predFile + " " + joinPath(repoBase, entry.truth);
         var served = [];
         if (!restricted) {
           if (rulesDoc && rulesUrl) served.push('<a href="' + esc(rulesUrl) + '" rel="noopener">checks</a>');
@@ -3243,7 +3243,7 @@
         var next = dark ? "light" : "dark";
         root.setAttribute("data-theme", next);
         try {
-          localStorage.setItem("liteocr-theme", next);
+          localStorage.setItem("puffinparse-theme", next);
         } catch (e) {
           /* private mode */
         }

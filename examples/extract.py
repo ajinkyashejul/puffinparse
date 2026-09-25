@@ -1,11 +1,11 @@
 """`extract` mode: pull a JSON object out of a document with a schema.
 
-NOTE: `extract` needs an extract-capable model. Ask `liteocr.list_models("extract")` which ones
+NOTE: `extract` needs an extract-capable model. Ask `puffinparse.list_models("extract")` which ones
 your build has; if it is empty, the call below raises `UnsupportedModelError` naming the mode.
 Reducto, Extend and LlamaParse are parse/ocr only.
 """
 
-import liteocr
+import puffinparse
 
 SCHEMA = {
     "type": "object",
@@ -29,19 +29,19 @@ SCHEMA = {
     "required": ["invoice_number", "total"],
 }
 
-models = liteocr.list_models("extract")
+models = puffinparse.list_models("extract")
 print("models that serve extract:", models or "none yet")
 model = models[0] if models else "reducto/standard"
 
 try:
-    resp = liteocr.extract(
+    resp = puffinparse.extract(
         "benchmark/datasets/synthetic-v1/docs/invoice_001.png",
         SCHEMA,
         model=model,
         instructions="Amounts are in the currency printed next to the total.",
         citations=True,
     )
-except liteocr.UnsupportedModelError as e:
+except puffinparse.UnsupportedModelError as e:
     print(f"\n{model} cannot do extract yet:\n  {e.message}")
     raise SystemExit(0) from None
 

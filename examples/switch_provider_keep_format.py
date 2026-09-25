@@ -1,7 +1,7 @@
 """Switch the provider, keep the vendor's response shape.
 
 Code already written against Reducto, Extend or LlamaParse does not have to be rewritten to try
-another engine: ask for that vendor's `output_format` and LiteOCR renders whatever provider ran
+another engine: ask for that vendor's `output_format` and PuffinParse renders whatever provider ran
 the call into the JSON your parser already knows.
 
 What is guaranteed is structural fidelity — key set, chunk/page and block counts, content strings,
@@ -11,7 +11,7 @@ would have returned. `docs/COMPAT.md` lists the always-null fields and the lossy
 
 import sys
 
-import liteocr
+import puffinparse
 
 path = sys.argv[1] if len(sys.argv) > 1 else "benchmark/datasets/synthetic-v1/docs/table_001.png"
 
@@ -27,21 +27,21 @@ def draw_blocks(reducto_response: dict) -> None:
 # ... now fed by three different providers.
 for model in ["reducto/standard", "extend/parse_light", "llamaparse/cost_effective"]:
     try:
-        doc = liteocr.parse(path, model=model, output_format="reducto")
-    except liteocr.AuthenticationError as e:
+        doc = puffinparse.parse(path, model=model, output_format="reducto")
+    except puffinparse.AuthenticationError as e:
         print(f"{model}: skipped ({e.message})")
         continue
     print(f"=== {model} -> {doc['response_type']}, {doc['usage']['num_pages']} page(s)")
     draw_blocks(doc)
 
-# Any vendor's shape works the same way, and "liteocr" (or omitting the argument) keeps the
+# Any vendor's shape works the same way, and "puffinparse" (or omitting the argument) keeps the
 # unified dataclass.
-extend_shaped = liteocr.parse(path, model="reducto/standard", output_format="extend")
+extend_shaped = puffinparse.parse(path, model="reducto/standard", output_format="extend")
 print(extend_shaped["object"], extend_shaped["status"], extend_shaped["metrics"]["pageCount"])
 
-unified = liteocr.parse(path, model="reducto/standard")
+unified = puffinparse.parse(path, model="reducto/standard")
 print(unified.markdown[:200], unified.cost_usd)
 
 # Callbacks always receive the unified dataclass, whatever shape the caller asked for.
-liteocr.success_callback.append(lambda r: print("callback:", r.model, r.usage.pages, r.cost_usd))
-liteocr.parse(path, model="extend/parse_light", output_format="llamaparse")
+puffinparse.success_callback.append(lambda r: print("callback:", r.model, r.usage.pages, r.cost_usd))
+puffinparse.parse(path, model="extend/parse_light", output_format="llamaparse")

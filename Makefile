@@ -1,4 +1,4 @@
-# LiteOCR developer tasks. Run `make help` for a list.
+# PuffinParse developer tasks. Run `make help` for a list.
 #
 # Python targets expect an active virtualenv with the dev tooling installed:
 #   python -m venv .venv && . .venv/bin/activate && pip install maturin ruff mypy pytest
@@ -7,7 +7,7 @@ BENCH_DATASET ?= benchmark/datasets/synthetic-v1
 BENCH_MODELS  ?= reducto/standard extend/parse_performance llamaparse/cost_effective
 CARGO         ?= cargo
 PYTHON        ?= python
-CLI           := $(CARGO) run -p liteocr-cli --release --
+CLI           := $(CARGO) run -p puffinparse-cli --release --
 
 .DEFAULT_GOAL := help
 .PHONY: help build test test-rust test-python test-node lint fmt develop bench dataset leaderboard clean
@@ -35,14 +35,14 @@ lint: ## fmt check, clippy, ruff, mypy — everything CI enforces
 	$(CARGO) clippy --workspace --all-targets -- -D warnings
 	ruff check python/ benchmark/ examples/
 	ruff format --check python/ benchmark/ examples/
-	mypy python/liteocr
+	mypy python/puffinparse
 
 fmt: ## Format Rust and Python sources in place
 	$(CARGO) fmt --all
 	ruff format python/ benchmark/ examples/
 	ruff check --fix python/ benchmark/ examples/
 
-develop: ## Build the PyO3 extension and install liteocr into the active venv
+develop: ## Build the PyO3 extension and install puffinparse into the active venv
 	maturin develop
 
 bench: ## Run the benchmark against the default dataset and models

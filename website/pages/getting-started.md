@@ -1,6 +1,6 @@
 # Getting started
 
-LiteOCR gives you one call for every OCR / document-parsing provider. Install it, set one key,
+PuffinParse gives you one call for every OCR / document-parsing provider. Install it, set one key,
 and parse a document in under a minute.
 
 ## 1. Install
@@ -8,7 +8,7 @@ and parse a document in under a minute.
 ### Python
 
 ```bash
-pip install liteocr
+pip install puffinparse
 ```
 
 Python 3.9+. The wheel bundles the Rust core — there is no toolchain to install and no provider
@@ -16,29 +16,29 @@ SDK to add.
 
 ### CLI
 
-The `liteocr` binary is built from the Rust workspace:
+The `puffinparse` binary is built from the Rust workspace:
 
 ```bash
-cargo install --git https://github.com/ajinkyashejul/liteocr liteocr-cli
+cargo install --git https://github.com/ajinkyashejul/liteocr puffinparse-cli
 # or, from a clone:
-cargo build --release -p liteocr-cli     # ./target/release/liteocr
+cargo build --release -p puffinparse-cli     # ./target/release/puffinparse
 ```
 
 ### Rust
 
 ```toml
 [dependencies]
-liteocr-core = "0.1"
+puffinparse-core = "0.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/ajinkyashejul/liteocr && cd liteocr
+git clone https://github.com/ajinkyashejul/liteocr && cd puffinparse
 python -m venv .venv && . .venv/bin/activate
-pip install maturin && maturin develop --release    # builds liteocr._core into the venv
-cargo build --release -p liteocr-cli
+pip install maturin && maturin develop --release    # builds puffinparse._core into the venv
+cargo build --release -p puffinparse-cli
 ```
 
 ## 2. Set a key
@@ -63,7 +63,7 @@ Keys can also be passed per call (`api_key=...` / `--api-key`), and base URLs ov
 Check what is configured:
 
 ```bash
-liteocr providers
+puffinparse providers
 ```
 
 ## 3. First call
@@ -71,9 +71,9 @@ liteocr providers
 ### Python
 
 ```python
-import liteocr
+import puffinparse
 
-resp = liteocr.parse("invoice.pdf", model="reducto/standard")
+resp = puffinparse.parse("invoice.pdf", model="reducto/standard")
 
 print(resp.markdown)                 # unified markdown, identical shape for every provider
 print(resp.usage.pages, resp.cost_usd, resp.latency_ms)
@@ -83,23 +83,23 @@ print(resp.pages[0].blocks[0].type, resp.pages[0].blocks[0].bbox)
 Async is the same call with `await`:
 
 ```python
-resp = await liteocr.aparse("invoice.pdf", model="llamaparse/cost_effective")
+resp = await puffinparse.aparse("invoice.pdf", model="llamaparse/cost_effective")
 ```
 
 ### CLI
 
 ```bash
-liteocr parse invoice.pdf -m extend/parse_light            # markdown on stdout
-liteocr parse scan.png -m llamaparse/agentic -f json --raw # unified JSON + provider payload
+puffinparse parse invoice.pdf -m extend/parse_light            # markdown on stdout
+puffinparse parse scan.png -m llamaparse/agentic -f json --raw # unified JSON + provider payload
 ```
 
 ### Rust
 
 ```rust
-use liteocr_core::{parse, DocumentRequest};
+use puffinparse_core::{parse, DocumentRequest};
 
 #[tokio::main]
-async fn main() -> liteocr_core::Result<()> {
+async fn main() -> puffinparse_core::Result<()> {
     let resp = parse(DocumentRequest::from_path("invoice.pdf").model("reducto/standard")).await?;
     println!("{} pages, ${:.4}", resp.usage.pages, resp.cost_usd.unwrap_or(0.0));
     println!("{}", resp.markdown);
@@ -114,15 +114,15 @@ async fn main() -> liteocr_core::Result<()> {
 
 | Mode | Python | CLI | You get |
 |---|---|---|---|
-| `parse` | `liteocr.parse(...)` | `liteocr parse doc.pdf` | Layout-aware markdown + typed blocks with boxes. |
-| `ocr` | `liteocr.ocr(...)` | `liteocr ocr scan.png` | Plain text with line and word boxes. |
-| `extract` | `liteocr.extract(..., schema)` | `liteocr extract doc.pdf -s schema.json` | A JSON object shaped by your schema, with citations. |
+| `parse` | `puffinparse.parse(...)` | `puffinparse parse doc.pdf` | Layout-aware markdown + typed blocks with boxes. |
+| `ocr` | `puffinparse.ocr(...)` | `puffinparse ocr scan.png` | Plain text with line and word boxes. |
+| `extract` | `puffinparse.extract(..., schema)` | `puffinparse extract doc.pdf -s schema.json` | A JSON object shaped by your schema, with citations. |
 
 ```python
-text = liteocr.ocr("scan.png", model="reducto/r-1")
+text = puffinparse.ocr("scan.png", model="reducto/r-1")
 text.text, text.pages[0].lines[0].bbox
 
-data = liteocr.extract(
+data = puffinparse.extract(
     "invoice.pdf",
     {"type": "object", "properties": {"total": {"type": "number"}}},
     model="reducto/standard",
@@ -131,7 +131,7 @@ data = liteocr.extract(
 data.data["total"], data.citations("/total")
 ```
 
-`liteocr providers --mode extract` lists the models that serve a mode; asking a model for a mode it
+`puffinparse providers --mode extract` lists the models that serve a mode; asking a model for a mode it
 does not support raises `UnsupportedModelError` before any network call.
 
 ## 5. Switch providers
@@ -140,10 +140,10 @@ The model string is the only thing that changes. `"<provider>/<model>"`, like Li
 provider name selects its default model.
 
 ```python
-liteocr.parse("doc.pdf", model="reducto/r-1")
-liteocr.parse("doc.pdf", model="extend/parse_performance")
-liteocr.parse("doc.pdf", model="llamaparse/agentic_plus")
-liteocr.parse("doc.pdf", model="reducto")               # -> reducto's default parse model
+puffinparse.parse("doc.pdf", model="reducto/r-1")
+puffinparse.parse("doc.pdf", model="extend/parse_performance")
+puffinparse.parse("doc.pdf", model="llamaparse/agentic_plus")
+puffinparse.parse("doc.pdf", model="reducto")               # -> reducto's default parse model
 ```
 
 Unknown providers or models raise `UnsupportedModelError` before any network call.
@@ -151,7 +151,7 @@ Unknown providers or models raise `UnsupportedModelError` before any network cal
 ## 6. Add fallbacks
 
 ```python
-router = liteocr.Router(
+router = puffinparse.Router(
     ["reducto/standard", "llamaparse/agentic", "extend/parse_light"],
     mode="parse",             # a router is bound to one mode
     strategy="ordered",       # or "round_robin"
@@ -167,7 +167,7 @@ bad-request and input errors never do — they would fail on every provider.
 
 - [Python SDK](/python/) — every function, dataclass and exception.
 - [CLI](/cli/) — every subcommand and flag.
-- [Rust](/rust/) — `liteocr-core` crate usage.
-- [Providers](/providers/) — exactly what LiteOCR sends and how the response is mapped.
+- [Rust](/rust/) — `puffinparse-core` crate usage.
+- [Providers](/providers/) — exactly what PuffinParse sends and how the response is mapped.
 - [Benchmark](/benchmark/) — how the leaderboard is produced, and its caveats.
 - [Specification](/project/spec/) — the contract the implementations follow.

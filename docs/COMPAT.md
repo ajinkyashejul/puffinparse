@@ -1,11 +1,11 @@
 # Native-format compatibility (`output_format`)
 
-LiteOCR normalises every provider to one response shape. That is the right default, but it is a
+PuffinParse normalises every provider to one response shape. That is the right default, but it is a
 migration cost for anyone already integrated with a vendor: code that reads
 `result.chunks[].blocks[].bbox.left` has to be rewritten before a single request can be re-pointed
 at another provider.
 
-The compatibility layer removes that step. Ask for a vendor's shape and LiteOCR renders the unified
+The compatibility layer removes that step. Ask for a vendor's shape and PuffinParse renders the unified
 response into that vendor's own JSON, **whatever provider actually produced it**:
 
 ```text
@@ -21,7 +21,7 @@ Switch the model string, keep your parser.
 Rust:
 
 ```rust
-use liteocr_core::{parse, DocumentRequest};
+use puffinparse_core::{parse, DocumentRequest};
 
 let resp = parse(DocumentRequest::from_path("invoice.pdf").model("extend/parse_performance")).await?;
 let reducto_shaped = resp.to_format("reducto")?;   // serde_json::Value
@@ -30,7 +30,7 @@ let reducto_shaped = resp.to_format("reducto")?;   // serde_json::Value
 or explicitly:
 
 ```rust
-use liteocr_core::compat::{render_parse, Format};
+use puffinparse_core::compat::{render_parse, Format};
 
 let value = render_parse(&resp, Format::Reducto);
 ```
@@ -46,7 +46,7 @@ Accepted names (case-insensitive, `-` and `_` interchangeable):
 
 | Value | Shape |
 |---|---|
-| `liteocr` (also `unified`), or unset | LiteOCR's own `ParseResponse` JSON |
+| `puffinparse` (also `unified`), or unset | PuffinParse's own `ParseResponse` JSON |
 | `reducto` | Reducto `POST /parse` response (`response_type: "parse"`) |
 | `extend` | Extend `parse_run` object (`GET /parse_runs/{id}`) |
 | `llamaparse` (also `llama`, `llama_parse`) | LlamaParse `…/result/json` payload |
@@ -77,7 +77,7 @@ Not guaranteed:
 
 - byte equality with what the vendor would have returned for the same document — a different
   engine produced the text;
-- fields LiteOCR does not model. They are rendered as `null`, `[]`, `{}` or a stable constant
+- fields PuffinParse does not model. They are rendered as `null`, `[]`, `{}` or a stable constant
   (§3), never invented;
 - vendor-specific enrichments (chart data, figure crops, OCR word layers, layout add-ons,
   studio links, presigned URLs). These are always `null`/empty;
@@ -99,8 +99,8 @@ Rendered envelope: every top-level key of a real `POST /parse` response.
 | Field | Value |
 |---|---|
 | `response_type` | `"parse"` |
-| `job_id` | source provider's job id, else LiteOCR's response `id` |
-| `duration` | `latency_ms / 1000` (whole LiteOCR call, including polling) |
+| `job_id` | source provider's job id, else PuffinParse's response `id` |
+| `duration` | `latency_ms / 1000` (whole PuffinParse call, including polling) |
 | `usage.num_pages` / `usage.credits` | unified `usage.pages` / `usage.credits` (`credits` is `null` when the source reports none) |
 | `result.type` | `"full"` (the URL variant is never emitted) |
 | `result.chunks[]` | one per page, `chunk_mode="page"` semantics; `content` and `embed` are both the page markdown |
@@ -110,14 +110,14 @@ Rendered envelope: every top-level key of a real `POST /parse` response.
 | **Always `null`** | `pdf_url`, `studio_link`, `parse_mode`, `document_properties`, `usage.credit_breakdown`, `usage.page_billing_breakdown`, `usage.non_empty_cell_count`, `result.ocr`, `result.custom`, chunk `enriched`, block `image_url`, `chart_data`, `extra`, `granular_confidence.extract_confidence` |
 | **Always `false`** | chunk `enrichment_success` |
 
-`original_page` is set equal to `page`: LiteOCR does not track pre-split page numbers.
+`original_page` is set equal to `page`: PuffinParse does not track pre-split page numbers.
 
 ### Extend (`output_format="extend"`)
 
 | Field | Value |
 |---|---|
 | `object` | `"parse_run"` |
-| `id` | source job id, else LiteOCR's response `id` |
+| `id` | source job id, else PuffinParse's response `id` |
 | `status` | `"PROCESSED"` (a failure never reaches this code path — it is raised as an error) |
 | `output.chunks[]` | one per page, `type: "page"`, ids `chunk_<page>` |
 | `…blocks[]` | ids `block_<page>_<n>`, `details: {}` |
@@ -129,7 +129,7 @@ Rendered envelope: every top-level key of a real `POST /parse` response.
 | `metrics` | `{processingTimeMs: latency_ms, pageCount: usage.pages}` |
 | `config` | `{target: "markdown", chunkingStrategy: {type: "page"}, engine: null}` |
 | `usage` | `{credits, totalCredits: credits, breakdown: []}` |
-| `metadata` | `null`, **or** `{"liteocr_synthetic_page_dims": true}` when page sizes had to be synthesised (§5). The run-level `metadata` map is free-form in Extend's API, so this is a legal place to say so. |
+| `metadata` | `null`, **or** `{"puffinparse_synthetic_page_dims": true}` when page sizes had to be synthesised (§5). The run-level `metadata` map is free-form in Extend's API, so this is a legal place to say so. |
 | **Always `null`** | `file`, `failureReason`, `failureMessage`, `dataRetention`, `outputUrl`, `batchId`, `config.engine` |
 | **Absent** | `output.ocr` (the word layer), `config.blockOptions`, `config.advancedOptions`, `block.details` contents |
 
@@ -148,7 +148,7 @@ Rendered envelope: every top-level key of a real `POST /parse` response.
 | `job_metadata` | `{credits_used, job_credits_usage, job_pages, job_auto_mode_triggered_pages: 0, job_is_cache_hit}` |
 | **Always empty** | `images`, `charts`, `links`, `layoutAwareBbox` |
 | **Always constant** | `status: "OK"`, `triggeredAutoMode: false`, `noStructuredContent: false`, `noTextContent: false`, `pageHeaderMarkdown`/`pageFooterMarkdown`/`printedPageNumber`: `""`, `parsingMode: null`, `structuredData: null` |
-| **Absent** | page: `originalOrientationAngle`, `layout`, `costOptimized`, `slideSpeakerNotes`, `slideSectionName` (add-ons LiteOCR does not model); table items: `csv`, `html`, `rows`, `isPerfectTable` (restatements of the markdown table already in `md`) |
+| **Absent** | page: `originalOrientationAngle`, `layout`, `costOptimized`, `slideSpeakerNotes`, `slideSectionName` (add-ons PuffinParse does not model); table items: `csv`, `html`, `rows`, `isPerfectTable` (restatements of the markdown table already in `md`) |
 
 Figures have no LlamaParse item type (LlamaParse puts them in `images[]`/`charts[]`, which we
 cannot synthesise), so a figure block is emitted as a `text` item carrying its markdown rather than
@@ -185,7 +185,7 @@ Two consequences worth stating plainly:
   itself also emits `Footnote`, `Caption`, `Formula`, `Page Number` and others
   (`docs/providers/reducto.md` §4); a Reducto → Reducto round trip over a document containing
   those blocks will see them arrive as `Text`. Widening the reverse map is a one-line change in
-  `crates/liteocr-core/src/compat/reducto.rs::block_type` if that fidelity is wanted.
+  `crates/puffinparse-core/src/compat/reducto.rs::block_type` if that fidelity is wanted.
 
 ---
 
@@ -205,8 +205,8 @@ required. When the unified response carries `Page.width`/`height` (Extend and Ll
 them; Reducto and the vision-LLM providers do not) those are used verbatim. When it does not, the
 renderer assumes a **1000 × 1000** page. That keeps the numbers readable and makes the original
 normalised coordinates exactly recoverable by dividing by 1000 — but they are not real page
-dimensions, and the Extend render says so via `metadata.liteocr_synthetic_page_dims = true`.
-The constant is `liteocr_core::compat::SYNTHETIC_PAGE_DIM`.
+dimensions, and the Extend render says so via `metadata.puffinparse_synthetic_page_dims = true`.
+The constant is `puffinparse_core::compat::SYNTHETIC_PAGE_DIM`.
 
 A block with no box at all renders as `{left: 0, top: 0, width: 0, height: 0, page, original_page}`
 for Reducto (whose `bbox` is not nullable in practice) and as `null` for Extend (`boundingBox`)
@@ -228,7 +228,7 @@ for chunk in resp.result.chunks:
         draw(block.bbox.left, block.bbox.top, block.type)
 
 # after — same parsing code, Extend doing the work
-doc = liteocr.parse(url, model="extend/parse_performance", output_format="reducto")
+doc = puffinparse.parse(url, model="extend/parse_performance", output_format="reducto")
 for chunk in doc["result"]["chunks"]:
     for block in chunk["blocks"]:
         draw(block["bbox"]["left"], block["bbox"]["top"], block["type"])
@@ -241,7 +241,7 @@ with the same page image.
 ### Reducto → Extend
 
 ```python
-doc = liteocr.parse(path, model="reducto/standard", output_format="extend")
+doc = puffinparse.parse(path, model="reducto/standard", output_format="extend")
 assert doc["object"] == "parse_run" and doc["status"] == "PROCESSED"
 for chunk in doc["output"]["chunks"]:
     text = chunk["content"]
@@ -249,7 +249,7 @@ for chunk in doc["output"]["chunks"]:
 ```
 
 What changes: Reducto reports no page dimensions, so the render uses a 1000 × 1000 page and sets
-`metadata.liteocr_synthetic_page_dims = true`. `boundingBox` values are therefore *relative*
+`metadata.puffinparse_synthetic_page_dims = true`. `boundingBox` values are therefore *relative*
 coordinates × 1000, not PDF points. If you overlay boxes on a rendered page image, scale by
 `your_image_size / 1000` — or scale by `boundingBox / page.width`, which is correct in both cases
 and is the recommended form.
@@ -257,7 +257,7 @@ and is the recommended form.
 ### LlamaParse → Reducto
 
 ```python
-doc = liteocr.parse(path, model="llamaparse/agentic", output_format="reducto")
+doc = puffinparse.parse(path, model="llamaparse/agentic", output_format="reducto")
 pages = {b["bbox"]["page"] for c in doc["result"]["chunks"] for b in c["blocks"]}
 ```
 
@@ -291,7 +291,7 @@ stripped; LlamaExtract uses dots (`invoice.total`).
 
 ## 8. How this is validated
 
-`crates/liteocr-core/src/compat/roundtrip.rs` runs, for each of the three providers:
+`crates/puffinparse-core/src/compat/roundtrip.rs` runs, for each of the three providers:
 
 ```text
 real fixture → provider::normalize → ParseResponse → render_parse(same format) → compare

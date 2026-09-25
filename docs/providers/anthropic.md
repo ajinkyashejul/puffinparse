@@ -11,16 +11,16 @@
 | Endpoint | `POST /v1/messages` with `anthropic-version: 2023-06-01` — one synchronous call, no job id, no polling |
 | Modes | `parse`, `ocr` (derived from `parse`), `extract` |
 | Verified | 2026-09-11 **against the published docs only** — no Anthropic key was available, so the fixtures are built from the documented response shape and the live tests are `#[ignore]` |
-| Implementation | `crates/liteocr-core/src/providers/anthropic.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/anthropic.rs` |
 
 Like `openai`, this is a general vision LLM rather than a document-parsing product: Claude is given
 the PDF (each page as text *plus* a page image) and asked, through a **forced tool call**, to return
 one markdown transcription per page. You get layout-aware markdown of tables, figures and
 handwriting, and you lose geometry — **no bounding boxes, no per-block types, no confidences**.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
-| Model | Provider parameters LiteOCR sets | Estimated price (`pricing.json`) |
+| Model | Provider parameters PuffinParse sets | Estimated price (`pricing.json`) |
 |---|---|---|
 | `anthropic/claude-sonnet-5` *(default)* | `model=claude-sonnet-5`, `output_config.effort=low` | ~$0.0100 / page |
 | `anthropic/claude-haiku-4-5` | `model=claude-haiku-4-5`, `temperature=0` | ~$0.0050 / page |
@@ -42,7 +42,7 @@ the embedded table covers the Opus 4.6–5, Sonnet 4.6/5, Haiku 4.5 and Fable 5/
 falls back to `None` for anything it does not know. **Claude Fable 5.1 / Mythos 5.1 do not work
 here**: they reject forced `tool_choice` with a 400 (see §6).
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 One call. `POST {base}/v1/messages` with `x-api-key`, `anthropic-version: 2023-06-01`,
 `content-type: application/json`:
@@ -73,7 +73,7 @@ One call. `POST {base}/v1/messages` with `x-api-key`, `anthropic-version: 2023-0
   the tool route keeps `extract` and `parse` on one code path.)
   * `parse` → tool `emit_pages`, schema `{"pages": [{"page_number": <int>, "markdown": <string>}]}`.
   * `extract` → tool `record_extraction`, schema = the caller's JSON Schema.
-* **Input handling.** Path and bytes inputs are read locally; a **URL input is downloaded by LiteOCR
+* **Input handling.** Path and bytes inputs are read locally; a **URL input is downloaded by PuffinParse
   and inlined** as base64 (Claude also accepts `source: {"type": "url"}`, but only for publicly
   reachable URLs). `application/pdf` → `document` block; `image/jpeg|png|gif|webp` → `image` block;
   anything else is an `input_error` before any network call.
@@ -91,11 +91,11 @@ One call. `POST {base}/v1/messages` with `x-api-key`, `anthropic-version: 2023-0
   with forced tool use; *manual* extended thinking (`thinking: {"type": "enabled"}`) is not and
   would break the forced call, so do not add it through `provider_options`.
 * **`provider_options` is merged into the body verbatim** (deep merge). The key `strict` is consumed
-  by LiteOCR and never forwarded.
+  by PuffinParse and never forwarded.
 
 ## 4. Response mapping
 
-| Messages API field | LiteOCR unified field | Notes |
+| Messages API field | PuffinParse unified field | Notes |
 |---|---|---|
 | `id` (`msg_…`) | `ParseResponse.provider_job_id` | The `request-id` response header is not read. |
 | `content[]` block with `type == "tool_use"` and the expected `name` → `.input` | the structured answer | Any `thinking` / `text` blocks before it are skipped. |
@@ -115,7 +115,7 @@ One call. `POST {base}/v1/messages` with `x-api-key`, `anthropic-version: 2023-0
 empty: Claude's citations feature grounds *text* answers and cannot be combined with the forced tool
 call, so `citations=True` is recorded as `metadata.anthropic_citations_unsupported = true`.
 
-Trimmed response (`crates/liteocr-core/tests/fixtures/anthropic_messages_parse.json`, built from the
+Trimmed response (`crates/puffinparse-core/tests/fixtures/anthropic_messages_parse.json`, built from the
 documented shape):
 
 ```json
@@ -126,7 +126,7 @@ documented shape):
   "model": "claude-sonnet-5",
   "content": [
     { "type": "tool_use", "id": "toolu_01A09q90qw90lq917835lq9", "name": "emit_pages",
-      "input": { "pages": [ { "page_number": 1, "markdown": "# Hello LiteOCR\n\nInvoice #1234…" } ] } }
+      "input": { "pages": [ { "page_number": 1, "markdown": "# Hello PuffinParse\n\nInvoice #1234…" } ] } }
   ],
   "stop_reason": "tool_use",
   "stop_sequence": null,
@@ -140,7 +140,7 @@ documented shape):
 The error envelope is `{"type": "error", "error": {"type", "message"}, "request_id"}`;
 `Error::from_http` picks up the nested `error.message` and classifies by status:
 
-| Status | Provider error type | LiteOCR `ErrorKind` |
+| Status | Provider error type | PuffinParse `ErrorKind` |
 |---|---|---|
 | 400 | `invalid_request_error` — bad schema, `max_tokens` above the model's ceiling, `temperature` on a 4.6+ model, forced `tool_choice` on Fable 5.1 | `bad_request` |
 | 401 | `authentication_error` | `authentication` |
@@ -152,7 +152,7 @@ The error envelope is `{"type": "error", "error": {"type", "message"}, "request_
 | 500 / 504 | `api_error` / `timeout_error` | `provider` (retried) |
 | **529** | `overloaded_error` | `provider` (retried) — **reported as HTTP 503** |
 
-**529 is rewritten to 503.** LiteOCR's shared retry policy only treats 500/502/503/504 as transient,
+**529 is rewritten to 503.** PuffinParse's shared retry policy only treats 500/502/503/504 as transient,
 so `map_http_error()` reports an overloaded 529 as status `503` and prefixes the message with
 `overloaded (HTTP 529):`. `Error.status_code` is therefore `503` for this case — the real status is
 in the message.
@@ -163,11 +163,11 @@ in the message.
 **Limits.** 32 MB per request; 600 PDF pages per request (100 on models with a context window under
 1M tokens); images up to 8000×8000 px and 10 MB each, JPEG/PNG/GIF/WebP only; no password-protected
 PDFs. `max_tokens` defaults to 32,000 (~20 dense pages) — a longer document stops with
-`stop_reason: "max_tokens"` and LiteOCR turns that into a provider error rather than returning half a
+`stop_reason: "max_tokens"` and PuffinParse turns that into a provider error rather than returning half a
 document.
 
 **Timeouts.** `timeout_secs` (default 300) is the whole-call deadline and also caps the single HTTP
-request. Anthropic recommends streaming or the Batch API beyond ~10 minutes; LiteOCR does neither,
+request. Anthropic recommends streaming or the Batch API beyond ~10 minutes; PuffinParse does neither,
 so keep documents small enough to finish inside the deadline.
 
 ## 6. Gotchas
@@ -177,30 +177,30 @@ so keep documents small enough to finish inside the deadline.
   this model`, so they are deliberately absent from the registry. Manual extended thinking
   (`thinking: {"type": "enabled"}`) has the same restriction — do not add it via `provider_options`.
 * **Sampling parameters are gone on Claude 4.6+.** `temperature`, `top_p` and `top_k` return a 400 on
-  Sonnet 5 / Opus 5 and the 4.6+ family. LiteOCR only sends `temperature: 0` to the older models that
+  Sonnet 5 / Opus 5 and the 4.6+ family. PuffinParse only sends `temperature: 0` to the older models that
   still accept it; determinism on the newer ones comes from the schema and the prompt, not sampling.
-* **`output_config.effort` is model-gated.** Haiku 4.5 and older reject it; LiteOCR sends it only to
+* **`output_config.effort` is model-gated.** Haiku 4.5 and older reject it; PuffinParse sends it only to
   models in `EFFORT_MODELS`. Raise it (`{"output_config": {"effort": "medium"}}`) for hard scans.
 * **Thinking tokens are billed as output tokens.** On Sonnet 5 / Opus 5 adaptive thinking is on by
   default (display omitted, so you never see it); `effort: "low"` keeps the bill down.
-* **Strict tool use is opt-in here.** Unlike the OpenAI provider, LiteOCR does *not* set
+* **Strict tool use is opt-in here.** Unlike the OpenAI provider, PuffinParse does *not* set
   `strict: true` on the tool by default, because Claude accepts many JSON Schema keywords that strict
   mode rejects (`minimum`/`maximum`, `minLength`/`maxLength`, recursive schemas). Pass
-  `provider_options={"strict": true}` to turn it on; LiteOCR then also sanitises your schema
+  `provider_options={"strict": true}` to turn it on; PuffinParse then also sanitises your schema
   recursively — `additionalProperties: false` everywhere and **every** property moved into
   `required`, which means fields you marked optional come back as `null` instead of missing.
 * **No geometry, ever.** `Block.bbox`, `Block.confidence` and `Page.width/height` are `None`, and
   every page holds exactly one `text` block. `ocr` mode is derived from `parse` by the default trait
-  method (`metadata.liteocr_derived_from = "parse"`), so its `words[]` carry no boxes either.
+  method (`metadata.puffinparse_derived_from = "parse"`), so its `words[]` carry no boxes either.
 * **`pages` is a prompt instruction, not an API parameter.** The whole document is uploaded and
   billed even when you ask for one page. Split the PDF client-side if that matters.
-* **Page numbers come from the model**, so a model can repeat or skip one; LiteOCR falls back to the
+* **Page numbers come from the model**, so a model can repeat or skip one; PuffinParse falls back to the
   array position when the number is missing or `0` and sorts pages by number.
 * **Hallucination is the failure mode.** A layout parser drops what it cannot read; an LLM can invent
   plausible text. The prompt forbids it ("transcribe verbatim, never invent"), but do not use this
   provider for high-stakes extraction without review.
 * **Claude will not identify people in images** and refuses documents that violate the AUP; such a
-  response arrives as HTTP 200 with `stop_reason: "refusal"`, which LiteOCR maps to a provider error.
+  response arrives as HTTP 200 with `stop_reason: "refusal"`, which PuffinParse maps to a provider error.
 * **Prompt caching is not used.** Every call re-uploads the document; for repeated parses of the same
   file, add `cache_control` through `provider_options` yourself.
 
@@ -208,23 +208,23 @@ so keep documents small enough to finish inside the deadline.
 
 ```python
 # 1. Longer documents: raise the output ceiling (the default 32k covers ~20 dense pages).
-liteocr.parse("contract.pdf", model="anthropic/claude-sonnet-5",
+puffinparse.parse("contract.pdf", model="anthropic/claude-sonnet-5",
               provider_options={"max_tokens": 64000})
 
 # 2. Harder documents: more thinking (billed as output tokens).
-liteocr.parse("handwritten.pdf", model="anthropic/claude-opus-5",
+puffinparse.parse("handwritten.pdf", model="anthropic/claude-opus-5",
               provider_options={"output_config": {"effort": "medium"}})
 
 # 3. A model that is not in the registry (pricing falls back to the embedded token table).
-liteocr.parse("scan.png", model="anthropic/claude-sonnet-5",
+puffinparse.parse("scan.png", model="anthropic/claude-sonnet-5",
               provider_options={"model": "claude-opus-4-8"})
 
 # 4. Strict tool use for extraction (schema is sanitised: all fields become required).
-liteocr.extract("invoice.pdf", schema=invoice_schema,
+puffinparse.extract("invoice.pdf", schema=invoice_schema,
                 model="anthropic/claude-sonnet-5", provider_options={"strict": True})
 
 # 5. Cache the document across repeated calls (5-minute ephemeral cache).
-liteocr.parse("handbook.pdf", model="anthropic/claude-haiku-4-5",
+puffinparse.parse("handbook.pdf", model="anthropic/claude-haiku-4-5",
               provider_options={"cache_control": {"type": "ephemeral"}})
 ```
 

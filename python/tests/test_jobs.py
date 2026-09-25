@@ -9,7 +9,7 @@ from collections.abc import Iterator
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
-import liteocr
+import puffinparse
 import pytest
 from conftest import FIXTURES
 
@@ -91,7 +91,7 @@ def test_submit_then_retrieve(server: tuple[str, _Script]) -> None:
         _job("Pending"),
         _job("Completed", json.loads(_fixture("reducto_parse.json"))),
     ]
-    job = liteocr.submit(
+    job = puffinparse.submit(
         b"%PDF-1.4 test",
         model="reducto/standard",
         filename="doc.pdf",
@@ -100,16 +100,16 @@ def test_submit_then_retrieve(server: tuple[str, _Script]) -> None:
         base_url=base,
         metadata={"run": "r1"},
     )
-    assert isinstance(job, liteocr.Job)
+    assert isinstance(job, puffinparse.Job)
     assert (job.provider, job.model, job.job_id) == ("reducto", "reducto/standard", "job-42")
     assert job.base_url == base
     assert "test-key" not in json.dumps(job.to_dict()), "a job never holds the key"
-    assert liteocr.Job.from_dict(job.to_dict()) == job
+    assert puffinparse.Job.from_dict(job.to_dict()) == job
 
-    pending = liteocr.retrieve(job, api_key="test-key")
+    pending = puffinparse.retrieve(job, api_key="test-key")
     assert pending is job
-    done = liteocr.retrieve(job, api_key="test-key")
-    assert isinstance(done, liteocr.ParseResponse)
+    done = puffinparse.retrieve(job, api_key="test-key")
+    assert isinstance(done, puffinparse.ParseResponse)
     assert done.model == "reducto/standard"
     assert done.markdown.startswith("# Hello LiteOCR")
     assert done.metadata["run"] == "r1"
@@ -124,11 +124,11 @@ def test_submit_then_retrieve(server: tuple[str, _Script]) -> None:
 def test_failed_job_raises_with_job_id(server: tuple[str, _Script]) -> None:
     base, script = server
     script.responses = [(200, json.dumps({"status": "Failed", "reason": "Password-protected document"}))]
-    job = liteocr.Job(
+    job = puffinparse.Job(
         provider="reducto", model="reducto/standard", job_id="job-9", submitted_at="", base_url=base
     )
-    with pytest.raises(liteocr.ProviderError) as info:
-        liteocr.retrieve(job, api_key="k")
+    with pytest.raises(puffinparse.ProviderError) as info:
+        puffinparse.retrieve(job, api_key="k")
     assert "Password-protected document" in info.value.message
     assert info.value.job_id == "job-9"
 
@@ -142,20 +142,20 @@ def test_async_variants(server: tuple[str, _Script]) -> None:
     ]
 
     async def run() -> Any:
-        job = await liteocr.asubmit(
+        job = await puffinparse.asubmit(
             b"%PDF-1.4 test", model="llamaparse/fast", filename="doc.pdf", api_key="k", base_url=base
         )
-        return await liteocr.aretrieve(job, api_key="k")
+        return await puffinparse.aretrieve(job, api_key="k")
 
     resp = asyncio.run(run())
-    assert isinstance(resp, liteocr.ParseResponse)
+    assert isinstance(resp, puffinparse.ParseResponse)
     assert resp.num_pages == 2
     assert resp.provider_job_id == "0b6f-job"
 
 
 def test_extend_rejects_a_webhook_url() -> None:
-    with pytest.raises(liteocr.InputError, match="webhook"):
-        liteocr.submit(
+    with pytest.raises(puffinparse.InputError, match="webhook"):
+        puffinparse.submit(
             b"%PDF-1.4",
             model="extend/parse_light",
             filename="a.pdf",
@@ -165,8 +165,8 @@ def test_extend_rejects_a_webhook_url() -> None:
 
 
 def test_providers_without_jobs() -> None:
-    with pytest.raises(liteocr.UnsupportedModelError):
-        liteocr.submit(b"%PDF-1.4", model="gemini/2.5-flash", filename="a.pdf", api_key="k")
+    with pytest.raises(puffinparse.UnsupportedModelError):
+        puffinparse.submit(b"%PDF-1.4", model="gemini/2.5-flash", filename="a.pdf", api_key="k")
 
 
 def test_handle_webhook_result_push() -> None:
@@ -176,18 +176,18 @@ def test_handle_webhook_result_push() -> None:
         "json": [{"page": 1, "text": "Hello", "md": "# Hello"}],
         "images": [],
     }
-    resp = liteocr.handle_webhook(push, model="llamaparse/agentic")
-    assert isinstance(resp, liteocr.ParseResponse)
+    resp = puffinparse.handle_webhook(push, model="llamaparse/agentic")
+    assert isinstance(resp, puffinparse.ParseResponse)
     assert resp.model == "llamaparse/agentic"
     assert resp.markdown == "# Hello"
 
 
 def test_handle_webhook_events(server: tuple[str, _Script]) -> None:
     base, script = server
-    pending = liteocr.handle_webhook(
+    pending = puffinparse.handle_webhook(
         {"event_type": "parse.pending", "data": {"job_id": "j1"}}, model="llamaparse"
     )
-    assert isinstance(pending, liteocr.Job)
+    assert isinstance(pending, puffinparse.Job)
     assert pending.job_id == "j1"
 
     failed = {
@@ -201,15 +201,15 @@ def test_handle_webhook_events(server: tuple[str, _Script]) -> None:
             "failureMessage": "No credits left.",
         },
     }
-    with pytest.raises(liteocr.AuthenticationError, match="No credits left"):
-        liteocr.handle_webhook(failed, model="extend")
+    with pytest.raises(puffinparse.AuthenticationError, match="No credits left"):
+        puffinparse.handle_webhook(failed, model="extend")
 
     script.responses = [_job("Completed", json.loads(_fixture("reducto_parse.json")))]
-    done = liteocr.handle_webhook(
+    done = puffinparse.handle_webhook(
         {"status": "Completed", "job_id": "job-7"}, model="reducto", api_key="k", base_url=base
     )
-    assert isinstance(done, liteocr.ParseResponse)
+    assert isinstance(done, puffinparse.ParseResponse)
     assert script.seen[0][:2] == ("GET", "/job/job-7")
 
-    with pytest.raises(liteocr.InputError):
-        liteocr.handle_webhook({"unexpected": True}, model="reducto")
+    with pytest.raises(puffinparse.InputError):
+        puffinparse.handle_webhook({"unexpected": True}, model="reducto")

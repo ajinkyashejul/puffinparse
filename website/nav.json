@@ -1,8 +1,8 @@
 {
   "site": {
-    "title": "LiteOCR",
+    "title": "PuffinParse",
     "tagline": "One API for every OCR / document-parsing provider.",
-    "summary": "LiteOCR is one API for every OCR and document-parsing provider (Reducto, Extend, LlamaParse, Mistral, Azure, Textract, Tesseract, Docling, ...). A Rust core with typed Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost. Switching provider is a one-string change.",
+    "summary": "PuffinParse is one API for every OCR and document-parsing provider (Reducto, Extend, LlamaParse, Mistral, Azure, Textract, Tesseract, Docling, ...). A Rust core with typed Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost. Switching provider is a one-string change.",
     "repo": "https://github.com/ajinkyashejul/liteocr",
     "branch": "main",
     "license": "MIT"
@@ -13,10 +13,10 @@
       "pages": [
         {
           "slug": "",
-          "title": "LiteOCR",
+          "title": "PuffinParse",
           "nav_title": "Home",
           "source": "README.md",
-          "description": "Overview, install, usage, the model table and how LiteOCR maps each provider.",
+          "description": "Overview, install, usage, the model table and how PuffinParse maps each provider.",
           "home": true
         },
         {
@@ -41,25 +41,25 @@
           "title": "TypeScript / Node.js SDK",
           "nav_title": "TypeScript",
           "source": "website/pages/typescript.md",
-          "description": "The liteocr npm package: async parse / ocr / extract on the Rust core, Router, camelCase response types, typed errors, pricing and scoring helpers."
+          "description": "The puffinparse npm package: async parse / ocr / extract on the Rust core, Router, camelCase response types, typed errors, pricing and scoring helpers."
         },
         {
           "slug": "cli",
           "title": "CLI",
           "source": "website/pages/cli.md",
-          "description": "Every liteocr subcommand and flag: parse, ocr, extract, providers, and bench run / report / score."
+          "description": "Every puffinparse subcommand and flag: parse, ocr, extract, providers, and bench run / report / score."
         },
         {
           "slug": "gateway",
           "title": "Gateway server",
           "source": "docs/SERVER.md",
-          "description": "liteocr serve: one HTTP endpoint with aliases, fallbacks, virtual keys, budgets, rate limits, JSON logs and Prometheus metrics."
+          "description": "puffinparse serve: one HTTP endpoint with aliases, fallbacks, virtual keys, budgets, rate limits, JSON logs and Prometheus metrics."
         },
         {
           "slug": "rust",
           "title": "Rust",
           "source": "website/pages/rust.md",
-          "description": "Using the liteocr-core crate: modes, the DocumentRequest builder, ParseResponse / TextResponse / ExtractResponse, Router, errors and the bench module."
+          "description": "Using the puffinparse-core crate: modes, the DocumentRequest builder, ParseResponse / TextResponse / ExtractResponse, Router, errors and the bench module."
         }
       ]
     },
@@ -210,13 +210,13 @@
           "slug": "benchmark/academic-benchmarks",
           "title": "Academic benchmarks",
           "source": "docs/benchmarks/academic-benchmarks.md",
-          "description": "Survey of olmOCR-bench, OmniDocBench, DP-Bench, READoc and others: what they measure, licences at pinned revisions, how they map to LiteOCR."
+          "description": "Survey of olmOCR-bench, OmniDocBench, DP-Bench, READoc and others: what they measure, licences at pinned revisions, how they map to PuffinParse."
         },
         {
           "slug": "benchmark/adapters",
           "title": "Dataset adapters",
           "source": "docs/benchmarks/adapters.md",
-          "description": "How public benchmarks are converted into LiteOCR manifests and rules, what is skipped and why."
+          "description": "How public benchmarks are converted into PuffinParse manifests and rules, what is skipped and why."
         }
       ],
       "links": [
@@ -271,7 +271,7 @@
           "slug": "project/security",
           "title": "Security",
           "source": "SECURITY.md",
-          "description": "Supported versions, how to report a vulnerability, and how LiteOCR handles API keys."
+          "description": "Supported versions, how to report a vulnerability, and how PuffinParse handles API keys."
         },
         {
           "slug": "project/for-agents",

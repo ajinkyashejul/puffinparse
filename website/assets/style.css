@@ -1,4 +1,4 @@
-/* LiteOCR docs — layered on tokens.css; no frameworks, no web fonts. */
+/* PuffinParse docs — layered on tokens.css; no frameworks, no web fonts. */
 /* Colour, type and shape come from tokens.css (docs/DESIGN.md); these are local aliases so the
    rules below stay short. Dark theme is handled entirely by tokens.css. */
 :root {

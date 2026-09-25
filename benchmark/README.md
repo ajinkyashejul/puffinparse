@@ -1,4 +1,4 @@
-# LiteOCR Open Benchmark
+# PuffinParse Open Benchmark
 
 A reproducible benchmark that ranks OCR / document-parsing providers on **accuracy**,
 **latency** and **cost**, using the same unified client as the SDK. Results are committed
@@ -10,9 +10,9 @@ to `results/` and rendered into [`LEADERBOARD.md`](LEADERBOARD.md).
    truth markdown is written from, so there is no annotation noise. The generator is seeded
    and byte-reproducible (`python benchmark/generate_synthetic.py`).
 2. **Deterministic metrics.** No LLM judge is needed. Everything is computed in Rust
-   (`liteocr_core::bench`) from the prediction and the truth after normalisation.
+   (`puffinparse_core::bench`) from the prediction and the truth after normalisation.
 3. **Tied to a dataset revision.** Every result file records the SHA-256 of the manifest plus
-   every input and truth file, the LiteOCR version, the models and the normalisation options.
+   every input and truth file, the PuffinParse version, the models and the normalisation options.
 4. **Three axes.** Accuracy, latency (p50 / p95 / ms per page as observed from the client, which
    includes upload and polling), and cost per 1,000 pages from the public list price of each model.
 
@@ -58,13 +58,13 @@ Two per-document adjustments follow from that:
 ## Running
 
 ```bash
-cargo build --release -p liteocr-cli
-./target/release/liteocr bench run \
+cargo build --release -p puffinparse-cli
+./target/release/puffinparse bench run \
     --dataset benchmark/datasets/synthetic-v1 \
     --models reducto/standard reducto/r-1 extend/parse_performance extend/parse_light \
              llamaparse/fast llamaparse/cost_effective llamaparse/agentic \
     --concurrency 4 --save-outputs benchmark/runs/outputs
-./target/release/liteocr bench report benchmark/results/*.json > benchmark/LEADERBOARD.md
+./target/release/puffinparse bench report benchmark/results/*.json > benchmark/LEADERBOARD.md
 ```
 
 `--save-outputs` writes each model's markdown per document so mistakes can be inspected. Committed
@@ -77,10 +77,10 @@ and `--filter synthetic` runs one source.
 Before spending money, check the plan and put a ceiling on it:
 
 ```bash
-./target/release/liteocr bench run --dataset benchmark/datasets/combined-v1 \
+./target/release/puffinparse bench run --dataset benchmark/datasets/combined-v1 \
     --models reducto/standard llamaparse/agentic --out benchmark/results/combined.json --dry-run
 # | Model | Calls | Skipped (resumed) | Est. pages | $/page | Est. cost | … no provider is called
-./target/release/liteocr bench run … --max-cost 5    # aborts before the first call if the estimate is higher
+./target/release/puffinparse bench run … --max-cost 5    # aborts before the first call if the estimate is higher
 ```
 
 The estimate is manifest `pages` × list price (`pricing.json`), so it is only as good as the
@@ -110,12 +110,12 @@ whose ids carry a `<source>/` prefix — a per-source breakdown of documents and
 
 Each model's `summary` carries `headline` (0–1; rank on this, `overall = 100 × headline`),
 `char_similarity` (literal), `table_score`, `teds_grid`, `rule_pass_rate`, and each document its
-own `headline`. The run records `scorer_version` (`liteocr_core::bench::SCORER_VERSION`, currently
+own `headline`. The run records `scorer_version` (`puffinparse_core::bench::SCORER_VERSION`, currently
 `2`). Files without it are scorer v1: read `headline` as `overall / 100`; their
 `summary.char_similarity` held the headline, and they have no `teds_grid`. Re-score them offline:
 
 ```bash
-liteocr bench rescore benchmark/results/2026-09-11-combined-v1.json \
+puffinparse bench rescore benchmark/results/2026-09-11-combined-v1.json \
     --outputs benchmark/results/outputs/run-20260911T111039Z   # [--dataset <dir>] [--out <path>]
 ```
 
@@ -129,10 +129,10 @@ are not committed, are re-scored.
 Scoring a single pair without any network access:
 
 ```bash
-liteocr bench score prediction.md truth.md
+puffinparse bench score prediction.md truth.md
 ```
 
-or from Python: `liteocr.score(prediction, truth)`.
+or from Python: `puffinparse.score(prediction, truth)`.
 
 ## Datasets
 

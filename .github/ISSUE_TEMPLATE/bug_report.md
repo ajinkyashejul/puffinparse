@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Something in LiteOCR behaves incorrectly
+about: Something in PuffinParse behaves incorrectly
 title: ""
 labels: bug
 assignees: ""
@@ -17,25 +17,25 @@ assignees: ""
 <!-- Smallest snippet or command that shows the problem. Please REDACT API keys. -->
 
 ```python
-import liteocr
-resp = liteocr.ocr("doc.pdf", model="reducto/standard")
+import puffinparse
+resp = puffinparse.ocr("doc.pdf", model="reducto/standard")
 ```
 
 or
 
 ```bash
-liteocr parse doc.pdf --model reducto/standard
+puffinparse parse doc.pdf --model reducto/standard
 ```
 
 **Input document**: <!-- kind of file, page count, whether you can share it -->
 
 ## Logs
 
-<!-- Re-run with LITEOCR_LOG=debug and paste the relevant output. Keys are
-     redacted by LiteOCR, but please double-check before pasting. -->
+<!-- Re-run with PUFFINPARSE_LOG=debug and paste the relevant output. Keys are
+     redacted by PuffinParse, but please double-check before pasting. -->
 
 <details>
-<summary><code>LITEOCR_LOG=debug</code> output</summary>
+<summary><code>PUFFINPARSE_LOG=debug</code> output</summary>
 
 ```
 paste here
@@ -45,7 +45,7 @@ paste here
 
 ## Environment
 
-- LiteOCR version: <!-- pip show liteocr, or the commit SHA -->
+- PuffinParse version: <!-- pip show puffinparse, or the commit SHA -->
 - Installed via: <!-- PyPI wheel / maturin develop / cargo -->
 - Provider and model: <!-- e.g. llamaparse/cost_effective -->
 - Python version:

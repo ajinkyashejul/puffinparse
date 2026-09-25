@@ -3,16 +3,16 @@
 import asyncio
 import glob
 
-import liteocr
+import puffinparse
 
 
 async def main() -> None:
     files = sorted(glob.glob("benchmark/datasets/synthetic-v1/docs/plain_*.png"))
     sem = asyncio.Semaphore(4)
 
-    async def one(path: str) -> liteocr.ParseResponse:
+    async def one(path: str) -> puffinparse.ParseResponse:
         async with sem:
-            return await liteocr.aparse(path, model="llamaparse/fast")
+            return await puffinparse.aparse(path, model="llamaparse/fast")
 
     results = await asyncio.gather(*(one(f) for f in files))
     total_cost = sum(r.cost_usd or 0.0 for r in results)

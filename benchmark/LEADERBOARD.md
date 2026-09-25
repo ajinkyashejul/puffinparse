@@ -1,12 +1,12 @@
-# LiteOCR Leaderboard
+# PuffinParse Leaderboard
 
-Generated from the result files in `benchmark/results/` with `liteocr bench report` (one section
+Generated from the result files in `benchmark/results/` with `puffinparse bench report` (one section
 per dataset; each section is that command's output for one result file). Higher **Overall** is
 better (100 = character-exact after normalisation, or every rule passing). Latency is measured
 from the client through the public API, including upload and polling, with provider result caches
 disabled. Prices are public pay-as-you-go list prices. Methodology and caveats:
 [`benchmark/README.md`](README.md). Every document, output, diff and rule check is browsable at
-[liteocr.vercel.app/benchmark-results](https://liteocr.vercel.app/benchmark-results/).
+[puffinparse.vercel.app/benchmark-results](https://puffinparse.vercel.app/benchmark-results/).
 
 **Headline: `combined-v2`** (run 2026-09-24, scorer v2) — 159 documents from four sources, each
 scored by its own ground truth: `synthetic-v1` (exact transcripts), a ParseBench subset (rules and
@@ -17,7 +17,7 @@ model, so it scores 0 wherever table structure is scored. 1,113 calls, 0 failure
 price. OmniDocBench is research-only, so its per-page outputs are not committed (scores are).
 
 Older runs are kept for comparison: `combined-v1` (79 documents, 2026-09-11) and `synthetic-v1`
-(39 documents, 2026-09-11), both re-scored offline with scorer v2 on 2026-09-24 (`liteocr bench
+(39 documents, 2026-09-11), both re-scored offline with scorer v2 on 2026-09-24 (`puffinparse bench
 rescore`; latency and cost as originally measured). See
 [`docs/benchmarks/findings.md`](../docs/benchmarks/findings.md) for what scorer v2 changed.
 

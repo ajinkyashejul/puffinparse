@@ -1,6 +1,6 @@
 # combined-v1
 
-The combined open benchmark: every committed LiteOCR dataset under one manifest, per
+The combined open benchmark: every committed PuffinParse dataset under one manifest, per
 [ADR-10](../../../docs/DECISIONS.md).
 
 Built by [`benchmark/adapters/combined.py`](../../adapters/combined.py):
@@ -39,8 +39,8 @@ file can be traced back to an exact revision of every input.
 ## Running
 
 ```bash
-cargo build --release -p liteocr-cli
-./target/release/liteocr bench run --dataset benchmark/datasets/combined-v1 \
+cargo build --release -p puffinparse-cli
+./target/release/puffinparse bench run --dataset benchmark/datasets/combined-v1 \
     --models reducto/standard --filter synthetic --limit 3
 ```
 

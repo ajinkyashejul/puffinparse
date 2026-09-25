@@ -1,6 +1,6 @@
 # combined-v2
 
-The combined open benchmark, version 2: every LiteOCR dataset under one manifest, per
+The combined open benchmark, version 2: every PuffinParse dataset under one manifest, per
 [ADR-10](../../../docs/DECISIONS.md). It extends [`combined-v1`](../combined-v1/README.md),
 which stays frozen because committed results were scored against it, with the two academic
 benchmarks surveyed in
@@ -30,8 +30,8 @@ the SHA-256 of the source manifest it was built from.
 
 ```bash
 python -m benchmark.adapters omnidocbench        # materialise the non-redistributable source first
-cargo build --release -p liteocr-cli
-./target/release/liteocr bench run --dataset benchmark/datasets/combined-v2 \
+cargo build --release -p puffinparse-cli
+./target/release/puffinparse bench run --dataset benchmark/datasets/combined-v2 \
     --models reducto/standard --filter olmocr/ --limit 5
 ```
 

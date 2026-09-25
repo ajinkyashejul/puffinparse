@@ -62,7 +62,7 @@ assignees: ""
 
 See [CONTRIBUTING.md](../../CONTRIBUTING.md#3-adding-a-provider).
 
-- [ ] `crates/liteocr-core/src/providers/<name>.rs` implements `OcrProvider`
+- [ ] `crates/puffinparse-core/src/providers/<name>.rs` implements `OcrProvider`
       using the shared HTTP helpers (retries, backoff, deadlines)
 - [ ] Response mapped to `OcrResponse` / `Page` / `Block` / `Usage`; block types
       mapped to `BlockType` (unknown → `other`); bboxes normalised to 0..1,
@@ -71,9 +71,9 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md#3-adding-a-provider).
       429 → rate limit, 5xx / failed job → provider)
 - [ ] Registered in `providers/mod.rs` `build()`
 - [ ] Models added to `model.rs` `PROVIDERS` (exactly one `default: true`)
-- [ ] Pricing added to `crates/liteocr-core/src/pricing.json` with `source`
+- [ ] Pricing added to `crates/puffinparse-core/src/pricing.json` with `source`
       and `updated`
-- [ ] Redacted fixture in `crates/liteocr-core/tests/fixtures/` plus a
+- [ ] Redacted fixture in `crates/puffinparse-core/tests/fixtures/` plus a
       normalisation unit test (no network)
 - [ ] API-key env var added to `.env.example` and `README.md`
 - [ ] `CHANGELOG.md` `## [Unreleased]` entry

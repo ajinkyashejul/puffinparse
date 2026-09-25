@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/liteocr-core",
-    "crates/liteocr-cli",
-    "crates/liteocr-python",
-    "crates/liteocr-node",
-    "crates/liteocr-server",
+    "crates/puffinparse-core",
+    "crates/puffinparse-cli",
+    "crates/puffinparse-python",
+    "crates/puffinparse-node",
+    "crates/puffinparse-server",
 ]
 
 [workspace.package]
@@ -15,12 +15,12 @@ rust-version = "1.80"
 license = "MIT"
 repository = "https://github.com/ajinkyashejul/liteocr"
 homepage = "https://github.com/ajinkyashejul/liteocr"
-authors = ["LiteOCR contributors"]
+authors = ["PuffinParse contributors"]
 keywords = ["ocr", "document-parsing", "pdf", "api", "benchmark"]
 categories = ["api-bindings", "text-processing"]
 
 [workspace.dependencies]
-liteocr-core = { path = "crates/liteocr-core", version = "0.1.0" }
+puffinparse-core = { path = "crates/puffinparse-core", version = "0.1.0" }
 reqwest = { version = "0.13", default-features = false, features = ["json", "multipart", "rustls", "stream", "gzip"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "time", "sync"] }
 serde = { version = "1", features = ["derive"] }

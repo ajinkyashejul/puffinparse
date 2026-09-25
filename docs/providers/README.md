@@ -1,8 +1,8 @@
 # Provider reference
 
-One page per provider, describing exactly what LiteOCR sends, what comes back, and how the two are
+One page per provider, describing exactly what PuffinParse sends, what comes back, and how the two are
 mapped onto the unified `OcrResponse`. Each page is verified against live API responses (2026-09-11)
-and against the implementation in `crates/liteocr-core/src/providers/`.
+and against the implementation in `crates/puffinparse-core/src/providers/`.
 
 | Provider | Doc | Implementation | Env var | Models | Status |
 |---|---|---|---|---|---|
@@ -25,7 +25,7 @@ and against the implementation in `crates/liteocr-core/src/providers/`.
 | Docling *(self-hosted)* | [`docling.md`](docling.md) | `providers/docling.rs` | none (`DOCLING_BASE_URL`; optional `DOCLING_API_KEY`) | `default` | live-verified (local docling-serve 1.35) |
 | PaddleOCR *(self-hosted)* | [`paddleocr.md`](paddleocr.md) | `providers/paddleocr.rs` | none (`PADDLEOCR_BASE_URL`, `PADDLEOCR_PARSE_BASE_URL`) | `default` | docs-only |
 
-The three self-hosted engines need no API key and are priced at $0/page (`liteocr providers` shows
+The three self-hosted engines need no API key and are priced at $0/page (`puffinparse providers` shows
 `local` in the Key column); they are the open baselines in the benchmark. Their shared helpers are
 in `providers/local.rs`.
 
@@ -38,23 +38,23 @@ limits → gotchas → `provider_options` examples → links.
 |---|---|---|---|
 | Upload method | `POST /upload` (multipart) → `reducto://<uuid>` id; URLs passed through as `input` | `POST /files/upload` (multipart) → `file_…` id; URLs passed through as `{"url", "name"}` | one multipart call: `file` part, or `input_url` field |
 | Sync / async | Sync `POST /parse` by default; async `POST /parse_async` + `GET /job/{id}` with `provider_options={"async": true}` | Always async: `POST /parse_runs` + `GET /parse_runs/{id}` | Always async: `POST /api/v1/parsing/upload` + `GET …/job/{id}` + `GET …/job/{id}/result/json` |
-| Page info source | `blocks[].bbox.page` (chunks carry no page number); LiteOCR pins `chunk_mode: "page"` | `chunk.metadata.pageRange` + `block.metadata.page.number`; LiteOCR pins `chunkingStrategy: {"type":"page"}` | `pages[].page` (native per-page objects with `md` and `text`) |
+| Page info source | `blocks[].bbox.page` (chunks carry no page number); PuffinParse pins `chunk_mode: "page"` | `chunk.metadata.pageRange` + `block.metadata.page.number`; PuffinParse pins `chunkingStrategy: {"type":"page"}` | `pages[].page` (native per-page objects with `md` and `text`) |
 | Page dimensions | not reported — `Page.width`/`height` are `None` | `block.metadata.page.width/height` (raster pixels at the run's dpi) | `pages[].width/height` |
 | Bbox units on the wire | already normalised 0–1, top-left origin | absolute `left/top/right/bottom` in page units | absolute `bBox {x,y,w,h}` in page units |
 | Bbox after normalisation | clamped as-is | divided by page width/height | divided by page width/height |
 | Confidence type | `granular_confidence.parse_confidence` (0–1), else coarse `"high"`/`"low"` → 0.9 / 0.5 | `metadata.avgOcrConfidence` (0–1) per block | `items[].bBox.confidence` (0–1) per item |
-| Credits reported? | yes — `usage.credits` (`null` on new per-product pricing) | yes — `usage.credits` (`null` for runs before 2025-10-07) | effectively no — `job_credits_usage` is 0 until billing settles, so LiteOCR reports `None` |
+| Credits reported? | yes — `usage.credits` (`null` on new per-product pricing) | yes — `usage.credits` (`null` for runs before 2025-10-07) | effectively no — `job_credits_usage` is 0 until billing settles, so PuffinParse reports `None` |
 | Large-result indirection | `result.type == "url"` → presigned JSON fetched without auth | `outputUrl` (15-min presigned) when `responseType=url` | none — result endpoints return inline JSON |
 | Job id surfaced as | `job_id` | run `id` (`pr_…`) | job `id` (UUID) |
 
 `Usage.pages` comes from `usage.num_pages` (Reducto), `metrics.pageCount` (Extend) and
 `job_metadata.job_pages` (LlamaParse), falling back to the number of reconstructed pages.
-`cost_usd` is always `pages × per_page_usd` from `crates/liteocr-core/src/pricing.json` — no provider
+`cost_usd` is always `pages × per_page_usd` from `crates/puffinparse-core/src/pricing.json` — no provider
 reports dollar cost directly.
 
 ## Shared behaviour
 
-These are implemented once, in `crates/liteocr-core/src/{http,error,provider}.rs`, and apply to all
+These are implemented once, in `crates/puffinparse-core/src/{http,error,provider}.rs`, and apply to all
 three providers:
 
 * **API key**: request `api_key` first, then the provider's env var; missing ⇒ `authentication` error.
@@ -70,8 +70,8 @@ three providers:
 ## How to add a provider
 
 See [`CONTRIBUTING.md`](../../CONTRIBUTING.md), section **"3. Adding a provider"** — one file under
-`crates/liteocr-core/src/providers/`, registered in `providers/mod.rs` and `model::PROVIDERS`, plus
+`crates/puffinparse-core/src/providers/`, registered in `providers/mod.rs` and `model::PROVIDERS`, plus
 `pricing.json` entries, a fixture-backed normalisation test, and a doc page here following the same
 eight sections as the pages above.
 
-**Status:** *live-verified* means the provider's `#[ignore]` live tests have passed with a real key. *docs-only* means it was implemented from the official API reference with fixtures shaped from documented responses; run `cargo test -p liteocr-core <provider> -- --ignored` with a key to promote it.
+**Status:** *live-verified* means the provider's `#[ignore]` live tests have passed with a real key. *docs-only* means it was implemented from the official API reference with fixtures shaped from documented responses; run `cargo test -p puffinparse-core <provider> -- --ignored` with a key to promote it.

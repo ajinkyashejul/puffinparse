@@ -1,12 +1,12 @@
-# LiteOCR gateway (`liteocr serve`)
+# PuffinParse gateway (`puffinparse serve`)
 
-A small HTTP server in front of every provider LiteOCR supports, in the spirit of the LiteLLM
+A small HTTP server in front of every provider PuffinParse supports, in the spirit of the LiteLLM
 proxy: clients call one endpoint with one API shape and a gateway-issued key; the gateway holds
 the provider keys, routes aliases to provider models with fallbacks, enforces per-key model
 lists, monthly budgets and rate limits, and emits JSON-lines request logs and Prometheus metrics.
 
-It is a thin layer over `liteocr-core` (crate `crates/liteocr-server`, axum + tower-http). It adds
-no provider logic: every call is `liteocr_core::parse / ocr / extract` with the request fields
+It is a thin layer over `puffinparse-core` (crate `crates/puffinparse-server`, axum + tower-http). It adds
+no provider logic: every call is `puffinparse_core::parse / ocr / extract` with the request fields
 below, so responses are exactly the unified types of [SPEC §5](SPEC.md#5-unified-responses), or
 a vendor shape via `output_format` ([COMPAT.md](COMPAT.md)). Long documents can go through the
 async jobs API instead (`POST /v1/jobs` + `GET /v1/jobs/{id}`, core `submit_parse` /
@@ -16,36 +16,36 @@ open while the provider works.
 ## Run it
 
 ```bash
-export LITEOCR_MASTER_KEY=sk-master-change-me
-export LITEOCR_KEY_BILLING=sk-billing-change-me LITEOCR_KEY_RESEARCH=sk-research-change-me
+export PUFFINPARSE_MASTER_KEY=sk-master-change-me
+export PUFFINPARSE_KEY_BILLING=sk-billing-change-me PUFFINPARSE_KEY_RESEARCH=sk-research-change-me
 export REDUCTO_API_KEY=... EXTEND_API_KEY=... LLAMA_API_KEY=...
-liteocr serve --config examples/server/liteocr.toml          # --host / --port override the file
+puffinparse serve --config examples/server/puffinparse.toml          # --host / --port override the file
 ```
 
-Without `--config` it reads `./liteocr.toml` if present (or `$LITEOCR_CONFIG`), else runs with
+Without `--config` it reads `./puffinparse.toml` if present (or `$PUFFINPARSE_CONFIG`), else runs with
 defaults: `127.0.0.1:4000`, no aliases, **no auth** (a warning is printed). Anything reachable
 beyond localhost should have a `master_key` or `[[keys]]`.
 
 Docker (multi-stage build, distroless runtime, runs as non-root):
 
 ```bash
-docker build -t liteocr .
-docker run --rm -p 4000:4000 -v $PWD/examples/server/liteocr.toml:/etc/liteocr/liteocr.toml:ro \
-  -e LITEOCR_MASTER_KEY -e LITEOCR_KEY_BILLING -e LITEOCR_KEY_RESEARCH \
-  -e REDUCTO_API_KEY -e EXTEND_API_KEY -e LLAMA_API_KEY liteocr
+docker build -t puffinparse .
+docker run --rm -p 4000:4000 -v $PWD/examples/server/puffinparse.toml:/etc/puffinparse/puffinparse.toml:ro \
+  -e PUFFINPARSE_MASTER_KEY -e PUFFINPARSE_KEY_BILLING -e PUFFINPARSE_KEY_RESEARCH \
+  -e REDUCTO_API_KEY -e EXTEND_API_KEY -e LLAMA_API_KEY puffinparse
 ```
 
-The image's default command is `serve --host 0.0.0.0 --config /etc/liteocr/liteocr.toml`; it exits
+The image's default command is `serve --host 0.0.0.0 --config /etc/puffinparse/puffinparse.toml`; it exits
 if no config is mounted rather than serving an open gateway.
 
-## Configuration (`liteocr.toml`)
+## Configuration (`puffinparse.toml`)
 
 Every secret may be written as `"env:VAR"`, resolved once at startup. A virtual key or master key
 whose reference resolves to nothing is a startup error (fail closed); a provider key that resolves
 to nothing prints a warning and the core falls back to the provider's default env var.
 
 ```toml
-master_key = "env:LITEOCR_MASTER_KEY"   # full access: all models, no budget, no rate limit
+master_key = "env:PUFFINPARSE_MASTER_KEY"   # full access: all models, no budget, no rate limit
 
 [server]
 host = "127.0.0.1"
@@ -61,9 +61,9 @@ job_retention_hours = 168                # how long POST /v1/jobs handles stay r
 
 [webhooks]                               # optional provider webhook receiver (off by default)
 enabled = false
-secret = "env:LITEOCR_WEBHOOK_SECRET"    # required when enabled; sent as ?token= or a header
+secret = "env:PUFFINPARSE_WEBHOOK_SECRET"    # required when enabled; sent as ?token= or a header
 
-[providers.reducto]                      # one table per provider (name as in `liteocr providers`)
+[providers.reducto]                      # one table per provider (name as in `puffinparse providers`)
 api_key = "env:REDUCTO_API_KEY"
 # base_url = "https://eu.platform.reducto.ai"
 
@@ -75,13 +75,13 @@ fallback_on = ["provider", "rate_limit", "timeout", "network"]   # the default
 
 [[keys]]
 id = "billing-team"                      # appears in logs, metrics, usage; never the secret
-key = "env:LITEOCR_KEY_BILLING"          # the bearer token the client sends
+key = "env:PUFFINPARSE_KEY_BILLING"          # the bearer token the client sends
 models = ["invoices", "llamaparse/*"]    # aliases, provider/model, provider/*, or "*"; empty = all
 monthly_budget_usd = 50.0                # calendar month, UTC
 rpm = 60                                 # requests per minute, sliding 60 s window
 ```
 
-A complete sample is [`examples/server/liteocr.toml`](../examples/server/liteocr.toml).
+A complete sample is [`examples/server/puffinparse.toml`](../examples/server/puffinparse.toml).
 
 **Routing.** `model` is looked up as an alias first, then (if `allow_direct_models`) as a registry
 model (`reducto/standard`, or a bare provider for its default model in that mode). An alias expands
@@ -91,7 +91,7 @@ list is appended after that (aliases expand in order). Every target is checked a
 endpoint's mode before any provider is called. Target-level `api_key` / `base_url` override the
 `[providers.*]` ones, so two deployments of the same provider (two accounts, two regions) can sit
 behind one alias. When a fallback served the call, the response metadata carries
-`liteocr_fallback_index` and `liteocr_fallback_from_error`, as with the SDK `Router`.
+`puffinparse_fallback_index` and `puffinparse_fallback_from_error`, as with the SDK `Router`.
 
 **Budgets.** Spend is the response's `cost_usd` (provider-reported cost when available, otherwise
 the list-price estimate from `pricing.json`), summed per key per UTC calendar month. The check runs
@@ -123,7 +123,7 @@ JSON-valued ones — `provider_options`, `schema`, `metadata`, `fallbacks` — a
 | `filename` | string | Sets the MIME type for `document` / overrides the part's filename. |
 | `pages`, `language` | string | As in SPEC §4.1. |
 | `output` | `"markdown"` \| `"text"` | Block content format (parse). |
-| `output_format` | `"reducto"` \| `"extend"` \| `"llamaparse"` \| `"liteocr"` | Vendor-native response shape (parse, extract). |
+| `output_format` | `"reducto"` \| `"extend"` \| `"llamaparse"` \| `"puffinparse"` | Vendor-native response shape (parse, extract). |
 | `provider_options` | object | Merged into the provider request verbatim. |
 | `include_raw` | bool | Attach the provider payload as `raw`. |
 | `timeout` | number (s) | Capped at `server.max_timeout_secs`. |
@@ -137,7 +137,7 @@ client must never be able to point the gateway's provider credentials at another
 paths are not accepted either.
 
 The response is the unified `ParseResponse` / `TextResponse` / `ExtractResponse` JSON (or the
-vendor shape), with headers `x-liteocr-model` (served model), `x-liteocr-cost-usd`, `x-request-id`.
+vendor shape), with headers `x-puffinparse-model` (served model), `x-puffinparse-cost-usd`, `x-request-id`.
 
 ### `POST /v1/jobs`, `GET /v1/jobs/{id}` (async parse)
 
@@ -183,7 +183,7 @@ every poll (the alias target's own key, else `[providers.*]`), never stored; han
 Off by default (404). With `[webhooks] enabled = true` and a `secret`, the gateway accepts the
 body a provider POSTs when a job changes state — Reducto direct webhooks, Extend `parse_run.*`
 events, LlamaCloud `parse.*` events — authenticated by `?token=<secret>` or the
-`x-liteocr-webhook-secret` header (compared in constant time). The body is read with core
+`x-puffinparse-webhook-secret` header (compared in constant time). The body is read with core
 `parse_webhook`; when it only says the job finished, the gateway makes one status check. The
 provider's job id must match a job submitted through this gateway (else 404); a success is
 charged to the job's owner (once, shared with `GET`), and the answer is an acknowledgement
@@ -238,13 +238,13 @@ keys for the master key.
 
 | Metric | Labels |
 |---|---|
-| `liteocr_requests_total` | `mode`, `model` (served model, or requested alias on failure, `-` if it never resolved), `status` |
-| `liteocr_errors_total` | `type` (the error `type` above) |
-| `liteocr_request_duration_seconds` (histogram, 0.25 s – 300 s buckets) | `mode` |
-| `liteocr_pages_total` | `model` |
-| `liteocr_cost_usd_total` | `model` |
-| `liteocr_fallbacks_total` | — |
-| `liteocr_jobs_total` | `event`: `submitted`, and `succeeded` / `failed` the first time a job is seen terminal |
+| `puffinparse_requests_total` | `mode`, `model` (served model, or requested alias on failure, `-` if it never resolved), `status` |
+| `puffinparse_errors_total` | `type` (the error `type` above) |
+| `puffinparse_request_duration_seconds` (histogram, 0.25 s – 300 s buckets) | `mode` |
+| `puffinparse_pages_total` | `model` |
+| `puffinparse_cost_usd_total` | `model` |
+| `puffinparse_fallbacks_total` | — |
+| `puffinparse_jobs_total` | `event`: `submitted`, and `succeeded` / `failed` the first time a job is seen terminal |
 
 `mode` is `parse` / `ocr` / `extract` for the synchronous endpoints and `job_submit`,
 `job_retrieve`, `webhook` for the jobs API, so job latencies do not mix with blocking calls. A

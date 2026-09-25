@@ -1,7 +1,7 @@
 'use strict'
 
 // Offline unit tests: no provider is contacted. The end-to-end cases talk to a local HTTP server
-// that replays the recorded Mistral OCR fixtures from crates/liteocr-core/tests/fixtures/.
+// that replays the recorded Mistral OCR fixtures from crates/puffinparse-core/tests/fixtures/.
 
 const { test, describe, before, after } = require('node:test')
 const assert = require('node:assert/strict')
@@ -9,34 +9,34 @@ const fs = require('node:fs')
 const http = require('node:http')
 const path = require('node:path')
 
-const liteocr = require('..')
+const puffinparse = require('..')
 const {
-  LiteOCRError,
+  PuffinParseError,
   AuthenticationError,
   BadRequestError,
   InputError,
   ProviderError,
   UnsupportedModelError,
   Router,
-} = liteocr
+} = puffinparse
 
-const FIXTURES = path.join(__dirname, '..', '..', 'crates', 'liteocr-core', 'tests', 'fixtures')
+const FIXTURES = path.join(__dirname, '..', '..', 'crates', 'puffinparse-core', 'tests', 'fixtures')
 const fixture = (name) => fs.readFileSync(path.join(FIXTURES, name), 'utf8')
 const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex') // tiny, inlined as a data URL
 
 describe('registry and helpers', () => {
   test('exports the version and modes', () => {
-    assert.match(liteocr.VERSION, /^\d+\.\d+\.\d+/)
-    assert.deepEqual(liteocr.modes(), ['parse', 'ocr', 'extract'])
-    assert.deepEqual([...liteocr.MODES], liteocr.modes())
+    assert.match(puffinparse.VERSION, /^\d+\.\d+\.\d+/)
+    assert.deepEqual(puffinparse.modes(), ['parse', 'ocr', 'extract'])
+    assert.deepEqual([...puffinparse.MODES], puffinparse.modes())
   })
 
   test('listModels lists qualified names and filters by mode', () => {
-    const all = liteocr.listModels()
+    const all = puffinparse.listModels()
     assert.ok(all.includes('reducto/standard'))
     assert.ok(all.includes('llamaparse/cost_effective'))
     assert.ok(all.every((m) => /^[a-z_]+\/.+/.test(m)))
-    const extract = liteocr.listModels('extract')
+    const extract = puffinparse.listModels('extract')
     assert.ok(extract.length > 0)
     assert.ok(extract.every((m) => all.includes(m)))
     assert.ok(!extract.includes('reducto/standard'), 'a parse-only model is not listed for extract')
@@ -44,22 +44,22 @@ describe('registry and helpers', () => {
 
   test('listModels rejects an unknown mode with InputError', () => {
     assert.throws(
-      () => liteocr.listModels('bogus'),
+      () => puffinparse.listModels('bogus'),
       (e) => e instanceof InputError && e.kind === 'input' && /unknown mode/.test(e.message),
     )
   })
 
   test('resolveModel canonicalises bare providers per mode', () => {
-    assert.equal(liteocr.resolveModel('reducto'), 'reducto/standard')
-    assert.equal(liteocr.resolveModel('reducto', 'extract'), 'reducto/extract')
+    assert.equal(puffinparse.resolveModel('reducto'), 'reducto/standard')
+    assert.equal(puffinparse.resolveModel('reducto', 'extract'), 'reducto/extract')
   })
 
   test('outputFormats lists every accepted format', () => {
-    assert.deepEqual(liteocr.outputFormats(), ['liteocr', 'reducto', 'extend', 'llamaparse'])
+    assert.deepEqual(puffinparse.outputFormats(), ['puffinparse', 'reducto', 'extend', 'llamaparse'])
   })
 
   test('providers are camelCased metadata', () => {
-    const reducto = liteocr.providers().find((p) => p.name === 'reducto')
+    const reducto = puffinparse.providers().find((p) => p.name === 'reducto')
     assert.equal(reducto.envVar, 'REDUCTO_API_KEY')
     assert.equal(reducto.displayName, 'Reducto')
     assert.ok(reducto.models.some((m) => m.model === 'standard' && m.modes.includes('parse')))
@@ -67,42 +67,42 @@ describe('registry and helpers', () => {
 })
 
 describe('pricing', () => {
-  after(() => liteocr.resetPricing())
+  after(() => puffinparse.resetPricing())
 
   test('estimateCost multiplies the list price by pages', () => {
-    const price = liteocr.pricing()['reducto/standard'].parse
+    const price = puffinparse.pricing()['reducto/standard'].parse
     assert.equal(typeof price, 'number')
-    assert.ok(Math.abs(liteocr.estimateCost('reducto/standard', 10) - price * 10) < 1e-12)
+    assert.ok(Math.abs(puffinparse.estimateCost('reducto/standard', 10) - price * 10) < 1e-12)
     // A bare provider resolves to its default model first.
-    assert.equal(liteocr.estimateCost('reducto', 10), liteocr.estimateCost('reducto/standard', 10))
+    assert.equal(puffinparse.estimateCost('reducto', 10), puffinparse.estimateCost('reducto/standard', 10))
   })
 
   test('estimateCost is null when the model has no price in that mode', () => {
-    assert.equal(liteocr.pricing()['reducto/standard'].extract, undefined)
-    assert.equal(liteocr.estimateCost('reducto/standard', 3, 'extract'), null)
+    assert.equal(puffinparse.pricing()['reducto/standard'].extract, undefined)
+    assert.equal(puffinparse.estimateCost('reducto/standard', 3, 'extract'), null)
   })
 
   test('setPricing overrides one mode and resetPricing restores it', () => {
-    const before = liteocr.estimateCost('reducto/standard', 4)
-    liteocr.setPricing({ 'reducto/standard': 0.5 })
-    assert.equal(liteocr.estimateCost('reducto/standard', 4), 2)
-    assert.equal(liteocr.pricing()['reducto/standard'].source, 'user')
-    liteocr.resetPricing()
-    assert.equal(liteocr.estimateCost('reducto/standard', 4), before)
+    const before = puffinparse.estimateCost('reducto/standard', 4)
+    puffinparse.setPricing({ 'reducto/standard': 0.5 })
+    assert.equal(puffinparse.estimateCost('reducto/standard', 4), 2)
+    assert.equal(puffinparse.pricing()['reducto/standard'].source, 'user')
+    puffinparse.resetPricing()
+    assert.equal(puffinparse.estimateCost('reducto/standard', 4), before)
   })
 
   test('estimateCost validates its arguments', () => {
-    assert.throws(() => liteocr.estimateCost('nope/x', 1), UnsupportedModelError)
-    assert.throws(() => liteocr.estimateCost('reducto', -1), TypeError)
-    assert.throws(() => liteocr.estimateCost('reducto', 1.5), TypeError)
-    assert.throws(() => liteocr.estimateCost('reducto', 1, 'bogus'), InputError)
-    assert.throws(() => liteocr.setPricing({ 'reducto/standard': 'free' }), TypeError)
+    assert.throws(() => puffinparse.estimateCost('nope/x', 1), UnsupportedModelError)
+    assert.throws(() => puffinparse.estimateCost('reducto', -1), TypeError)
+    assert.throws(() => puffinparse.estimateCost('reducto', 1.5), TypeError)
+    assert.throws(() => puffinparse.estimateCost('reducto', 1, 'bogus'), InputError)
+    assert.throws(() => puffinparse.setPricing({ 'reducto/standard': 'free' }), TypeError)
   })
 })
 
 describe('score', () => {
   test('identical text scores perfectly, with camelCase metrics', () => {
-    const m = liteocr.score('# Hello **world**', 'hello world')
+    const m = puffinparse.score('# Hello **world**', 'hello world')
     assert.equal(m.charSimilarity, 1)
     assert.equal(m.cer, 0)
     assert.equal(m.wer, 0)
@@ -114,26 +114,26 @@ describe('score', () => {
   })
 
   test('differences lower the score and options are honoured', () => {
-    const m = liteocr.score('hello there', 'hello world')
+    const m = puffinparse.score('hello there', 'hello world')
     assert.ok(m.charSimilarity < 1)
     assert.equal(m.wordRecall, 0.5)
-    const strict = liteocr.score('Hello', 'hello', { caseInsensitive: false })
+    const strict = puffinparse.score('Hello', 'hello', { caseInsensitive: false })
     assert.ok(strict.charSimilarity < 1)
-    assert.equal(liteocr.normalizeText('# Hi  **there**'), 'hi there')
-    assert.equal(liteocr.markdownToText('**bold**'), 'bold')
+    assert.equal(puffinparse.normalizeText('# Hi  **there**'), 'hi there')
+    assert.equal(puffinparse.markdownToText('**bold**'), 'bold')
   })
 
   test('score validates its arguments', () => {
-    assert.throws(() => liteocr.score(1, 'a'), TypeError)
-    assert.throws(() => liteocr.score('a', 'b', { bogus: true }), TypeError)
+    assert.throws(() => puffinparse.score(1, 'a'), TypeError)
+    assert.throws(() => puffinparse.score('a', 'b', { bogus: true }), TypeError)
   })
 })
 
 describe('errors and argument validation (no network)', () => {
   test('a bad model string rejects with UnsupportedModelError before any call', async () => {
-    await assert.rejects(liteocr.parse('missing.pdf', { model: 'nope/x' }), (e) => {
+    await assert.rejects(puffinparse.parse('missing.pdf', { model: 'nope/x' }), (e) => {
       assert.ok(e instanceof UnsupportedModelError)
-      assert.ok(e instanceof LiteOCRError)
+      assert.ok(e instanceof PuffinParseError)
       assert.ok(e instanceof Error)
       assert.equal(e.kind, 'unsupported_model')
       assert.equal(e.name, 'UnsupportedModelError')
@@ -154,47 +154,47 @@ describe('errors and argument validation (no network)', () => {
 
   test('a model that does not serve the mode names the ones that do', async () => {
     await assert.rejects(
-      liteocr.extract('missing.pdf', { model: 'reducto/standard', schema: { type: 'object' } }),
+      puffinparse.extract('missing.pdf', { model: 'reducto/standard', schema: { type: 'object' } }),
       (e) => e instanceof UnsupportedModelError && /Models for mode 'extract': .*reducto\/extract/.test(e.message),
     )
   })
 
   test('resolveModel throws synchronously for unknown models', () => {
-    assert.throws(() => liteocr.resolveModel('reducto/nope'), UnsupportedModelError)
+    assert.throws(() => puffinparse.resolveModel('reducto/nope'), UnsupportedModelError)
   })
 
   test('document arguments are validated', async () => {
-    await assert.rejects(liteocr.parse(42), TypeError)
-    await assert.rejects(liteocr.parse(''), InputError)
-    await assert.rejects(liteocr.parse(Buffer.from('x')), (e) => e instanceof InputError && /filename/.test(e.message))
-    await assert.rejects(liteocr.parse(new Uint8Array(0), { filename: 'a.pdf' }), InputError)
-    await assert.rejects(liteocr.parse({ url: 'ftp://x/a.pdf' }), InputError)
-    await assert.rejects(liteocr.parse({ nothing: true }), TypeError)
+    await assert.rejects(puffinparse.parse(42), TypeError)
+    await assert.rejects(puffinparse.parse(''), InputError)
+    await assert.rejects(puffinparse.parse(Buffer.from('x')), (e) => e instanceof InputError && /filename/.test(e.message))
+    await assert.rejects(puffinparse.parse(new Uint8Array(0), { filename: 'a.pdf' }), InputError)
+    await assert.rejects(puffinparse.parse({ url: 'ftp://x/a.pdf' }), InputError)
+    await assert.rejects(puffinparse.parse({ nothing: true }), TypeError)
   })
 
   test('options are validated before any call', async () => {
-    await assert.rejects(liteocr.parse('a.pdf', { provider_options: {} }), /unknown option\(s\) "provider_options"/)
-    await assert.rejects(liteocr.parse('a.pdf', { timeout: -1 }), TypeError)
-    await assert.rejects(liteocr.parse('a.pdf', { maxRetries: 1.5 }), TypeError)
-    await assert.rejects(liteocr.parse('a.pdf', { pages: {} }), TypeError)
-    await assert.rejects(liteocr.parse('a.pdf', { output: 'html' }), TypeError)
-    await assert.rejects(liteocr.parse('a.pdf', 'reducto'), TypeError)
-    await assert.rejects(liteocr.ocr('a.pdf', { outputFormat: 'reducto' }), TypeError)
-    await assert.rejects(liteocr.extract('a.pdf', { model: 'reducto/extract' }), /schema must be a JSON Schema object/)
-    await assert.rejects(liteocr.extract('a.pdf', { schema: [] }), TypeError)
-    await assert.rejects(liteocr.parse('a.pdf', { fallbacks: 'llamaparse' }), TypeError)
+    await assert.rejects(puffinparse.parse('a.pdf', { provider_options: {} }), /unknown option\(s\) "provider_options"/)
+    await assert.rejects(puffinparse.parse('a.pdf', { timeout: -1 }), TypeError)
+    await assert.rejects(puffinparse.parse('a.pdf', { maxRetries: 1.5 }), TypeError)
+    await assert.rejects(puffinparse.parse('a.pdf', { pages: {} }), TypeError)
+    await assert.rejects(puffinparse.parse('a.pdf', { output: 'html' }), TypeError)
+    await assert.rejects(puffinparse.parse('a.pdf', 'reducto'), TypeError)
+    await assert.rejects(puffinparse.ocr('a.pdf', { outputFormat: 'reducto' }), TypeError)
+    await assert.rejects(puffinparse.extract('a.pdf', { model: 'reducto/extract' }), /schema must be a JSON Schema object/)
+    await assert.rejects(puffinparse.extract('a.pdf', { schema: [] }), TypeError)
+    await assert.rejects(puffinparse.parse('a.pdf', { fallbacks: 'llamaparse' }), TypeError)
   })
 
   test('an unknown outputFormat is a BadRequestError listing the choices', async () => {
     await assert.rejects(
-      liteocr.parse('a.pdf', { outputFormat: 'docx' }),
-      (e) => e instanceof BadRequestError && e.kind === 'bad_request' && /liteocr \| reducto/.test(e.message),
+      puffinparse.parse('a.pdf', { outputFormat: 'docx' }),
+      (e) => e instanceof BadRequestError && e.kind === 'bad_request' && /puffinparse \| reducto/.test(e.message),
     )
   })
 
   test('a missing file is an InputError', async () => {
     await assert.rejects(
-      liteocr.parse(path.join(__dirname, 'does-not-exist.pdf'), { model: 'mistral/ocr-latest', apiKey: 'k' }),
+      puffinparse.parse(path.join(__dirname, 'does-not-exist.pdf'), { model: 'mistral/ocr-latest', apiKey: 'k' }),
       InputError,
     )
   })
@@ -258,7 +258,7 @@ describe('end to end against a local mock provider', () => {
 
   test('parse returns a camelCase ParseResponse', async () => {
     queue = [[200, fixture('mistral_ocr.json')]]
-    const resp = await liteocr.parse(PNG, opts({ filename: 'scan.png', metadata: { my_key: 1 } }))
+    const resp = await puffinparse.parse(PNG, opts({ filename: 'scan.png', metadata: { my_key: 1 } }))
     const sent = requests.at(-1)
     assert.equal(sent.url, '/v1/ocr')
     assert.equal(sent.auth, 'Bearer test-key')
@@ -282,7 +282,7 @@ describe('end to end against a local mock provider', () => {
 
   test('ocr returns a TextResponse and includeRaw attaches the payload', async () => {
     queue = [[200, fixture('mistral_ocr.json')]]
-    const resp = await liteocr.ocr({ data: PNG, filename: 'scan.png' }, opts({ includeRaw: true }))
+    const resp = await puffinparse.ocr({ data: PNG, filename: 'scan.png' }, opts({ includeRaw: true }))
     assert.equal(resp.pages[0].pageNumber, 1)
     assert.ok(Array.isArray(resp.pages[0].lines))
     assert.ok(Array.isArray(resp.pages[0].words))
@@ -293,7 +293,7 @@ describe('end to end against a local mock provider', () => {
   test('extract returns data verbatim and an empty fields map', async () => {
     queue = [[200, fixture('mistral_annotation.json')]]
     const schema = { type: 'object', properties: { invoice_number: { type: 'string' } } }
-    const resp = await liteocr.extract(PNG, opts({ filename: 'scan.png', schema, instructions: 'be exact' }))
+    const resp = await puffinparse.extract(PNG, opts({ filename: 'scan.png', schema, instructions: 'be exact' }))
     assert.equal(requests.at(-1).body.document_annotation_prompt, 'be exact')
     assert.ok(resp.data && typeof resp.data === 'object')
     assert.ok(Object.keys(resp.data).some((k) => k.includes('_')), 'extracted keys are not camelCased')
@@ -302,13 +302,13 @@ describe('end to end against a local mock provider', () => {
 
   test('outputFormat renders the vendor shape', async () => {
     queue = [[200, fixture('mistral_ocr.json')]]
-    const resp = await liteocr.parse(PNG, opts({ filename: 'scan.png', outputFormat: 'reducto' }))
+    const resp = await puffinparse.parse(PNG, opts({ filename: 'scan.png', outputFormat: 'reducto' }))
     assert.ok(resp.result && Array.isArray(resp.result.chunks), 'Reducto-shaped response')
   })
 
   test('HTTP 401 maps to AuthenticationError and keeps the provider message', async () => {
     queue = [[401, '{"message":"Invalid API key from mock"}']]
-    await assert.rejects(liteocr.parse(PNG, opts({ filename: 'scan.png' })), (e) => {
+    await assert.rejects(puffinparse.parse(PNG, opts({ filename: 'scan.png' })), (e) => {
       assert.ok(e instanceof AuthenticationError)
       assert.equal(e.kind, 'authentication')
       assert.equal(e.statusCode, 401)
@@ -320,7 +320,7 @@ describe('end to end against a local mock provider', () => {
 
   test('HTTP 500 maps to a retryable ProviderError', async () => {
     queue = [[500, '{"detail":"boom"}']]
-    await assert.rejects(liteocr.parse(PNG, opts({ filename: 'scan.png' })), (e) => {
+    await assert.rejects(puffinparse.parse(PNG, opts({ filename: 'scan.png' })), (e) => {
       assert.ok(e instanceof ProviderError)
       assert.equal(e.statusCode, 500)
       assert.equal(e.retryable, true)
@@ -334,9 +334,9 @@ describe('end to end against a local mock provider', () => {
       [503, '{"message":"overloaded"}'],
       [200, fixture('mistral_ocr.json')],
     ]
-    const resp = await liteocr.parse(PNG, opts({ filename: 'scan.png', fallbacks: ['mistral/ocr-4-1'] }))
+    const resp = await puffinparse.parse(PNG, opts({ filename: 'scan.png', fallbacks: ['mistral/ocr-4-1'] }))
     assert.equal(resp.model, 'mistral/ocr-4-1')
-    assert.equal(resp.metadata.liteocr_fallback_index, 1)
+    assert.equal(resp.metadata.puffinparse_fallback_index, 1)
   })
 
   test('Router records per-model stats', async () => {

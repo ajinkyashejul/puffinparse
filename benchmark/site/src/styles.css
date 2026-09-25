@@ -1,8 +1,8 @@
-/* LiteOCR benchmark viewer.
+/* PuffinParse benchmark viewer.
  *
  * Styled only through the custom properties of tokens.css (website/assets/tokens.css, copied
  * next to this file by build.py and linked before it); docs/DESIGN.md explains them. No private
- * palette, no web fonts, no framework. Theme: `data-theme` + the shared `liteocr-theme` key.
+ * palette, no web fonts, no framework. Theme: `data-theme` + the shared `puffinparse-theme` key.
  */
 
 * {

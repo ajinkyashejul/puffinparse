@@ -8,18 +8,18 @@
 | Base URL | **none built in** — Azure endpoints are per resource. `AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT` (or `base_url` on the request), e.g. `https://<resource>.cognitiveservices.azure.com` or `https://<region>.api.cognitive.microsoft.com`. `base_url` *is* the endpoint. |
 | API key | `AZURE_DOCUMENT_INTELLIGENCE_KEY` (or `api_key` on the request) — sent as the `Ocp-Apim-Subscription-Key` header |
 | Docs | <https://learn.microsoft.com/azure/ai-services/document-intelligence/> |
-| API version | **`2024-11-30`** (v4.0 GA), pinned by LiteOCR as the `api-version` query parameter (`azure::API_VERSION`) |
+| API version | **`2024-11-30`** (v4.0 GA), pinned by PuffinParse as the `api-version` query parameter (`azure::API_VERSION`) |
 | Verified | 2026-09-11 — **against the published REST reference only**; no Azure resource was available when this provider was written, so the fixtures are built from the documented response schema, not captured from a live call. The `#[ignore]`d live tests in `providers/azure.rs` are the check to run once a key exists. |
-| Implementation | `crates/liteocr-core/src/providers/azure.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/azure.rs` |
 | Modes | `parse`, `ocr`, `extract` |
 
-Azure is the only provider so far that serves all three LiteOCR modes: `prebuilt-layout` returns
+Azure is the only provider so far that serves all three PuffinParse modes: `prebuilt-layout` returns
 markdown plus paragraphs/tables with polygons, `prebuilt-read` is a cheap native OCR endpoint with
 words, lines and confidences, and the `prebuilt-*` extraction models return typed fields with
 per-field confidence and bounding regions. Every model is reached through **one** endpoint shape, so
 the whole provider is a single request + poll loop.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
 | Model | Azure `modelId` | Modes | List price (`pricing.json`) |
 |---|---|---|---|
@@ -45,12 +45,12 @@ September 2026). Not modelled by `cost_usd`:
   a silent truncation, not an error.
 
 `provider_options.model_id` overrides the `modelId` for *any* model name, which is also how you reach
-prebuilt models LiteOCR does not list (`prebuilt-document`, `prebuilt-tax.us.1098`,
+prebuilt models PuffinParse does not list (`prebuilt-document`, `prebuilt-tax.us.1098`,
 `prebuilt-healthInsuranceCard.us`, `prebuilt-contract`, …). Pricing then falls back to the price of
-the LiteOCR model you named, so pick `azure/custom` for custom models and `azure/invoice` for other
+the PuffinParse model you named, so pick `azure/custom` for custom models and `azure/invoice` for other
 prebuilt extraction models to keep the cost estimate honest.
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 Every request carries `Ocp-Apim-Subscription-Key: $AZURE_DOCUMENT_INTELLIGENCE_KEY`.
 
@@ -69,17 +69,17 @@ Every request carries `Ocp-Apim-Subscription-Key: $AZURE_DOCUMENT_INTELLIGENCE_K
    ```
 
    * `pages="1-3,7,10-"` → `pages=1-3,7,10-2000`: Azure's grammar
-     (`^(\d+(-\d+)?)(,\s*(\d+(-\d+)?))*$`) has no open-ended range, so LiteOCR closes it at the S0
+     (`^(\d+(-\d+)?)(,\s*(\d+(-\d+)?))*$`) has no open-ended range, so PuffinParse closes it at the S0
      page ceiling.
    * `language` → `locale`.
    * `stringIndexType=unicodeCodePoint` is deliberate: Azure's default is `textElements` (grapheme
-     clusters), and LiteOCR slices `content` with Rust `char` indices, which *is* code points.
+     clusters), and PuffinParse slices `content` with Rust `char` indices, which *is* code points.
    * Query parameters are percent-encoded by hand — `reqwest`'s `query` feature is not enabled in
      this workspace.
 2. **`202 Accepted`** with an empty body, an `Operation-Location` header
    (`{endpoint}/documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}?api-version=…`)
    and usually `Retry-After: 1`. `{resultId}` becomes `provider_job_id`.
-3. **Poll.** `GET {Operation-Location}` with the same key header. LiteOCR sleeps for `Retry-After`
+3. **Poll.** `GET {Operation-Location}` with the same key header. PuffinParse sleeps for `Retry-After`
    first, then polls starting at 2 s and backing off ×1.5 to a maximum of 10 s (Microsoft asks for at
    most one GET every 2 s per analyze request). `status` walks `notStarted` → `running` →
    `succeeded` | `failed`. Each poll is itself retried on 429 / 5xx / network errors, so a throttled
@@ -106,13 +106,13 @@ Lists may be given as a JSON array or a single string.
 
 ### 4.1 `parse` (`prebuilt-layout`)
 
-| Azure field | LiteOCR unified field | Notes |
+| Azure field | PuffinParse unified field | Notes |
 |---|---|---|
 | `{resultId}` from `Operation-Location` | `ParseResponse.provider_job_id` | |
 | `analyzeResult.content` sliced by `pages[].spans` | `Page.markdown` | The page's slice of the document-level markdown, with the `<!-- PageBreak -->` marker stripped and the edges trimmed. Offsets are code points. With no spans (or no content) the page markdown falls back to its blocks joined by blank lines. |
 | — | `Page.text` | Derived from `Page.markdown`: `<!-- PageHeader="…" -->` / `PageFooter` / `PageNumber` comments are unwrapped to their text, other HTML comments dropped, then `markdown_to_text` flattens headings and the HTML table. |
 | `pages[].pageNumber` | `Page.page_number` | 1-based, as Azure reports it. |
-| `pages[].width` / `height` | `Page.width` / `height` | **In `pages[].unit`: `inch` for PDFs, `pixel` for images.** LiteOCR passes the numbers through unchanged, so a PDF page is `8.5 × 11`, not `612 × 792`. |
+| `pages[].width` / `height` | `Page.width` / `height` | **In `pages[].unit`: `inch` for PDFs, `pixel` for images.** PuffinParse passes the numbers through unchanged, so a PDF page is `8.5 × 11`, not `612 × 792`. |
 | `paragraphs[]` | `Page.blocks[]` | One block per paragraph, ordered by span offset within the page. |
 | `paragraphs[].role` | `Block.type` | `title`→`title`, `sectionHeading`→`section_header`, `pageHeader`→`header`, `pageFooter`→`footer`, `footnote`→`footnote`, `formulaBlock`→`formula`, `pageNumber`→`other`, no role→`text`. |
 | `paragraphs[].content` | `Block.content` | Markdown; `output="text"` runs it through `markdown_to_text`. |
@@ -125,19 +125,19 @@ Lists may be given as a JSON array or a single string.
 | resolved `modelId` | `metadata.azure_model_id` | Useful with `provider_options.model_id`. |
 
 **Bounding boxes.** Azure gives `polygon: [x1,y1,x2,y2,x3,y3,x4,y4]` — a *quadrilateral* that follows
-the text rotation. LiteOCR takes its axis-aligned hull (min/max of the x and y components) and divides
+the text rotation. PuffinParse takes its axis-aligned hull (min/max of the x and y components) and divides
 by the page `width`/`height`, so `BBox` stays the unified 0–1, top-left-origin rectangle. The polygon
 unit and the page unit are always the same, so no unit conversion is needed.
 
 **Table paragraph de-duplication.** Azure emits table cell text *both* in `tables[].cells[]` and as
-ordinary `paragraphs[]`. LiteOCR drops paragraphs whose span starts inside a table's span, so cell
+ordinary `paragraphs[]`. PuffinParse drops paragraphs whose span starts inside a table's span, so cell
 text appears exactly once — in the table block.
 
 ### 4.2 `ocr` (`prebuilt-read`, also `prebuilt-layout`)
 
 `Provider::ocr` is overridden, so this is a native mapping and not derived from `parse`:
 
-| Azure field | LiteOCR unified field |
+| Azure field | PuffinParse unified field |
 |---|---|
 | `pages[].lines[].content` | `Line.text` |
 | `pages[].lines[].polygon` | `Line.bbox` (normalised) |
@@ -171,7 +171,7 @@ the `ocr` default; use `azure/layout` for `ocr` only when you want layout and te
 
 **The request schema does not change what Azure extracts.** Prebuilt models have a fixed field set
 (see the per-model field tables in the Azure docs) and custom models have the schema you trained.
-LiteOCR therefore uses `ExtractRequest.schema` only to **select and rename**: each key of
+PuffinParse therefore uses `ExtractRequest.schema` only to **select and rename**: each key of
 `schema.properties` is matched against the returned field names ignoring case and non-alphanumeric
 characters (`invoice_total` ≡ `InvoiceTotal`), and matches are emitted under the *schema's* spelling,
 with `fields` pointers renamed to match. If nothing matches, the full Azure field set is returned
@@ -181,7 +181,7 @@ ignored; to ask for a field Azure does not model, use `provider_options.query_fi
 
 ### 4.4 Trimmed fixture
 
-`crates/liteocr-core/tests/fixtures/azure_layout.json` (2 pages, 12 paragraphs, 1 table, 20 words; the three
+`crates/puffinparse-core/tests/fixtures/azure_layout.json` (2 pages, 12 paragraphs, 1 table, 20 words; the three
 `azure_*.json` fixtures follow the documented `2024-11-30` schema exactly and drive the unit tests):
 
 ```json
@@ -194,13 +194,13 @@ ignored; to ask for a field Azure does not model, use `provider_options.query_fi
     "modelId": "prebuilt-layout",
     "stringIndexType": "unicodeCodePoint",
     "contentFormat": "markdown",
-    "content": "<!-- PageHeader=\"LiteOCR sample\" -->\n\n# Hello LiteOCR\n\nInvoice #1234\n\n…\n\n<table>\n<tr><th>Item</th><th>Amount</th></tr>\n<tr><td>Widget</td><td>$56.78</td></tr>\n</table>\n\n\n<!-- PageFooter=\"Page 1\" -->\n\n<!-- PageBreak -->\n\n## Page Two\n\nReference: ABC-9876",
+    "content": "<!-- PageHeader=\"PuffinParse sample\" -->\n\n# Hello PuffinParse\n\nInvoice #1234\n\n…\n\n<table>\n<tr><th>Item</th><th>Amount</th></tr>\n<tr><td>Widget</td><td>$56.78</td></tr>\n</table>\n\n\n<!-- PageFooter=\"Page 1\" -->\n\n<!-- PageBreak -->\n\n## Page Two\n\nReference: ABC-9876",
     "pages": [
       {
         "pageNumber": 1, "angle": 0.0, "width": 8.5, "height": 11.0, "unit": "inch",
         "words": [ { "content": "Hello", "polygon": [1.0, 1.0, 1.8, 1.0, 1.8, 1.5, 1.0, 1.5],
                      "span": { "offset": 40, "length": 5 }, "confidence": 0.99 } ],
-        "lines": [ { "content": "Hello LiteOCR", "polygon": [1.0, 1.0, 3.5, 1.0, 3.5, 1.3, 1.0, 1.3],
+        "lines": [ { "content": "Hello PuffinParse", "polygon": [1.0, 1.0, 3.5, 1.0, 3.5, 1.3, 1.0, 1.3],
                      "spans": [ { "offset": 40, "length": 13 } ] } ],
         "selectionMarks": [],
         "spans": [ { "offset": 0, "length": 249 } ]
@@ -209,10 +209,10 @@ ignored; to ask for a field Azure does not model, use `provider_options.query_fi
     "paragraphs": [
       { "spans": [ { "offset": 17, "length": 14 } ],
         "boundingRegions": [ { "pageNumber": 1, "polygon": [1.0, 0.5, 3.5, 0.5, 3.5, 1.0, 1.0, 1.0] } ],
-        "content": "LiteOCR sample", "role": "pageHeader" },
+        "content": "PuffinParse sample", "role": "pageHeader" },
       { "spans": [ { "offset": 40, "length": 13 } ],
         "boundingRegions": [ { "pageNumber": 1, "polygon": [1.0, 1.0, 3.5, 1.0, 3.5, 1.5, 1.0, 1.5] } ],
-        "role": "title", "content": "Hello LiteOCR" }
+        "role": "title", "content": "Hello PuffinParse" }
     ],
     "tables": [
       { "rowCount": 2, "columnCount": 2,
@@ -232,7 +232,7 @@ ignored; to ask for a field Azure does not model, use `provider_options.query_fi
 Azure's error body is `{"error": {"code", "message", "target"?, "details"?, "innererror"?}}`, which
 `Error::from_http` reads out of the box (it picks up the nested `message`).
 
-| Status | Typical `error.code` | LiteOCR `ErrorKind` |
+| Status | Typical `error.code` | PuffinParse `ErrorKind` |
 |---|---|---|
 | 400 | `InvalidRequest` (+ `innererror.code` such as `InvalidContent`, `InvalidContentDimensions`, `InvalidArgument`), `NotSupportedApiVersion` | `bad_request` |
 | 401 | `401` / `Unauthorized` — "Access denied due to invalid subscription key or wrong API endpoint." | `authentication` |
@@ -243,7 +243,7 @@ Azure's error body is `{"error": {"code", "message", "target"?, "details"?, "inn
 | 500/503 | `InternalServerError`, `ServiceUnavailable` | `provider` (retried) |
 
 Failures **after** the 202 come back as `200 OK` with `status: "failed"` and the same error object.
-LiteOCR maps those itself: codes starting with `Invalid` / `Unsupported` / `NotSupported`, plus
+PuffinParse maps those itself: codes starting with `Invalid` / `Unsupported` / `NotSupported`, plus
 `ContentSourceNotAccessible`, `ContentSourceTimeout` and `ContentSourceSizeExceeded`, become
 `bad_request`; anything else is a `provider` error. The message is
 `analysis failed: <code>: <message> (<innererror.code>: <innererror.message>)`, and the error carries
@@ -256,7 +256,7 @@ both before any network call. `azure/custom` without `provider_options.model_id`
 
 **Rate limits (S0 defaults, adjustable by support ticket):** 15 analyze transactions/second, 50 GET
 operations/second, 5 model-management/second, 10 list/second. Free F0 is 1/second for each. There are
-no `X-RateLimit-*` headers; 429 carries `Retry-After` and is retried with LiteOCR's own jittered
+no `X-RateLimit-*` headers; 429 carries `Retry-After` and is retried with PuffinParse's own jittered
 backoff.
 
 **Service limits:** 500 MB and 2 000 pages per document on S0 (4 MB / 2 pages on F0); max 500 MB of
@@ -271,20 +271,20 @@ raise `timeout_secs` for large documents.
 ## 6. Gotchas (from the REST reference; re-verify the ⚠ ones against a live resource)
 
 * **The endpoint is not a constant.** Every Document Intelligence resource has its own host, so
-  `base_url` is mandatory in the same sense an API key is. LiteOCR raises an authentication error
+  `base_url` is mandatory in the same sense an API key is. PuffinParse raises an authentication error
   rather than guessing a region. Keep the `/` -free form: `https://<resource>.cognitiveservices.azure.com`.
 * **Two auth schemes, one supported.** Azure also accepts Microsoft Entra ID bearer tokens
-  (`Authorization: Bearer`, scope `https://cognitiveservices.azure.com/.default`). LiteOCR only sends
+  (`Authorization: Bearer`, scope `https://cognitiveservices.azure.com/.default`). PuffinParse only sends
   `Ocp-Apim-Subscription-Key`; a managed identity / AAD setup is not reachable through `api_key`.
 * **Markdown tables are HTML.** In `2024-11-30` the markdown `content` renders tables as
   `<table><tr><th>…` (to express merged cells), *not* as pipe tables, and selection marks as ☒ / ☐
   rather than `:selected:`. `Page.markdown` therefore contains HTML fragments, while `Block.content`
-  for a table block is a pipe table LiteOCR rendered from `tables[].cells`. `Page.text` flattens both.
+  for a table block is a pipe table PuffinParse rendered from `tables[].cells`. `Page.text` flattens both.
 * **Page headers, footers and page numbers are HTML comments** in markdown
-  (`<!-- PageHeader="…" -->`), and pages are separated by `<!-- PageBreak -->`. LiteOCR splits pages
+  (`<!-- PageHeader="…" -->`), and pages are separated by `<!-- PageBreak -->`. PuffinParse splits pages
   by `pages[].spans` (exact) and only strips the page-break marker; the comments stay in
   `Page.markdown`, while `Page.text` unwraps `PageHeader`/`PageFooter`/`PageNumber` to their text.
-* ⚠ **Offsets depend on `stringIndexType`.** LiteOCR pins `unicodeCodePoint` so `content` can be
+* ⚠ **Offsets depend on `stringIndexType`.** PuffinParse pins `unicodeCodePoint` so `content` can be
   sliced with `char` indices. Overriding it with `textElements` (Azure's default) or `utf16CodeUnit`
   will mis-slice `Page.markdown` for documents containing emoji, combining marks or non-BMP script —
   everything else (blocks, boxes, fields) is unaffected.
@@ -307,35 +307,35 @@ raise `timeout_secs` for large documents.
   model.
 * **Analyze is always async**, even for a one-page PNG: there is no synchronous endpoint, so the
   minimum latency is one POST plus one GET.
-* **`Retry-After` is honoured once**, before the first poll; afterwards LiteOCR uses its own 2 s → 10 s
+* **`Retry-After` is honoured once**, before the first poll; afterwards PuffinParse uses its own 2 s → 10 s
   backoff. A throttled poll (429) is retried inside the poll loop instead of failing the call.
 
 ## 7. Useful `provider_options` passthrough
 
 ```python
 # 1. Custom (trained) model — `model_id` is required for azure/custom and overrides any model name.
-liteocr.extract("po.pdf", model="azure/custom", schema=schema,
+puffinparse.extract("po.pdf", model="azure/custom", schema=schema,
                 provider_options={"model_id": "purchase-orders-v3"})
 
 # 2. Fine print / low-quality scans: high-resolution OCR (+$6 / 1k pages).
-liteocr.parse("fine-print.pdf", model="azure/layout",
+puffinparse.parse("fine-print.pdf", model="azure/layout",
               provider_options={"features": ["ocrHighResolution"]})
 
 # 3. Formulas as LaTeX and barcodes as markdown images, plus a searchable PDF of the result.
-liteocr.parse("paper.pdf", model="azure/layout",
+puffinparse.parse("paper.pdf", model="azure/layout",
               provider_options={"features": ["formulas", "barcodes"], "output": ["pdf"]})
 
 # 4. Ask a prebuilt model for fields it does not model (+$10 / 1k pages); `features` gets
 #    `queryFields` added automatically.
-liteocr.extract("receipt.png", model="azure/receipt", schema=schema,
+puffinparse.extract("receipt.png", model="azure/receipt", schema=schema,
                 provider_options={"query_fields": ["StoreNumber", "CashierName"]})
 
 # 5. General key/value pairs out of an unstructured form, via the layout model.
-liteocr.extract("form.pdf", model="azure/layout", schema={},
+puffinparse.extract("form.pdf", model="azure/layout", schema={},
                 provider_options={"model_id": "prebuilt-layout", "features": ["keyValuePairs"]})
 
-# 6. A prebuilt model LiteOCR does not list, with a locale hint.
-liteocr.extract("card.jpg", model="azure/invoice", schema=schema,
+# 6. A prebuilt model PuffinParse does not list, with a locale hint.
+puffinparse.extract("card.jpg", model="azure/invoice", schema=schema,
                 provider_options={"model_id": "prebuilt-healthInsuranceCard.us", "locale": "en-US"})
 ```
 

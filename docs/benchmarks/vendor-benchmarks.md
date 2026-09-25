@@ -1,10 +1,10 @@
-# Vendor-published OCR / document-parsing benchmarks — feasibility review for LiteOCR
+# Vendor-published OCR / document-parsing benchmarks — feasibility review for PuffinParse
 
 Researched 2026-09-11. All three benchmarks were **verified by actually downloading a sample**
-into `/tmp/claude-0/-home-user-liteocr/b117fcb6-379d-5abe-b4ce-bac65d298215/scratchpad/benchres/`.
-Nothing under `/home/user/liteocr` was modified.
+into `/tmp/claude-0/-home-user-puffinparse/b117fcb6-379d-5abe-b4ce-bac65d298215/scratchpad/benchres/`.
+Nothing under `/home/user/puffinparse` was modified.
 
-LiteOCR manifest target format (from `benchmark/README.md`):
+PuffinParse manifest target format (from `benchmark/README.md`):
 `benchmark/datasets/<name>/manifest.json` = `{name, version, description, license,
 documents:[{id, file, truth, pages, category, tags}]}` with inputs in `docs/` and
 **ground-truth markdown per document** in `truth/`. Scoring is deterministic char/word
@@ -14,14 +14,14 @@ Levenshtein + reading order + table sub-score against that truth markdown.
 
 ## Summary table
 
-| Name | Public data? | Location | License | Size | GT format | Convertible to LiteOCR manifest? |
+| Name | Public data? | Location | License | Size | GT format | Convertible to PuffinParse manifest? |
 |---|---|---|---|---|---|---|
 | **ParseBench** (LlamaIndex) | Yes, fully | HF `llamaindex/ParseBench`; code `github.com/run-llama/ParseBench` | Apache-2.0 (data card + code LICENSE) — redistribution permitted | 592 MB total (517 MB docs, 2,079 files; 71 MB rule JSONL) | 169,011 **rule** assertions in 5 JSONL files; **no reference markdown** except 503 HTML tables | **Partially.** Table split → direct (503 docs, HTML→md truth). Text splits → only a *reconstructable approximation* from `bag_of_sentence` + pairwise `order` rules. Chart/layout/formatting splits → not convertible. |
 | **RealDoc-Bench** (Extend) — QA track | Yes | HF `Extend-AI/RealDoc-Bench`; code `github.com/extend-hq/realdoc-bench` | Annotations **CC-BY-4.0**; **source PDFs explicitly excluded from that license**, rights vary (471/581 "not_established") | 540 MB (538 MB = 581 PDFs; `qa_bank.json` 1.1 MB) | 1,356 question → typed `gold_dict` JSON pairs (+137 capability tags) | **No** for char-level markdown scoring — there is no page text truth at all. Only usable as a *separate QA-over-parse* track. PDFs are **download-on-demand only**, do not redistribute. |
 | **RealDoc-Bench-Layout** (Extend) | Yes | HF `Extend-AI/RealDoc-Bench-Layout` | Annotations CC-BY-4.0; page images keep original per-source licenses | 374 MB (1,500 PNG/JPG = 371 MB; annotations 2.3 MB) | COCO bbox + 9 block classes per page. **No text in annotations** | **No.** Bboxes only, zero transcription. |
 | **LongExtractBench-50** (micro1, commissioned by Reducto) | Yes (50-doc subset of a 225-doc corpus) | HF `micro1-inc/longextract-bench-50`; code `github.com/micro1-research/longextract-bench` | Labels **CC-BY-4.0** (micro1); **`document.pdf` retains original source rights** — "verify before redistributing" | 375 MB / 50 folders × 3 files (largest folder 84 MB; median GT ~640 KB) | `schema.json` (JSON Schema) + `ground_truth.json` (nested JSON extraction) | **No** for markdown scoring — GT is a structured extraction, not page text. Excellent as a *long-document extraction* track; PDFs are 1–200+ pages so they are also a good latency/robustness stress corpus. |
 
-**Bottom line for a "combined open benchmark dataset" in LiteOCR's current manifest shape
+**Bottom line for a "combined open benchmark dataset" in PuffinParse's current manifest shape
 (input file + expected markdown per document): only ParseBench's `table` split drops in
 cleanly (503 documents, Apache-2.0, redistributable).** Everything else measures either
 field extraction or layout, and would need a second manifest/scorer kind.
@@ -142,7 +142,7 @@ rule pass-rate scores for content faithfulness and formatting; Element Pass Rate
 (IoA localisation + classification + attribution) for layout. Leaderboard headline:
 LlamaParse Agentic Plus 90.20, LlamaParse Agentic 87.01 (vendor-run).
 
-### Conversion into the LiteOCR manifest
+### Conversion into the PuffinParse manifest
 - **`table` split → clean fit.** 503 single-page PDFs, each with one ground-truth HTML table.
   Convert HTML → markdown pipe table for `truth/<id>.md`, `pages: 1`, `category: "table"`,
   `tags: ["easy"|"hard","parsebench"]`. Our `table_score` metric applies directly; our
@@ -291,10 +291,10 @@ realdoc-bench evaluate run --run-dir runs/smoke -p pymupdf --limit 20
 
 Layout normaliser at `realdoc_bench/layout/normalizers/coco.py`. Apache-2.0.
 Scoring is **exact-match over typed gold dicts**, but the *answering* step uses an LLM reader,
-so runs are not bit-reproducible and cost money — that conflicts with LiteOCR's
+so runs are not bit-reproducible and cost money — that conflicts with PuffinParse's
 "no LLM judge, deterministic metrics" principle #2.
 
-### Conversion into the LiteOCR manifest
+### Conversion into the PuffinParse manifest
 **Not convertible as-is.** There is no page transcription anywhere in either repo, so nothing
 can populate `truth/<id>.md`. Options:
 - Add a **second manifest kind** (`qa`) — `{id, file, questions:[{question, response_format,
@@ -303,7 +303,7 @@ can populate `truth/<id>.md`. Options:
   (and non-deterministic, paid) axis from `bench run`.
 - Or use the layout track as a third kind for bbox F1.
 - Either way `docs/` stays **download-on-demand** (manifest records `sha256` + HF repo path;
-  a `liteocr bench fetch` step pulls 540 MB / 374 MB on first use).
+  a `puffinparse bench fetch` step pulls 540 MB / 374 MB on first use).
 - **Lost if forced into the markdown shape:** everything — you'd be inventing truth.
 
 ---
@@ -411,13 +411,13 @@ run via `src/longextract_bench/dataset.py`. Metrics:
   separately — explicitly to stop systems from looking good by silently dropping hard docs.
 Deterministic, no LLM judge.
 
-### Conversion into the LiteOCR manifest
+### Conversion into the PuffinParse manifest
 **Not convertible to `truth/*.md`.** The ground truth is a nested JSON extraction of selected
 fields, not a transcription — most of the 202-page PDF's text is deliberately *not* in the GT.
 Realistic uses:
 - **A third manifest kind (`extract`)**: `{id, file, schema, truth_json, pages, category, tags}`
   with a scorer implementing row-keyed precision/recall + leaf accuracy. That is a
-  well-specified, deterministic, LLM-judge-free metric — a good fit for LiteOCR's principle #2,
+  well-specified, deterministic, LLM-judge-free metric — a good fit for PuffinParse's principle #2,
   and it exercises the `extract`-style endpoints our providers expose (Reducto Deep Extract,
   Extend, LlamaExtract) rather than the parse endpoints.
 - **A latency/robustness corpus for the existing parse benchmark**: 50 PDFs of 1–200+ pages is
@@ -438,14 +438,14 @@ Realistic uses:
    `table.jsonl` + the 503 `docs/table/*.pdf` (~130 MB of the 517 MB) and emits
    `manifest.json` + `truth/*.md`. Flag in the dataset README that colspan/rowspan is flattened.
 2. **Do not vendor any PDFs from RealDoc-Bench or LongExtractBench.** Both explicitly carve the
-   source documents out of their CC-BY-4.0 annotation licence. A `liteocr bench fetch` that
+   source documents out of their CC-BY-4.0 annotation licence. A `puffinparse bench fetch` that
    snapshot_downloads from HF and verifies `sha256` (RealDoc-Bench ships them; LongExtractBench
    does not, so we'd record our own) keeps us clean and matches the manifest's existing
    "downloaded by the user and converted" plan.
 3. **Two new manifest kinds would unlock the rest**: `extract` (JSON Schema + expected JSON,
    deterministic row-keyed P/R + leaf accuracy — LongExtractBench, and LlamaIndex's companion
    ExtractBench) and `qa` (question + typed gold dict, needs a reader model — RealDoc-Bench).
-   Only the `extract` kind preserves LiteOCR's "no LLM judge" principle.
+   Only the `extract` kind preserves PuffinParse's "no LLM judge" principle.
 4. **Provenance caveats to carry through** into any combined dataset README: RealDoc-Bench is
    ~50% `ai_generated_edit` and 471/581 documents have `not_established` rights;
    LongExtractBench was commissioned by the vendor that won it and its labels are
@@ -455,7 +455,7 @@ Realistic uses:
 ## Reproduce the downloads
 
 ```bash
-cd /tmp/claude-0/-home-user-liteocr/b117fcb6-379d-5abe-b4ce-bac65d298215/scratchpad/benchres
+cd /tmp/claude-0/-home-user-puffinparse/b117fcb6-379d-5abe-b4ce-bac65d298215/scratchpad/benchres
 export REQUESTS_CA_BUNDLE=/root/.ccr/ca-bundle.crt SSL_CERT_FILE=/root/.ccr/ca-bundle.crt
 pip install huggingface_hub
 python - <<'PY'

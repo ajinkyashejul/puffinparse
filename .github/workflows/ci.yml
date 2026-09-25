@@ -45,13 +45,13 @@ jobs:
         run: cargo test --workspace
 
       - name: Build CLI (release)
-        run: cargo build -p liteocr-cli --release
+        run: cargo build -p puffinparse-cli --release
 
       - name: Upload CLI binary
         uses: actions/upload-artifact@v4
         with:
-          name: liteocr-cli-linux-x86_64
-          path: target/release/liteocr
+          name: puffinparse-cli-linux-x86_64
+          path: target/release/puffinparse
           if-no-files-found: error
           retention-days: 7
 
@@ -89,7 +89,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install maturin ruff mypy pytest pytest-asyncio
 
-      # Builds crates/liteocr-python into the venv as `liteocr._core`,
+      # Builds crates/puffinparse-python into the venv as `puffinparse._core`,
       # driven by the root pyproject.toml ([tool.maturin] manifest-path).
       - name: Build and install the extension module
         run: maturin develop --release
@@ -101,7 +101,7 @@ jobs:
         run: ruff format --check python/ benchmark/ examples/
 
       - name: Mypy
-        run: mypy python/liteocr
+        run: mypy python/puffinparse
 
       # No provider API keys are set here on purpose: the live provider tests
       # skip themselves when REDUCTO_API_KEY / EXTEND_API_KEY / LLAMA_API_KEY
@@ -147,7 +147,7 @@ jobs:
         run: npm run typecheck
 
       # Offline: unit tests plus end-to-end calls against a local mock provider. The live test
-      # skips itself because LITEOCR_LIVE_TESTS and provider keys are deliberately not set.
+      # skips itself because PUFFINPARSE_LIVE_TESTS and provider keys are deliberately not set.
       - name: Test
         run: npm test
 
@@ -157,14 +157,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image
-        run: docker build -t liteocr:ci .
+        run: docker build -t puffinparse:ci .
       - name: CLI runs in the image
-        run: docker run --rm liteocr:ci --version
+        run: docker run --rm puffinparse:ci --version
       - name: Gateway serves /health and /v1/models
         run: |
-          printf '[server]\nport = 4000\n' > "$RUNNER_TEMP/liteocr.toml"
+          printf '[server]\nport = 4000\n' > "$RUNNER_TEMP/puffinparse.toml"
           docker run -d --name gw -p 4000:4000 \
-            -v "$RUNNER_TEMP/liteocr.toml:/etc/liteocr/liteocr.toml:ro" liteocr:ci
+            -v "$RUNNER_TEMP/puffinparse.toml:/etc/puffinparse/puffinparse.toml:ro" puffinparse:ci
           for i in $(seq 1 30); do curl -fsS localhost:4000/health && break; sleep 1; done
           curl -fsS localhost:4000/v1/models | head -c 300; echo
           docker logs gw

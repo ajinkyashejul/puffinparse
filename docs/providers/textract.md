@@ -11,14 +11,14 @@
 | Protocol | AWS JSON 1.1 RPC: always `POST /`, operation chosen by `X-Amz-Target`, `Content-Type: application/x-amz-json-1.1` |
 | API version | `textract-2018-06-27` (implicit in the target names; there is no version header) |
 | Verified | 2026-09-11 — request/response shapes and quotas from the AWS API reference; pricing from the AWS Price List API (`AmazonTextract`, `us-east-1`, publication `2026-08-31`). **Response fixtures are built from the AWS documentation's own examples, not from a live capture** (see §6). |
-| Implementation | `crates/liteocr-core/src/providers/textract.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/textract.rs` |
 
 Textract is not a "parse a document to markdown" product: it returns a flat array of `Block` objects
-linked by ids. LiteOCR reassembles those into pages, blocks, markdown tables and extraction results.
+linked by ids. PuffinParse reassembles those into pages, blocks, markdown tables and extraction results.
 There is no upload endpoint and no remote-URL input — synchronous calls carry the document inline as
 base64, asynchronous ones read it from S3.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
 | Model | Modes | Textract operation + `FeatureTypes` | List price (`pricing.json`) |
 |---|---|---|---|
@@ -44,13 +44,13 @@ AWS Price List API rather than the marketing page, and used only to fill
 price list: *"Layout is available for free when used with the Tables feature."* So `["LAYOUT","TABLES"]`
 bills exactly like `["TABLES"]` — $0.015 / page. A LAYOUT-only call would be $0.004 / page, which you
 can get with `provider_options={"FeatureTypes": ["LAYOUT"]}` (the passthrough replaces the array), at
-the cost of losing markdown tables. Prices are region-dependent and LiteOCR's table is us-east-1 only,
+the cost of losing markdown tables. Prices are region-dependent and PuffinParse's table is us-east-1 only,
 so `cost_usd` is an estimate for any other region.
 
 Async (`Start*`/`Get*`) pages cost the same as sync pages; the `USE1-Async…` usage types carry
 identical rates.
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 Every call is `POST {base}/` with these headers, all of them signed:
 
@@ -74,7 +74,7 @@ without a network call.
 
 ### 3.1 Synchronous (default)
 
-1. **Load bytes.** Path and bytes inputs are read locally. A **URL input is downloaded by LiteOCR**
+1. **Load bytes.** Path and bytes inputs are read locally. A **URL input is downloaded by PuffinParse**
    and sent inline — Textract cannot fetch URLs itself.
 2. **Multi-page guard.** If the bytes are a PDF, `pdf_page_count()` counts `/Type /Page` objects
    (falling back to the page tree's `/Count`). More than one page ⇒ a `bad_request` error before any
@@ -93,7 +93,7 @@ without a network call.
 
 ### 3.2 Asynchronous (multi-page, `provider_options.s3_object`)
 
-Textract's async API reads **only from S3** — there is no way to hand it bytes. LiteOCR has no S3
+Textract's async API reads **only from S3** — there is no way to hand it bytes. PuffinParse has no S3
 client and deliberately does not grow one, so you upload the object yourself and name it:
 
 ```python
@@ -101,7 +101,7 @@ provider_options={"s3_object": {"bucket": "my-bucket", "name": "invoices/2026-q3
 # optional: "version": "<S3 object version id>"
 ```
 
-Then LiteOCR:
+Then PuffinParse:
 
 1. `Textract.StartDocumentTextDetection` / `Textract.StartDocumentAnalysis` with
    `{"DocumentLocation": {"S3Object": {"Bucket": …, "Name": …}}, "FeatureTypes": […]}` → `{"JobId": …}`.
@@ -112,11 +112,11 @@ Then LiteOCR:
 3. Follows `NextToken` until it is absent, concatenating every `Blocks` page (a 3 000-page document
    is many round trips — budget `timeout_secs` accordingly).
 
-`NotificationChannel` / SNS is not used: LiteOCR polls. You can still set it (and `OutputConfig`,
+`NotificationChannel` / SNS is not used: PuffinParse polls. You can still set it (and `OutputConfig`,
 `KMSKeyId`, `JobTag`, `ClientRequestToken`, `AdaptersConfig`) through `provider_options`, which is
 deep-merged into whichever body is actually sent.
 
-**Where `provider_options` are merged:** the keys `region` and `s3_object` are consumed by LiteOCR;
+**Where `provider_options` are merged:** the keys `region` and `s3_object` are consumed by PuffinParse;
 everything else is deep-merged verbatim into the Textract request body, so the remaining keys are
 top-level Textract request members in `PascalCase` (`FeatureTypes`, `QueriesConfig`, `AdaptersConfig`,
 `HumanLoopConfig`, `OutputConfig`, `KMSKeyId`, `JobTag`, `ClientRequestToken`, `NotificationChannel`).
@@ -136,7 +136,7 @@ and never reports which language it found.
 Every operation returns the same envelope: `{"Blocks": [...], "DocumentMetadata": {"Pages": n},
 "AnalyzeDocumentModelVersion": "1.0"}` (plus `JobStatus` / `NextToken` / `Warnings` for `Get*`).
 
-| Textract field | LiteOCR unified field | Notes |
+| Textract field | PuffinParse unified field | Notes |
 |---|---|---|
 | `DocumentMetadata.Pages` | `Usage.pages` | Falls back to the highest `Block.Page`, minimum 1. |
 | `JobId` (async only) | `provider_job_id` | `None` for synchronous calls — Textract returns no id there. |
@@ -160,7 +160,7 @@ and words regardless of `FeatureTypes`, so no second call is needed (and no extr
 ### 4.2 `parse` mode — `LAYOUT_*` + `TABLE`
 
 Textract returns `LAYOUT_*` blocks **in implied reading order** (left to right, top to bottom;
-column by column on multi-column pages). LiteOCR walks them in array order, so `Page.markdown` is in
+column by column on multi-column pages). PuffinParse walks them in array order, so `Page.markdown` is in
 reading order. A layout block's text is its descendant `LINE` blocks via `Relationships[CHILD]`.
 
 | `BlockType` | `Block.type` | `Block.content` |
@@ -176,7 +176,7 @@ reading order. A layout block's text is its descendant `LINE` blocks via `Relati
 | `LAYOUT_PAGE_NUMBER` | `other` | plain text |
 
 `LAYOUT_LIST` points at `LAYOUT_TEXT` children, and those children *also* appear at the top level of
-`Blocks`; LiteOCR suppresses any layout block that is another layout block's child so list items are
+`Blocks`; PuffinParse suppresses any layout block that is another layout block's child so list items are
 not emitted twice.
 
 **Tables.** A `LAYOUT_TABLE` is matched to its `TABLE` block by a direct `CHILD` reference, or — when
@@ -189,11 +189,11 @@ child becomes `[x]` / `[ ]`; `|` is escaped. The header row is the lowest `RowIn
 `TABLE_FOOTER` blocks are emitted as plain lines around the table.
 
 **Fallback.** If a response carries no `LAYOUT_*` blocks at all (LAYOUT disabled through
-`provider_options`, or nothing detected), LiteOCR emits every `TABLE` as a markdown table plus one
+`provider_options`, or nothing detected), PuffinParse emits every `TABLE` as a markdown table plus one
 `text` block per `LINE`, skipping lines whose words are all inside table cells so table content is
 not duplicated. `output="text"` renders every block through `markdown_to_text`.
 
-Trimmed fixture (`crates/liteocr-core/tests/fixtures/textract_layout.json`, most blocks elided):
+Trimmed fixture (`crates/puffinparse-core/tests/fixtures/textract_layout.json`, most blocks elided):
 
 ```json
 {
@@ -231,7 +231,7 @@ maps back to the original property name, so `"invoice number"` in the schema is 
 `invoice_number` and returned under `"invoice number"`.
 
 Responses are `QUERY` blocks carrying `Query.Alias` and a `Relationships[{"Type":"ANSWER"}]` list of
-`QUERY_RESULT` ids. LiteOCR takes the highest-confidence non-empty `QUERY_RESULT`, coerces its `Text`
+`QUERY_RESULT` ids. PuffinParse takes the highest-confidence non-empty `QUERY_RESULT`, coerces its `Text`
 to the schema's type (`number`/`integer` strip currency and separators; `boolean` understands
 yes/no/true/false/selected/`[x]`), and writes it to `data[<key>]`. Confidence lands in
 `fields["/<key>"].confidence`; with `citations=True` the answer's page, box and text land in
@@ -256,13 +256,13 @@ properties than the applicable limit is rejected with an `input` error before an
 `CHILD` `WORD`s) and points at its value block through `Relationships[{"Type":"VALUE"}]`; the value
 block's `CHILD`ren are `WORD`s or a `SELECTION_ELEMENT`.
 
-LiteOCR matches each schema property to a detected key by **case- and punctuation-insensitive**
+PuffinParse matches each schema property to a detected key by **case- and punctuation-insensitive**
 comparison (both sides reduced to lowercase alphanumerics), trying the property name and its `title`,
 first for an exact match and then for "one name contains the other" (≥3 characters). Each detected
 key is consumed at most once. Values are coerced by the schema's type exactly as in §4.3, and a
 selected checkbox becomes `true`.
 
-> **This is a heuristic, not schema-driven extraction.** Textract decides what the keys are; LiteOCR
+> **This is a heuristic, not schema-driven extraction.** Textract decides what the keys are; PuffinParse
 > only tries to line them up with your field names. Properties with no match are set to `null` and
 > listed in `metadata.textract_unmatched_fields`; `metadata.textract_form_keys_found` reports how many
 > key-value pairs Textract actually detected, which is the first thing to look at when fields come
@@ -277,7 +277,7 @@ mapping (`4xx → bad_request`) is wrong for Textract. `textract::map_error` key
 (a fully-qualified `com.amazonaws.textract#ThrottlingException` is accepted too) and prefixes the
 exception name onto the message:
 
-| `__type` | HTTP | LiteOCR `ErrorKind` | Retried? |
+| `__type` | HTTP | PuffinParse `ErrorKind` | Retried? |
 |---|---|---|---|
 | `AccessDeniedException` | 400 | `authentication` | no |
 | `UnrecognizedClientException`, `InvalidClientTokenId`, `ExpiredTokenException` | 400/403 | `authentication` | no |
@@ -294,7 +294,7 @@ exception name onto the message:
 An async job that ends `FAILED` becomes a `provider` error carrying `StatusMessage` and the job id.
 `PARTIAL_SUCCESS` is accepted, logged, and its `Warnings` surfaced in metadata.
 
-**Multi-page PDFs.** Synchronous Textract accepts PDF and TIFF at **one page only**. LiteOCR raises a
+**Multi-page PDFs.** Synchronous Textract accepts PDF and TIFF at **one page only**. PuffinParse raises a
 `bad_request` before the call:
 
 > textract: synchronous operations accept single-page PDF/TIFF only (this document has 2 pages).
@@ -313,7 +313,7 @@ rate-limit headers**, so backoff is blind. Default us-east-1 quotas worth knowin
 Service Quotas, and lower in most other regions): synchronous `AnalyzeDocument` 10 TPS,
 `DetectDocumentText` 25 TPS; `StartDocumentAnalysis` 10 TPS, `StartDocumentTextDetection` 15 TPS;
 `GetDocumentAnalysis` 10 TPS, `GetDocumentTextDetection` 25 TPS; at most 600 asynchronous jobs
-existing simultaneously per account (exceeding that is `LimitExceededException`, which LiteOCR
+existing simultaneously per account (exceeding that is `LimitExceededException`, which PuffinParse
 retries).
 
 **Timeouts.** `timeout_secs` (default 300) is the whole-call deadline — download, signing, the call,
@@ -322,11 +322,11 @@ budget is spent.
 
 ## 6. Gotchas (verified)
 
-* **The "API key" is a key pair.** `api_key` on a LiteOCR request can only stand in for
+* **The "API key" is a key pair.** `api_key` on a PuffinParse request can only stand in for
   `AWS_ACCESS_KEY_ID`; `AWS_SECRET_ACCESS_KEY` must be in the environment, otherwise the request is
   refused with an `authentication` error that says so. Set `AWS_SESSION_TOKEN` as well for STS /
   assumed-role credentials — it is signed as `x-amz-security-token` and included in `SignedHeaders`.
-  LiteOCR reads **only** those environment variables: it does not parse `~/.aws/credentials`, does not
+  PuffinParse reads **only** those environment variables: it does not parse `~/.aws/credentials`, does not
   honour `AWS_PROFILE`, and does not call IMDS or the ECS credential endpoint.
 * **The region is part of the signature, not just the URL.** Signing with the wrong region gives a
   400 that talks about the *credential scope*, not about the host. If you override `base_url` to a
@@ -341,7 +341,7 @@ budget is spent.
   `textract_*.json` fixture is assembled from the shapes in the AWS API reference, with confidences,
   ids and boxes filled in to be realistic. **Re-capture them from a real account before trusting the
   numbers**, and run the `#[ignore]`d live tests at the bottom of `textract.rs`.
-* **Confidence is 0–100, not 0–1.** Every `Confidence` is a percentage; LiteOCR divides by 100.
+* **Confidence is 0–100, not 0–1.** Every `Confidence` is a percentage; PuffinParse divides by 100.
   The `QUERY_RESULT` sample in the AWS docs shows `"Confidence": 1.0`, which is 1 %, not certainty.
 * **Boxes are already normalised.** Unlike most providers, `BoundingBox` is 0–1 relative to the page,
   so no page dimensions are needed — which is just as well, because Textract never reports them and
@@ -359,7 +359,7 @@ budget is spent.
   those `LAYOUT_TEXT` blocks appear twice in `Blocks` (once nested, once at the top level). Naive
   iteration duplicates every list item.
 * **`MERGED_CELL` duplicates content.** A merged cell's `CHILD` ids are the individual `CELL`s, which
-  are *also* children of the `TABLE`. Rendering both repeats the text; LiteOCR renders only the plain
+  are *also* children of the `TABLE`. Rendering both repeats the text; PuffinParse renders only the plain
   cells, so a row/column span shows its text in the first cell and blanks beside it.
 * **Queries are English-only** and capped at 15 per page synchronously / 30 asynchronously. Answers
   are capped at 128 characters. A query aimed at a page that does not exist comes back as an
@@ -371,37 +371,37 @@ budget is spent.
   worked and lists the failures in `Warnings` — check `metadata.textract_warnings` before trusting
   the page count.
 * **No `provider_job_id` for sync calls.** Textract returns the request id only in the
-  `x-amzn-RequestId` response header, which LiteOCR does not surface today.
+  `x-amzn-RequestId` response header, which PuffinParse does not surface today.
 * **Pagination is per 1 000 blocks, not per page.** A dense 50-page document can need dozens of
   `Get*` round trips; they all come out of `timeout_secs`.
 
 ## 7. Useful `provider_options` passthrough
 
 ```python
-# 1. Multi-page PDF: upload to S3 yourself, then let LiteOCR drive Start*/Get* + NextToken.
-liteocr.parse("ignored-when-s3.pdf", model="textract/layout",
+# 1. Multi-page PDF: upload to S3 yourself, then let PuffinParse drive Start*/Get* + NextToken.
+puffinparse.parse("ignored-when-s3.pdf", model="textract/layout",
               provider_options={"s3_object": {"bucket": "my-bucket", "name": "reports/q3.pdf"}},
               timeout=1200)
 
 # 2. Cheapest layout: drop TABLES to bill at the LAYOUT rate ($4 vs $15 per 1k pages).
 #    Tables then come back as plain lines instead of markdown grids.
-liteocr.parse("memo.png", model="textract/layout",
+puffinparse.parse("memo.png", model="textract/layout",
               provider_options={"FeatureTypes": ["LAYOUT"]})
 
 # 3. A different region (also changes the signing scope, not just the host).
-liteocr.ocr("scan.png", model="textract/detect-text", provider_options={"region": "eu-west-1"})
+puffinparse.ocr("scan.png", model="textract/detect-text", provider_options={"region": "eu-west-1"})
 
-# 4. Signatures alongside layout, and the raw Block array for anything LiteOCR does not map.
-liteocr.parse("contract.png", model="textract/layout", include_raw=True,
+# 4. Signatures alongside layout, and the raw Block array for anything PuffinParse does not map.
+puffinparse.parse("contract.png", model="textract/layout", include_raw=True,
               provider_options={"FeatureTypes": ["LAYOUT", "TABLES", "SIGNATURES"]})
 
 # 5. A trained Custom Queries adapter (adapters are Queries-only).
-liteocr.extract("claim.png", model="textract/queries", schema=schema,
+puffinparse.extract("claim.png", model="textract/queries", schema=schema,
                 provider_options={"AdaptersConfig": {"Adapters": [
                     {"AdapterId": "abc123", "Version": "1"}]}})
 
 # 6. Async with your own output bucket, KMS key and an idempotency token.
-liteocr.parse("big.pdf", model="textract/layout", timeout=1800,
+puffinparse.parse("big.pdf", model="textract/layout", timeout=1800,
               provider_options={"s3_object": {"bucket": "in", "name": "big.pdf"},
                                 "OutputConfig": {"S3Bucket": "out", "S3Prefix": "textract/"},
                                 "KMSKeyId": "alias/textract",

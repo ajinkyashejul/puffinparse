@@ -1,7 +1,7 @@
 # dpbench
 
 A curated subset of **[DP-Bench](https://huggingface.co/datasets/upstage/dp-bench)** (Upstage),
-converted into LiteOCR `kind: "transcript"` documents by
+converted into PuffinParse `kind: "transcript"` documents by
 [`benchmark/adapters/dpbench.py`](../../adapters/dpbench.py).
 
 - Upstream data and evaluation code: `upstage/dp-bench`, pinned to commit
@@ -82,7 +82,7 @@ subset cannot be balanced or tagged by Library of Congress / OER / Upstage.
 
 - **Not comparable to DP-Bench's published leaderboard.** Upstream NID joins element text after
   *removing* newlines and uses `rapidfuzz.fuzz.ratio` on text only; its TEDS works on the full
-  HTML tree. LiteOCR scores a normalised markdown transcript, tables included, and `teds_grid`
+  HTML tree. PuffinParse scores a normalised markdown transcript, tables included, and `teds_grid`
   on the flattened grid.
 - **Chart and figure text counts against a parser here.** Upstream drops prediction elements that
   fall inside a ground-truth figure/chart region (`--filter-by-gt-area`), so transcribing axis

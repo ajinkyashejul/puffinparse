@@ -22,7 +22,7 @@ def _format_stat(value: Any) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m benchmark.adapters",
-        description="Convert a public OCR benchmark into a LiteOCR dataset manifest.",
+        description="Convert a public OCR benchmark into a PuffinParse dataset manifest.",
     )
     parser.add_argument("adapter", nargs="?", help=f"one of: {', '.join(sorted(registry))}")
     parser.add_argument("--list", action="store_true", help="list the registered adapters and exit")

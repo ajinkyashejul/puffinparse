@@ -1,4 +1,4 @@
-"""OmniDocBench adapter — OpenDataLab's page-level parsing benchmark → LiteOCR transcripts.
+"""OmniDocBench adapter — OpenDataLab's page-level parsing benchmark → PuffinParse transcripts.
 
 Upstream: https://huggingface.co/datasets/opendatalab/OmniDocBench (evaluation code at
 https://github.com/opendatalab/OmniDocBench, Apache-2.0; paper arXiv:2412.07626).
@@ -65,7 +65,7 @@ ATTRIBUTION = (
     "OmniDocBench (OpenDataLab / Shanghai AI Laboratory) — Ouyang et al., 'OmniDocBench: "
     "Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations', "
     "arXiv:2412.07626 · dataset https://huggingface.co/datasets/opendatalab/OmniDocBench · "
-    "research use only, not for commercial use; not redistributed by LiteOCR."
+    "research use only, not for commercial use; not redistributed by PuffinParse."
 )
 
 JSON_FILE = "OmniDocBench.json"

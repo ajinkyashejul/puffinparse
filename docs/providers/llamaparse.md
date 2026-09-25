@@ -8,16 +8,16 @@
 | Base URL | `https://api.cloud.llamaindex.ai` (override: `base_url` on the request, or `LLAMA_BASE_URL`). EU region: `https://api.cloud.eu.llamaindex.ai` |
 | API key | `LLAMA_API_KEY` (or `api_key` on the request) — sent as `Authorization: Bearer llx-…` |
 | Docs | <https://developers.llamaindex.ai/llamaparse> (the old `docs.cloud.llamaindex.ai` host 308-redirects here) |
-| API version | Path-versioned: LiteOCR uses `/api/v1/parsing/*`. Quality is selected by `tier` + a dated `version` (LiteOCR sends `version=latest`) |
+| API version | Path-versioned: PuffinParse uses `/api/v1/parsing/*`. Quality is selected by `tier` + a dated `version` (PuffinParse sends `version=latest`) |
 | Verified | 2026-09-11, live against the North America host |
-| Implementation | `crates/liteocr-core/src/providers/llamaparse.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/llamaparse.rs` |
 
 A key is bound to one region; using the wrong host returns `401 "Invalid API Key. Please check your
 region …"`. The OpenAPI spec is at `/api/openapi.json` (not `/openapi.json`); Swagger UI at `/docs`.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
-| Model | Provider parameters LiteOCR sets | List price (`pricing.json`) |
+| Model | Provider parameters PuffinParse sets | List price (`pricing.json`) |
 |---|---|---|
 | `llamaparse/fast` | `tier=fast`, `version=latest` | $0.00125 / page (1 credit) |
 | `llamaparse/cost_effective` *(default)* | `tier=cost_effective`, `version=latest` | $0.00375 / page (3 credits) |
@@ -35,13 +35,13 @@ parse-only tier. Extract prices are per page, on top of the parse the extraction
 
 1 000 credits = $1.25 ⇒ 1 credit = $0.00125. Prices come from
 <https://developers.llamaindex.ai/llamaparse/general/pricing/> and drive `OcrResponse.cost_usd`;
-add-ons LiteOCR does not model include `extract_layout` (+3 credits/page) and enriched forms
+add-ons PuffinParse does not model include `extract_layout` (+3 credits/page) and enriched forms
 (+10 credits per form page). The live per-tier version list is `GET /api/v2/parse/versions`.
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 1. **Upload / create job — one call.** `POST {base}/api/v1/parsing/upload`, `multipart/form-data`, with
-   `Authorization: Bearer …` and `accept: application/json`. The parts LiteOCR sends are:
+   `Authorization: Bearer …` and `accept: application/json`. The parts PuffinParse sends are:
 
    | Part | Value |
    |---|---|
@@ -57,14 +57,14 @@ add-ons LiteOCR does not model include `extract_layout` (+3 credits/page) and en
    5 s. Terminal statuses: `SUCCESS`, `PARTIAL_SUCCESS`, `ERROR`, `CANCELLED` (`PENDING` keeps polling).
    Both `SUCCESS` and `PARTIAL_SUCCESS` proceed to the result fetch.
 3. **Result.** `GET {base}/api/v1/parsing/job/{job_id}/result/json` → `{"pages":[…],"job_metadata":{…}}`.
-   LiteOCR always uses the JSON result (it carries per-page `md`, `text`, `items[]` and bboxes);
+   PuffinParse always uses the JSON result (it carries per-page `md`, `text`, `items[]` and bboxes);
    `/result/markdown`, `/result/text` and the undocumented `/result/raw/markdown` are not used.
 
 **Where `provider_options` are merged:** LlamaParse has no JSON body — everything is a multipart form
 field — so `form_fields()` flattens `provider_options` (which must be a JSON object) into additional
 text parts. Strings pass through; booleans become `"true"`/`"false"`; numbers are stringified; `null`
 values are skipped; objects/arrays are serialised as JSON text. A key already present (e.g. `version`,
-`tier`, `language`, `target_pages`) is **replaced**, so provider options override LiteOCR's defaults.
+`tier`, `language`, `target_pages`) is **replaced**, so provider options override PuffinParse's defaults.
 
 ### Jobs API and webhooks (`submit_parse` / `retrieve_parse`, SPEC §15)
 
@@ -80,7 +80,7 @@ values are skipped; objects/arrays are serialised as JSON text. A key already pr
     "images"}`: this **is** the result (normalised through the `result/json` mapping, no geometry
     unless `items` are present) → `Succeeded`, but it carries no job id;
   * a LlamaCloud *event* (sent for jobs created with `webhook_configurations`, a v2 feature; that
-    LiteOCR's v1 upload accepts it through `provider_options` is **not verified**),
+    PuffinParse's v1 upload accepts it through `provider_options` is **not verified**),
     `{"event_id", "event_type": "parse.success", "timestamp", "data": {"job_id"}}`:
     `parse.pending` → `Pending`; `parse.success` / `partial_success` / `error` / `cancelled` →
     `Finished` (retrieve for the result or the error message). Events for other products
@@ -90,7 +90,7 @@ values are skipped; objects/arrays are serialised as JSON text. A key already pr
 
 ## 4. Response mapping (`parse` / `ocr`)
 
-| LlamaParse field | LiteOCR unified field | Notes |
+| LlamaParse field | PuffinParse unified field | Notes |
 |---|---|---|
 | upload/poll `id` | `OcrResponse.provider_job_id` | |
 | `pages[].page` | `Page.page_number` | Already 1-based. |
@@ -113,7 +113,7 @@ Item types: `heading` → `title` when `lvl == 1`, otherwise `section_header`; `
 `table` → `table`; `list`/`list_item` → `list`; `figure`/`image`/`chart` → `figure`;
 `formula`/`equation` → `formula`; `header` → `header`; `footer` → `footer`; everything else → `other`.
 
-Trimmed real response (`crates/liteocr-core/tests/fixtures/llamaparse_result_json.json`; two pages,
+Trimmed real response (`crates/puffinparse-core/tests/fixtures/llamaparse_result_json.json`; two pages,
 `images`/`layout`/`charts` and most page keys elided):
 
 ```json
@@ -121,10 +121,10 @@ Trimmed real response (`crates/liteocr-core/tests/fixtures/llamaparse_result_jso
   "pages": [
     {
       "page": 1,
-      "text": "Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78",
-      "md": "# Hello LiteOCR\n\nInvoice #1234\n\nTotal: $56.78",
+      "text": "Hello PuffinParse\n\nInvoice #1234\nTotal: $56.78",
+      "md": "# Hello PuffinParse\n\nInvoice #1234\n\nTotal: $56.78",
       "items": [
-        { "type": "heading", "md": "# Hello LiteOCR", "value": "Hello LiteOCR", "lvl": 1,
+        { "type": "heading", "md": "# Hello PuffinParse", "value": "Hello PuffinParse", "lvl": 1,
           "bBox": { "x": 60.178, "y": 56.553, "w": 308.672, "h": 40.835,
                     "confidence": 0.84, "label": "doc_title" },
           "layoutAwareBbox": [ { "x": 60.178, "y": 56.553, "w": 308.672, "h": 40.835,
@@ -169,13 +169,13 @@ Trimmed real response (`crates/liteocr-core/tests/fixtures/llamaparse_result_jso
 
 ## 5. Extract mode (`extract`) — LlamaExtract
 
-Extraction is a different API surface from parsing: LiteOCR uses LlamaCloud's **v2 extract** endpoints,
+Extraction is a different API surface from parsing: PuffinParse uses LlamaCloud's **v2 extract** endpoints,
 not the v1 extraction-agent ones, so no agent has to be created and the schema travels with the
-request. Implementation: `LlamaParse::extract` in `crates/liteocr-core/src/providers/llamaparse.rs`.
+request. Implementation: `LlamaParse::extract` in `crates/puffinparse-core/src/providers/llamaparse.rs`.
 
 1. **Upload.** `POST {base}/api/v1/beta/files`, `multipart/form-data` with parts `file` and
    `purpose=extract` → `201` `{"id": "<uuid>", "name": …, "expires_at": …}` (files expire after 48 h).
-   Unlike the parse path there is **no URL input**: an `https://…` document is downloaded by LiteOCR
+   Unlike the parse path there is **no URL input**: an `https://…` document is downloaded by PuffinParse
    and re-uploaded.
 2. **Create.** `POST {base}/api/v2/extract`:
 
@@ -208,11 +208,11 @@ Mapping of the unified request:
 * `pages` → `configuration.target_pages`, which is **1-based** here — the opposite of the 0-based
   `target_pages` form field on the parsing endpoint;
 * `provider_options` are merged into `configuration` key-by-key (`use_reasoning`, `extraction_target`,
-  `parse_tier`, `disable_cache`, `max_pages`, `spreadsheet_mode`, …), and win over LiteOCR's defaults.
+  `parse_tier`, `disable_cache`, `max_pages`, `spreadsheet_mode`, …), and win over PuffinParse's defaults.
 
 ### Response mapping
 
-| LlamaCloud field | LiteOCR unified field | Notes |
+| LlamaCloud field | PuffinParse unified field | Notes |
 |---|---|---|
 | `extract_result` | `ExtractResponse.data` | The schema shape; no wrapper to strip. |
 | `extract_metadata.field_metadata.document_metadata` | `ExtractResponse.fields` | A **parallel tree** mirroring the data: objects keyed by field, arrays as lists indexed by position, and `{citation, confidence, extraction_confidence, parsing_confidence}` entries at the leaves. Walked into RFC 6901 pointers (`/sites/0/samples`). |
@@ -225,13 +225,13 @@ Mapping of the unified request:
 | `extract_metadata.parse_job_id` / `parse_tier` | `metadata.llamaparse_parse_job_id` / `llamaparse_parse_tier` | The parse defaults to the extract tier. |
 | `id` | `ExtractResponse.provider_job_id` | `ext-…` |
 
-**Page count is derived.** LlamaExtract reports no page count anywhere in the job. LiteOCR uses the
+**Page count is derived.** LlamaExtract reports no page count anywhere in the job. PuffinParse uses the
 highest page number seen in the citations; with citations off it divides `usage.extract_credits` by the
 tier's published per-page rate (5 / 15 / 50 credits for cost_effective / agentic / agentic_plus, 35 for
 turbo); failing both it reports 1. So `usage.pages` — and therefore `cost_usd` — is a best-effort
 figure, exact when citations are on and every page contributes a cited field.
 
-Trimmed real response (`crates/liteocr-core/tests/fixtures/llamaparse_extract_job.json`, a 2-page PDF):
+Trimmed real response (`crates/puffinparse-core/tests/fixtures/llamaparse_extract_job.json`, a 2-page PDF):
 
 ```json
 {
@@ -274,10 +274,10 @@ with `usage.credits = 8` (5 extract + 3 parse) and every field cited on page 1; 
   produced".
 * **`target_pages` flips base** between the two APIs: 0-based on `/api/v1/parsing/upload`, 1-based on
   the v2 extract configuration.
-* **No URL input and no page count** — both are handled by LiteOCR (download + re-upload, derived
+* **No URL input and no page count** — both are handled by PuffinParse (download + re-upload, derived
   pages).
 * **`fast` is not an extract tier**; `turbo` exists on the API (35 credits/page, text-only citations)
-  but is not registered as a LiteOCR model, so `llamaparse/turbo` resolves to an unsupported-model
+  but is not registered as a PuffinParse model, so `llamaparse/turbo` resolves to an unsupported-model
   error even though the provider code accepts the tier.
 * **Results are cached**: an identical file + configuration returns in a couple of seconds and may not
   be billed again. Pass `provider_options={"disable_cache": true}` for benchmarking.
@@ -291,7 +291,7 @@ with `usage.credits = 8` (5 extract + 3 parse) and every field cited on page 1; 
 Every error is FastAPI-shaped: either `{"detail": "message"}` or, on 422, `{"detail": [ValidationError…]}`.
 `Error::from_http` picks up `detail` (stringifying the array form) and classifies by status:
 
-| Status | Trigger | LiteOCR `ErrorKind` |
+| Status | Trigger | PuffinParse `ErrorKind` |
 |---|---|---|
 | 400 | `tier` without `version`; no input source; malformed job id | `bad_request` |
 | 401 | bad key (wrong region), or no `Authorization` header (`"Not authenticated"`) | `authentication` |
@@ -318,23 +318,23 @@ image on `cost_effective` finished in ~4.3 s in testing.
 ## 7. Gotchas (verified)
 
 * **`tier` requires `version`.** Sending a tier alone is `400 "Must specify a version with a tier.
-  Tier: cost_effective"`. LiteOCR always sends `version=latest`; pin a dated version through
+  Tier: cost_effective"`. PuffinParse always sends `version=latest`; pin a dated version through
   `provider_options` when you need reproducibility.
 * **`tier` is not validated at upload.** An unknown tier returns `200 PENDING` and only fails later with
-  `status: "ERROR"`, `error_code: "INVALID_TIER_VERSION_COMBINATION"`. LiteOCR validates the tier
+  `status: "ERROR"`, `error_code: "INVALID_TIER_VERSION_COMBINATION"`. PuffinParse validates the tier
   client-side, but a tier overridden via `provider_options` bypasses that check.
 * **`PARTIAL_SUCCESS` is a real terminal status** (some pages failed within `page_error_tolerance`) and
-  **results are retrievable**. LiteOCR treats it as success and flags
+  **results are retrievable**. PuffinParse treats it as success and flags
   `metadata.llamaparse_partial_success = true`.
 * **Credits are 0 until billing settles.** `credits_used` and `job_credits_usage` were `0` on every
   observed job — including `agentic` on 2 pages with `job_is_cache_hit: false` — because usage is
-  recorded asynchronously. LiteOCR therefore drops non-positive values and leaves `Usage.credits` as
+  recorded asynchronously. PuffinParse therefore drops non-positive values and leaves `Usage.credits` as
   `None`; `cost_usd` comes from the price table instead. For real billing numbers use
   `GET /api/v1/beta/usage-metrics`.
 * **Re-parsing the same file within 48 hours is a free cache hit**, which makes latency and cost
-  benchmarks meaningless. `liteocr bench` therefore injects
+  benchmarks meaningless. `puffinparse bench` therefore injects
   `{"do_not_cache": true, "invalidate_cache": true}` for every `llamaparse/*` model
-  (`crates/liteocr-cli/src/bench.rs::cache_busting_options`) unless caching is explicitly allowed.
+  (`crates/puffinparse-cli/src/bench.rs::cache_busting_options`) unless caching is explicitly allowed.
   `metadata.llamaparse_cache_hit` surfaces a hit when it happens.
 * **The docs moved** from `docs.cloud.llamaindex.ai` to `developers.llamaindex.ai` (308), and most old
   deep links 404. The OpenAPI spec is at `/api/openapi.json`.
@@ -343,11 +343,11 @@ image on `cost_effective` finished in ~4.3 s in testing.
 * **`error_code` / `error_message` are omitted (not null)** on `GET /job/{id}` for successful jobs, but
   present-and-null on the upload response.
 * **Three coordinate spaces in one response**: `items[].bBox` and `images[]` are in page units
-  (`pages[].width/height` — LiteOCR normalises against these), `pages[].layout[].bbox` is already
+  (`pages[].width/height` — PuffinParse normalises against these), `pages[].layout[].bbox` is already
   normalised 0–1, and `images[].ocr[]` is in that image's own `original_width`×`original_height` pixels.
 * **Mixed casing.** `bBox`, `layoutAwareBbox`, `isPerfectTable`, `noTextContent`, `originalOrientationAngle`
   are camelCase while `job_metadata`, `original_width` are snake_case — no blanket rename rule works.
-* **`target_pages` is 0-based** while LiteOCR's `pages` is 1-based; the conversion happens in
+* **`target_pages` is 0-based** while PuffinParse's `pages` is 1-based; the conversion happens in
   `form_fields()`. The document-level markdown is exactly `page_separator.join(pages[].md)` with a
   default separator of `"\n\n---\n\n"`.
 * **The `fast` tier degrades tables noticeably** (misaligned columns on a table `agentic` got right).
@@ -358,25 +358,25 @@ image on `cost_effective` finished in ~4.3 s in testing.
 
 ```python
 # 1. Pin a dated parser version instead of `latest` (reproducible output).
-liteocr.ocr("doc.pdf", model="llamaparse/cost_effective",
+puffinparse.ocr("doc.pdf", model="llamaparse/cost_effective",
             provider_options={"version": "2026-08-19"})
 
 # 2. Defeat the 48-hour result cache (what the benchmark does).
-liteocr.ocr("doc.pdf", model="llamaparse/agentic",
+puffinparse.ocr("doc.pdf", model="llamaparse/agentic",
             provider_options={"do_not_cache": True, "invalidate_cache": True})
 
 # 3. Layout blocks and a full-page screenshot in the raw payload (+3 credits/page for layout).
-liteocr.ocr("scan.png", model="llamaparse/agentic", include_raw=True,
+puffinparse.ocr("scan.png", model="llamaparse/agentic", include_raw=True,
             provider_options={"extract_layout": True, "take_screenshot": True})
 
 # 4. Prompt steering and table tuning.
-liteocr.ocr("statement.pdf", model="llamaparse/agentic_plus",
+puffinparse.ocr("statement.pdf", model="llamaparse/agentic_plus",
             provider_options={"parsing_instruction": "Preserve every table column.",
                               "merge_tables_across_pages_in_markdown": True,
                               "output_tables_as_HTML": True})
 
 # 5. Skip OCR on a digital-native PDF, hide running headers/footers, tolerate bad pages.
-liteocr.ocr("contract.pdf", model="llamaparse/fast",
+puffinparse.ocr("contract.pdf", model="llamaparse/fast",
             provider_options={"disable_ocr": True, "hide_headers": True, "hide_footers": True,
                               "page_error_tolerance": 0.1, "replace_failed_page_mode": "raw_text"})
 ```

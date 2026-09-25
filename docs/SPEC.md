@@ -1,4 +1,4 @@
-# LiteOCR Specification
+# PuffinParse Specification
 
 > **One API for every OCR / document-parsing provider.** Rust core, Python SDK, CLI,
 > and an open benchmark that ranks providers on accuracy, latency and cost.
@@ -11,11 +11,11 @@ Status: `v0.1` — providers: **Reducto**, **Extend**, **LlamaParse**.
 
 ### Goals
 
-1. **Single call, any provider.** `liteocr.parse("invoice.pdf", model="reducto/standard")`
+1. **Single call, any provider.** `puffinparse.parse("invoice.pdf", model="reducto/standard")`
    returns the same `ParseResponse` shape whether the backend is Reducto, Extend,
    LlamaParse, or anything added later. Switching provider is a one-string change,
    within a mode (§3.1).
-2. **Fast and lite.** The core is a Rust library (`liteocr-core`) with a small
+2. **Fast and lite.** The core is a Rust library (`puffinparse-core`) with a small
    dependency set. Python only wraps it (PyO3). No provider SDKs are vendored;
    every provider is talked to over plain HTTPS with `reqwest`.
 3. **Cost tracking.** Every response carries `usage` (pages, provider credits)
@@ -29,7 +29,7 @@ Status: `v0.1` — providers: **Reducto**, **Extend**, **LlamaParse**.
 
 ### Non-goals (v0.1)
 
-- A hosted service. (A self-hosted gateway now exists: `liteocr serve`, §14.)
+- A hosted service. (A self-hosted gateway now exists: `puffinparse serve`, §14.)
 - Bundling or running OCR models in-process. Local and self-hosted engines are supported only
   as providers that call *out* to them — the `tesseract` binary via `tokio::process`, a
   docling-serve or PaddleOCR serving endpoint over HTTP (§8.4) — never through C bindings or an
@@ -45,13 +45,13 @@ Status: `v0.1` — providers: **Reducto**, **Extend**, **LlamaParse**.
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Python SDK (python/liteocr)         CLI (crates/liteocr-cli)      │
-│  parse / ocr / extract (+ a*)        liteocr parse | ocr | extract │
-│  Router(models, mode=...)            liteocr providers | bench     │
+│  Python SDK (python/puffinparse)         CLI (crates/puffinparse-cli)      │
+│  parse / ocr / extract (+ a*)        puffinparse parse | ocr | extract │
+│  Router(models, mode=...)            puffinparse providers | bench     │
 └───────────────┬────────────────────────────────┬───────────────────┘
-                │ PyO3 (crates/liteocr-python)   │
+                │ PyO3 (crates/puffinparse-python)   │
 ┌───────────────▼────────────────────────────────▼───────────────────┐
-│  liteocr-core (Rust)                                               │
+│  puffinparse-core (Rust)                                               │
 │  ├─ modes        parse → Parse / ocr → Text / extract → Extract     │
 │  ├─ types        DocumentRequest / ParseResponse / TextResponse /   │
 │  │               ExtractResponse / Page / Block / Line / Word       │
@@ -67,11 +67,11 @@ Crates:
 
 | Crate | Purpose |
 |---|---|
-| `crates/liteocr-core` | Library. All provider logic, types, router, pricing, benchmark metrics. `#![forbid(unsafe_code)]`. |
-| `crates/liteocr-cli` | `liteocr` binary: `parse`, `ocr`, `extract`, `providers`, `bench run`, `bench report`. |
-| `crates/liteocr-python` | PyO3 extension module `liteocr._core`, built with maturin. |
-| `crates/liteocr-server` | HTTP gateway behind `liteocr serve` (axum): aliases, virtual keys, budgets, metrics. §14, `docs/SERVER.md`. |
-| `python/liteocr` | Pure-Python public API, dataclasses, callbacks, typing. |
+| `crates/puffinparse-core` | Library. All provider logic, types, router, pricing, benchmark metrics. `#![forbid(unsafe_code)]`. |
+| `crates/puffinparse-cli` | `puffinparse` binary: `parse`, `ocr`, `extract`, `providers`, `bench run`, `bench report`. |
+| `crates/puffinparse-python` | PyO3 extension module `puffinparse._core`, built with maturin. |
+| `crates/puffinparse-server` | HTTP gateway behind `puffinparse serve` (axum): aliases, virtual keys, budgets, metrics. §14, `docs/SERVER.md`. |
+| `python/puffinparse` | Pure-Python public API, dataclasses, callbacks, typing. |
 | `benchmark/` | Datasets, manifests, ground truth, results, leaderboard generator. |
 
 ---
@@ -80,15 +80,15 @@ Crates:
 
 ### 3.1 Modes
 
-Document-AI vendors sell three different products, and they are not interchangeable. LiteOCR
+Document-AI vendors sell three different products, and they are not interchangeable. PuffinParse
 makes that explicit: every call names a **mode**, and the mode decides both which providers can
 serve it and what comes back.
 
 | Mode | Entry point | Response | What it is for |
 |---|---|---|---|
-| `parse` | `liteocr.parse` / `liteocr_core::parse` | `ParseResponse` (§5.1) | layout-aware markdown + typed blocks: RAG chunks, tables, structure |
-| `ocr` | `liteocr.ocr` / `liteocr_core::ocr` | `TextResponse` (§5.2) | plain text with line/word boxes: search, redaction, overlays |
-| `extract` | `liteocr.extract` / `liteocr_core::extract` | `ExtractResponse` (§5.3) | a JSON object shaped by a schema, with per-field citations |
+| `parse` | `puffinparse.parse` / `puffinparse_core::parse` | `ParseResponse` (§5.1) | layout-aware markdown + typed blocks: RAG chunks, tables, structure |
+| `ocr` | `puffinparse.ocr` / `puffinparse_core::ocr` | `TextResponse` (§5.2) | plain text with line/word boxes: search, redaction, overlays |
+| `extract` | `puffinparse.extract` / `puffinparse_core::extract` | `ExtractResponse` (§5.3) | a JSON object shaped by a schema, with per-field citations |
 
 **Providers are swappable only within a mode.** A one-string provider switch is only honest
 between models that do the same job: a markdown parse and a schema extraction are not
@@ -99,12 +99,12 @@ before any network call, with a message naming the mode and the models that do s
 
 `Mode` is a Rust enum (`Mode::{Parse, Ocr, Extract}`) with `FromStr` (`"ocr"`/`"text"`,
 `"extract"`/`"extraction"`, case-insensitive), `as_str`, and `Mode::ALL`. In Python it is the
-string literal type `liteocr.Mode = Literal["parse", "ocr", "extract"]`. `list_models(mode)`
+string literal type `puffinparse.Mode = Literal["parse", "ocr", "extract"]`. `list_models(mode)`
 (`list_models_for` in Rust) lists the models for one mode; with no mode it lists all of them.
 
 A provider that has no native OCR endpoint serves `ocr` from its own parse output (the default
 `Provider::ocr` implementation): lines come from block text, words from lines, and the response
-is tagged `metadata["liteocr_derived_from"] = "parse"` so callers can tell native OCR geometry
+is tagged `metadata["puffinparse_derived_from"] = "parse"` so callers can tell native OCR geometry
 from derived geometry. Nothing is derived across any other mode pair.
 
 ### 3.2 Model naming
@@ -140,7 +140,7 @@ verbatim. This is the escape hatch; it never changes the response shape.
 Every mode takes the same document request; `parse` and `ocr` take nothing else.
 
 ```python
-liteocr.parse(
+puffinparse.parse(
     input,                       # str path | pathlib.Path | bytes | "https://..." URL
     model: str = "reducto",      # "<provider>/<model>", must support this mode
     *,
@@ -168,7 +168,7 @@ request is *submitted* as a job (§15; Python `submit(..., webhook_url=...)`); `
 ### 4.2 `ocr`
 
 ```python
-liteocr.ocr(input, model="reducto", *, ...same keywords, minus `output`...) -> TextResponse
+puffinparse.ocr(input, model="reducto", *, ...same keywords, minus `output`...) -> TextResponse
 ```
 
 `ocr` always returns plain text, so `output` does not apply; `aocr(...)` is the async form.
@@ -176,7 +176,7 @@ liteocr.ocr(input, model="reducto", *, ...same keywords, minus `output`...) -> T
 ### 4.3 `extract`
 
 ```python
-liteocr.extract(
+puffinparse.extract(
     input,
     schema: dict,                # JSON Schema (draft 2020-12 subset) object for the result
     *,
@@ -200,7 +200,7 @@ Input handling (`DocumentInput`) is identical in all three modes:
 - **URL** (`http(s)://`) → passed to the provider as a remote URL when the
   provider supports it (all three do); otherwise downloaded and uploaded.
 
-Supported document types are whatever the provider accepts; LiteOCR does not
+Supported document types are whatever the provider accepts; PuffinParse does not
 pre-validate beyond a non-empty body.
 
 ---
@@ -216,7 +216,7 @@ differ only in the payload.
 ```python
 @dataclass
 class ParseResponse:
-    id: str                    # liteocr-generated uuid
+    id: str                    # puffinparse-generated uuid
     provider: str              # "reducto"
     model: str                 # "reducto/standard"
     provider_job_id: str | None
@@ -281,7 +281,7 @@ class TextResponse:
     cost_usd: float | None
     latency_ms: int
     created_at: str
-    metadata: dict             # "liteocr_derived_from": "parse" when derived (§3.1)
+    metadata: dict             # "puffinparse_derived_from": "parse" when derived (§3.1)
     raw: Any | None
 
 @dataclass
@@ -341,7 +341,7 @@ and `.citations(p)` are Python conveniences over the pointer map.
 
 ## 6. Errors
 
-All errors derive from `liteocr.LiteOCRError`:
+All errors derive from `puffinparse.PuffinParseError`:
 
 | Error | When |
 |---|---|
@@ -365,7 +365,7 @@ asked for.
 ## 7. Router
 
 ```python
-router = liteocr.Router(
+router = puffinparse.Router(
     models=["reducto/standard", "llamaparse/agentic", "extend/parse_light"],
     mode="parse",                # "parse" (default) | "ocr" | "extract"
     strategy="ordered",          # "ordered" (fallback order) | "round_robin"
@@ -385,15 +385,15 @@ Semantics: `ordered` → try `models[0]`, on a fallback-eligible error move on.
 `round_robin` → rotate the starting index per call, then fallback in order.
 The router records per-model success/failure counts and average latency,
 exposed as `router.stats()`. Auth/BadRequest/Input errors never trigger fallback.
-When a fallback served the call, the response metadata carries `liteocr_fallback_index` and
-`liteocr_fallback_from_error`.
+When a fallback served the call, the response metadata carries `puffinparse_fallback_index` and
+`puffinparse_fallback_from_error`.
 
 ---
 
 ## 8. Provider mapping
 
 All three mappings below were verified against live API responses on 2026-09-11;
-the captured payloads live in `crates/liteocr-core/tests/fixtures/` and drive unit tests.
+the captured payloads live in `crates/puffinparse-core/tests/fixtures/` and drive unit tests.
 
 ### 8.1 Reducto
 
@@ -426,7 +426,7 @@ the captured payloads live in `crates/liteocr-core/tests/fixtures/` and drive un
   `provider_options.workspace_id` sets `x-extend-workspace-id` for org-scoped keys.
 - Flow: `POST /files/upload` (multipart) → `{id: "file_…"}`; URLs are passed as
   `file:{url,name}`. Then `POST /parse_runs` (async) → poll `GET /parse_runs/{id}` until
-  `status ∈ {PROCESSED, FAILED}`. (The sync `POST /parse` has a 5-minute hard limit, so LiteOCR
+  `status ∈ {PROCESSED, FAILED}`. (The sync `POST /parse` has a 5-minute hard limit, so PuffinParse
   always uses runs.)
 - Body: `{file, config:{target:"markdown", chunkingStrategy:{type:"page"}, engine,
   blockOptions:{tables:{targetFormat:"markdown"}}, advancedOptions:{pageRanges}}}`.
@@ -463,7 +463,7 @@ the captured payloads live in `crates/liteocr-core/tests/fixtures/` and drive un
 
 Listed in `model::SELF_HOSTED`; `ProviderInfo::self_hosted()` is `true`, no API key is required
 (`env_var` is empty, or names an optional key), prices are `0.0` with `source: "self-hosted"`, and
-`liteocr providers` shows `local` in the Key column (`self_hosted` / `key_required` in `--json`
+`puffinparse providers` shows `local` in the Key column (`self_hosted` / `key_required` in `--json`
 and in Python `providers()`).
 
 - `tesseract/default`: `tesseract <image> stdout ... tsv`, PDFs rasterised with `pdftoppm`; `ocr`
@@ -479,15 +479,15 @@ Details, errors and limits: `docs/providers/{tesseract,docling,paddleocr}.md`.
 
 ## 9. Pricing
 
-`crates/liteocr-core/pricing.json` (embedded via `include_str!`) maps
+`crates/puffinparse-core/pricing.json` (embedded via `include_str!`) maps
 `"<provider>/<model>"` → `{ "parse": float, "ocr": float, "extract": float, "source": url,
 "updated": date }` — a per-page price **per mode**, each optional, since vendors price parsing,
 OCR and extraction differently. `cost_usd = usage.pages * price_per_page(model, mode)` unless the
 provider reports credits with a known credit price, in which case `credits * per_credit_usd` is
 used. A mode with no price yields `cost_usd = None`.
 Users can override one mode at a time with
-`liteocr.set_pricing({"reducto/standard": 0.01}, "parse")`, and ask for an estimate with
-`liteocr.estimate_cost("reducto/standard", 1000, "ocr")`.
+`puffinparse.set_pricing({"reducto/standard": 0.01}, "parse")`, and ask for an estimate with
+`puffinparse.estimate_cost("reducto/standard", 1000, "ocr")`.
 Prices are best-effort public list prices; the benchmark reports them as such.
 
 ---
@@ -528,7 +528,7 @@ Categories in the built-in `synthetic-v1` set: `plain`, `invoice`, `table`,
 `receipt`, `complex_table`. The generator (`benchmark/generate_synthetic.py`) is seeded and
 byte-reproducible; the truth is produced from the same source the pixels are rendered from.
 
-### 10.3 Metrics (computed in Rust, `liteocr_core::bench`)
+### 10.3 Metrics (computed in Rust, `puffinparse_core::bench`)
 
 Given predicted `P` and truth `T` after **normalisation** (NFKC, strip markdown syntax and HTML
 tags, decode HTML entities, straighten quotes/dashes, collapse whitespace, lowercase for the
@@ -543,7 +543,7 @@ tags, decode HTML entities, straighten quotes/dashes, collapse whitespace, lower
 - `table_score` (when the truth has a table): char_similarity restricted to table rows. Tables are
   markdown pipe tables **or HTML `<table>`s** (thead/tbody, th/td, `colspan`/`rowspan` repeated
   into every slot they cover, entities decoded), each reduced to rows of normalised cells; a row is
-  its cells joined by a space. `liteocr_core::bench::tables`.
+  its cells joined by a space. `puffinparse_core::bench::tables`.
 - `teds_grid` (when the truth has a table): TEDS (Zhong et al. 2020) computed on the grid tree
   `table > row > cell` — `1 - TED / max(|Tp|, |Tt|)`, Zhang–Shasha tree edit distance, unit
   insert/delete, cell rename = normalised Levenshtein of the contents. It is TEDS without
@@ -565,19 +565,19 @@ similar (`BAG_SENTENCE_MIN_SIMILARITY`); the rule passes when at least `threshol
 (default `BAG_DEFAULT_THRESHOLD = 0.8`). A rule's optional `max_diffs` (olmOCR-bench) allows that
 many Levenshtein edits in `present` / `absent` / `order` / `table_cell` matching.
 
-The scorer is versioned: `liteocr_core::bench::SCORER_VERSION` (currently `2`) is written to every
+The scorer is versioned: `puffinparse_core::bench::SCORER_VERSION` (currently `2`) is written to every
 result as `scorer_version` and bumped whenever a change would move a committed score.
 
 ### 10.4 Runner and outputs
 
 ```
-liteocr bench run --dataset benchmark/datasets/synthetic-v1 \
+puffinparse bench run --dataset benchmark/datasets/synthetic-v1 \
     --models reducto/standard extend/parse_performance llamaparse/agentic \
     --out benchmark/results/<date>-synthetic-v1.json
-liteocr bench report benchmark/results/*.json --format markdown > benchmark/LEADERBOARD.md
+puffinparse bench report benchmark/results/*.json --format markdown > benchmark/LEADERBOARD.md
 ```
 
-Result JSON: `{run_id, created_at, liteocr_version, scorer_version, rescored_at?,
+Result JSON: `{run_id, created_at, puffinparse_version, scorer_version, rescored_at?,
 dataset:{name, version, documents, sha256}, normalize, models:[{model, docs:[{id, category, kind,
 table_only, pages, metrics, headline, latency_ms, cost_usd, error}], summary:{documents, failed,
 headline, char_similarity, cer, wer, word_f1, order_score, table_score, teds_grid, rule_pass_rate,
@@ -589,7 +589,7 @@ Consumers (the viewer in `benchmark/site/`, `bench report`) rank on `summary.hea
 present, else `overall / 100`, and show a document's `headline` when present. Compatibility with
 older files: a file without `scorer_version` is scorer v1; its `summary.headline` is read as
 `overall / 100`, `teds_grid` is absent, and — unlike v2 — its `summary.char_similarity` held the
-headline (table-only documents contributed `table_score`). `liteocr bench rescore <result.json>
+headline (table-only documents contributed `table_score`). `puffinparse bench rescore <result.json>
 --outputs <dir> [--dataset <dir>] [--out <path>]` re-scores a run from its saved per-document
 outputs with the current scorer, without network access: metrics, headlines and summaries are
 recomputed, `kind`/`table_only`/`category` are refreshed from the manifest, latency, cost, pages
@@ -625,7 +625,7 @@ calls made, resumed, failed, total cost, this invocation's cost and wall time.
 
 Document kinds: a manifest document is `kind: "transcript"` (default; `truth` markdown, scored by
 the text metrics) or `kind: "rules"` (a `rules` file of machine-checkable assertions — `present`,
-`absent`, `order`, `table_cell`, `bag_of_sentences` — scored by `liteocr_core::bench::score_rules`,
+`absent`, `order`, `table_cell`, `bag_of_sentences` — scored by `puffinparse_core::bench::score_rules`,
 reported as `rule_pass_rate` / `rules_passed` / `rules_total` in `Metrics` and `rule_pass_rate` in
 `Summary`). Documents tagged `table-only` are headlined by `table_score`. Result JSON documents
 carry `kind` and `table_only`; rule files are included in the dataset `sha256`.
@@ -634,7 +634,7 @@ carry `kind` and `table_only`; rule files are included in the dataset `sha256`.
 
 ## 11. Python SDK details
 
-- `python/liteocr/__init__.py` exports the three modes — `parse`/`aparse`, `ocr`/`aocr`,
+- `python/puffinparse/__init__.py` exports the three modes — `parse`/`aparse`, `ocr`/`aocr`,
   `extract`/`aextract` — plus `Router`, the response dataclasses (`ParseResponse`, `Page`,
   `Block`, `BBox`, `Usage`, `TextResponse`, `TextPage`, `Line`, `Word`, `ExtractResponse`,
   `FieldInfo`, `Citation`), the `Mode` literal (`"parse" | "ocr" | "extract"`), errors,
@@ -642,9 +642,9 @@ carry `kind` and `table_only`; rule files are included in the dataset `sha256`.
   and the callback lists.
 - Mode arguments are plain strings everywhere (`list_models("ocr")`,
   `Router([...], mode="ocr")`, `set_pricing({...}, "ocr")`, `estimate_cost(m, 1000, "ocr")`),
-  typed as `liteocr.Mode`.
-- Callbacks: `liteocr.success_callback: list[Callable[[Response], None]]` where `Response` is
-  the union of the three response types, and `liteocr.failure_callback` — both fire for every
+  typed as `puffinparse.Mode`.
+- Callbacks: `puffinparse.success_callback: list[Callable[[Response], None]]` where `Response` is
+  the union of the three response types, and `puffinparse.failure_callback` — both fire for every
   mode, sync and async; awaitables returned by a callback are awaited (on the caller's loop for
   `a*` calls, on a private loop otherwise).
 - Bytes never cross the FFI boundary as base64: the Python layer passes the document
@@ -657,25 +657,25 @@ carry `kind` and `table_only`; rule files are included in the dataset `sha256`.
   non-dict `schema` raises `TypeError` before any FFI call.
 - Jobs (§15): `submit`/`asubmit` → `Job` (dataclass mirroring `JobHandle`),
   `retrieve`/`aretrieve` and `handle_webhook`/`ahandle_webhook` → `Job | ParseResponse`
-  (`liteocr.JobResult`), implemented in `python/liteocr/jobs.py` over `_core.submit`,
+  (`puffinparse.JobResult`), implemented in `python/puffinparse/jobs.py` over `_core.submit`,
   `_core.retrieve` and `_core.parse_webhook`.
-- `liteocr.score`, `normalize_text`, `markdown_to_text` expose the benchmark metrics.
-- Logging: `LITEOCR_LOG=debug` enables tracing in the core; Python uses
-  `logging.getLogger("liteocr")`.
+- `puffinparse.score`, `normalize_text`, `markdown_to_text` expose the benchmark metrics.
+- Logging: `PUFFINPARSE_LOG=debug` enables tracing in the core; Python uses
+  `logging.getLogger("puffinparse")`.
 - Typing: fully typed, `py.typed` shipped; dataclasses mirror the Rust structs 1:1.
-- Build: maturin, `abi3-py39` wheels, `pip install liteocr`.
+- Build: maturin, `abi3-py39` wheels, `pip install puffinparse`.
 
 ---
 
 ## 12. CLI
 
 ```
-liteocr parse   <file|url> [--model reducto/standard] [--format markdown|text|json] [--raw]
-liteocr ocr     <file|url> [--model reducto/standard] [--format text|json]
-liteocr extract <file|url> --schema <file.json|inline JSON> [--instructions TEXT] [--citations]
-liteocr providers [--mode parse|ocr|extract] [--json]   # models, modes, per-mode pricing, key status
-liteocr bench run|report|score|rescore                  # see §10 (parse mode; rescore is offline)
-liteocr serve [--config liteocr.toml] [--host H] [--port P]   # HTTP gateway, see §14
+puffinparse parse   <file|url> [--model reducto/standard] [--format markdown|text|json] [--raw]
+puffinparse ocr     <file|url> [--model reducto/standard] [--format text|json]
+puffinparse extract <file|url> --schema <file.json|inline JSON> [--instructions TEXT] [--citations]
+puffinparse providers [--mode parse|ocr|extract] [--json]   # models, modes, per-mode pricing, key status
+puffinparse bench run|report|score|rescore                  # see §10 (parse mode; rescore is offline)
+puffinparse serve [--config puffinparse.toml] [--host H] [--port P]   # HTTP gateway, see §14
 ```
 
 One subcommand per mode; `--model` must name a model that serves that subcommand's mode, and a
@@ -711,7 +711,7 @@ does not serve the requested mode).
 
 ## 14. Gateway server
 
-`liteocr serve` (crate `liteocr-server`) exposes the three modes over HTTP for clients that should
+`puffinparse serve` (crate `puffinparse-server`) exposes the three modes over HTTP for clients that should
 not hold provider keys. Operator reference: [`SERVER.md`](SERVER.md). Contract:
 
 - **Endpoints.** `POST /v1/parse | /v1/ocr | /v1/extract` take the §4 fields (`model`, `pages`,
@@ -732,7 +732,7 @@ not hold provider keys. Operator reference: [`SERVER.md`](SERVER.md). Contract:
   that key once, when the job is first observed succeeded; polls count toward `rpm`, not the
   budget. Handles (no secrets) live in memory and the `state_file` for `job_retention_hours`.
   Optional `POST /v1/webhooks/{provider}` (`[webhooks] enabled`, shared `secret` as `?token=` or
-  `x-liteocr-webhook-secret`, else 404) resolves a provider webhook body with core
+  `x-puffinparse-webhook-secret`, else 404) resolves a provider webhook body with core
   `parse_webhook` (+ one retrieve when needed) against a stored job and settles it the same way.
 - **Config.** One TOML file: `[server]`, `master_key`, `[providers.<name>]` (`api_key`,
   `base_url`), `[[models]]` aliases (`name`, `targets`, `strategy`, `fallback_on`, with the §7
@@ -752,27 +752,27 @@ not hold provider keys. Operator reference: [`SERVER.md`](SERVER.md). Contract:
   served_model, provider, fallback_index, pages, cost_usd, latency_ms, status, error_type,
   provider_status`, plus `job_id, job_status` on jobs API lines. Never document content or URLs,
   provider error text, or any secret. Metrics label jobs traffic `mode="job_submit" |
-  "job_retrieve" | "webhook"` and count `liteocr_jobs_total{event}`.
+  "job_retrieve" | "webhook"` and count `puffinparse_jobs_total{event}`.
 
 ## 15. Asynchronous jobs and webhooks
 
 `parse` blocks until the provider is done (polling job-queue providers internally). The jobs API
 splits that call in two so the caller owns the waiting — for long documents, large batches, or
-pipelines driven by provider webhooks. An SDK cannot *receive* a webhook, so LiteOCR exposes the
+pipelines driven by provider webhooks. An SDK cannot *receive* a webhook, so PuffinParse exposes the
 primitives and a parser for webhook bodies; your web handler does the receiving. `parse` mode only.
 
 ```rust
-liteocr_core::submit_parse(DocumentRequest) -> Result<JobHandle>
-liteocr_core::retrieve_parse(&JobHandle) -> Result<JobStatus>            // env credentials
-liteocr_core::retrieve_parse_with(&JobHandle, &RetrieveOptions) -> Result<JobStatus>
-liteocr_core::parse_webhook(model, &serde_json::Value) -> Result<WebhookEvent>   // no network
-liteocr_core::resolve_webhook(model, &Value, &RetrieveOptions) -> Result<JobStatus>
+puffinparse_core::submit_parse(DocumentRequest) -> Result<JobHandle>
+puffinparse_core::retrieve_parse(&JobHandle) -> Result<JobStatus>            // env credentials
+puffinparse_core::retrieve_parse_with(&JobHandle, &RetrieveOptions) -> Result<JobStatus>
+puffinparse_core::parse_webhook(model, &serde_json::Value) -> Result<WebhookEvent>   // no network
+puffinparse_core::resolve_webhook(model, &Value, &RetrieveOptions) -> Result<JobStatus>
 ```
 
 ```python
-job = liteocr.submit("big.pdf", model="reducto/standard", webhook_url="https://…/hook")  # -> Job
-liteocr.retrieve(job)                    # -> Job (still running) | ParseResponse; raises on failure
-liteocr.handle_webhook(body, model="reducto")   # -> Job | ParseResponse; raises on failure
+job = puffinparse.submit("big.pdf", model="reducto/standard", webhook_url="https://…/hook")  # -> Job
+puffinparse.retrieve(job)                    # -> Job (still running) | ParseResponse; raises on failure
+puffinparse.handle_webhook(body, model="reducto")   # -> Job | ParseResponse; raises on failure
 # asubmit / aretrieve / ahandle_webhook are the async equivalents
 ```
 

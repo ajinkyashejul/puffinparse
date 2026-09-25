@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from liteocr.types import (
+from puffinparse.types import (
     BBox,
     Block,
     Citation,
@@ -98,7 +98,7 @@ def test_text_response_round_trip() -> None:
         "cost_usd": 0.0025,
         "latency_ms": 42,
         "created_at": "2026-09-11T00:00:00Z",
-        "metadata": {"liteocr_derived_from": "parse"},
+        "metadata": {"puffinparse_derived_from": "parse"},
     }
     r = TextResponse.from_dict(d)
     assert r.num_pages == 2
@@ -111,7 +111,7 @@ def test_text_response_round_trip() -> None:
     assert r.words[0] == Word("Hello", BBox(0.1, 0.1, 0.2, 0.2), None)
     assert r.words[1].confidence == 0.9
     assert r.pages[1].lines == [] and r.pages[1].words == []
-    assert r.metadata["liteocr_derived_from"] == "parse"
+    assert r.metadata["puffinparse_derived_from"] == "parse"
     assert r.to_dict()["pages"][0]["lines"][1]["bbox"] is None
 
 

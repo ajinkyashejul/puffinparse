@@ -1,12 +1,12 @@
-# Contributing to LiteOCR
+# Contributing to PuffinParse
 
-Thanks for helping build LiteOCR — one API for every OCR / document-parsing
+Thanks for helping build PuffinParse — one API for every OCR / document-parsing
 provider. This document covers local setup, the checks CI runs, and the two
 contributions we get asked about most: **adding a provider** and **adding a
 benchmark dataset**.
 
 By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
-LiteOCR is MIT licensed; contributions are accepted under the same license.
+PuffinParse is MIT licensed; contributions are accepted under the same license.
 
 ---
 
@@ -20,7 +20,7 @@ Prerequisites:
 
 ```bash
 git clone https://github.com/ajinkyashejul/liteocr
-cd liteocr
+cd puffinparse
 
 # Rust side
 cargo build --workspace
@@ -28,11 +28,11 @@ cargo build --workspace
 # Python side — use a virtualenv; maturin installs into the active one.
 python -m venv .venv && source .venv/bin/activate
 pip install maturin ruff mypy pytest
-maturin develop            # builds crates/liteocr-python, installs `liteocr`
+maturin develop            # builds crates/puffinparse-python, installs `puffinparse`
 ```
 
-`maturin develop` compiles the PyO3 extension (`liteocr._core`) and links it
-against the pure-Python package in `python/liteocr`, so edits to the Python
+`maturin develop` compiles the PyO3 extension (`puffinparse._core`) and links it
+against the pure-Python package in `python/puffinparse`, so edits to the Python
 sources take effect immediately; re-run it after changing any Rust code.
 Use `maturin develop --release` when you care about speed (benchmarks, large
 documents) — debug builds of the core are slow.
@@ -50,16 +50,16 @@ provider skips itself when the relevant key is absent, and CI sets no secrets.
 
 ### Debugging
 
-Set `LITEOCR_LOG` to turn on the core's `tracing` output — request URLs, retry
+Set `PUFFINPARSE_LOG` to turn on the core's `tracing` output — request URLs, retry
 and backoff decisions, poll loops, router fallbacks:
 
 ```bash
-LITEOCR_LOG=debug liteocr parse invoice.pdf --model reducto/standard
-LITEOCR_LOG=liteocr_core::providers=trace pytest python/tests -q
+PUFFINPARSE_LOG=debug puffinparse parse invoice.pdf --model reducto/standard
+PUFFINPARSE_LOG=puffinparse_core::providers=trace pytest python/tests -q
 ```
 
 On the Python side the same events also surface through
-`logging.getLogger("liteocr")`.
+`logging.getLogger("puffinparse")`.
 
 ---
 
@@ -77,7 +77,7 @@ cargo fmt --all              # or `cargo fmt --all --check` to only verify
 cargo clippy --workspace --all-targets -- -D warnings
 ruff check python/ benchmark/
 ruff format --check python/ benchmark/
-mypy python/liteocr
+mypy python/puffinparse
 ```
 
 Rules of the road:
@@ -86,9 +86,9 @@ Rules of the road:
 - Clippy warnings are errors in CI. Prefer fixing over `#[allow]`; if an
   `#[allow]` is genuinely right, put a one-line comment saying why.
 - **No network in unit tests.** Provider parsing is tested against recorded
-  JSON in `crates/liteocr-core/tests/fixtures/`. Live tests are `#[ignore]`d
+  JSON in `crates/puffinparse-core/tests/fixtures/`. Live tests are `#[ignore]`d
   and/or key-gated.
-- `liteocr-core` is `#![forbid(unsafe_code)]`. Keep it that way.
+- `puffinparse-core` is `#![forbid(unsafe_code)]`. Keep it that way.
 - The Python package is fully typed and `mypy --strict`-clean; new public API
   needs annotations and a docstring.
 
@@ -103,8 +103,8 @@ or open one from the template so we can agree on model naming before you write
 code.
 
 1. **Implement the trait.** Create
-   `crates/liteocr-core/src/providers/<name>.rs` and implement
-   `OcrProvider` (see `crates/liteocr-core/src/provider.rs`). Use the shared
+   `crates/puffinparse-core/src/providers/<name>.rs` and implement
+   `OcrProvider` (see `crates/puffinparse-core/src/provider.rs`). Use the shared
    HTTP helpers in `src/http.rs` so you inherit retries, backoff, deadlines and
    error classification — do not build your own `reqwest::Client`, and do not
    vendor a provider SDK. Map the provider's response onto the unified
@@ -117,18 +117,18 @@ code.
      only `ProviderError`, `RateLimitError` and `TimeoutError` are fallback-eligible
      in the router, so classify carefully.
 2. **Register it.** Add the module and a `match` arm to `build()` in
-   `crates/liteocr-core/src/providers/mod.rs`.
+   `crates/puffinparse-core/src/providers/mod.rs`.
 3. **Declare its models.** Add a `ProviderInfo` entry to `PROVIDERS` in
-   `crates/liteocr-core/src/model.rs`: `name`, `display_name`, `env_var`,
+   `crates/puffinparse-core/src/model.rs`: `name`, `display_name`, `env_var`,
    `base_url`, `docs`, and one `ModelInfo` per mode with exactly one
    `default: true`. Model strings are `"<provider>/<model>"`; keep them short,
    lowercase and stable — they are public API.
 4. **Add pricing.** Add `"<provider>/<model>"` entries to
-   `crates/liteocr-core/src/pricing.json` with `per_page_usd`, a `source` URL
+   `crates/puffinparse-core/src/pricing.json` with `per_page_usd`, a `source` URL
    pointing at the public pricing page, and the `updated` date. Public list
    prices only.
 5. **Add a fixture + normalisation test.** Save one real (redacted) response as
-   `crates/liteocr-core/tests/fixtures/<name>_<endpoint>.json` and add a unit
+   `crates/puffinparse-core/tests/fixtures/<name>_<endpoint>.json` and add a unit
    test that parses it and asserts the normalised output: page count, block
    types, a bbox inside 0..1, `usage.pages`, and that the document-level
    `markdown` is the pages joined in order. Scrub keys, job ids, customer
@@ -150,7 +150,7 @@ Engines that run on the user's machine or their own server (`tesseract`,
 
 - **No API key.** Add the provider name to `SELF_HOSTED` in `model.rs`; set
   `env_var` to `""` (or to an *optional* key, as Docling does) and `base_url`
-  to the local default. `liteocr providers` then shows `local` in the Key
+  to the local default. `puffinparse providers` then shows `local` in the Key
   column instead of a missing-key cross. Read the base URL from
   `<NAME>_BASE_URL` via `provider::resolve_base_url`.
 - **Price 0.** `pricing.json` gets `0.0` for each mode with
@@ -160,7 +160,7 @@ Engines that run on the user's machine or their own server (`tesseract`,
   error that names the binary and how to install it or point at it
   (`TESSERACT_CMD`). Shared helpers (download a URL input, base64, file-type
   sniffing, a self-cleaning scratch directory) are in
-  `crates/liteocr-core/src/providers/local.rs`.
+  `crates/puffinparse-core/src/providers/local.rs`.
 - **Fixtures.** Capture a real output from a local install where you can (the
   Tesseract TSV and docling-serve fixtures are real); otherwise shape it from
   the server's documented schema and mark the doc page *docs-only*. The
@@ -213,7 +213,7 @@ extending the generator over hand-writing truth files.
 Verify with a cheap model before proposing the dataset:
 
 ```bash
-cargo run -p liteocr-cli --release -- bench run \
+cargo run -p puffinparse-cli --release -- bench run \
   --dataset benchmark/datasets/<name> \
   --models llamaparse/cost_effective \
   --out benchmark/results/$(date +%F)-<name>.json
@@ -235,7 +235,7 @@ Before opening a PR:
 - [ ] `cargo fmt --all --check` is clean
 - [ ] `cargo clippy --workspace --all-targets -- -D warnings` is clean
 - [ ] `cargo test --workspace` passes
-- [ ] `ruff check` / `ruff format --check` / `mypy python/liteocr` are clean
+- [ ] `ruff check` / `ruff format --check` / `mypy python/puffinparse` are clean
 - [ ] `pytest python/tests -q` passes
 - [ ] New behaviour has a test (fixture-based, no network)
 - [ ] Docs updated — `README.md`, `docs/SPEC.md` if the contract changed,

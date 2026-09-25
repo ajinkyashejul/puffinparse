@@ -1,8 +1,8 @@
 # Benchmark adapters
 
-How public OCR benchmarks become LiteOCR datasets.
+How public OCR benchmarks become PuffinParse datasets.
 
-[ADR-10](../DECISIONS.md) says LiteOCR does not author a competing benchmark: it runs every
+[ADR-10](../DECISIONS.md) says PuffinParse does not author a competing benchmark: it runs every
 public benchmark through one harness. An **adapter** is the piece that makes that true — it
 fetches one upstream benchmark at a pinned revision and rewrites it into
 `benchmark/datasets/<name>/manifest.json`. Datasets whose license permits redistribution are
@@ -31,7 +31,7 @@ python -m benchmark.adapters <name> [--limit N] [--out DIR] [--cache DIR] [--see
 |---|---|
 | `--limit N` | cap the number of documents built (selection stays deterministic) |
 | `--out DIR` | output dataset directory (default: the adapter's `default_out`) |
-| `--cache DIR` | download cache (default: `$LITEOCR_BENCH_CACHE`, else `$XDG_CACHE_HOME/liteocr/benchmarks`, else `~/.cache/liteocr/benchmarks`) — never inside the repo |
+| `--cache DIR` | download cache (default: `$PUFFINPARSE_BENCH_CACHE`, else `$XDG_CACHE_HOME/puffinparse/benchmarks`, else `~/.cache/puffinparse/benchmarks`) — never inside the repo |
 | `--seed N` | selection seed, default `1234` |
 | `--no-download` | build from an existing cache, never hit the network |
 
@@ -89,7 +89,7 @@ for combined datasets — `sources`:
 
 ### `kind: "transcript"`
 
-The existing behaviour: `truth` is markdown, scored by `liteocr_core::bench` with
+The existing behaviour: `truth` is markdown, scored by `puffinparse_core::bench` with
 `char_similarity` / `cer` / `wer` / `word_f1` / `order_score` / `table_score`.
 
 ### `kind: "rules"`
@@ -146,7 +146,7 @@ documents and 169,011 assertions in five JSONL files.
 
 ### Rule conversion, whole upstream dataset
 
-| Upstream file | Upstream type | Rules | → LiteOCR | Converted | Skipped |
+| Upstream file | Upstream type | Rules | → PuffinParse | Converted | Skipped |
 |---|---|---:|---|---:|---:|
 | `table.jsonl` | `expected_markdown` | 503 | `kind: transcript`, HTML table → markdown | 503 | 0 |
 | `text_content.jsonl` | `missing_specific_word` | 105,369 | `present` (`rule.word`) | 105,369 | 0 |
@@ -241,7 +241,7 @@ Shared helpers:
 | `slugify` | ASCII, lowercase, `_`-separated ids safe for filenames and `--filter` |
 | `html_table_to_markdown` | HTML `<table>` → GitHub pipe table; flattens `colspan`/`rowspan` by repeating the cell into every position it covers, and reports `merged_cells` so the caller can add the `merged-cells` tag. Inline markup is dropped, `<br>` becomes a space, `\|` is escaped (backslashes are kept verbatim so LaTeX in cells survives), short rows are padded |
 | `pdf_page_count` | `pypdf` when importable, otherwise a byte scan: the `/Count` of the root `/Type /Pages` node (also inside inflated object streams), falling back to *distinct* `/Type /Page` object numbers so an incrementally-updated PDF is not double counted |
-| `default_cache_dir` | `$LITEOCR_BENCH_CACHE` → `$XDG_CACHE_HOME/liteocr/benchmarks` → `~/.cache/liteocr/benchmarks` |
+| `default_cache_dir` | `$PUFFINPARSE_BENCH_CACHE` → `$XDG_CACHE_HOME/puffinparse/benchmarks` → `~/.cache/puffinparse/benchmarks` |
 
 `pypdf` is optional on purpose. It pulls in `cryptography`, whose Rust extension can raise a
 `pyo3` `PanicException` (a `BaseException`, not an `Exception`) on a mismatched wheel, so the
@@ -264,7 +264,7 @@ instead of aborting a build.
    sources of an existing combined version: a result is only reproducible against the exact
    manifest it scored. Write a `README.md` in the dataset
    directory with the license, and list the dataset in `benchmark/README.md`.
-7. Add the dataset to `crates/liteocr-core/tests/benchmark_datasets.rs`. Every rule must pass
+7. Add the dataset to `crates/puffinparse-core/tests/benchmark_datasets.rs`. Every rule must pass
    against a witness built from its own document, and every transcript must score 1.0 against
    itself.
 
@@ -288,7 +288,7 @@ Upstream: [`allenai/olmOCR-bench`](https://huggingface.co/datasets/allenai/olmOC
 `olmocr/bench/tests.py` at `f7cfe4c22098b154c76b6ec950d1c0a464eecf8d`. Every document is
 `kind: rules`.
 
-| Upstream test | → LiteOCR | Converted | Skipped | Note |
+| Upstream test | → PuffinParse | Converted | Skipped | Note |
 |---|---|---:|---:|---|
 | `present` | `present` (upstream `case_sensitive`, default true) | 721 | 0 | |
 | `absent` | `absent` | 622 | 201 | positional (`first_n` / `last_n`) absences are skipped: a whole-page absence would be the wrong assertion |
@@ -369,14 +369,14 @@ Congress / OER / Upstage) or domain, so neither can be tagged. Counts:
 
 **Not comparable to published DP-Bench numbers**: upstream NID concatenates element text with
 newlines *removed* (not replaced by spaces) and compares with `rapidfuzz.fuzz.ratio`, on text
-only; LiteOCR scores a markdown transcript with its own normalisation, tables included.
+only; PuffinParse scores a markdown transcript with its own normalisation, tables included.
 Upstream also discards predicted text that lies inside a ground-truth figure or chart region
 (`--filter-by-gt-area`). A transcript has no regions, so chart labels a parser transcribes count
 as extra text here: `tesseract/default` scores 65 on `chart` pages and 99 on `text` pages.
 
 ## Self-checks
 
-`crates/liteocr-core/tests/benchmark_datasets.rs` keeps the adapters honest:
+`crates/puffinparse-core/tests/benchmark_datasets.rs` keeps the adapters honest:
 
 - `olmocr_rules_are_satisfiable` builds a *witness* prediction from each document's own
   assertions: every `present` text, every `order` pair, and each `table_cell` as a one-row table.
@@ -391,9 +391,9 @@ as extra text here: `tesseract/default` scores 65 on `chart` pages and 99 on `te
 - `combined_v2_references_resolve` / `combined_v3_references_resolve` check every committed
   `../` path of `combined-v2` / `combined-v3`.
 - Two `#[ignore]`d helpers:
-  - `LITEOCR_SELFCHECK_RULES_DIR` runs the witness check over any directory of rule files. On
+  - `PUFFINPARSE_SELFCHECK_RULES_DIR` runs the witness check over any directory of rule files. On
     the full 824-document olmOCR conversion: 3,040 rules, 0 unsatisfiable.
-  - `LITEOCR_SELFCHECK_PRED_DIR` scores real extractions, such as `pdftotext` output.
+  - `PUFFINPARSE_SELFCHECK_PRED_DIR` scores real extractions, such as `pdftotext` output.
 
 ## Licensing
 
@@ -417,4 +417,4 @@ Rules for any future adapter:
 
 ## Known gaps in the Rust side
 
-Both gaps are closed: `ManifestDoc` carries `kind` / `rules`, rule files are hashed into the dataset SHA, `kind: rules` documents are scored with `liteocr_core::bench::score_rules`, and `table-only` documents are headlined by `table_score` (`summarize_with`).
+Both gaps are closed: `ManifestDoc` carries `kind` / `rules`, rule files are hashed into the dataset SHA, `kind: rules` documents are scored with `puffinparse_core::bench::score_rules`, and `table-only` documents are headlined by `table_score` (`summarize_with`).

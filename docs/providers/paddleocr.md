@@ -20,7 +20,7 @@
 | Parse base URL | `PADDLEOCR_PARSE_BASE_URL`, falling back to `PADDLEOCR_BASE_URL` (a `base_url` on the request wins for both modes) |
 | API key | none |
 | Price | $0 per page (`pricing.json` source `self-hosted`) |
-| Implementation | `crates/liteocr-core/src/providers/paddleocr.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/paddleocr.rs` |
 
 Each served pipeline is its own HTTP service, so ocr and parse usually run on two ports:
 
@@ -32,14 +32,14 @@ paddlex --serve --pipeline PP-StructureV3 --port 8081   # → POST /layout-parsi
 export PADDLEOCR_BASE_URL=http://localhost:8080 PADDLEOCR_PARSE_BASE_URL=http://localhost:8081
 ```
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
 | Model | Modes | Endpoint | List price |
 |---|---|---|---|
 | `paddleocr/default` *(default)* | `ocr` (native) | `POST /ocr` — general OCR pipeline (PP-OCRv5 by default) | $0 |
 | | `parse` | `POST /layout-parsing` — PP-StructureV3 (layout, tables, formulas, reading order) | $0 |
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 One synchronous JSON call per document:
 
@@ -103,7 +103,7 @@ server returned fewer pages than `dataInfo.numPages` (see §6); `raw` = the whol
 
 ## 5. Errors and limits
 
-Failures come back as `{"logId", "errorCode": <HTTP status>, "errorMsg": "..."}`. LiteOCR maps
+Failures come back as `{"logId", "errorCode": <HTTP status>, "errorMsg": "..."}`. PuffinParse maps
 the HTTP status (or `errorCode` if a 200 carries a non-zero code) through the usual table —
 401/403 → `authentication_error`, 422/4xx → `bad_request_error`, 5xx → `provider_error` — with
 `errorMsg` as the message, verbatim. A refused connection is a `network_error` that names the
@@ -114,10 +114,10 @@ an `input_error` before any request.
 
 * **10-page limit.** By default the serving layer processes only the first 10 pages of a PDF or
   multi-page TIFF. Set `Serving: extra: max_num_input_imgs: null` in the pipeline config to lift
-  it; LiteOCR flags truncation in `metadata.paddleocr_pages_truncated`.
+  it; PuffinParse flags truncation in `metadata.paddleocr_pages_truncated`.
 * **Two servers.** `ocr` and `parse` hit different pipelines. If only the OCR pipeline is
   running, `parse` gets a 404; set `PADDLEOCR_PARSE_BASE_URL`.
-* **Image payloads.** Without `visualize: false` (LiteOCR sends it) the server returns several
+* **Image payloads.** Without `visualize: false` (PuffinParse sends it) the server returns several
   base64 JPEGs per page. PP-StructureV3 also returns markdown images unless
   `returnMarkdownImages: false` — pass it in `provider_options` to shrink responses.
 * `pages` is applied after the call (the serving API has no page-range field), so every page up to
@@ -126,14 +126,14 @@ an `input_error` before any request.
 ## 7. `provider_options` examples
 
 ```python
-import liteocr
+import puffinparse
 
-liteocr.ocr("scan.png", model="paddleocr")
-liteocr.ocr("photo.jpg", model="paddleocr",
+puffinparse.ocr("scan.png", model="paddleocr")
+puffinparse.ocr("photo.jpg", model="paddleocr",
             provider_options={"useDocOrientationClassify": True, "useTextlineOrientation": True})
-liteocr.parse("report.pdf", model="paddleocr",
+puffinparse.parse("report.pdf", model="paddleocr",
               provider_options={"returnMarkdownImages": False, "useChartRecognition": False})
-liteocr.parse("report.pdf", model="paddleocr", base_url="http://gpu-box:8081")
+puffinparse.parse("report.pdf", model="paddleocr", base_url="http://gpu-box:8081")
 ```
 
 ## 8. Links

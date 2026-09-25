@@ -30,8 +30,8 @@ the SHA-256 of the source manifest it was built from.
 
 ```bash
 python -m benchmark.adapters omnidocbench        # materialise the non-redistributable source first
-cargo build --release -p liteocr-cli
-./target/release/liteocr bench run --dataset benchmark/datasets/combined-v3 \
+cargo build --release -p puffinparse-cli
+./target/release/puffinparse bench run --dataset benchmark/datasets/combined-v3 \
     --models reducto/standard --filter dpbench/ --limit 5
 ```
 

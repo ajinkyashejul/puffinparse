@@ -1,29 +1,29 @@
 <!doctype html>
 <!--
-  LiteOCR landing page template.
+  PuffinParse landing page template.
 
   Rendered by website/build.py: every {{ NAME }} placeholder is replaced with live repository data
-  (the provider registry in crates/liteocr-core/src/model.rs, the committed benchmark results,
+  (the provider registry in crates/puffinparse-core/src/model.rs, the committed benchmark results,
   and the doc URLs derived from website/nav.json). Never edit website/dist/index.html.
 -->
 <html lang="en" data-base="{{BASE}}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LiteOCR — one API for every OCR provider</title>
+<title>PuffinParse — one API for every OCR provider</title>
 <meta name="description" content="{{DESCRIPTION}}">
 <link rel="canonical" href="{{CANONICAL}}">
 <link rel="icon" href="{{FAVICON}}">
 <link rel="stylesheet" href="{{BASE}}tokens.css">
 <link rel="stylesheet" href="{{BASE}}style.css">
 <link rel="stylesheet" href="{{BASE}}landing.css">
-<script>(function(){try{var t=localStorage.getItem('liteocr-theme');
+<script>(function(){try{var t=localStorage.getItem('puffinparse-theme');
 if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </head>
 <body class="lp">
 
 <header class="top"><div class="topin">
-<a class="brand" href="{{BASE}}"><span class="lp-mark" aria-hidden="true"></span>LiteOCR</a>
+<a class="brand" href="{{BASE}}"><span class="lp-mark" aria-hidden="true"></span>PuffinParse</a>
 <div class="spacer"></div>
 <a class="plain" href="{{URL_DOCS}}">Docs</a>
 <a class="plain" href="{{URL_LEADERBOARD}}">Benchmark</a>
@@ -45,14 +45,14 @@ if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</scr
         accuracy, latency and cost.</p>
 
       <div class="lp-install">
-        <code>pip install liteocr</code>
-        <button class="lp-copybtn" type="button" data-copy="pip install liteocr">Copy</button>
+        <code>pip install puffinparse</code>
+        <button class="lp-copybtn" type="button" data-copy="pip install puffinparse">Copy</button>
       </div>
 
       <div class="lp-code lp-hero-code">
-        <pre><code class="language-python">import liteocr
+        <pre><code class="language-python">import puffinparse
 
-doc = liteocr.parse("invoice.pdf", model="<span class="lp-slot" data-model-slot>{{DEFAULT_MODEL}}</span>")
+doc = puffinparse.parse("invoice.pdf", model="<span class="lp-slot" data-model-slot>{{DEFAULT_MODEL}}</span>")
 print(doc.markdown, doc.pages[0].blocks[0].bbox)
 print(doc.usage.pages, doc.cost_usd)</code></pre>
       </div>
@@ -115,7 +115,7 @@ print(doc.usage.pages, doc.cost_usd)</code></pre>
     <p class="lp-kicker">Switch in one line</p>
     <h2>Change the string. Nothing else moves.</h2>
     <p class="lp-sub">Every provider has its own upload flow, polling loop, block vocabulary,
-      coordinate system and billing unit. LiteOCR hides all of it. Pick a tab: only the
+      coordinate system and billing unit. PuffinParse hides all of it. Pick a tab: only the
       highlighted model string changes.</p>
     {{SWITCH_TABS}}
     <p class="lp-note"><b>Providers are only interchangeable within a mode.</b> A model that cannot
@@ -133,7 +133,7 @@ print(doc.usage.pages, doc.cost_usd)</code></pre>
       drift from the code — {{N_VERIFIED}} of them verified against live API responses, the rest
       implemented from the official reference with fixture-backed tests.</p>
     <div class="lp-grid">{{PROVIDER_CARDS}}</div>
-    <p class="lp-note"><a href="{{URL_PROVIDERS}}">Provider reference →</a> exactly what LiteOCR
+    <p class="lp-note"><a href="{{URL_PROVIDERS}}">Provider reference →</a> exactly what PuffinParse
       sends, what comes back, and how every field is mapped.</p>
   </div>
 </section>
@@ -184,8 +184,8 @@ print(doc.usage.pages, doc.cost_usd)</code></pre>
 }</code></pre>
       </article>
     </div>
-    <p class="lp-note"><code>liteocr.list_models("extract")</code> or
-      <code>liteocr providers --mode extract</code> lists the models that serve a mode — it is a
+    <p class="lp-note"><code>puffinparse.list_models("extract")</code> or
+      <code>puffinparse providers --mode extract</code> lists the models that serve a mode — it is a
       registry fact, not a guess.</p>
   </div>
 </section>
@@ -196,7 +196,7 @@ print(doc.usage.pages, doc.cost_usd)</code></pre>
     <div>
       <p class="lp-kicker">Native-format compatibility</p>
       <h2>Already on Reducto, Extend or LlamaParse? Keep your code.</h2>
-      <p class="lp-sub">Ask for a vendor's own JSON shape and LiteOCR renders the unified response
+      <p class="lp-sub">Ask for a vendor's own JSON shape and PuffinParse renders the unified response
         into it — whatever provider actually produced it. Key set, nesting, block vocabulary,
         coordinate convention and billed page count, all in the vendor's units.</p>
       <p class="lp-wit">Your parser is loyal to a vendor. Your code doesn't have to be.</p>
@@ -204,7 +204,7 @@ print(doc.usage.pages, doc.cost_usd)</code></pre>
         exactly what is guaranteed and what is rendered as <code>null</code>.</p>
     </div>
     <div class="lp-code">
-      <pre><code class="language-python">doc = liteocr.parse("invoice.pdf",
+      <pre><code class="language-python">doc = puffinparse.parse("invoice.pdf",
                     model="gemini/2.5-flash",
                     output_format=<mark class="lp-diff">"reducto"</mark>)
 # -> Reducto's own parse JSON, from Gemini
@@ -231,9 +231,9 @@ doc.raw["result"]["chunks"][0]["blocks"][0]["bbox"]["left"]</code></pre>
     <p class="lp-caption">{{LEADERBOARD_DATASET}} (synthetic, ParseBench, olmOCR-bench and
       OmniDocBench pages, each scored by its own truth) · higher Overall is better</p>
     <div class="lp-code">
-      <pre><code class="language-bash">liteocr bench run --dataset benchmark/datasets/combined-v2 \
+      <pre><code class="language-bash">puffinparse bench run --dataset benchmark/datasets/combined-v2 \
     --models reducto/r-1 extend/parse_light llamaparse/cost_effective --dry-run
-liteocr bench report benchmark/results/2026-09-24-combined-v2.json</code></pre>
+puffinparse bench report benchmark/results/2026-09-24-combined-v2.json</code></pre>
     </div>
     <p class="lp-note">The results viewer opens every run document by document: the input, the
       ground truth, each model's raw output, a word-level diff and the commands to reproduce that
@@ -274,8 +274,8 @@ liteocr bench report benchmark/results/2026-09-24-combined-v2.json</code></pre>
 <footer class="lp-footer">
   <div class="lp-wrap lp-footer-in">
     <div>
-      <p class="lp-footer-brand"><span class="lp-mark" aria-hidden="true"></span>LiteOCR</p>
-      <p class="lp-footer-note">Built with the Rust core (<code>liteocr-core</code>) and the typed
+      <p class="lp-footer-brand"><span class="lp-mark" aria-hidden="true"></span>PuffinParse</p>
+      <p class="lp-footer-note">Built with the Rust core (<code>puffinparse-core</code>) and the typed
         Python and TypeScript SDKs. MIT licensed.</p>
     </div>
     <nav class="lp-footer-links">

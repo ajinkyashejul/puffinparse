@@ -18,7 +18,7 @@ pytest python/tests -q
 - [ ] `cargo clippy --workspace --all-targets -- -D warnings` is clean
 - [ ] `cargo test --workspace` passes
 - [ ] `ruff check python/ benchmark/` and `ruff format --check python/ benchmark/` are clean
-- [ ] `mypy python/liteocr` is clean
+- [ ] `mypy python/puffinparse` is clean
 - [ ] `pytest python/tests -q` passes
 - [ ] New behaviour is covered by a test that makes no network calls
 - [ ] Docs updated (`README.md`, `docs/SPEC.md`, `.env.example`) where relevant

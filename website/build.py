@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build the LiteOCR product website.
+"""Build the PuffinParse product website.
 
 The site has two halves:
 
 * the **landing page** at ``/``, rendered from the template in ``website/landing/index.html`` with
-  live repository data (the provider registry in ``crates/liteocr-core/src/model.rs`` and the
+  live repository data (the provider registry in ``crates/puffinparse-core/src/model.rs`` and the
   committed benchmark results) injected at build time;
 * the **documentation** under ``/docs/``, driven by the site map in ``website/nav.json``: every
   listed markdown file (existing repo docs plus the pages under ``website/pages/``) is rendered to
@@ -270,7 +270,7 @@ def read_registry() -> list[dict[str, Any]]:
     ``model.rs`` is regular enough to read with a small parser: one ``ProviderInfo`` block per
     provider, each holding a list of ``ModelInfo`` entries with a ``modes`` expression.
     """
-    model_rs = ROOT / "crates/liteocr-core/src/model.rs"
+    model_rs = ROOT / "crates/puffinparse-core/src/model.rs"
     if not model_rs.exists():
         return []
     _, _, body = model_rs.read_text(encoding="utf-8").partition("pub const PROVIDERS")
@@ -304,7 +304,7 @@ def read_registry() -> list[dict[str, Any]]:
 
 def read_providers() -> list[dict[str, Any]]:
     """Registry providers with the priced model list used by the docs provider cards."""
-    pricing_json = ROOT / "crates/liteocr-core/src/pricing.json"
+    pricing_json = ROOT / "crates/puffinparse-core/src/pricing.json"
     if not pricing_json.exists():
         return []
     prices = {k for k in json.loads(pricing_json.read_text(encoding="utf-8")) if "/" in k}
@@ -391,13 +391,13 @@ def hero(site: Site, models: list[str]) -> str:
 <h1>{html.escape(site.title)}</h1>
 <p class="lede"><strong>{html.escape(site.tagline)}</strong> Rust core, Python and TypeScript SDKs,
 CLI, gateway, and an open benchmark that ranks providers on accuracy, latency and cost.</p>
-<div class="codewrap"><pre><code class="language-python">import liteocr
-doc = liteocr.parse(&quot;invoice.pdf&quot;, model=&quot;{span}&quot;)
+<div class="codewrap"><pre><code class="language-python">import puffinparse
+doc = puffinparse.parse(&quot;invoice.pdf&quot;, model=&quot;{span}&quot;)
 print(doc.markdown, doc.cost_usd)</code></pre></div>
 <p class="meta">Switch providers by changing one string. Same request, same response shape, same errors.</p>
 <div class="cta">
 <a class="btn primary" href="{site.url("getting-started")}">Get started</a>
-<code>pip install liteocr</code>
+<code>pip install puffinparse</code>
 <a class="btn" href="{site.url("benchmark/leaderboard")}">Leaderboard</a>
 <a class="btn" href="{site.repo}">GitHub</a>
 </div>
@@ -459,9 +459,9 @@ SCAN_OUTPUT = (
     "}",
 )
 
-LANDING_SWITCH_CODE = """import liteocr
+LANDING_SWITCH_CODE = """import puffinparse
 
-doc = liteocr.parse(&quot;invoice.pdf&quot;, model={model})
+doc = puffinparse.parse(&quot;invoice.pdf&quot;, model={model})
 
 doc.markdown          # same unified markdown
 doc.pages[0].blocks   # same typed blocks, same normalised boxes
@@ -630,12 +630,12 @@ def page_html(site: Site, page: Page, pages: list[Page]) -> str:
 <link rel="icon" href="{FAVICON}">
 <link rel="stylesheet" href="{site.base}tokens.css">
 <link rel="stylesheet" href="{site.base}style.css">
-<script>(function(){{try{{var t=localStorage.getItem('liteocr-theme');
+<script>(function(){{try{{var t=localStorage.getItem('puffinparse-theme');
 if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
 </head>
 <body>
 <header class="top"><div class="topin">
-<a class="brand" href="{site.base}">LiteOCR</a>
+<a class="brand" href="{site.base}">PuffinParse</a>
 <a class="brand-sub hide-sm" href="{site.docs_base}">docs</a>
 <div class="spacer"></div>
 <div class="searchwrap">
@@ -829,11 +829,11 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         title="Page not found",
         nav_title="404",
         source="website/build.py",
-        description="That page does not exist on the LiteOCR documentation site.",
+        description="That page does not exist on the PuffinParse documentation site.",
         section="",
         has_md=False,
         body_html=(
-            "<h1>Page not found</h1><p>That URL is not part of the LiteOCR site. The documentation "
+            "<h1>Page not found</h1><p>That URL is not part of the PuffinParse site. The documentation "
             f'moved under <a href="{site.docs_base}"><code>{site.docs_base}</code></a>.</p>'
             f'<p><a href="{site.base}">Home</a> · '
             f'<a href="{site.docs_base}">Documentation</a> · '
@@ -857,7 +857,7 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
     if not BENCH_BUILD.is_file():
         print(f"benchmark viewer: {BENCH_BUILD} not found, skipping", file=sys.stderr)
         return False
-    spec = importlib.util.spec_from_file_location("liteocr_benchmark_site_build", BENCH_BUILD)
+    spec = importlib.util.spec_from_file_location("puffinparse_benchmark_site_build", BENCH_BUILD)
     if spec is None or spec.loader is None:  # pragma: no cover - importlib contract
         print(f"benchmark viewer: cannot load {BENCH_BUILD}, skipping", file=sys.stderr)
         return False
@@ -995,12 +995,12 @@ def dir_size(path: Path) -> int:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description="Build the LiteOCR documentation site.")
+    ap = argparse.ArgumentParser(description="Build the PuffinParse documentation site.")
     ap.add_argument("--base-url", default="/", help="URL prefix the site is served from (default: /)")
     ap.add_argument("--out", default=str(WEB / "dist"), help="output directory (default: website/dist)")
     ap.add_argument(
         "--site-url",
-        default="https://ajinkyashejul.github.io/liteocr",
+        default="https://ajinkyashejul.github.io/puffinparse",
         help="public base URL of the deployed site, used for canonical links and the sitemap",
     )
     ap.add_argument(

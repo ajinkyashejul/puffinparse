@@ -1,8 +1,8 @@
 /**
- * LiteOCR for Node.js: one API for every OCR / document-parsing provider.
+ * PuffinParse for Node.js: one API for every OCR / document-parsing provider.
  *
  * Hand-written to match `index.js` and the unified types in docs/SPEC.md §4–6 (camelCase here,
- * snake_case in the core's JSON). Keep it in sync with `crates/liteocr-core/src/types.rs`.
+ * snake_case in the core's JSON). Keep it in sync with `crates/puffinparse-core/src/types.rs`.
  */
 
 /// <reference types="node" />
@@ -19,7 +19,7 @@ export declare const MODES: readonly Mode[]
 export declare const VERSION: string
 
 /** Values `outputFormat` accepts (aliases such as `'llama'` are canonicalised by the core). */
-export type OutputFormat = 'liteocr' | VendorFormat
+export type OutputFormat = 'puffinparse' | VendorFormat
 
 /** The vendor shapes a response can be rendered in (docs/COMPAT.md). */
 export type VendorFormat = 'reducto' | 'extend' | 'llamaparse'
@@ -69,7 +69,7 @@ export interface ParseOptions extends CommonOptions {
   /** Preferred block content. Default `'markdown'`. */
   output?: 'markdown' | 'text'
   /**
-   * Return a vendor's own JSON shape instead of the unified response. `'liteocr'` (or unset)
+   * Return a vendor's own JSON shape instead of the unified response. `'puffinparse'` (or unset)
    * gives the unified camelCase `ParseResponse`. See docs/COMPAT.md.
    */
   outputFormat?: OutputFormat | (string & {}) | null
@@ -131,7 +131,7 @@ export interface Usage {
 
 /** Fields shared by every mode's response. */
 export interface ResponseEnvelope {
-  /** LiteOCR-generated UUID. */
+  /** PuffinParse-generated UUID. */
   id: string
   /** e.g. `'reducto'`. */
   provider: string
@@ -145,7 +145,7 @@ export interface ResponseEnvelope {
   latencyMs: number
   /** RFC 3339. */
   createdAt: string
-  /** Your `metadata`, plus `liteocr_*` keys (e.g. `liteocr_fallback_index`, `liteocr_derived_from`). Keys are not camelCased. */
+  /** Your `metadata`, plus `puffinparse_*` keys (e.g. `puffinparse_fallback_index`, `puffinparse_derived_from`). Keys are not camelCased. */
   metadata: Record<string, unknown>
   /** Provider payload when `includeRaw: true`, else `null`. Returned verbatim. */
   raw: unknown
@@ -262,7 +262,7 @@ export interface ScoreOptions {
 // ---- calls ---------------------------------------------------------------------------------------
 
 /** Parse a document into markdown + typed blocks (`parse` mode). */
-export declare function parse(doc: DocumentInput, options?: ParseOptions & { outputFormat?: 'liteocr' | null }): Promise<ParseResponse>
+export declare function parse(doc: DocumentInput, options?: ParseOptions & { outputFormat?: 'puffinparse' | null }): Promise<ParseResponse>
 export declare function parse(doc: DocumentInput, options: ParseOptions & { outputFormat: VendorFormat }): Promise<NativeFormatResponse>
 export declare function parse(doc: DocumentInput, options: ParseOptions): Promise<ParseResponse | NativeFormatResponse>
 
@@ -272,7 +272,7 @@ export declare function ocr(doc: DocumentInput, options?: OcrOptions): Promise<T
 /** Pull a structured JSON object out of a document with a schema (`extract` mode). */
 export declare function extract<T = unknown>(
   doc: DocumentInput,
-  options: ExtractOptions & { outputFormat?: 'liteocr' | null },
+  options: ExtractOptions & { outputFormat?: 'puffinparse' | null },
 ): Promise<ExtractResponse<T>>
 export declare function extract(doc: DocumentInput, options: ExtractOptions & { outputFormat: VendorFormat }): Promise<NativeFormatResponse>
 export declare function extract<T = unknown>(
@@ -339,9 +339,9 @@ export declare function submit(doc: DocumentInput, options?: SubmitOptions): Pro
 
 /**
  * Check a job once: the same `Job` while it runs, the `ParseResponse` (or vendor shape) once done.
- * A failed job rejects with the typed `LiteOCRError` (`jobId` set).
+ * A failed job rejects with the typed `PuffinParseError` (`jobId` set).
  */
-export declare function retrieve(job: Job, options?: RetrieveOptions & { outputFormat?: 'liteocr' | null }): Promise<Job | ParseResponse>
+export declare function retrieve(job: Job, options?: RetrieveOptions & { outputFormat?: 'puffinparse' | null }): Promise<Job | ParseResponse>
 export declare function retrieve(job: Job, options: RetrieveOptions & { outputFormat: VendorFormat }): Promise<Job | NativeFormatResponse>
 export declare function retrieve(job: Job, options?: RetrieveOptions): Promise<Job | ParseResponse | NativeFormatResponse>
 
@@ -351,7 +351,7 @@ export declare function retrieve(job: Job, options?: RetrieveOptions): Promise<J
  */
 export declare function handleWebhook(
   payload: Record<string, unknown> | string | Uint8Array,
-  options?: HandleWebhookOptions & { outputFormat?: 'liteocr' | null },
+  options?: HandleWebhookOptions & { outputFormat?: 'puffinparse' | null },
 ): Promise<Job | ParseResponse>
 export declare function handleWebhook(
   payload: Record<string, unknown> | string | Uint8Array,
@@ -376,7 +376,7 @@ export interface RouterConfig {
    * Error kinds that move on to the next model. Accepts kinds (`'provider'`), class names
    * (`'ProviderError'`) or classes. Default: provider, rate_limit, timeout, network.
    */
-  fallbackOn?: Array<ErrorKind | ErrorClassName | (abstract new (...args: any[]) => LiteOCRError)>
+  fallbackOn?: Array<ErrorKind | ErrorClassName | (abstract new (...args: any[]) => PuffinParseError)>
 }
 
 export interface ModelStats {
@@ -399,13 +399,13 @@ export declare class Router {
   plan(): string[]
   /** Per-model counters keyed by model string. */
   stats(): Record<string, ModelStats>
-  parse(doc: DocumentInput, options?: RouterParseOptions & { outputFormat?: 'liteocr' | null }): Promise<ParseResponse>
+  parse(doc: DocumentInput, options?: RouterParseOptions & { outputFormat?: 'puffinparse' | null }): Promise<ParseResponse>
   parse(doc: DocumentInput, options: RouterParseOptions & { outputFormat: VendorFormat }): Promise<NativeFormatResponse>
   parse(doc: DocumentInput, options: RouterParseOptions): Promise<ParseResponse | NativeFormatResponse>
   ocr(doc: DocumentInput, options?: RouterOcrOptions): Promise<TextResponse>
   extract<T = unknown>(
     doc: DocumentInput,
-    options: RouterExtractOptions & { outputFormat?: 'liteocr' | null },
+    options: RouterExtractOptions & { outputFormat?: 'puffinparse' | null },
   ): Promise<ExtractResponse<T>>
   extract(doc: DocumentInput, options: RouterExtractOptions & { outputFormat: VendorFormat }): Promise<NativeFormatResponse>
   extract<T = unknown>(doc: DocumentInput, options: RouterExtractOptions): Promise<ExtractResponse<T> | NativeFormatResponse>
@@ -458,7 +458,7 @@ export declare function setPricing(prices: Record<string, number>, mode?: Mode):
 export declare function resetPricing(): void
 /** Estimated USD cost for `pages` pages; `null` when the model has no price in `mode`. */
 export declare function estimateCost(model: string, pages: number, mode?: Mode): number | null
-/** Every value `outputFormat` accepts: `['liteocr', 'reducto', 'extend', 'llamaparse']`. */
+/** Every value `outputFormat` accepts: `['puffinparse', 'reducto', 'extend', 'llamaparse']`. */
 export declare function outputFormats(): OutputFormat[]
 
 /** Benchmark metrics (character similarity, CER, WER, word F1, ...) for a prediction. */
@@ -493,16 +493,16 @@ export type ErrorClassName =
   | 'InputError'
   | 'NetworkError'
 
-export interface LiteOCRErrorOptions {
+export interface PuffinParseErrorOptions {
   provider?: string | null
   statusCode?: number | null
   jobId?: string | null
   retryable?: boolean
 }
 
-/** Base class for every error LiteOCR throws (argument type errors are plain `TypeError`s). */
-export declare class LiteOCRError extends Error {
-  constructor(message: string, options?: LiteOCRErrorOptions)
+/** Base class for every error PuffinParse throws (argument type errors are plain `TypeError`s). */
+export declare class PuffinParseError extends Error {
+  constructor(message: string, options?: PuffinParseErrorOptions)
   readonly kind: ErrorKind | 'error'
   /** The provider's own message is kept verbatim in `message`. */
   provider: string | null
@@ -522,42 +522,42 @@ export declare class LiteOCRError extends Error {
 }
 
 /** 401/403 from the provider, or no API key configured. */
-export declare class AuthenticationError extends LiteOCRError {
+export declare class AuthenticationError extends PuffinParseError {
   static readonly kind: 'authentication'
   readonly kind: 'authentication'
 }
 /** 429 after retries were exhausted. */
-export declare class RateLimitError extends LiteOCRError {
+export declare class RateLimitError extends PuffinParseError {
   static readonly kind: 'rate_limit'
   readonly kind: 'rate_limit'
 }
 /** The provider rejected the request (4xx other than auth / rate limit), or an unknown `outputFormat`. */
-export declare class BadRequestError extends LiteOCRError {
+export declare class BadRequestError extends PuffinParseError {
   static readonly kind: 'bad_request'
   readonly kind: 'bad_request'
 }
 /** 5xx, malformed provider payload, or a job that ended in a failed state. */
-export declare class ProviderError extends LiteOCRError {
+export declare class ProviderError extends PuffinParseError {
   static readonly kind: 'provider'
   readonly kind: 'provider'
 }
 /** The whole-call deadline (upload + polling + download) was exceeded. */
-export declare class TimeoutError extends LiteOCRError {
+export declare class TimeoutError extends PuffinParseError {
   static readonly kind: 'timeout'
   readonly kind: 'timeout'
 }
 /** Unknown provider / model string, or a model that does not serve the requested mode. */
-export declare class UnsupportedModelError extends LiteOCRError {
+export declare class UnsupportedModelError extends PuffinParseError {
   static readonly kind: 'unsupported_model'
   readonly kind: 'unsupported_model'
 }
 /** Unreadable input, bytes without a filename, empty body, bad mode, router asked for another mode. */
-export declare class InputError extends LiteOCRError {
+export declare class InputError extends PuffinParseError {
   static readonly kind: 'input'
   readonly kind: 'input'
 }
 /** Network / TLS / DNS failure after retries. */
-export declare class NetworkError extends LiteOCRError {
+export declare class NetworkError extends PuffinParseError {
   static readonly kind: 'network'
   readonly kind: 'network'
 }

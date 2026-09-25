@@ -1,12 +1,12 @@
 # TypeScript / Node.js SDK
 
-The `liteocr` npm package is the same Rust core as the Python SDK and the CLI, loaded into Node.js
+The `puffinparse` npm package is the same Rust core as the Python SDK and the CLI, loaded into Node.js
 as a native addon (N-API, built with [napi-rs](https://napi.rs)). Every call returns a `Promise`;
 responses are plain camelCase objects typed by the bundled `index.d.ts`. No provider logic lives in
 JavaScript, so a model behaves identically from Python, Node, Rust and the CLI.
 
 Node.js 18+. Source: [`js/`](../../js/README.md) (wrapper and typings) and
-[`crates/liteocr-node`](../../crates/liteocr-node/src/lib.rs) (the addon).
+[`crates/puffinparse-node`](../../crates/puffinparse-node/src/lib.rs) (the addon).
 
 ## Install
 
@@ -14,20 +14,20 @@ Prebuilt binaries are not published to npm yet, so build the addon from a clone 
 toolchain):
 
 ```bash
-git clone https://github.com/ajinkyashejul/liteocr && cd liteocr/js
+git clone https://github.com/ajinkyashejul/liteocr && cd puffinparse/js
 npm install
-npm run build          # cargo build --release of crates/liteocr-node -> liteocr.<platform>.node
+npm run build          # cargo build --release of crates/puffinparse-node -> puffinparse.<platform>.node
 npm test               # offline unit tests
 ```
 
-Then depend on it by path (`npm install ../liteocr/js`) or `npm link`. Keys come from the same
+Then depend on it by path (`npm install ../puffinparse/js`) or `npm link`. Keys come from the same
 environment variables as every other surface (`REDUCTO_API_KEY`, `LLAMA_API_KEY`, `EXTEND_API_KEY`,
 ...; see [Providers](/providers/)).
 
 ## First call
 
 ```ts
-import { parse, ocr, extract } from 'liteocr'
+import { parse, ocr, extract } from 'puffinparse'
 
 const doc = await parse('invoice.pdf', { model: 'llamaparse/cost_effective' })
 console.log(doc.markdown, doc.costUsd, doc.pages[0].blocks[0].bbox)
@@ -43,11 +43,11 @@ const inv = await extract<{ total: number }>('invoice.pdf', {
 console.log(inv.data.total, inv.fields['/total']?.citations)
 ```
 
-CommonJS works the same: `const liteocr = require('liteocr')`.
+CommonJS works the same: `const puffinparse = require('puffinparse')`.
 
 ## Modes
 
-As everywhere in LiteOCR, the mode decides the response type, and a model that does not serve the
+As everywhere in PuffinParse, the mode decides the response type, and a model that does not serve the
 mode you asked for rejects with `UnsupportedModelError` before any network call.
 
 | Mode | Call | Resolves to |
@@ -82,7 +82,7 @@ The options mirror SPEC §4 and the Python keywords, in camelCase:
 | `pages` | all | `'1-3,7'`, `2` or `[1, 2, 5]`, 1-based, forwarded best-effort. |
 | `language` | — | Language hint when the provider supports one. |
 | `output` | `'markdown'` | `parse` only: preferred block content, `'markdown'` or `'text'`. |
-| `outputFormat` | unified | `parse` / `extract`: `'reducto'`, `'extend'` or `'llamaparse'` returns that vendor's JSON shape, verbatim ([compatibility](/project/compat/)). `'liteocr'` is the unified response. |
+| `outputFormat` | unified | `parse` / `extract`: `'reducto'`, `'extend'` or `'llamaparse'` returns that vendor's JSON shape, verbatim ([compatibility](/project/compat/)). `'puffinparse'` is the unified response. |
 | `providerOptions` | — | Provider-specific options merged verbatim into the provider request. |
 | `includeRaw` | `false` | Attach the provider payload as `response.raw`. |
 | `timeout` | `300` | Whole-call deadline in **seconds** (upload + polling + download), as in Python and the CLI. |
@@ -98,8 +98,8 @@ Unknown option names are a `TypeError` that lists the accepted ones, so a snake_
 
 The interfaces in `index.d.ts` follow [SPEC §5](/project/spec/) field for field, in camelCase.
 Optional values are `null` (never missing), lists are always present, and three things are returned
-exactly as received: `data` (your extraction), `metadata` (your keys plus `liteocr_*` keys such as
-`liteocr_fallback_index` and `liteocr_derived_from`) and `raw`. `fields` keeps its JSON-pointer keys.
+exactly as received: `data` (your extraction), `metadata` (your keys plus `puffinparse_*` keys such as
+`puffinparse_fallback_index` and `puffinparse_derived_from`) and `raw`. `fields` keeps its JSON-pointer keys.
 
 ```ts
 interface ParseResponse {
@@ -120,7 +120,7 @@ interface Block { type: BlockType; content: string; text: string | null; bbox: B
 ## Router
 
 ```ts
-import { Router } from 'liteocr'
+import { Router } from 'puffinparse'
 
 const router = new Router({
   models: ['reducto/standard', 'llamaparse/agentic', 'extend/parse_light'],
@@ -136,7 +136,7 @@ router.plan()    // the order the next call would try
 `fallbackOn` also accepts class names (`'ProviderError'`) or the classes themselves. Calling a
 method for another mode (`router.ocr(...)` on a parse router) rejects with `InputError`. Per-call
 options are the module-level ones minus `model` and `fallbacks`. When a fallback served the call,
-`response.metadata.liteocr_fallback_index` says which.
+`response.metadata.puffinparse_fallback_index` says which.
 
 ## Async jobs and webhooks
 
@@ -145,11 +145,11 @@ batches or webhook-driven pipelines, split the call in two and own the waiting y
 `parse` mode only and need a provider with a job queue: `reducto`, `extend`, `llamaparse`.
 
 ```ts
-import { submit, retrieve, handleWebhook, type Job } from 'liteocr'
+import { submit, retrieve, handleWebhook, type Job } from 'puffinparse'
 
 const job: Job = await submit('200-pages.pdf', {
   model: 'reducto/standard',
-  webhookUrl: 'https://example.com/hooks/liteocr',   // optional, see below
+  webhookUrl: 'https://example.com/hooks/puffinparse',   // optional, see below
 })
 await queue.put(JSON.stringify(job))                  // a Job never holds an API key
 
@@ -175,7 +175,7 @@ interface Job {
 provider once. It resolves to the **same** `Job` object while the job is pending, or to the
 `ParseResponse` (normalised exactly like `parse()`, `latencyMs` counted from submission; a
 vendor shape with `outputFormat`) once it is done. A job the provider reports as failed rejects
-with the typed `LiteOCRError`, `jobId` set, exactly like a failed `parse()`. The key is read from
+with the typed `PuffinParseError`, `jobId` set, exactly like a failed `parse()`. The key is read from
 the environment again unless you pass `apiKey`.
 
 `webhookUrl` maps to Reducto `async.webhook` (direct mode) and LlamaParse `webhook_url`; Extend
@@ -183,7 +183,7 @@ has no per-job webhook (register an endpoint in its dashboard) and rejects it wi
 In your web handler, verify the provider's signature or your own secret first, then:
 
 ```ts
-app.post('/hooks/liteocr', async (req, res) => {
+app.post('/hooks/puffinparse', async (req, res) => {
   const result = await handleWebhook(req.body, { model: 'reducto' })   // Job | ParseResponse
   res.sendStatus(204)
 })
@@ -198,7 +198,7 @@ for every provider's body shape.
 
 ## Errors
 
-Every provider or core failure rejects with a subclass of `LiteOCRError`, mapped from the core's
+Every provider or core failure rejects with a subclass of `PuffinParseError`, mapped from the core's
 `ErrorKind`; argument mistakes are plain `TypeError`s thrown before anything else runs.
 
 | Class | `kind` | When |
@@ -216,13 +216,13 @@ Each carries `message` (the provider's own message, verbatim), `provider`, `stat
 and `retryable`; `toJSON()` returns all of them.
 
 ```ts
-import { parse, AuthenticationError, LiteOCRError } from 'liteocr'
+import { parse, AuthenticationError, PuffinParseError } from 'puffinparse'
 
 try {
   await parse('a.pdf', { model: 'reducto/standard' })
 } catch (e) {
   if (e instanceof AuthenticationError) console.error('set REDUCTO_API_KEY')
-  else if (e instanceof LiteOCRError) console.error(e.kind, e.statusCode, e.message)
+  else if (e instanceof PuffinParseError) console.error(e.kind, e.statusCode, e.message)
   else throw e
 }
 ```
@@ -230,19 +230,19 @@ try {
 ## Models, pricing and scoring
 
 ```ts
-import * as liteocr from 'liteocr'
+import * as puffinparse from 'puffinparse'
 
-liteocr.listModels()                 // every "<provider>/<model>"
-liteocr.listModels('extract')        // only models serving extract
-liteocr.resolveModel('reducto')      // 'reducto/standard'
-liteocr.providers()                  // [{ name, displayName, envVar, baseUrl, docs, models }]
-liteocr.estimateCost('reducto/standard', 100)          // USD, or null when unpriced
-liteocr.setPricing({ 'reducto/standard': 0.012 })      // per page, mode defaults to 'parse'
-liteocr.resetPricing()
-liteocr.outputFormats()              // ['liteocr', 'reducto', 'extend', 'llamaparse']
-liteocr.score(prediction, truth)     // { charSimilarity, cer, wer, wordF1, ..., tableScore }
-liteocr.normalizeText(text)          // the normalisation applied before scoring
-liteocr.initLogging('debug')         // core tracing on stderr
+puffinparse.listModels()                 // every "<provider>/<model>"
+puffinparse.listModels('extract')        // only models serving extract
+puffinparse.resolveModel('reducto')      // 'reducto/standard'
+puffinparse.providers()                  // [{ name, displayName, envVar, baseUrl, docs, models }]
+puffinparse.estimateCost('reducto/standard', 100)          // USD, or null when unpriced
+puffinparse.setPricing({ 'reducto/standard': 0.012 })      // per page, mode defaults to 'parse'
+puffinparse.resetPricing()
+puffinparse.outputFormats()              // ['puffinparse', 'reducto', 'extend', 'llamaparse']
+puffinparse.score(prediction, truth)     // { charSimilarity, cer, wer, wordF1, ..., tableScore }
+puffinparse.normalizeText(text)          // the normalisation applied before scoring
+puffinparse.initLogging('debug')         // core tracing on stderr
 ```
 
 ## Differences from the Python SDK

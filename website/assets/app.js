@@ -1,4 +1,4 @@
-/* LiteOCR docs — small progressive enhancements. No dependencies. */
+/* PuffinParse docs — small progressive enhancements. No dependencies. */
 (function () {
   "use strict";
   var BASE = document.documentElement.getAttribute("data-base") || "/";
@@ -12,7 +12,7 @@
           window.matchMedia("(prefers-color-scheme: dark)").matches);
       var next = dark ? "light" : "dark";
       document.documentElement.setAttribute("data-theme", next);
-      try { localStorage.setItem("liteocr-theme", next); } catch (e) { /* private mode */ }
+      try { localStorage.setItem("puffinparse-theme", next); } catch (e) { /* private mode */ }
       var label = "Switch to " + (next === "dark" ? "light" : "dark") + " theme";
       toggle.setAttribute("aria-label", label);
       toggle.setAttribute("title", label);

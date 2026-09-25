@@ -8,12 +8,12 @@
 | Base URL | `https://generativelanguage.googleapis.com` (override: `base_url` on the request, or `GEMINI_BASE_URL`) |
 | API key | `GEMINI_API_KEY` (or `api_key` on the request) — sent as the header `x-goog-api-key: AIza…` |
 | Docs | <https://ai.google.dev/gemini-api/docs> |
-| API version | Path-versioned; LiteOCR uses `/v1beta` (the Files API and the newest models live there). `/v1` serves the same `generateContent` method. |
+| API version | Path-versioned; PuffinParse uses `/v1beta` (the Files API and the newest models live there). `/v1` serves the same `generateContent` method. |
 | Modes | `parse`, `ocr` (derived from `parse`), `extract` |
 | Verified | 2026-09-11 against the documented wire format; **the live call was not exercised** — see §6, "Unverified against a live key" |
-| Implementation | `crates/liteocr-core/src/providers/gemini.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/gemini.rs` |
 
-Gemini is not a document-AI product but a general vision LLM: LiteOCR sends the file plus a
+Gemini is not a document-AI product but a general vision LLM: PuffinParse sends the file plus a
 transcription prompt and pins the answer's shape with `generationConfig.response_schema`
 (structured output), so the model must return one entry per page instead of a single markdown blob.
 There is exactly **one** HTTP call per parse — no upload step, no polling — unless the document is
@@ -23,9 +23,9 @@ The consequence of using an LLM is that **nothing geometric comes back**: no bou
 dimensions, no per-block confidence. Anything that needs overlays or coordinates should use a layout
 provider (Reducto, Extend, LlamaParse, Azure, Textract) instead.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
-The LiteOCR model name is the Gemini model id minus the `gemini-` prefix.
+The PuffinParse model name is the Gemini model id minus the `gemini-` prefix.
 
 | Model | API model id | Token price (in / out, per 1M) | `pricing.json` per-page estimate |
 |---|---|---|---|
@@ -43,9 +43,9 @@ models page and the changelog (3.5 Flash GA 2026-05-19, 3.5 Flash-Lite GA 2026-0
 
 **Cost is computed from tokens, not from pages.** Each response's `usageMetadata` is priced exactly
 (`promptTokenCount × input + (candidatesTokenCount + thoughtsTokenCount) × output`) and lands in
-`usage.provider_cost_usd`, which `liteocr-core` prefers over the price table. The per-page numbers in
+`usage.provider_cost_usd`, which `puffinparse-core` prefers over the price table. The per-page numbers in
 `pricing.json` are only a fallback for the case where a response carries no `usageMetadata` (and for
-`liteocr providers`-style estimates). They were derived, not measured:
+`puffinparse providers`-style estimates). They were derived, not measured:
 
 ```
 per_page_usd = (1500 × input_price_per_1M + N × output_price_per_1M) / 1e6
@@ -60,10 +60,10 @@ plus the rendered-image tokens, while a full-page scan image is ~1 000–1 600 t
 are not in the estimate; with a thinking budget left at its default they can double the output side.
 
 A model that is not in this table can be used without a registry change:
-`provider_options={"model": "gemini-3.1-pro-preview"}` replaces the API model id verbatim (LiteOCR
+`provider_options={"model": "gemini-3.1-pro-preview"}` replaces the API model id verbatim (PuffinParse
 then has no token prices for it and falls back to the registry model's per-page price).
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 One call: `POST {base}/v1beta/models/{api_model}:generateContent`, headers `x-goog-api-key` and
 `content-type: application/json`.
@@ -92,7 +92,7 @@ One call: `POST {base}/v1beta/models/{api_model}:generateContent`, headers `x-go
 
 **Input handling.**
 
-| Input | What LiteOCR does |
+| Input | What PuffinParse does |
 |---|---|
 | Path / bytes ≤ 14 MB | base64 into `inline_data` |
 | Path / bytes > 14 MB | resumable Files API upload, then `file_data: {file_uri, mime_type}` |
@@ -101,7 +101,7 @@ One call: `POST {base}/v1beta/models/{api_model}:generateContent`, headers `x-go
 The MIME type is sniffed from the magic bytes (`%PDF-`, PNG, JPEG, WebP, GIF) and only falls back to
 the extension guess, because Gemini rejects a mismatched `mime_type` outright. PDFs are native input
 (up to 1 000 pages / 50 MB); the accepted image types are `image/png`, `image/jpeg`, `image/webp`,
-`image/heic` and `image/heif` — **not GIF**, which LiteOCR still labels correctly so that Gemini's
+`image/heic` and `image/heif` — **not GIF**, which PuffinParse still labels correctly so that Gemini's
 rejection names the real reason.
 
 The 14 MB inline cut-off exists because a `generateContent` request is capped at ~20 MB and base64
@@ -109,7 +109,7 @@ inflates the payload by a third. The Files API path is
 `POST {base}/upload/v1beta/files` with `X-Goog-Upload-Protocol: resumable` and
 `X-Goog-Upload-Command: start` → the `x-goog-upload-url` response header → a second request with
 `X-Goog-Upload-Command: upload, finalize` carrying the bytes → `{"file": {"uri", "name", "state"}}`;
-if `state` is not `ACTIVE` LiteOCR polls `GET {base}/v1beta/files/{id}` (0.5 s, ×1.5, max 5 s) until
+if `state` is not `ACTIVE` PuffinParse polls `GET {base}/v1beta/files/{id}` (0.5 s, ×1.5, max 5 s) until
 it is. Uploaded files expire after 48 hours.
 
 **Per mode.**
@@ -118,7 +118,7 @@ it is. Uploaded files expire after 48 hours.
   `{"pages": [{"page_number": 1, "markdown": "…"}, …]}`, so the page split is exact rather than
   guessed from a separator.
 * `ocr` — not implemented natively; the trait default derives a `TextResponse` from `parse`
-  (`metadata.liteocr_derived_from = "parse"`). Lines come from the page text, words carry no boxes.
+  (`metadata.puffinparse_derived_from = "parse"`). Lines come from the page text, words carry no boxes.
   Passing `output="text"` additionally tells the model to skip Markdown syntax.
 * `extract` — the request schema is rewritten into Gemini's schema subset (see §4) and used as
   `response_schema`; the schema and `instructions` are also restated in the prompt, which measurably
@@ -132,8 +132,8 @@ tokens, and a model may ignore the restriction. For a non-PDF input `pages` is d
 `metadata.gemini_pages_ignored = true` is set.
 
 **Where `provider_options` are merged:** the whole object is deep-merged into the request body after
-LiteOCR builds it, so `generationConfig`, `safetySettings`, `systemInstruction`, `tools`, … can all be
-set or overridden. Three keys are consumed by LiteOCR and never reach Gemini: `model` (API model id),
+PuffinParse builds it, so `generationConfig`, `safetySettings`, `systemInstruction`, `tools`, … can all be
+set or overridden. Three keys are consumed by PuffinParse and never reach Gemini: `model` (API model id),
 `prompt` (replaces the built-in instruction entirely) and `prompt_suffix` (appended to it).
 
 ## 4. Response mapping
@@ -155,10 +155,10 @@ set or overridden. Three keys are consumed by LiteOCR and never reach Gemini: `m
 }
 ```
 
-(The full payloads are `crates/liteocr-core/tests/fixtures/gemini_parse_multipage.json` and
+(The full payloads are `crates/puffinparse-core/tests/fixtures/gemini_parse_multipage.json` and
 `gemini_extract_invoice.json`, which drive the normalisation tests.)
 
-| Gemini field | LiteOCR unified field | Notes |
+| Gemini field | PuffinParse unified field | Notes |
 |---|---|---|
 | `responseId` | `ParseResponse.provider_job_id` | Gemini has no job concept; this is the only per-call id. |
 | `candidates[0].content.parts[].text` | — | All text parts are concatenated, then parsed as JSON (a stray ```` ```json ```` fence is stripped defensively). |
@@ -179,7 +179,7 @@ set or overridden. Three keys are consumed by LiteOCR and never reach Gemini: `m
 For `extract`, the parsed JSON becomes `ExtractResponse.data` verbatim, `fields` stays empty (no
 citations, no per-field confidence) and `usage.pages` is the PDF page count, or `1` for an image.
 
-**PDF page-count sanity check.** For an inline PDF LiteOCR counts `/Type /Page` objects (ignoring
+**PDF page-count sanity check.** For an inline PDF PuffinParse counts `/Type /Page` objects (ignoring
 `/Type /Pages`) in the raw bytes and records it as `metadata.gemini_pdf_page_count`. If it differs
 from the number of pages the model returned — a dropped or hallucinated page, or simply a
 page-selection request — `metadata.gemini_page_count_mismatch = true` is set and a warning is logged.
@@ -208,7 +208,7 @@ Gemini's `response_schema` accepts:
 Errors are `{"error": {"code": 400, "message": "…", "status": "INVALID_ARGUMENT", "details": [...]}}`;
 `Error::from_http` lifts `error.message` and classifies by status:
 
-| Status | `status` field | Trigger | LiteOCR `ErrorKind` |
+| Status | `status` field | Trigger | PuffinParse `ErrorKind` |
 |---|---|---|---|
 | 400 | `INVALID_ARGUMENT` | malformed body, unsupported `mime_type`, **invalid API key**, schema Gemini rejects | `bad_request` |
 | 400 | `FAILED_PRECONDITION` | free tier not available in the caller's country / billing required | `bad_request` |
@@ -231,7 +231,7 @@ Failures that arrive with HTTP 200 are turned into errors too:
 
 **Retries.** `max_retries` (default 2) with exponential backoff and full jitter, on 429, 5xx and
 network errors only (the shared `http::with_retry`). Gemini's 429 body sometimes carries a
-`RetryInfo` detail with `retryDelay`; LiteOCR does not read it yet and backs off blind.
+`RetryInfo` detail with `retryDelay`; PuffinParse does not read it yet and backs off blind.
 
 **Rate limits.** Counted per project and per model in three dimensions — requests/minute, *input*
 tokens/minute and requests/day — and they depend on the usage tier, so the authoritative numbers are
@@ -250,10 +250,10 @@ request, including the Files API upload and the URL download.
   Google with `400 API_KEY_INVALID` on every endpoint, so no call has ever reached the real service.
   The fixtures under `tests/fixtures/gemini_*.json` were therefore **constructed from the documented
   response schema**, not captured. Run
-  `cargo test -p liteocr-core gemini_live -- --ignored --nocapture` with a working key, then replace
+  `cargo test -p puffinparse-core gemini_live -- --ignored --nocapture` with a working key, then replace
   the fixtures with real payloads and fill in measured latency and cost here.
 * **No geometry, ever.** `Block.bbox`, `Page.width`/`height` and `Block.confidence` are always
-  `None`. `ocr` mode returns words without boxes. This is a property of the model, not of LiteOCR.
+  `None`. `ocr` mode returns words without boxes. This is a property of the model, not of PuffinParse.
 * **The page split comes from the model, not from the file.** Structured output makes it reliable in
   practice, but a model can still merge or drop a page. `metadata.gemini_page_count_mismatch` is the
   tripwire for PDFs; there is no equivalent check for multi-page TIFFs or images.
@@ -267,7 +267,7 @@ request, including the Files API upload and the URL download.
   PDFs with `pages`, or raise `generationConfig.maxOutputTokens`.
 * **`temperature: 0` does not make the output deterministic.** Repeated runs differ slightly, which
   matters for benchmark reproducibility.
-* **Gemini cannot fetch a URL.** LiteOCR downloads it first; a URL that needs authentication has to
+* **Gemini cannot fetch a URL.** PuffinParse downloads it first; a URL that needs authentication has to
   be fetched by the caller and passed as bytes.
 * **`additionalProperties` is the classic 400.** Most schema generators (Pydantic, zod) emit it and
   Gemini rejects it; `sanitize_schema` strips it, along with `$schema`, `default` and `examples`.
@@ -276,50 +276,50 @@ request, including the Files API upload and the URL download.
 * **The API is versioned in the path and the newest surface is moving.** Google's *Interactions API*
   (`POST /v1beta/interactions`, GA June 2026) is now the documented default and uses a different
   shape (`input`, `steps`, `response_format`). `generateContent` remains supported and is still the
-  recommended path for stable deployments — LiteOCR targets it deliberately; expect the docs links
+  recommended path for stable deployments — PuffinParse targets it deliberately; expect the docs links
   below to show the Interactions shape.
 * **Files API objects expire after 48 hours** and are scoped to the project, so a `file_uri` cannot be
-  reused across keys. LiteOCR uploads per call and never reuses or deletes (files are free and
+  reused across keys. PuffinParse uploads per call and never reuses or deletes (files are free and
   capped at 20 GB per project).
 * **Image vs. PDF tokenisation differ.** A PDF page is a flat 258 tokens plus image tokens; a
   standalone image is tiled at 768×768 (≈258 tokens per tile). A scan sent as PNG can therefore cost
   several times what the same page costs inside a PDF.
-* **`x-goog-api-key` and `?key=` are equivalent**; LiteOCR uses the header so keys never land in
+* **`x-goog-api-key` and `?key=` are equivalent**; PuffinParse uses the header so keys never land in
   request logs or URLs.
 
 ## 7. Useful `provider_options` passthrough
 
 ```python
 # 1. Turn thinking off for cheap, fast transcription (Flash / Flash-Lite only).
-liteocr.parse("scan.png", model="gemini/2.5-flash",
+puffinparse.parse("scan.png", model="gemini/2.5-flash",
               provider_options={"generationConfig": {"thinkingConfig": {"thinkingBudget": 0}}})
 
 # 2. Raise the output budget for a long PDF.
-liteocr.parse("report.pdf", model="gemini/2.5-pro",
+puffinparse.parse("report.pdf", model="gemini/2.5-pro",
               provider_options={"generationConfig": {"maxOutputTokens": 65536}})
 
 # 3. Reach a model that is not in the registry.
-liteocr.parse("doc.pdf", model="gemini/2.5-flash",
+puffinparse.parse("doc.pdf", model="gemini/2.5-flash",
               provider_options={"model": "gemini-3.1-pro-preview"})
 
 # 4. Steer the transcription without rewriting the whole prompt.
-liteocr.parse("statement.pdf", model="gemini/2.5-flash",
+puffinparse.parse("statement.pdf", model="gemini/2.5-flash",
               provider_options={"prompt_suffix": "Keep every stamp and handwritten note, "
                                                  "and transcribe struck-through text as ~~text~~."})
 
 # 5. Replace the instruction entirely (the pages schema still applies).
-liteocr.parse("form.pdf", model="gemini/2.5-flash-lite",
+puffinparse.parse("form.pdf", model="gemini/2.5-flash-lite",
               provider_options={"prompt": "Return each page of this form as a Markdown table of "
                                           "field name and value, one row per field."})
 
 # 6. Loosen safety filters for documents that trip them (medical, legal, incident reports).
-liteocr.parse("report.pdf", model="gemini/2.5-flash",
+puffinparse.parse("report.pdf", model="gemini/2.5-flash",
               provider_options={"safetySettings": [
                   {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
                   {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"}]})
 
 # 7. A system instruction, e.g. to pin the output language.
-liteocr.parse("brief.pdf", model="gemini/2.5-flash",
+puffinparse.parse("brief.pdf", model="gemini/2.5-flash",
               provider_options={"systemInstruction": {"parts": [{"text": "Always answer in German."}]}})
 ```
 
@@ -335,5 +335,5 @@ liteocr.parse("brief.pdf", model="gemini/2.5-flash",
 * Files API: <https://ai.google.dev/gemini-api/docs/files>
 * `generateContent` reference: <https://ai.google.dev/api/generate-content>
 * API versions: <https://ai.google.dev/gemini-api/docs/api-versions>
-* Interactions API (the newer surface LiteOCR does *not* use):
+* Interactions API (the newer surface PuffinParse does *not* use):
   <https://ai.google.dev/gemini-api/docs/migrate-to-interactions>

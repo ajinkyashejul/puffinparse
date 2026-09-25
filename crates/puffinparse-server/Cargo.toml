@@ -1,0 +1,33 @@
+[package]
+name = "puffinparse-server"
+description = "PuffinParse gateway: an HTTP proxy in front of every OCR provider with virtual keys, budgets, rate limits, fallbacks and metrics."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+puffinparse-core = { workspace = true }
+axum = { version = "0.8", default-features = false, features = ["http1", "json", "multipart", "query", "tokio"] }
+tower-http = { version = "0.6", features = ["catch-panic"] }
+tokio = { workspace = true, features = ["net", "signal"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+bytes = { workspace = true }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+toml = { version = "0.9", default-features = false, features = ["parse", "serde", "std"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+
+[lints.rust]
+unsafe_code = "forbid"

@@ -1118,98 +1118,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
 
 [[package]]
-name = "liteocr-cli"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "clap",
- "comfy-table",
- "futures",
- "indicatif",
- "liteocr-core",
- "liteocr-server",
- "serde",
- "serde_json",
- "sha2",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "liteocr-core"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "bytes",
- "chrono",
- "futures",
- "hmac",
- "mime_guess",
- "rand",
- "reqwest",
- "serde",
- "serde_json",
- "sha2",
- "strsim",
- "thiserror",
- "tokio",
- "tracing",
- "unicode-normalization",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "liteocr-node"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "liteocr-core",
- "napi",
- "napi-build",
- "napi-derive",
- "serde",
- "serde_json",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "liteocr-python"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "liteocr-core",
- "pyo3",
- "pyo3-async-runtimes",
- "pythonize",
- "serde",
- "serde_json",
- "tokio",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "liteocr-server"
-version = "0.1.0"
-dependencies = [
- "axum",
- "bytes",
- "chrono",
- "http-body-util",
- "liteocr-core",
- "serde",
- "serde_json",
- "tokio",
- "toml",
- "tower",
- "tower-http",
- "tracing",
- "uuid",
-]
-
-[[package]]
 name = "litrs"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1483,6 +1391,98 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "puffinparse-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "clap",
+ "comfy-table",
+ "futures",
+ "indicatif",
+ "puffinparse-core",
+ "puffinparse-server",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "puffinparse-core"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "bytes",
+ "chrono",
+ "futures",
+ "hmac",
+ "mime_guess",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2",
+ "strsim",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "unicode-normalization",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "puffinparse-node"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "napi",
+ "napi-build",
+ "napi-derive",
+ "puffinparse-core",
+ "serde",
+ "serde_json",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "puffinparse-python"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "puffinparse-core",
+ "pyo3",
+ "pyo3-async-runtimes",
+ "pythonize",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "puffinparse-server"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "bytes",
+ "chrono",
+ "http-body-util",
+ "puffinparse-core",
+ "serde",
+ "serde_json",
+ "tokio",
+ "toml",
+ "tower",
+ "tower-http",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]

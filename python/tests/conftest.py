@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-FIXTURES = Path(__file__).resolve().parents[2] / "crates" / "liteocr-core" / "tests" / "fixtures"
+FIXTURES = Path(__file__).resolve().parents[2] / "crates" / "puffinparse-core" / "tests" / "fixtures"
 SAMPLE_PDF = (
     Path(__file__).resolve().parents[2]
     / "benchmark"
@@ -27,8 +27,8 @@ def has_key(provider: str) -> bool:
 
 
 def live(provider: str):  # type: ignore[no-untyped-def]
-    """Skip a live test unless the provider's API key is configured and LITEOCR_LIVE_TESTS is set."""
+    """Skip a live test unless the provider's API key is configured and PUFFINPARSE_LIVE_TESTS is set."""
     return pytest.mark.skipif(
-        not (has_key(provider) and os.environ.get("LITEOCR_LIVE_TESTS")),
-        reason=f"set {PROVIDER_ENV[provider]} and LITEOCR_LIVE_TESTS=1 to run live {provider} tests",
+        not (has_key(provider) and os.environ.get("PUFFINPARSE_LIVE_TESTS")),
+        reason=f"set {PROVIDER_ENV[provider]} and PUFFINPARSE_LIVE_TESTS=1 to run live {provider} tests",
     )

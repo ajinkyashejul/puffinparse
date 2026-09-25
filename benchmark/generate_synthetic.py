@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the ``synthetic-v1`` benchmark dataset for LiteOCR.
+"""Generate the ``synthetic-v1`` benchmark dataset for PuffinParse.
 
 The script renders a set of synthetic documents (PNG images and one multi-page
 PDF per ``multipage`` document) together with *exact* markdown ground truth, so
@@ -1012,7 +1012,7 @@ def generate() -> list[dict]:
 README = """\
 # synthetic-v1
 
-A small, fully synthetic OCR benchmark dataset for [LiteOCR](../../../README.md).
+A small, fully synthetic OCR benchmark dataset for [PuffinParse](../../../README.md).
 Every document is rendered by `{generator}` from a built-in corpus, so the
 markdown in `truth/` is *exact* ground truth rather than a human transcription.
 

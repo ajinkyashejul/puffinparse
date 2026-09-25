@@ -1,7 +1,7 @@
 # parsebench
 
 A curated, redistributable subset of **[ParseBench](https://parsebench.ai)** (LlamaIndex),
-converted into the LiteOCR manifest format by
+converted into the PuffinParse manifest format by
 [`benchmark/adapters/parsebench.py`](../../adapters/parsebench.py).
 
 Upstream: `llamaindex/ParseBench` on Hugging Face, pinned to commit
@@ -60,7 +60,7 @@ understand them and reports
 which counts as a failure and drags `overall` down. Until a rules scorer lands, run
 
 ```bash
-liteocr bench run --dataset benchmark/datasets/parsebench --models <model> --filter _page
+puffinparse bench run --dataset benchmark/datasets/parsebench --models <model> --filter _page
 ```
 
 to select only the table documents (every table id ends in `_pageN`), or filter `text_` for the

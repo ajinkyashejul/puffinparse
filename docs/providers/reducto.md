@@ -10,15 +10,15 @@
 | Docs | <https://docs.reducto.ai> (append `.md` to any docs path for raw markdown; index at `llms.txt`) |
 | API version | Unversioned — no version header. Server string observed in the published OpenAPI: `v1.12.12-114-g9808b824f237` |
 | Verified | 2026-09-11, live against the production host |
-| Implementation | `crates/liteocr-core/src/providers/reducto.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/reducto.rs` |
 
-Reducto's Parse product returns Markdown chunks plus typed, bbox-carrying blocks. LiteOCR uses the
+Reducto's Parse product returns Markdown chunks plus typed, bbox-carrying blocks. PuffinParse uses the
 current **v3** request schema (`input` + `enhance`/`retrieval`/`formatting`/`spreadsheet`/`settings`),
 not the legacy `document_url` schema.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
-| Model | Provider parameters LiteOCR sets | List price (`pricing.json`) |
+| Model | Provider parameters PuffinParse sets | List price (`pricing.json`) |
 |---|---|---|
 | `reducto/standard` *(default)* | none beyond the shared body — the account's default model (legacy Parse for most accounts) | $0.015 / page |
 | `reducto/r-1` | `settings.model = "r-1"` | $0.010 / page |
@@ -31,7 +31,7 @@ Prices are public pay-as-you-go list prices (source: <https://docs.reducto.ai/re
 used only to fill `OcrResponse.cost_usd = per_page_usd × usage.pages`. Reducto bills "complex" pages a
 surcharge credit on top of the base page credit, so the estimate is a floor for `standard`/`agentic`.
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 All requests carry `Authorization: Bearer $REDUCTO_API_KEY`. There is no version or workspace header.
 
@@ -57,14 +57,14 @@ All requests carry `Authorization: Bearer $REDUCTO_API_KEY`. There is no version
    * `pages="1-3,7"` becomes `settings.page_range = [{"start":1,"end":3},{"start":7}]` (1-based,
      matching Reducto's own indexing).
    * `chunk_mode: "page"` is deliberate: Reducto's default is `"disabled"`, which returns the whole
-     document as one chunk and gives LiteOCR no page structure.
-3. **Async variant.** When `provider_options.async == true`, LiteOCR posts the *same* body to
+     document as one chunk and gives PuffinParse no page structure.
+3. **Async variant.** When `provider_options.async == true`, PuffinParse posts the *same* body to
    `POST {base}/parse_async` → `{"job_id":"..."}`, then polls `GET {base}/job/{job_id}` (Bearer header
    required) starting at 1 s and backing off ×1.5 to a maximum of 8 s. Terminal statuses are
    `Completed`, `Failed`, `Cancelled`; anything else (`Pending`, `Idle`, `InProgress`, `Completing`, …)
    keeps polling. A completed job's `result` is deserialised as the same `ParseResponse` the sync call
    returns — i.e. the payload lives at `job.result.result.chunks`.
-4. **Result.** If `result.type == "url"` (large results, or `settings.force_url_result`), LiteOCR issues
+4. **Result.** If `result.type == "url"` (large results, or `settings.force_url_result`), PuffinParse issues
    a plain `GET` on the presigned URL **without** the Authorization header and expects the *whole*
    `FullResult` object back (`{"type":"full","chunks":[…]}`), not a bare chunk array. A second `url`
    result is an error, and a storage error (e.g. an expired link: S3 answers `403` with an XML body)
@@ -74,7 +74,7 @@ All requests carry `Authorization: Bearer $REDUCTO_API_KEY`. There is no version
    end to end by the loopback tests in `providers::reducto::wire`. The link is valid for 12 h
    (`X-Amz-Expires=43200`) and the object is deleted after 24 h.
 
-**Where `provider_options` are merged:** `build_body()` clones `provider_options`, removes the LiteOCR-only
+**Where `provider_options` are merged:** `build_body()` clones `provider_options`, removes the PuffinParse-only
 key `async`, and deep-merges the rest into the body above (objects merge recursively; scalars and arrays
 replace). So `provider_options` keys are top-level Reducto request keys — `settings`, `retrieval`,
 `formatting`, `enhance`, `spreadsheet`, `queue_priority`, `async` (the Reducto object of that name is
@@ -91,7 +91,7 @@ replace). So `provider_options` keys are top-level Reducto request keys — `set
   body has no result and no failure reason, so `parse_webhook` reports `Finished` and
   `resolve_webhook` / Python `handle_webhook` fetch `GET /job/{id}`. Direct webhooks are unsigned:
   put a secret in `async.metadata` and check it before trusting the body. Svix-mode webhooks are
-  not configured by LiteOCR (pass `provider_options={"async": {"webhook": {"mode": "svix", …}}}`).
+  not configured by PuffinParse (pass `provider_options={"async": {"webhook": {"mode": "svix", …}}}`).
 * **Retrieve** — one `GET {base}/job/{job_id}` (retried on 429/5xx). `Completed` → the `result`
   (a `ParseResponse`, `url`-typed results followed as above); `Failed` / `Cancelled` →
   `JobStatus::Failed` with `reason` (or `error.message`); `Pending`, `Idle`, `InProgress`,
@@ -101,7 +101,7 @@ replace). So `provider_options` keys are top-level Reducto request keys — `set
 
 ## 4. Response mapping (`parse` / `ocr`)
 
-| Reducto field | LiteOCR unified field | Notes |
+| Reducto field | PuffinParse unified field | Notes |
 |---|---|---|
 | `job_id` | `OcrResponse.provider_job_id` | |
 | `result.chunks[].content` | `Page.markdown` | Only when every block in the chunk is on one page; multiple such chunks on a page are joined with a blank line. |
@@ -123,7 +123,7 @@ Block types: `Text`, `Key Value`, `Comment` → `text`; `Title` → `title`; `Se
 `Footer` → `footer`; `Footnote` → `footnote`; `Caption` → `caption`; `Formula`/`Equation` → `formula`;
 everything else (including `Page Number`, `Signature`, `Checkbox`) → `other`.
 
-Trimmed real response (`crates/liteocr-core/tests/fixtures/reducto_parse.json`, two of three blocks elided):
+Trimmed real response (`crates/puffinparse-core/tests/fixtures/reducto_parse.json`, two of three blocks elided):
 
 ```json
 {
@@ -143,8 +143,8 @@ Trimmed real response (`crates/liteocr-core/tests/fixtures/reducto_parse.json`, 
     "type": "full",
     "chunks": [
       {
-        "content": "# Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78\n\nAcme Corporation, 123 Main Street",
-        "embed": "# Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78\n\nAcme Corporation, 123 Main Street",
+        "content": "# Hello PuffinParse\n\nInvoice #1234\nTotal: $56.78\n\nAcme Corporation, 123 Main Street",
+        "embed": "# Hello PuffinParse\n\nInvoice #1234\nTotal: $56.78\n\nAcme Corporation, 123 Main Street",
         "enriched": null,
         "enrichment_success": false,
         "blocks": [
@@ -153,7 +153,7 @@ Trimmed real response (`crates/liteocr-core/tests/fixtures/reducto_parse.json`, 
             "bbox": { "left": 0.119281045751634, "top": 0.06818181818181818,
                       "width": 0.24754901960784315, "height": 0.021464646464646464,
                       "page": 1, "original_page": 1 },
-            "content": "Hello LiteOCR",
+            "content": "Hello PuffinParse",
             "image_url": null,
             "chart_data": null,
             "confidence": "high",
@@ -173,10 +173,10 @@ Trimmed real response (`crates/liteocr-core/tests/fixtures/reducto_parse.json`, 
 
 ## 5. Extract mode (`extract`)
 
-`liteocr.extract(...)` posts to `POST {base}/extract` (sync) or `POST {base}/extract_async` +
+`puffinparse.extract(...)` posts to `POST {base}/extract` (sync) or `POST {base}/extract_async` +
 `GET {base}/job/{job_id}` when `provider_options={"async": true}` — the same upload step, auth header
 and polling schedule as parse. Implementation: `Reducto::extract` in
-`crates/liteocr-core/src/providers/reducto.rs`.
+`crates/puffinparse-core/src/providers/reducto.rs`.
 
 Body built by `build_extract_body()`:
 
@@ -200,7 +200,7 @@ Body built by `build_extract_body()`:
 * `reducto/deep_extract` adds `settings.deep_extract` (agentic refinement loop; `usage.extract_mode`
   comes back as `"super_agent"`).
 * `pages` → `settings.page_range`, and `provider_options` are deep-merged exactly as on the parse path
-  (`settings`, `parsing`, `queue_priority`, …; the LiteOCR-only `async` key is consumed).
+  (`settings`, `parsing`, `queue_priority`, …; the PuffinParse-only `async` key is consumed).
 
 ### Response mapping
 
@@ -211,7 +211,7 @@ The response shape **changes with citations**, which is the main trap:
 | off | `"extract"` | a **list** of objects (one per chunk; length 1 unless chunking is on), plus a top-level `"citations": null` |
 | on | `"v3_extract"` | an **object** whose every *leaf* is `{"value": …, "citations": [ParseBlock…]}` — recursively, inside nested objects and arrays too |
 
-| Reducto field | LiteOCR unified field | Notes |
+| Reducto field | PuffinParse unified field | Notes |
 |---|---|---|
 | `result` | `ExtractResponse.data` | Citation wrappers are stripped so `data` matches the request schema. A single-element list is unwrapped to the object; a longer list is kept as an array (pointers then start `/0/…`). |
 | `result.<path>.citations[]` | `ExtractResponse.fields["<json pointer>"]` | Keys are RFC 6901 pointers: `/invoice_number`, `/line_items/0/amount`, `/vendor_address/city`. Only leaves get an entry. |
@@ -226,10 +226,10 @@ The response shape **changes with citations**, which is the main trap:
 | `job_id` | `ExtractResponse.provider_job_id` | Optional in the schema, so it may be `None`. |
 
 `settings.force_url_result` (and large results) replace `result` with
-`{"type":"url","url":"https://…"}`; LiteOCR fetches that URL **without** the Authorization header and
+`{"type":"url","url":"https://…"}`; PuffinParse fetches that URL **without** the Authorization header and
 uses the body, which is the *bare* result value — not a wrapper object like the parse path's.
 
-Trimmed real response (`crates/liteocr-core/tests/fixtures/reducto_extract.json`, one citation shown):
+Trimmed real response (`crates/puffinparse-core/tests/fixtures/reducto_extract.json`, one citation shown):
 
 ```json
 {
@@ -284,7 +284,7 @@ Trimmed real response (`crates/liteocr-core/tests/fixtures/reducto_extract.json`
 Every non-2xx body goes through `Error::from_http`, which pulls a message out of `message` / `detail` /
 `error` and classifies by status:
 
-| Status | Reducto body | LiteOCR `ErrorKind` |
+| Status | Reducto body | PuffinParse `ErrorKind` |
 |---|---|---|
 | 400 | `{"error":{"code":400,"name":"INVALID_CONFIG",…},"detail":"…"}` — bad config, source download failure, bad page range | `bad_request` |
 | 401 | `{"error":{"code":401,"name":"AUTH_ERROR","message":"Invalid access token"},…}` | `authentication` |
@@ -327,47 +327,47 @@ sync `/parse` ceiling is 900 s — use `provider_options={"async": true}` for an
 * **Error text always names `document_url`** even when you sent `input` — never parse error strings.
 * **`result.type == "url"`** appears for large results (~6 MB inline limit). The fetched body is the full
   `{"type":"full","chunks":[…]}` object, not a bare array — the vendor's own snippet gets this wrong.
-  LiteOCR handles both variants; force the URL path deterministically with
+  PuffinParse handles both variants; force the URL path deterministically with
   `provider_options={"settings":{"force_url_result":true}}`.
 * **442 is a real status code** (password-protected document), not a typo for 422. Supply
   `settings.document_password`.
 * **No rate-limit headers**, no `Retry-After`, even on 429.
-* **Missing auth header → 403 with an HTML body**, invalid token → 401 with JSON. LiteOCR's message
+* **Missing auth header → 403 with an HTML body**, invalid token → 401 with JSON. PuffinParse's message
   extraction falls back to the raw (truncated) body for the HTML case.
 * **Chunks have no page number.** Page identity comes only from `blocks[].bbox.page`; with
-  `chunk_mode: "variable"` chunks straddle pages, which is why LiteOCR pins `chunk_mode: "page"` and
+  `chunk_mode: "variable"` chunks straddle pages, which is why PuffinParse pins `chunk_mode: "page"` and
   still derives page numbers from blocks rather than array position.
 * **Undocumented keys on the wire**: `response_type`, `parse_mode`, `document_properties`,
   `usage.credit_breakdown`, `usage.page_billing_breakdown` (1-based page numbers as *string* keys),
-  `usage.non_empty_cell_count`. LiteOCR ignores all but `credit_breakdown`, which it deserialises but
+  `usage.non_empty_cell_count`. PuffinParse ignores all but `credit_breakdown`, which it deserialises but
   does not surface.
 * **`usage.credits` can be `null`** on accounts on the new per-product pricing (they get
   `usage_breakdown` instead) — `Usage.credits` is then `None` and `cost_usd` still comes from the table.
 * **Uploaded files expire after 24 h**, and results expire after 24 h unless
   `settings.persist_results` is set.
 * **`settings.return_images: ["page"]` does not populate `block.image_url`** (it stays `null`); the URL
-  shows up under `block.extra.page_image_url`. LiteOCR surfaces neither.
+  shows up under `block.extra.page_image_url`. PuffinParse surfaces neither.
 
 ## 8. Useful `provider_options` passthrough
 
 ```python
-# 1. Long documents: submit asynchronously and poll (the `async` key is consumed by LiteOCR).
-liteocr.ocr("200-page.pdf", model="reducto/standard", provider_options={"async": True})
+# 1. Long documents: submit asynchronously and poll (the `async` key is consumed by PuffinParse).
+puffinparse.ocr("200-page.pdf", model="reducto/standard", provider_options={"async": True})
 
 # 2. Word- and line-level OCR boxes in the raw payload (+$2 / 1k pages).
-liteocr.ocr("scan.pdf", model="reducto/standard", include_raw=True,
+puffinparse.ocr("scan.pdf", model="reducto/standard", include_raw=True,
             provider_options={"settings": {"return_ocr_data": True}})
 
-# 3. HTML tables instead of LiteOCR's markdown default, and merge tables split across pages.
-liteocr.ocr("report.pdf", model="reducto/r-1",
+# 3. HTML tables instead of PuffinParse's markdown default, and merge tables split across pages.
+puffinparse.ocr("report.pdf", model="reducto/r-1",
             provider_options={"formatting": {"table_output_format": "html", "merge_tables": True}})
 
 # 4. Cheap bulk queue: 12-hour completion guarantee, 20% usage discount.
-liteocr.ocr("batch.pdf", model="reducto/r-1",
+puffinparse.ocr("batch.pdf", model="reducto/r-1",
             provider_options={"async": True, "queue_priority": "batch"})
 
 # 5. Password-protected PDF, and always take the presigned-URL result path.
-liteocr.ocr("locked.pdf", model="reducto/standard",
+puffinparse.ocr("locked.pdf", model="reducto/standard",
             provider_options={"settings": {"document_password": "…", "force_url_result": True}})
 ```
 

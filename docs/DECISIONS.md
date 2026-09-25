@@ -348,3 +348,23 @@ overlays are off by default.
 
 **Consequences.** A palette or type change is one edit. The site build needs pypdfium2 (added to
 `vercel.json` and `pages.yml`); without it the build falls back to Pillow page-1 extraction.
+
+## ADR-23: The product is renamed PuffinParse
+
+**Context.** `liteocr` on PyPI belongs to an unrelated OCR engine, several GitHub projects already
+use the name, and "OCR" undersells a tool whose modes are parse, OCR and extract. The owner's
+preference, LiteParse, is a LlamaIndex product. About 110 names were checked against domains,
+PyPI/npm/crates.io and web collisions (`docs/research/naming.md`).
+
+**Decision.** The product, crates (`puffinparse-{core,cli,python,node,server}`), Python package
+(`puffinparse`, native module `puffinparse._core`), Node package, CLI binary, environment variables
+(`PUFFINPARSE_*`), metadata keys (`puffinparse_*`), error base class (`PuffinParseError`), the
+native output format value (`"puffinparse"`) and the site (`puffinparse.vercel.app`) all use the
+new name. PuffinParse had every checked domain (.com, .dev, .ai, .io) and every registry name free
+and no product collision; the puffin's black, white and orange match the existing palette.
+
+**Consequences.** Committed benchmark results, recorded provider fixtures (which contain
+"LiteOCR" in document text), the CHANGELOG history and earlier ADRs keep the old name. Result files
+written before the rename carry `liteocr_version`, which the CLI and site builder read as an alias.
+`liteocr.vercel.app` keeps serving the same project. The GitHub repository rename, domain purchase,
+handles and trademark clearance are owner actions.

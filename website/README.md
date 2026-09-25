@@ -1,4 +1,4 @@
-# LiteOCR website
+# PuffinParse website
 
 The whole product site: a **landing page at `/`** and the **documentation under `/docs/`**. One
 Python script, two stylesheets, one small JavaScript file — no toolchain, no framework, no CDN, no
@@ -34,7 +34,7 @@ python website/build.py          # -> website/dist/
 |---|---|---|
 | `--base-url <PATH>` | `/` | URL prefix, for hosting under a subpath (`--base-url /docs`). |
 | `--out <DIR>` | `website/dist` | Output directory. Wiped and rebuilt on every run. |
-| `--site-url <URL>` | `https://ajinkyashejul.github.io/liteocr` | Public base URL of the deployed site, used for `<link rel="canonical">` and `sitemap.xml`. Independent of `--base-url`. |
+| `--site-url <URL>` | `https://ajinkyashejul.github.io/puffinparse` | Public base URL of the deployed site, used for `<link rel="canonical">` and `sitemap.xml`. Independent of `--base-url`. |
 | `--docs-prefix <PATH>` | `docs` | Where the documentation is mounted below `--base-url`. The landing page always owns `--base-url` itself. |
 | `--with-benchmark` / `--no-benchmark` | Also build the results viewer into `<out>/benchmark-results/` (default on) |
 | `--check` | off | After building, verify that every internal link and `#fragment` resolves — on the landing page as well as the docs — and that `vercel.json` still redirects every old docs URL. |
@@ -123,7 +123,7 @@ Two small blocks in the docs are generated from live repository data rather than
 cannot drift:
 
 - the docs home **leaderboard strip** reads `benchmark/results/*.json` (best score per model, top 5);
-- the **provider cards** on `/docs/providers/` read `crates/liteocr-core/src/model.rs` and
+- the **provider cards** on `/docs/providers/` read `crates/puffinparse-core/src/model.rs` and
   `pricing.json` for display names, env vars, model lists and vendor doc links.
 
 Both degrade to nothing if those files are missing.
@@ -136,7 +136,7 @@ build. Nothing on the page is hand-maintained prose about counts or results:
 
 | Source | What it feeds |
 |---|---|
-| `crates/liteocr-core/src/model.rs` | `read_registry()` parses the `PROVIDERS` table — provider id, display name, every `ModelInfo` and its `modes` expression (`PARSE_OCR`, `Mode::ALL`, `&[Mode::Extract]`). It drives the provider grid (one card per provider: id, name, mode chips, model count), the `15 / 53 / 3` stat band, and the list of model strings the hero cycles through. |
+| `crates/puffinparse-core/src/model.rs` | `read_registry()` parses the `PROVIDERS` table — provider id, display name, every `ModelInfo` and its `modes` expression (`PARSE_OCR`, `Mode::ALL`, `&[Mode::Extract]`). It drives the provider grid (one card per provider: id, name, mode chips, model count), the `15 / 53 / 3` stat band, and the list of model strings the hero cycles through. |
 | `docs/providers/README.md` | The status column of the provider table → the *live-verified* / *docs-only* dot on each card, and the verified count in the section intro. |
 | `benchmark/results/*.json` | `read_leaderboard(7)` — best score per model → the leaderboard table (the same reader the docs home uses with a limit of 5). |
 | `website/nav.json` | Every link on the page is `site.url(slug)`, so the landing follows the docs prefix automatically. |
@@ -188,13 +188,13 @@ Keep `style.css` under ~250 lines, `landing.css` under ~300, and resist adding a
 ## Deploying
 
 Vercel builds and serves the site from `vercel.json`: `buildCommand` runs this script with
-`--site-url https://liteocr.vercel.app`, `outputDirectory` is `website/dist`, and `cleanUrls` +
+`--site-url https://puffinparse.vercel.app`, `outputDirectory` is `website/dist`, and `cleanUrls` +
 `trailingSlash` give the pretty URLs. The benchmark results viewer is a separate artifact published
 under **`/benchmark-results/`**, so the two never collide.
 
 The URL flags are independent. `--base-url` decides how links are *written* in the HTML,
 `--docs-prefix` decides where the docs sit below it, and `--site-url` decides the absolute address
 used for canonical links and the sitemap. For a project page served at
-`https://user.github.io/liteocr/`, build with `--base-url /liteocr --site-url
-https://user.github.io/liteocr`. Every internal URL, including `llms.txt` and the sitemap, follows
+`https://user.github.io/puffinparse/`, build with `--base-url /puffinparse --site-url
+https://user.github.io/puffinparse`. Every internal URL, including `llms.txt` and the sitemap, follows
 from those flags.

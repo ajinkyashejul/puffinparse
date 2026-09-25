@@ -1,6 +1,6 @@
-# LiteOCR design language
+# PuffinParse design language
 
-LiteOCR reads documents for developers, so its interface borrows from the things that happen when a
+PuffinParse reads documents for developers, so its interface borrows from the things that happen when a
 document is read: a clean page, dark ink, a scanner's line of light, a detector's box around a
 region, and a proofreader's marks. Everything else stays out of the way.
 
@@ -80,7 +80,7 @@ use `text-wrap: balance`. Reading text stays within `--measure` (68ch).
 
 ## Signatures
 
-Two motifs make LiteOCR recognisable. Each is used sparingly.
+Two motifs make PuffinParse recognisable. Each is used sparingly.
 
 - **The bounding box** (`.bbox`): four corner ticks in `--scan`, like a detector's box around a
   region. It marks the single focused object on a view: the selected model, the headline score.

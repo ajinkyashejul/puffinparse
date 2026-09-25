@@ -1,24 +1,24 @@
 'use strict'
 
 /**
- * LiteOCR for Node.js: one API for every OCR / document-parsing provider.
+ * PuffinParse for Node.js: one API for every OCR / document-parsing provider.
  *
- * This file is a thin, typed wrapper over the Rust core (the `liteocr-node` N-API addon loaded by
+ * This file is a thin, typed wrapper over the Rust core (the `puffinparse-node` N-API addon loaded by
  * `native.js`). It validates arguments, builds the core's request JSON from camelCase options,
  * converts responses to camelCase objects (typed in `index.d.ts`, mirroring docs/SPEC.md §5) and
- * turns core errors into `LiteOCRError` subclasses. No provider logic lives here.
+ * turns core errors into `PuffinParseError` subclasses. No provider logic lives here.
  */
 
 const { fileURLToPath } = require('node:url')
 
 const native = require('./native.js')
 
-const CORE_ERROR_PREFIX = 'LITEOCR_CORE_ERROR:'
+const CORE_ERROR_PREFIX = 'PUFFINPARSE_CORE_ERROR:'
 
 // ---- errors --------------------------------------------------------------------------------------
 
-/** Base class for every error LiteOCR throws. `kind` is the core's `ErrorKind`. */
-class LiteOCRError extends Error {
+/** Base class for every error PuffinParse throws. `kind` is the core's `ErrorKind`. */
+class PuffinParseError extends Error {
   constructor(message, options = {}) {
     super(message)
     this.name = new.target.name
@@ -47,7 +47,7 @@ class LiteOCRError extends Error {
 
 function errorClass(name, kind) {
   const cls = {
-    [name]: class extends LiteOCRError {
+    [name]: class extends PuffinParseError {
       get kind() {
         return kind
       }
@@ -90,9 +90,9 @@ function errorFromCore(payload) {
   })
 }
 
-/** Convert whatever the addon threw into a `LiteOCRError` (or a `TypeError` for bad arguments). */
+/** Convert whatever the addon threw into a `PuffinParseError` (or a `TypeError` for bad arguments). */
 function convertError(err, mode) {
-  if (err instanceof LiteOCRError || err instanceof TypeError) return err
+  if (err instanceof PuffinParseError || err instanceof TypeError) return err
   const message = err && typeof err.message === 'string' ? err.message : String(err)
   if (message.startsWith(CORE_ERROR_PREFIX)) {
     let payload
@@ -381,10 +381,10 @@ function outputFormatOption(options, where) {
   } catch {
     throw new BadRequestError(
       `unknown outputFormat ${JSON.stringify(f)}: expected one of ${native.outputFormats().join(' | ')}, ` +
-        `or leave it unset for LiteOCR's unified response`,
+        `or leave it unset for PuffinParse's unified response`,
     )
   }
-  return canonical === 'liteocr' ? null : canonical
+  return canonical === 'puffinparse' ? null : canonical
 }
 
 // ---- response conversion (snake_case core JSON -> camelCase, SPEC §5) ----------------------------
@@ -786,7 +786,7 @@ function listModels(mode) {
   return callNative(() => native.listModels(mode))
 }
 
-/** The modes LiteOCR knows: `['parse', 'ocr', 'extract']`. */
+/** The modes PuffinParse knows: `['parse', 'ocr', 'extract']`. */
 function modes() {
   return native.modes()
 }
@@ -835,7 +835,7 @@ function estimateCost(model, pages, mode = 'parse') {
   return callNative(() => native.estimateCost(qualified, mode, pages))
 }
 
-/** Every value `outputFormat` accepts: `['liteocr', 'reducto', 'extend', 'llamaparse']`. */
+/** Every value `outputFormat` accepts: `['puffinparse', 'reducto', 'extend', 'llamaparse']`. */
 function outputFormats() {
   return native.outputFormats()
 }
@@ -905,7 +905,7 @@ module.exports = {
   normalizeText,
   markdownToText,
   initLogging,
-  LiteOCRError,
+  PuffinParseError,
   AuthenticationError,
   RateLimitError,
   BadRequestError,

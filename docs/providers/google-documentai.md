@@ -11,19 +11,19 @@
 | Docs | <https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors/process> |
 | Modes | `ocr` (**native**), `parse`, `extract` (entities) |
 | Verified | 2026-09-11, **from documentation only** — no credentials were available, so the `#[ignore]`d live test has not been run |
-| Implementation | `crates/liteocr-core/src/providers/google_documentai.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/google_documentai.rs` |
 
-Document AI is a fleet of *processors* you create in your own Google Cloud project. LiteOCR makes one
-synchronous `:process` call against the processor named in your configuration; the LiteOCR model name
+Document AI is a fleet of *processors* you create in your own Google Cloud project. PuffinParse makes one
+synchronous `:process` call against the processor named in your configuration; the PuffinParse model name
 only selects **how the response is read**.
 
-> **Service-account key exchange is out of scope.** LiteOCR does not sign JWTs or talk to
+> **Service-account key exchange is out of scope.** PuffinParse does not sign JWTs or talk to
 > `oauth2.googleapis.com`. Mint a token yourself — `export GOOGLE_DOCUMENTAI_ACCESS_TOKEN=$(gcloud auth print-access-token)`,
 > a metadata-server token on GCE/Cloud Run, or your own service-account exchange — and remember that
 > tokens expire after ~1 hour. The required IAM permission is
 > `documentai.processors.processOnline` (scope `https://www.googleapis.com/auth/cloud-platform`).
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
 | Model | Expected processor type | Modes | List price (`pricing.json`) |
 |---|---|---|---|
@@ -42,7 +42,7 @@ The model **must match the processor you configured**: sending a Layout Parser i
 `documentLayout` if it is present. A bare `model="google_documentai"` resolves to `ocr` for `parse`
 and `ocr`, and to `form` for `extract` (the first extract-capable entry in the registry).
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 One call, no polling:
 
@@ -69,7 +69,7 @@ Body built by `build_body()`:
 ```
 
 * **Input.** Path and bytes inputs are base64-encoded into `rawDocument`. Document AI accepts no
-  http(s) URL, so a URL input is downloaded by LiteOCR and sent inline. (`gcsDocument` is reachable
+  http(s) URL, so a URL input is downloaded by PuffinParse and sent inline. (`gcsDocument` is reachable
   through `provider_options` if your file is already in Cloud Storage — pass
   `{"gcsDocument": {"gcsUri": "gs://…", "mimeType": "application/pdf"}}`; the `rawDocument` key stays
   in the body, so remove it via a full `provider_options` body override if Google rejects both.)
@@ -82,20 +82,20 @@ Body built by `build_body()`:
 * **`provider_options`** are deep-merged into the body verbatim, after the five configuration keys
   (`project`, `location`, `processor_id`, `processor_version`, `access_token`) are removed. So
   `{"processOptions": {"ocrConfig": {"enableNativePdfParsing": true}}}` and `{"imagelessMode": true}`
-  both work, and an explicit value always wins over LiteOCR's default.
+  both work, and an explicit value always wins over PuffinParse's default.
 
 ## 4. Response mapping
 
 The response is `{"document": {…}, "humanReviewStatus": {…}}`. `document.text` holds the whole
 document's text; everything else points into it with `textAnchor.textSegments[{startIndex, endIndex}]`
-(UTF-8 offsets, sent as **strings** because they are `int64`). LiteOCR slices `document.text` by byte
+(UTF-8 offsets, sent as **strings** because they are `int64`). PuffinParse slices `document.text` by byte
 offset, falling back to character offsets when the indices are not byte boundaries.
 
-Fixtures: `crates/liteocr-core/tests/fixtures/google_documentai_{ocr,layout,form}.json`.
+Fixtures: `crates/puffinparse-core/tests/fixtures/google_documentai_{ocr,layout,form}.json`.
 
 ### parse — `ocr`, `form`, `prebuilt`
 
-| Document AI field | LiteOCR unified field | Notes |
+| Document AI field | PuffinParse unified field | Notes |
 |---|---|---|
 | `pages[].paragraphs[]` | `Page.blocks[]` (type `text`) | Text via `layout.textAnchor`; empty paragraphs dropped. |
 | `pages[].tables[]` | `Page.blocks[]` (type `table`) | Rendered as a Markdown table from `headerRows`/`bodyRows` cell anchors; pipes and newlines inside cells are escaped. Emitted *before* the page's paragraphs. |
@@ -109,7 +109,7 @@ Fixtures: `crates/liteocr-core/tests/fixtures/google_documentai_{ocr,layout,form
 
 ### parse — `layout` (Layout Parser)
 
-| Document AI field | LiteOCR unified field | Notes |
+| Document AI field | PuffinParse unified field | Notes |
 |---|---|---|
 | `documentLayout.blocks[]` | `Page.blocks[]` | Flattened depth-first, reading order preserved. |
 | `textBlock.type` | `Block.type` + Markdown prefix | `heading-1` → `title` (`# `), `heading-2`/`subtitle` → `section_header` (`## `), `heading-3/4/5` → `section_header` (`###`…), `header` → `header`, `footer` → `footer`, everything else → `text`. |
@@ -129,11 +129,11 @@ Fixtures: `crates/liteocr-core/tests/fixtures/google_documentai_{ocr,layout,form
 `pages[].lines[]` → `TextPage.lines` (text, box, confidence), `pages[].tokens[]` → `TextPage.words`
 (trimmed, so trailing `detectedBreak` whitespace does not leak into the word), and the page's own
 `layout.textAnchor` → `TextPage.text` (falling back to the joined lines). For `layout` there are no
-lines or tokens, so `ocr` is derived from the parsed blocks (`liteocr_derived_from=parse`).
+lines or tokens, so `ocr` is derived from the parsed blocks (`puffinparse_derived_from=parse`).
 
 ### extract — `form`, `prebuilt`
 
-| Document AI field | LiteOCR unified field | Notes |
+| Document AI field | PuffinParse unified field | Notes |
 |---|---|---|
 | `entities[].type` | key in `ExtractResponse.data` | Google's own names (`invoice_id`, `total_amount`, `line_item/description`). |
 | `entities[].properties[]` | nested object | Recursively, keyed by the child's `type`. |
@@ -145,7 +145,7 @@ lines or tokens, so `ocr` is derived from the parsed blocks (`liteocr_derived_fr
 | — | `metadata.google_documentai_schema_source = "processor"` | See the gotcha below. |
 
 **`ExtractRequest.schema` is not sent.** A Document AI processor extracts the schema it was trained
-on; there is no request-time JSON Schema. LiteOCR returns every entity the processor found and leaves
+on; there is no request-time JSON Schema. PuffinParse returns every entity the processor found and leaves
 the schema as documentation of intent — filter or rename on your side. (`processOptions.schemaOverride`
 exists but takes Google's `DocumentSchema` proto, not JSON Schema; it is reachable through
 `provider_options` if your processor version supports it.)
@@ -155,7 +155,7 @@ exists but takes Google's `DocumentSchema` proto, not JSON Schema; it is reachab
 Google's standard envelope — `{"error": {"code", "message", "status", "details": []}}` — is picked up
 by `Error::from_http` (it reports `error.message`).
 
-| Status | `status` | Typical cause | LiteOCR `ErrorKind` |
+| Status | `status` | Typical cause | PuffinParse `ErrorKind` |
 |---|---|---|---|
 | 400 | `INVALID_ARGUMENT` / `FAILED_PRECONDITION` | page limit exceeded, unsupported MIME type, `ocrConfig` on a Layout Parser, bad page selector | `bad_request` |
 | 401 | `UNAUTHENTICATED` | missing / **expired** access token | `authentication` |
@@ -170,7 +170,7 @@ A 200 response can still carry `document.error` (a `google.rpc.Status`); a non-z
 **Limits.** Online `:process` accepts **40 MB** per request (batch: 1 GB) and, for almost every
 processor, **15 pages** — 30 with `imagelessMode: true`, and only when the pages are contiguous from
 page 1. Identity/driver-licence processors cap at 2 pages, Expense at 10. Images are capped at
-40 megapixels. Bigger documents need `batchProcess` (async, Cloud Storage in and out), which LiteOCR
+40 megapixels. Bigger documents need `batchProcess` (async, Cloud Storage in and out), which PuffinParse
 does not implement: an obvious follow-up.
 
 **Timeouts.** `timeout_secs` (default 300) covers the whole call and caps the single HTTP request.
@@ -186,13 +186,13 @@ Because there is no polling, a document that is too large fails fast with a 400 
 * **The model is a *reading strategy*, not a processor selector.** Both come from your configuration:
   point `GOOGLE_DOCUMENTAI_PROCESSOR_ID` at a Layout Parser and use `google_documentai/layout`; point
   it at an Invoice Parser and use `google_documentai/prebuilt`. Mismatches produce empty output rather
-  than an error (LiteOCR logs a warning when `extract` finds no entities).
+  than an error (PuffinParse logs a warning when `extract` finds no entities).
 * **15 pages online.** This is the single biggest practical limit; Document AI is the only provider
   here whose sync ceiling is that low.
 * **`int64` fields are JSON strings.** `startIndex`, `endIndex` and `pageRefs[].page` arrive as
   `"14"`, not `14` — and a value of `0` is **omitted entirely** (proto3 default), which is why
   `pageRefs[]` without a `page` means *page 1*.
-* **Text offsets are UTF-8 byte offsets** in the proto sense. LiteOCR slices bytes when the indices
+* **Text offsets are UTF-8 byte offsets** in the proto sense. PuffinParse slices bytes when the indices
   land on char boundaries and falls back to character slicing otherwise, so non-ASCII documents do not
   panic or truncate mid-codepoint. Worth re-checking against a real CJK document.
 * **The Document OCR processor returns no tables** — `pages[].tables` is a Form Parser (and
@@ -201,7 +201,7 @@ Because there is no polling, a document that is too large fails fast with a 400 
   `vertices`, which are only convertible with `dimension`. The Layout Parser's `boundingBox` has no
   page dimensions at all, so absolute vertices there yield `bbox = None`.
 * **`skipHumanReview` is documented as deprecated** but is still the field on `ProcessRequest`;
-  LiteOCR sends `true` so a human-review-enabled processor does not silently queue work.
+  PuffinParse sends `true` so a human-review-enabled processor does not silently queue work.
 * **Prices differ by 20× across processors** ($1.50 vs $30 per 1 000 pages), so the model string is a
   cost decision, not just an output-shape decision.
 
@@ -209,35 +209,35 @@ Because there is no polling, a document that is too large fails fast with a 400 
 
 ```python
 # 1. Everything by configuration, nothing in the environment.
-liteocr.parse("scan.pdf", model="google_documentai/ocr",
+puffinparse.parse("scan.pdf", model="google_documentai/ocr",
               provider_options={"project": "my-proj", "location": "eu",
                                 "processor_id": "1a2b3c4d5e6f7890",
                                 "access_token": token})
 
 # 2. Pin a processor version for reproducible output.
-liteocr.parse("scan.pdf", model="google_documentai/ocr",
+puffinparse.parse("scan.pdf", model="google_documentai/ocr",
               provider_options={"processor_version": "pretrained-ocr-v2.0-2023-06-02"})
 
 # 3. Better text from digital-born PDFs, plus image-quality diagnostics.
-liteocr.parse("report.pdf", model="google_documentai/ocr",
+puffinparse.parse("report.pdf", model="google_documentai/ocr",
               provider_options={"processOptions": {"ocrConfig": {
                   "enableNativePdfParsing": True, "enableImageQualityScores": True}}})
 
 # 4. Push the online page limit from 15 to 30 (contiguous pages from page 1).
-liteocr.parse("long.pdf", model="google_documentai/layout",
+puffinparse.parse("long.pdf", model="google_documentai/layout",
               provider_options={"imagelessMode": True})
 
 # 5. Layout Parser chunking, for RAG pipelines (chunks land in `raw`).
-liteocr.parse("handbook.pdf", model="google_documentai/layout", include_raw=True,
+puffinparse.parse("handbook.pdf", model="google_documentai/layout", include_raw=True,
               provider_options={"processOptions": {"layoutConfig": {"chunkingConfig": {
                   "chunkSize": 1000, "includeAncestorHeadings": True}}}})
 
 # 6. Entities from a prebuilt Invoice Parser, with citations.
-liteocr.extract("invoice.pdf", model="google_documentai/prebuilt", citations=True,
+puffinparse.extract("invoice.pdf", model="google_documentai/prebuilt", citations=True,
                 schema={"type": "object", "properties": {"invoice_id": {"type": "string"}}})
 
 # 7. A file already in Cloud Storage.
-liteocr.parse("placeholder.pdf", model="google_documentai/ocr",
+puffinparse.parse("placeholder.pdf", model="google_documentai/ocr",
               provider_options={"gcsDocument": {"gcsUri": "gs://bucket/doc.pdf",
                                                 "mimeType": "application/pdf"}})
 ```

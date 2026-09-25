@@ -14,9 +14,9 @@ build/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
-python/liteocr/_core*.so
-python/liteocr/_core*.pyd
-python/liteocr/_core.abi3.*
+python/puffinparse/_core*.so
+python/puffinparse/_core*.pyd
+python/puffinparse/_core.abi3.*
 
 # Env / secrets
 .env

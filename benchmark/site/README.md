@@ -1,6 +1,6 @@
-# LiteOCR benchmark site
+# PuffinParse benchmark site
 
-A static, framework-free viewer for the open LiteOCR benchmark and the place to verify every
+A static, framework-free viewer for the open PuffinParse benchmark and the place to verify every
 claim it makes: every run, every model, every document, every score — with the page itself, each
 model's output side by side, a word diff against the truth or a pass/fail checklist of every
 assertion, and layout boxes when a unified response was saved.
@@ -28,15 +28,15 @@ python -m http.server -d benchmark/site/dist 8000   # then open http://localhost
 | Flag | Default | What it does |
 |---|---|---|
 | `--out DIR` | `benchmark/site/dist` | Output directory. Wiped and rebuilt on every run. |
-| `--home-url URL` | empty | Where the header's "LiteOCR" link points (`website/build.py` passes the site root). Empty = the viewer's own leaderboard. |
+| `--home-url URL` | empty | Where the header's "PuffinParse" link points (`website/build.py` passes the site root). Empty = the viewer's own leaderboard. |
 | `--docs-url URL` | empty | Adds a "Docs" link to the header (`website/build.py` passes `/docs/`). |
-| `--base-url PATH` | page-relative | URL prefix the viewer is served from, e.g. `/benchmark-results/`. It is written into `<meta name="liteocr-base">` and onto the `styles.css` / `app.js` tags; `app.js` prefixes every `data/` URL with it. The default keeps every URL relative to the page, which works at any path served with a trailing slash. |
+| `--base-url PATH` | page-relative | URL prefix the viewer is served from, e.g. `/benchmark-results/`. It is written into `<meta name="puffinparse-base">` and onto the `styles.css` / `app.js` tags; `app.js` prefixes every `data/` URL with it. The default keeps every URL relative to the page, which works at any path served with a trailing slash. |
 
 The build needs nothing but Python 3.9+ (plain `python benchmark/site/build.py` works). Two
 optional packages make PDF inputs visible without any client-side PDF library: with
 **pypdfium2** and **Pillow** (the `uv` line above; both are pip wheels) every PDF page, up to 4
 per document, is rendered 1000 px wide to `<doc>.p<n>.webp` (about 120 KB a page, ~10 MB for
-combined-v2); with Pillow alone only page 1 of LiteOCR's own image-only synthetic PDFs can be
+combined-v2); with Pillow alone only page 1 of PuffinParse's own image-only synthetic PDFs can be
 extracted (`<doc>.p1.png`). Without either, PDFs are still copied and the viewer falls back to
 pdf.js.
 
@@ -124,10 +124,10 @@ Every view is a shareable hash link:
     **Compare models**. Each check is one sentence ("Should not contain “ARTICLE IN PRESS”")
     with a reason line only when it adds information, grouped by type when a document mixes
     types, filterable failing / passing / all. The checks run in the browser through a
-    line-for-line JS port of `score_rules` / `normalize` / `markdown_to_text` in `liteocr-core`
+    line-for-line JS port of `score_rules` / `normalize` / `markdown_to_text` in `puffinparse-core`
     (scorer v2); the result is compared with the recorded score and flagged if they ever differ
     (the recorded Rust score stays authoritative). Keep the port in step with `SCORER_VERSION`.
-  - **Reproduce this score**: the exact `liteocr parse` / `bench score` (or `bench run
+  - **Reproduce this score**: the exact `puffinparse parse` / `bench score` (or `bench run
     --filter`) commands and links to every file behind the page.
   - Research-only sources (tag `fetch-required`, e.g. OmniDocBench) show scores only and the
     fetch command; none of their files is requested.
@@ -136,13 +136,13 @@ Every view is a shareable hash link:
 Keyboard: `j`/`k` next/previous document (within the current source/category/filter), `m`/`M`
 cycle models, `1`–`4` tabs, `d` split/unified diff, `o` layout boxes, `[`/`]` pages, `g l` /
 `g d` leaderboard / documents, `?` help. Light and dark follow the product site (`data-theme`
-and the shared `liteocr-theme` key, with a toggle in the header); the layout works down to phone
+and the shared `puffinparse-theme` key, with a toggle in the header); the layout works down to phone
 width with no horizontal page scroll (wide tables scroll inside their frame).
 
 ## Deployment
 
 The viewer ships with the product site, at
-[`https://liteocr.vercel.app/benchmark-results/`](https://liteocr.vercel.app/benchmark-results/).
+[`https://puffinparse.vercel.app/benchmark-results/`](https://puffinparse.vercel.app/benchmark-results/).
 `website/build.py` imports this script and runs it with
 `--out <dist>/benchmark-results --base-url /benchmark-results/` as part of every build
 (`--no-benchmark` skips it). Nothing in `vercel.json` is specific to the viewer beyond `--with

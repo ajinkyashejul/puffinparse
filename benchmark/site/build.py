@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Assemble the static LiteOCR benchmark results site.
+"""Assemble the static PuffinParse benchmark results site.
 
 Reads the committed benchmark artefacts (`benchmark/results/*.json`, the saved model
 outputs under `benchmark/results/outputs/`, and the datasets under `benchmark/datasets/`)
 and writes a completely static, dependency-free site into `benchmark/site/dist/`:
 
     index.html  app.js  styles.css        copied from benchmark/site/src/
-    tokens.css                            the LiteOCR design tokens (website/assets/)
+    tokens.css                            the PuffinParse design tokens (website/assets/)
     data/index.json                       every run + dataset info + model summaries + labels
     data/runs/<run_id>.json               the full result file for a run
     data/outputs/<run_id>/<model>/<doc>.md   each model's markdown output per document
@@ -23,7 +23,7 @@ relative path keeps working in the browser and no bytes are copied twice.
 The script uses only the standard library. Two optional packages make PDF inputs visible
 without a client-side PDF library: with **pypdfium2** (plus Pillow) every PDF page, up to
 `PREVIEW_MAX_PAGES`, is rendered to `<id>.p<n>.webp`; with Pillow alone only the page-1
-image embedded in LiteOCR's own synthetic PDFs is extracted (`<id>.p1.png`). Without
+image embedded in PuffinParse's own synthetic PDFs is extracted (`<id>.p1.png`). Without
 either, PDFs are still copied and the viewer falls back to pdf.js or a download link.
 
 Every document in a copied manifest also gets a human name: `title` ("Headers & footers
@@ -56,7 +56,7 @@ OUTPUTS_DIR = RESULTS_DIR / "outputs"
 DATASETS_DIR = REPO_ROOT / "benchmark" / "datasets"
 
 STATIC_FILES = ("index.html", "app.js", "styles.css")
-# The shared LiteOCR design tokens (docs/DESIGN.md), linked before styles.css.
+# The shared PuffinParse design tokens (docs/DESIGN.md), linked before styles.css.
 TOKENS_CSS = REPO_ROOT / "website" / "assets" / "tokens.css"
 
 # Human names for the dataset sources (the prefix of a combined-dataset id).
@@ -101,12 +101,12 @@ PREVIEW_MAX_WIDTH = 1240
 PREVIEW_MIN_WIDTH = 700
 PREVIEW_MIN_HEIGHT = 900
 
-# `<meta name="liteocr-base">` tells app.js what to prefix its `data/` URLs with; the
+# `<meta name="puffinparse-base">` tells app.js what to prefix its `data/` URLs with; the
 # stylesheet and script tags are rewritten with the same prefix.
-BASE_META_RE = re.compile(r'(<meta\s+name="liteocr-base"\s+content=")[^"]*(")')
-# `<meta name="liteocr-home">` / `liteocr-docs`: where the header's "LiteOCR" and "Docs"
+BASE_META_RE = re.compile(r'(<meta\s+name="puffinparse-base"\s+content=")[^"]*(")')
+# `<meta name="puffinparse-home">` / `puffinparse-docs`: where the header's "PuffinParse" and "Docs"
 # links point when the viewer is embedded in the product site (empty = standalone).
-LINK_META_RE = re.compile(r'(<meta\s+name="liteocr-(home|docs)"\s+content=")[^"]*(")')
+LINK_META_RE = re.compile(r'(<meta\s+name="puffinparse-(home|docs)"\s+content=")[^"]*(")')
 ASSET_REF_RE = re.compile(r'((?:href|src)=")(tokens\.css|styles\.css|app\.js)(")')
 
 
@@ -200,12 +200,14 @@ def apply_base(html_text: str, base: str) -> str:
         return html_text
     text, found = BASE_META_RE.subn(lambda m: m.group(1) + base + m.group(2), html_text)
     if not found:
-        print('  ! index.html has no <meta name="liteocr-base">: data URLs stay relative', file=sys.stderr)
+        print(
+            '  ! index.html has no <meta name="puffinparse-base">: data URLs stay relative', file=sys.stderr
+        )
     return ASSET_REF_RE.sub(lambda m: m.group(1) + base + m.group(2) + m.group(3), text)
 
 
 def apply_links(html_text: str, home: str = "", docs: str = "") -> str:
-    """Fill the `liteocr-home` / `liteocr-docs` meta tags (HTML-escaped)."""
+    """Fill the `puffinparse-home` / `puffinparse-docs` meta tags (HTML-escaped)."""
     values = {"home": home or "", "docs": docs or ""}
 
     def repl(match: re.Match[str]) -> str:
@@ -604,7 +606,7 @@ def run_index_entry(
     return {
         "run_id": run["run_id"],
         "created_at": run.get("created_at"),
-        "liteocr_version": run.get("liteocr_version"),
+        "puffinparse_version": run.get("puffinparse_version") or run.get("liteocr_version"),
         "scorer_version": run.get("scorer_version"),
         "dataset": run.get("dataset", {}),
         "normalize": run.get("normalize", {}),
@@ -639,7 +641,7 @@ def build(dist: Path, base: str = "./", home: str = "", docs: str = "") -> int:
         shutil.rmtree(dist)
     dist.mkdir(parents=True)
 
-    print(f"Building LiteOCR benchmark site -> {dist} (base {base})")
+    print(f"Building PuffinParse benchmark site -> {dist} (base {base})")
 
     for name in STATIC_FILES:
         src = SRC_DIR / name
@@ -726,7 +728,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument(
         "--home-url",
         default="",
-        help="URL of the product site the viewer is embedded in (header 'LiteOCR' link)",
+        help="URL of the product site the viewer is embedded in (header 'PuffinParse' link)",
     )
     parser.add_argument(
         "--docs-url",

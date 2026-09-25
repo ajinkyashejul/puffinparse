@@ -78,13 +78,13 @@ class CombinedAdapter(Adapter):
     name = "combined"
     license = "mixed (see `sources`)"
     default_out = "benchmark/datasets/combined-v1"
-    description = "Union of every committed LiteOCR benchmark dataset, referenced in place."
+    description = "Union of every committed PuffinParse benchmark dataset, referenced in place."
     #: Datasets folded in, and the manifest identity written out.
     sources: tuple[Source, ...] = SOURCES
     dataset_name = "combined-v1"
     version = VERSION
     manifest_description = (
-        "Union of the committed LiteOCR benchmark datasets (synthetic-v1 and the "
+        "Union of the committed PuffinParse benchmark datasets (synthetic-v1 and the "
         "redistributable ParseBench subset). No bytes are copied: every document is "
         "referenced relatively in its own dataset directory, so the per-dataset and "
         "combined runs score exactly the same files."
@@ -194,7 +194,7 @@ class CombinedV2Adapter(CombinedAdapter):
     dataset_name = "combined-v2"
     version = "2.0.0"
     manifest_description = (
-        "Union of the LiteOCR benchmark datasets: synthetic-v1, the ParseBench subset, the "
+        "Union of the PuffinParse benchmark datasets: synthetic-v1, the ParseBench subset, the "
         "olmOCR-bench subset and the OmniDocBench subset. No bytes are copied: every document is "
         "referenced relatively in its own dataset directory, so the per-dataset and combined "
         "runs score exactly the same files."
@@ -232,7 +232,7 @@ class CombinedV3Adapter(CombinedAdapter):
     dataset_name = "combined-v3"
     version = "3.0.0"
     manifest_description = (
-        "Union of the LiteOCR benchmark datasets: synthetic-v1, the ParseBench subset, the "
+        "Union of the PuffinParse benchmark datasets: synthetic-v1, the ParseBench subset, the "
         "olmOCR-bench subset, the OmniDocBench subset and the DP-Bench subset. No bytes are "
         "copied: every document is referenced relatively in its own dataset directory, so the "
         "per-dataset and combined runs score exactly the same files."

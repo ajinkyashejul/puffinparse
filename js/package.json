@@ -1,7 +1,7 @@
 {
-  "name": "liteocr",
+  "name": "puffinparse",
   "version": "0.1.0",
-  "description": "One API for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, ...). Node.js bindings to the LiteOCR Rust core.",
+  "description": "One API for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, ...). Node.js bindings to the PuffinParse Rust core.",
   "keywords": ["ocr", "document-parsing", "pdf", "reducto", "llamaparse", "extend", "napi-rs"],
   "license": "MIT",
   "homepage": "https://github.com/ajinkyashejul/liteocr",
@@ -17,7 +17,7 @@
     "node": ">=18"
   },
   "napi": {
-    "binaryName": "liteocr",
+    "binaryName": "puffinparse",
     "targets": [
       "x86_64-unknown-linux-gnu",
       "aarch64-unknown-linux-gnu",
@@ -27,8 +27,8 @@
     ]
   },
   "scripts": {
-    "build": "napi build --manifest-path ../crates/liteocr-node/Cargo.toml --package-json-path package.json --output-dir . --platform --release --js native.js --dts native.d.ts",
-    "build:debug": "napi build --manifest-path ../crates/liteocr-node/Cargo.toml --package-json-path package.json --output-dir . --platform --js native.js --dts native.d.ts",
+    "build": "napi build --manifest-path ../crates/puffinparse-node/Cargo.toml --package-json-path package.json --output-dir . --platform --release --js native.js --dts native.d.ts",
+    "build:debug": "napi build --manifest-path ../crates/puffinparse-node/Cargo.toml --package-json-path package.json --output-dir . --platform --js native.js --dts native.d.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "node --test test/*.test.js"
   },

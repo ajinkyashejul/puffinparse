@@ -1,9 +1,9 @@
 # Mathpix
 
 > **Status: docs-only.** Everything below is taken from the official Mathpix documentation
-> (read 2026-09-11) and from the implementation in `crates/liteocr-core/src/providers/mathpix.rs`.
+> (read 2026-09-11) and from the implementation in `crates/puffinparse-core/src/providers/mathpix.rs`.
 > No live call has been made — this repository has no Mathpix credentials. The fixtures under
-> `crates/liteocr-core/tests/fixtures/mathpix_*.json` are hand-built from the documented response
+> `crates/puffinparse-core/tests/fixtures/mathpix_*.json` are hand-built from the documented response
 > shapes, not captured traffic. Mark this page **verified** only after the `#[ignore]`d live tests
 > in `providers/mathpix.rs` pass with a real key pair.
 
@@ -17,16 +17,16 @@
 | Docs | <https://docs.mathpix.com> |
 | API version | Path-versioned (`/v3/...`). No version header; the model is reported per response as `version` (e.g. `SuperNet-200`) |
 | Verified | **not live-verified** (see banner) — documentation read 2026-09-11 |
-| Implementation | `crates/liteocr-core/src/providers/mathpix.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/mathpix.rs` |
 
 Mathpix is an OCR engine rather than a layout parser: it is built for STEM content (printed *and*
 handwritten math, tables, chemistry diagrams) and its native output is **Mathpix Markdown (MMD)**, a
 markdown superset that can contain LaTeX (`$…$`, `\begin{tabular}`, `\section*{}`,
-`<smiles>…</smiles>`). LiteOCR passes MMD through unchanged.
+`<smiles>…</smiles>`). PuffinParse passes MMD through unchanged.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
-| Model | Endpoint LiteOCR calls | Modes | List price (`pricing.json`) |
+| Model | Endpoint PuffinParse calls | Modes | List price (`pricing.json`) |
 |---|---|---|---|
 | `mathpix/pdf` *(default)* | `POST /v3/pdf` for documents; automatically `POST /v3/text` when the input is an image | `parse`, `ocr` | $0.005 / page |
 | `mathpix/text` | always `POST /v3/text` (one image = one request) | `parse`, `ocr` | $0.002 / image |
@@ -34,7 +34,7 @@ markdown superset that can contain LaTeX (`$…$`, `\begin{tabular}`, `\section*
 Prices from <https://mathpix.com/pricing/api>: `v3/pdf` $5 per 1 000 pages (falling to $3.50 above
 1M pages/month), `v3/text` $0.002 per image (falling to $0.0015 above 1M). A one-time **$19.99 setup
 fee** activates the first API key, and the asynchronous Files API (`files/v1/*`, $1.50 per 1 000
-pages) is **not** used by LiteOCR.
+pages) is **not** used by PuffinParse.
 
 **Why two models.** `/v3/pdf` accepts documents and ebooks only (PDF, EPUB, DOCX, DOC, PPTX, AZW/
 AZW3/KFX, MOBI, DJVU, WPD, ODT), while images (JPEG, PNG, BMP, JP2, WebP, PBM/PGM/PPM, PFM, Sun
@@ -43,7 +43,7 @@ input's guessed MIME type — `image/*` goes to `/v3/text`, everything else to `
 model string works for a mixed workload. `mathpix/text` is the explicit escape hatch when you want
 the cheaper per-image rate and snippet behaviour; sending it a PDF fails with `image_decode_error`.
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 ### 3.1 Documents (`mathpix/pdf` with a non-image input)
 
@@ -52,16 +52,16 @@ the cheaper per-image rate and snippet behaviour; sending it a PDF fails with `i
      stringified JSON field, `options_json`** (this is how Mathpix takes options on multipart);
    * URL input → a JSON body `{"url": "…", …options}` (Mathpix downloads the file itself).
 
-   Options LiteOCR always sends: `math_inline_delimiters: ["$","$"]` and
+   Options PuffinParse always sends: `math_inline_delimiters: ["$","$"]` and
    `math_display_delimiters: ["$$","$$"]` (markdown-friendly instead of the default `\(…\)` /
    `\[…\]`). `pages` becomes `page_ranges` (see §4). `provider_options` are deep-merged last and
    win. Response: `{"pdf_id": "2026_01_15_abc123def456"}`.
 2. **Poll.** `GET {base}/v3/pdf/{pdf_id}` every 2 s, backing off ×1.5 to 10 s, until
    `status == "completed"` (or `"error"`). Intermediate statuses are `received`, `loaded`, `split`.
-   LiteOCR deliberately ignores `percent_done` / `num_pages_completed`: both reach 100 % while the
+   PuffinParse deliberately ignores `percent_done` / `num_pages_completed`: both reach 100 % while the
    output files are still being assembled, and a download at that moment 404s.
 3. **Download line data.** `GET {base}/v3/pdf/{pdf_id}.lines.json` — per-page lines with polygons.
-   A `404` (body = the status object) or `202` means "not ready yet" and LiteOCR keeps polling for
+   A `404` (body = the status object) or `202` means "not ready yet" and PuffinParse keeps polling for
    it until the deadline; any other non-2xx is an error.
 4. **Download markdown** (`parse` mode only). `GET {base}/v3/pdf/{pdf_id}.mmd` — the assembled
    Mathpix Markdown for the whole document. `ocr` mode skips this call.
@@ -72,7 +72,7 @@ they are *not* valid `conversion_formats` keys and cost nothing extra.
 ### 3.2 Images (`mathpix/text`, or `mathpix/pdf` with an image input)
 
 One synchronous call: `POST {base}/v3/text`, multipart `file` + `options_json`, or a JSON body with
-`{"src": "<url>"}` for URL inputs. Options LiteOCR sends:
+`{"src": "<url>"}` for URL inputs. Options PuffinParse sends:
 
 | Option | Value | Why |
 |---|---|---|
@@ -89,7 +89,7 @@ API), which is exactly why the two modes send different option sets.
 
 ### 4.1 Documents — `.lines.json` + `.mmd`
 
-| Mathpix field | LiteOCR unified field | Notes |
+| Mathpix field | PuffinParse unified field | Notes |
 |---|---|---|
 | `pdf_id` | `ParseResponse.provider_job_id` / `TextResponse.provider_job_id` | |
 | `pages[].page` | `Page.page_number` / `TextPage.page_number` | Already 1-based. |
@@ -98,7 +98,7 @@ API), which is exactly why the two modes send different option sets.
 | `lines[].type` (+ `subtype`) | `Block.type` | See the table below. |
 | `lines[].text_display` | `Block.content` | The line's MMD, exactly as it appears in the assembled `.mmd`. Falls back to `text` when empty. With `output="text"`, `text` is used instead. |
 | `lines[].text` | `Block.text` / `Line.text` | Searchable plain text; falls back to `markdown_to_text(text_display)`. |
-| `lines[].cnt` | `Block.bbox` / `Line.bbox` | Polygon in page pixels, `[TL, TR, BR, BL]`; LiteOCR takes the enclosing axis-aligned box and divides by `page_width`/`page_height`. |
+| `lines[].cnt` | `Block.bbox` / `Line.bbox` | Polygon in page pixels, `[TL, TR, BR, BL]`; PuffinParse takes the enclosing axis-aligned box and divides by `page_width`/`page_height`. |
 | `lines[].confidence` | `Block.confidence` / `Line.confidence` | 0–1, the product of per-token OCR confidence. `confidence_rate` (geometric mean) is not mapped. |
 | `.mmd` body | `ParseResponse.markdown` | Mathpix's own rendering of the whole document wins over the pages joined together. Page-level `markdown` stays line-derived so text and boxes agree. |
 | status `num_pages` | `Usage.pages` | Falls back to the number of pages in `lines.json`. |
@@ -115,7 +115,7 @@ their geometry is still real.
 
 ### 4.2 Images — `/v3/text`
 
-| Mathpix field | LiteOCR unified field | Notes |
+| Mathpix field | PuffinParse unified field | Notes |
 |---|---|---|
 | `request_id` | `provider_job_id` | |
 | `text` | `Page.markdown` (page 1) | The whole image's MMD. |
@@ -148,7 +148,7 @@ Mathpix line types (the same vocabulary for `line_data` and PDF lines data):
 ### 4.4 `pages` selection
 
 `pages="1-3,7,10-"` becomes `page_ranges: "1-3,7,10--1"`. Mathpix's `page_ranges` is 1-based like
-LiteOCR's, and negative indices count from the end, so an open-ended range is closed with `-1` (the
+PuffinParse's, and negative indices count from the end, so an open-ended range is closed with `-1` (the
 last page). For `/v3/text` the option does not exist — an image is a single page — and the selection
 is ignored.
 
@@ -160,11 +160,11 @@ is ignored.
 {"error": "Image has no content", "error_info": {"id": "image_no_content", "message": "Image has no content"}}
 ```
 
-Only `http_unauthorized` (401) and `http_max_requests` (429) use a real status code. LiteOCR
+Only `http_unauthorized` (401) and `http_max_requests` (429) use a real status code. PuffinParse
 therefore inspects **every** 200 payload (submit, status poll, `.lines.json`, `/v3/text`) and maps
 `error_info.id`:
 
-| `error_info.id` | LiteOCR `ErrorKind` |
+| `error_info.id` | PuffinParse `ErrorKind` |
 |---|---|
 | `http_unauthorized`, `account_disabled`, `expired_license`, `unauthorized_token_request` | `authentication` |
 | `http_max_requests` (monthly page/image quota **or** per-minute rate) | `rate_limit` (retried) |
@@ -185,7 +185,7 @@ per-minute request ceiling is on the *Limits & Quotas* page, which renders clien
 be read here — treat the exact number as unverified.
 
 **Retention.** Text outputs (MMD, JSON lines) are kept for up to **90 days**, uploaded source files
-and CDN image crops for **30 days**. `DELETE /v3/pdf/{pdf_id}` removes everything at once; LiteOCR
+and CDN image crops for **30 days**. `DELETE /v3/pdf/{pdf_id}` removes everything at once; PuffinParse
 never deletes on your behalf.
 
 **Timeouts.** `timeout_secs` (default 300) is the whole-call deadline: submit + status polling +
@@ -202,15 +202,15 @@ never deletes on your behalf.
   the input's MIME type; `mathpix/text` does not, by design.
 * **Poll `status`, not `percent_done`.** `percent_done` reaches 100 % when OCR finishes, which is
   before the outputs are assembled; downloading then returns `404` with the status object as the
-  body. LiteOCR treats such a `404` (and a `202`, used while a conversion format is still running)
+  body. PuffinParse treats such a `404` (and a `202`, used while a conversion format is still running)
   as "not ready" and keeps polling.
-* **MMD is not plain markdown.** Expect `$…$` / `$$…$$` math (LiteOCR asks for those delimiters
+* **MMD is not plain markdown.** Expect `$…$` / `$$…$$` math (PuffinParse asks for those delimiters
   instead of the default `\(…\)`), `\begin{tabular}` or `\begin{array}` for complex tables,
   `\section*{}` headings on some documents, `<smiles>…</smiles>` for chemistry, and `\pagebreak`
   markers if you set `include_page_breaks`. Benchmark scoring against plain-markdown ground truth
   will punish this; it is the provider's format, not a bug.
 * **Table cells are children of the table line.** Both the `table` line and its `table_cell`
-  children carry `conversion_output: true`, so LiteOCR drops any line whose `parent_id` is itself
+  children carry `conversion_output: true`, so PuffinParse drops any line whose `parent_id` is itself
   kept. Without that rule every table would appear twice.
 * **`include_page_info` defaults differ per endpoint**: `true` on `/v3/text`, `false` on `/v3/pdf`.
   Running heads and page numbers are therefore in image output but not in document output unless you
@@ -220,45 +220,45 @@ never deletes on your behalf.
 * **Images with more than 12 rows of text may be billed at the `v3/pdf` per-page rate**, so
   `mathpix/text` on a full page is not reliably $0.002.
 * **`conversion_output` supersedes `included`.** `/v3/text` still emits both; `/v3/pdf` lines only
-  carry `conversion_output`. LiteOCR reads `conversion_output` first and defaults to keeping a line
+  carry `conversion_output`. PuffinParse reads `conversion_output` first and defaults to keeping a line
   when neither is present.
 * **No `language` support.** Mathpix takes `alphabets_allowed` (which alphabets to *exclude*), not a
   language hint, so `language` on the request is ignored. Use
   `provider_options={"alphabets_allowed": {"ru": false}}` if you need it.
 * **Streaming exists but is unused.** `streaming: true` + `GET /v3/pdf/{id}/stream` (SSE) delivers
-  pages as they finish; LiteOCR polls instead, because the unified response is whole-document.
+  pages as they finish; PuffinParse polls instead, because the unified response is whole-document.
 * **The Files API is a different product** (`files/v1/*`, $1.50 per 1 000 pages, results written to
   your own S3/GCS/Azure bucket) with a *different* error model — real HTTP status codes and a closed
-  error-code set. LiteOCR does not use it.
+  error-code set. PuffinParse does not use it.
 
 ## 7. Useful `provider_options` passthrough
 
 ```python
 # 1. Credentials in code instead of the environment (app_id is stripped from the request body).
-liteocr.parse("paper.pdf", model="mathpix/pdf",
+puffinparse.parse("paper.pdf", model="mathpix/pdf",
               api_key=MATHPIX_APP_KEY, provider_options={"app_id": MATHPIX_APP_ID})
 
 # 2. Keep running heads, page numbers and QR codes, and mark page boundaries in the MMD.
-liteocr.parse("book.pdf", model="mathpix/pdf",
+puffinparse.parse("book.pdf", model="mathpix/pdf",
               provider_options={"include_page_info": True, "include_page_breaks": True})
 
 # 3. Idiomatic LaTeX for equation-heavy papers, with equation numbers preserved.
-liteocr.parse("paper.pdf", model="mathpix/pdf",
+puffinparse.parse("paper.pdf", model="mathpix/pdf",
               provider_options={"idiomatic_eqn_arrays": True, "include_equation_tags": True,
                                 "math_inline_delimiters": ["\\(", "\\)"]})
 
 # 4. Plain markdown fences and flat lists instead of lstlisting / itemize environments.
-liteocr.parse("manual.pdf", model="mathpix/pdf",
+puffinparse.parse("manual.pdf", model="mathpix/pdf",
               provider_options={"disable_lstlisting": True, "disable_itemize": True})
 
 # 5. Chemistry + table data on a single image, with the raw payload attached.
-liteocr.parse("reaction.png", model="mathpix/text", include_raw=True,
+puffinparse.parse("reaction.png", model="mathpix/text", include_raw=True,
               provider_options={"include_smiles": True, "formats": ["text", "data"],
                                 "data_options": {"include_table_html": True, "include_tsv": True}})
 
 # 6. Ask for a DOCX conversion alongside the parse (downloaded separately from
-#    GET /v3/pdf/{id}.docx once its conversion_status is completed — LiteOCR does not fetch it).
-liteocr.parse("report.pdf", model="mathpix/pdf",
+#    GET /v3/pdf/{id}.docx once its conversion_status is completed — PuffinParse does not fetch it).
+puffinparse.parse("report.pdf", model="mathpix/pdf",
               provider_options={"conversion_formats": {"docx": True}})
 ```
 

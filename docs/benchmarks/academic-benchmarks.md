@@ -1,4 +1,4 @@
-# Academic and community OCR / document-parsing benchmarks: a survey for LiteOCR
+# Academic and community OCR / document-parsing benchmarks: a survey for PuffinParse
 
 Researched 2026-09-24. Companion to the [vendor benchmark review](vendor-benchmarks.md), which
 covers ParseBench, RealDoc-Bench and LongExtractBench. Every licence below was read from the
@@ -7,14 +7,14 @@ pinned revision) or from the repository's `LICENSE` file. Revisions are the comm
 current when this was written. **olmOCR-bench** and **OmniDocBench** now have adapters (see
 [adapters.md](adapters.md)). For the others this page recommends what to do next.
 
-LiteOCR scores two document kinds (SPEC §10): `transcript` (reference markdown, scored with
+PuffinParse scores two document kinds (SPEC §10): `transcript` (reference markdown, scored with
 char/word edit distance, reading order and `table_score`) and `rules` (machine-checkable
 `present` / `absent` / `order` / `table_cell` / `bag_of_sentences` assertions). "Maps to" below
 means into one of those two kinds.
 
 ## Summary
 
-| Benchmark | Measures | Size | Licence (verified) | Redistributable in LiteOCR (MIT)? | GT format | Maps to | Recommendation |
+| Benchmark | Measures | Size | Licence (verified) | Redistributable in PuffinParse (MIT)? | GT format | Maps to | Recommendation |
 |---|---|---|---|---|---|---|---|
 | **olmOCR-bench** (AI2) | PDF → markdown unit tests | 1,403 PDFs, 7,010 tests | ODC-BY-1.0 (card) | **Yes**, with attribution | JSONL unit tests | `rules`: 3,040 of 7,019 tests (43%) | **Adapted**: 40-doc subset committed |
 | **OmniDocBench** (OpenDataLab) | end-to-end page parsing: text, tables, formulas, reading order | 1,651 pages, 10 doc types, EN + ZH | none on the card; "research purposes only and not for commercial use" | **No**, index only | one JSON: blocks + order + text/LaTeX/HTML | `transcript` (1,443 of 1,651 pages) | **Adapted**: 40-page index, fetched at run time |
@@ -90,9 +90,9 @@ from `olmocr/bench/tests.py`:
 
 The leaderboard averages pass rates per split, not per document.
 
-**Mapping to LiteOCR.** Every test is already a rule, so documents are `kind: rules`:
+**Mapping to PuffinParse.** Every test is already a rule, so documents are `kind: rules`:
 
-| Upstream | → LiteOCR | Converted | Skipped | Fidelity |
+| Upstream | → PuffinParse | Converted | Skipped | Fidelity |
 |---|---|---:|---:|---|
 | `present` | `present` | 721 | 0 | exact substring, stricter than fuzzy when `max_diffs > 0` |
 | `absent` (no `first_n`/`last_n`) | `absent` | 622 | — | exact, looser than fuzzy when `max_diffs > 0` |
@@ -110,7 +110,7 @@ The leaderboard averages pass rates per split, not per document.
 **Recommendation.** Done. See [`benchmark/datasets/olmocr/README.md`](../../benchmark/datasets/olmocr/README.md).
 Two scorer extensions would recover most of what is skipped or approximated: fuzzy matching
 driven by `max_diffs`, and `up`/`down`/`left`/`right` neighbour fields on `table_cell`. Math is
-deliberately out of scope until LiteOCR has a formula metric.
+deliberately out of scope until PuffinParse has a formula metric.
 
 ## 2. OmniDocBench (OpenDataLab / Shanghai AI Laboratory): adapted as an index
 
@@ -137,7 +137,7 @@ includes a 296-page hard subset added 2026-04-09. Page attributes:
 are the Copyright Statement: *"The PDFs are collected from public online channels and community
 user contributions. Content that is not allowed for distribution has been removed. The dataset
 is for research purposes only and not for commercial use."* That grants no redistribution right
-and forbids commercial use, so LiteOCR, an MIT repository, **does not vendor any of it**: not the
+and forbids commercial use, so PuffinParse, an MIT repository, **does not vendor any of it**: not the
 images, and not the truth derived from the annotations. The evaluation code is Apache-2.0.
 
 **Ground truth.** Per page: `page_info` (image path, size, attributes) and `layout_dets`. Each
@@ -146,7 +146,7 @@ block has a `category_type` (28 block classes), a polygon, a reading `order`, an
 across columns, and `parent_son` links, which attach captions. Upstream's `tools/json2md.py`
 shows how to turn this into markdown.
 
-**Mapping to LiteOCR.** One `transcript` document per page. Blocks are emitted in `order`, with
+**Mapping to PuffinParse.** One `transcript` document per page. Blocks are emitted in `order`, with
 truncated chains merged. Titles become `#` headings, tables become pipe tables converted from
 the HTML (merged cells flattened, tagged `merged-cells`), display formulas stay as `$$…$$`, and
 headers, footers, page numbers, page footnotes, `abandon` regions and figures are dropped. Those
@@ -156,9 +156,9 @@ under 120 characters (82). That leaves **1,443 of 1,651 pages** convertible. `da
 the `category`. Language, layout, subset, special issues and `has-table` / `has-formula` are
 tags.
 
-What is lost: TEDS table structure (LiteOCR's `table_score` compares cell text row by row), CDM
+What is lost: TEDS table structure (PuffinParse's `table_score` compares cell text row by row), CDM
 formula matching (LaTeX is compared as text), and OmniDocBench's block-level matching, which
-forgives reading-order differences. LiteOCR's `char_similarity` over the whole page does not.
+forgives reading-order differences. PuffinParse's `char_similarity` over the whole page does not.
 
 **Recommendation.** Done as a fetch-at-run-time index. See
 [`benchmark/datasets/omnidocbench/README.md`](../../benchmark/datasets/omnidocbench/README.md).
@@ -218,7 +218,7 @@ redistribute. Treat the markdown truth as MIT and the PDFs as fetch-only.
 **Ground truth.** One markdown file per document, e.g. `arxiv_ground_truth/0705.4297.md`
 (91 KB).
 
-**Mapping.** `transcript`, multi-page, exactly LiteOCR's existing kind, but with documents of 10
+**Mapping.** `transcript`, multi-page, exactly PuffinParse's existing kind, but with documents of 10
 to 40 pages. That makes it a latency and cost stress test as much as an accuracy one.
 
 **Recommendation.** Worth an adapter as a separate long-document track (`readoc-arxiv`, about
@@ -242,8 +242,8 @@ diacritics sets, table-extraction sets), loaded through `docext` from Hugging Fa
 **Licence.** The harness is MIT. The IDP Core datasets keep their own terms, and several need
 an agreement or are research-only (DocILE, DocVQA). **Not verified dataset by dataset here.**
 
-**Recommendation.** No adapter of its own. Its two page-parsing benchmarks are now LiteOCR
-adapters, so LiteOCR can report comparable per-benchmark numbers directly. The KIE and table
+**Recommendation.** No adapter of its own. Its two page-parsing benchmarks are now PuffinParse
+adapters, so PuffinParse can report comparable per-benchmark numbers directly. The KIE and table
 tracks belong with a future `extract`-mode benchmark and would need a per-dataset licence audit.
 
 ## 6. Fox (UCAS / MEGVII)
@@ -257,7 +257,7 @@ multi-page variants. Scoring uses edit distance, F1, BLEU and METEOR.
 **Licence.** CC-BY-NC-SA-4.0 (card and tags). The non-commercial and share-alike terms are
 incompatible with vendoring into an MIT repository.
 
-**Recommendation.** Skip. The task is prompt-conditioned, and LiteOCR's providers expose no
+**Recommendation.** Skip. The task is prompt-conditioned, and PuffinParse's providers expose no
 "focus this box" input. Only the plain page-OCR slice would map to `transcript`, and the licence
 keeps it fetch-only.
 
@@ -297,7 +297,7 @@ the "score `parse` output" design exactly as RealDoc-Bench's QA track does.
 
 ---
 
-## What changes in LiteOCR because of this survey
+## What changes in PuffinParse because of this survey
 
 1. `benchmark/adapters/olmocr.py` and `benchmark/adapters/omnidocbench.py` exist, and
    `combined-v2` includes both. `combined-v1` is unchanged because it has committed results.

@@ -1,4 +1,4 @@
-"""Framework for turning a public OCR benchmark into a LiteOCR dataset manifest.
+"""Framework for turning a public OCR benchmark into a PuffinParse dataset manifest.
 
 An *adapter* knows how to fetch one upstream benchmark at a pinned revision and rewrite it
 into ``benchmark/datasets/<name>/manifest.json`` (see ``docs/benchmarks/adapters.md``).
@@ -54,7 +54,7 @@ __all__ = [
 ]
 
 #: Manifest ``kind`` values. ``transcript`` is the default and keeps the pre-existing behaviour
-#: (``truth`` is markdown, scored by ``liteocr_core::bench``); ``rules`` points at a rule file.
+#: (``truth`` is markdown, scored by ``puffinparse_core::bench``); ``rules`` points at a rule file.
 KIND_TRANSCRIPT = "transcript"
 KIND_RULES = "rules"
 
@@ -70,14 +70,14 @@ RULE_TYPES = ("present", "absent", "order", "table_cell", "bag_of_sentences")
 def default_cache_dir() -> Path:
     """Where adapters cache upstream downloads (never inside the repository).
 
-    Honours ``LITEOCR_BENCH_CACHE`` first, then ``XDG_CACHE_HOME``, then ``~/.cache``.
+    Honours ``PUFFINPARSE_BENCH_CACHE`` first, then ``XDG_CACHE_HOME``, then ``~/.cache``.
     """
-    env = os.environ.get("LITEOCR_BENCH_CACHE")
+    env = os.environ.get("PUFFINPARSE_BENCH_CACHE")
     if env:
         return Path(env).expanduser()
     xdg = os.environ.get("XDG_CACHE_HOME")
     base = Path(xdg).expanduser() if xdg else Path.home() / ".cache"
-    return base / "liteocr" / "benchmarks"
+    return base / "puffinparse" / "benchmarks"
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -180,7 +180,7 @@ class Doc:
     """One manifest document.
 
     ``id``, ``file``, ``truth``, ``pages``, ``category`` and ``tags`` are the fields the Rust
-    CLI already reads (``liteocr-cli/src/bench.rs``, ``ManifestDoc``). Everything else is an
+    CLI already reads (``puffinparse-cli/src/bench.rs``, ``ManifestDoc``). Everything else is an
     additive extension that serde ignores today.
 
     ``truth`` is always emitted, even for ``kind == "rules"`` documents where it is the empty

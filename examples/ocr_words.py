@@ -6,11 +6,11 @@ and where it sits on the page.
 
 import sys
 
-import liteocr
+import puffinparse
 
 path = sys.argv[1] if len(sys.argv) > 1 else "benchmark/datasets/synthetic-v1/docs/receipt_001.png"
 
-resp = liteocr.ocr(path, model="reducto/standard")
+resp = puffinparse.ocr(path, model="reducto/standard")
 
 print(f"{resp.model}: {resp.usage.pages} page(s), {resp.latency_ms} ms, ${resp.cost_usd or 0:.4f}")
 print(resp.text[:300])
@@ -25,5 +25,5 @@ for line in page.lines[:5]:
     else:
         print(f"  [no box] {line.text}")
 
-if resp.metadata.get("liteocr_derived_from") == "parse":
+if resp.metadata.get("puffinparse_derived_from") == "parse":
     print("\n(this provider has no native OCR endpoint; the text was derived from its parse output)")

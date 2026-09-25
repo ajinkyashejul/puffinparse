@@ -1,4 +1,4 @@
-"""Benchmark adapters: public OCR benchmarks → LiteOCR dataset manifests.
+"""Benchmark adapters: public OCR benchmarks → PuffinParse dataset manifests.
 
 Usage::
 

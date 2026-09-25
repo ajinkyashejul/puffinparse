@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-LiteOCR is pre-1.0. Security fixes land on `main` and ship in the next release;
+PuffinParse is pre-1.0. Security fixes land on `main` and ship in the next release;
 only the latest released version is supported.
 
 | Version | Supported |
@@ -33,8 +33,8 @@ details — and we will take it from there.
 
 ## What is in scope
 
-- The Rust crates (`liteocr-core`, `liteocr-cli`, `liteocr-python`) and the
-  Python package `liteocr`.
+- The Rust crates (`puffinparse-core`, `puffinparse-cli`, `puffinparse-python`) and the
+  Python package `puffinparse`.
 - The release and CI workflows in `.github/workflows/`, and the published
   artifacts (PyPI wheels/sdist, GitHub Release binaries).
 
@@ -43,20 +43,20 @@ Out of scope: vulnerabilities in the third-party OCR providers themselves
 require an already-compromised machine or a malicious local Rust/Python
 dependency you introduced.
 
-## How LiteOCR handles credentials
+## How PuffinParse handles credentials
 
 - **Provider API keys are only read from the environment** (`REDUCTO_API_KEY`,
   `EXTEND_API_KEY`, `LLAMA_API_KEY`) or passed explicitly as the `api_key`
-  argument. LiteOCR never reads them from anywhere else, never writes them to
+  argument. PuffinParse never reads them from anywhere else, never writes them to
   disk, and never sends them anywhere but the provider's own base URL.
-- **Keys are never logged.** `LITEOCR_LOG=debug` traces requests, retries and
+- **Keys are never logged.** `PUFFINPARSE_LOG=debug` traces requests, retries and
   polling, but `Authorization` headers and key values are redacted; errors carry
   provider, status code, message and request/job id only. If you ever see a key
   in log output, in an error message, or in a serialized `OcrResponse`, that is
   a vulnerability — please report it.
-- Document bytes are sent only to the selected provider. LiteOCR has no
+- Document bytes are sent only to the selected provider. PuffinParse has no
   telemetry and makes no network calls other than to the provider you choose.
-- Recorded test fixtures under `crates/liteocr-core/tests/fixtures/` must be
+- Recorded test fixtures under `crates/puffinparse-core/tests/fixtures/` must be
   redacted; never commit a fixture containing a real key, token or job id tied
   to a live account.
 - Releases are published to PyPI with trusted publishing (OIDC), so no

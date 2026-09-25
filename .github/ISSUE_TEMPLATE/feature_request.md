@@ -8,7 +8,7 @@ assignees: ""
 
 ## Problem
 
-<!-- What are you trying to do that LiteOCR makes hard or impossible today? -->
+<!-- What are you trying to do that PuffinParse makes hard or impossible today? -->
 
 ## Proposed solution
 
@@ -16,16 +16,16 @@ assignees: ""
 
 ```python
 # e.g.
-liteocr.ocr("doc.pdf", model="reducto/standard", new_option=...)
+puffinparse.ocr("doc.pdf", model="reducto/standard", new_option=...)
 ```
 
 ## Alternatives considered
 
 ## Scope
 
-- [ ] Rust core (`crates/liteocr-core`)
-- [ ] CLI (`crates/liteocr-cli`)
-- [ ] Python SDK (`python/liteocr`)
+- [ ] Rust core (`crates/puffinparse-core`)
+- [ ] CLI (`crates/puffinparse-cli`)
+- [ ] Python SDK (`python/puffinparse`)
 - [ ] Benchmark (`benchmark/`)
 - [ ] Docs
 

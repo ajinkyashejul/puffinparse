@@ -9,10 +9,10 @@ const fs = require('node:fs')
 const http = require('node:http')
 const path = require('node:path')
 
-const liteocr = require('..')
-const { AuthenticationError, InputError, ProviderError, UnsupportedModelError } = liteocr
+const puffinparse = require('..')
+const { AuthenticationError, InputError, ProviderError, UnsupportedModelError } = puffinparse
 
-const FIXTURES = path.join(__dirname, '..', '..', 'crates', 'liteocr-core', 'tests', 'fixtures')
+const FIXTURES = path.join(__dirname, '..', '..', 'crates', 'puffinparse-core', 'tests', 'fixtures')
 const REDUCTO_RESULT = JSON.parse(fs.readFileSync(path.join(FIXTURES, 'reducto_parse.json'), 'utf8'))
 const DOC = { url: 'https://example.com/invoice.pdf' } // Reducto takes URLs as-is: no upload step
 
@@ -56,7 +56,7 @@ describe('async jobs against a mock Reducto', () => {
 
   test('submit returns a camelCase Job and forwards the webhook', async () => {
     queue = [[200, '{"job_id":"rj-42"}']]
-    const j = await liteocr.submit(
+    const j = await puffinparse.submit(
       DOC,
       submitOpts({ webhookUrl: 'https://hooks.example.com/x', metadata: { batch_id: 7 } }),
     )
@@ -90,11 +90,11 @@ describe('async jobs against a mock Reducto', () => {
 
   test('retrieve returns the same Job while pending, then the ParseResponse', async () => {
     queue = [[200, '{"job_id":"rj-1"}'], job('Pending'), job('Completed', { result: REDUCTO_RESULT })]
-    const j = await liteocr.submit(DOC, submitOpts({ metadata: { run: 'r1' } }))
-    const pending = await liteocr.retrieve(j, { apiKey: 'test-key' })
+    const j = await puffinparse.submit(DOC, submitOpts({ metadata: { run: 'r1' } }))
+    const pending = await puffinparse.retrieve(j, { apiKey: 'test-key' })
     assert.equal(pending, j)
     // A Job survives a JSON round trip (e.g. stored in a queue between processes).
-    const done = await liteocr.retrieve(JSON.parse(JSON.stringify(j)), { apiKey: 'test-key' })
+    const done = await puffinparse.retrieve(JSON.parse(JSON.stringify(j)), { apiKey: 'test-key' })
     assert.equal(done.model, 'reducto/standard')
     assert.equal(done.provider, 'reducto')
     assert.equal(done.providerJobId, REDUCTO_RESULT.job_id)
@@ -115,7 +115,7 @@ describe('async jobs against a mock Reducto', () => {
   test('retrieve renders a vendor shape with outputFormat', async () => {
     queue = [job('Completed', { result: REDUCTO_RESULT })]
     const j = { provider: 'reducto', model: 'reducto/standard', jobId: 'rj-2', submittedAt: '', baseUrl }
-    const resp = await liteocr.retrieve(j, { apiKey: 'k', outputFormat: 'llamaparse' })
+    const resp = await puffinparse.retrieve(j, { apiKey: 'k', outputFormat: 'llamaparse' })
     assert.ok(Array.isArray(resp.pages), 'LlamaParse-shaped response')
     assert.equal(resp.pages[0].page, 1)
   })
@@ -123,7 +123,7 @@ describe('async jobs against a mock Reducto', () => {
   test('a failed job rejects with a typed error carrying the job id and provider message', async () => {
     queue = [job('Failed', { reason: 'Password-protected document' })]
     const j = { provider: 'reducto', model: 'reducto/standard', jobId: 'rj-9', submittedAt: '', baseUrl }
-    await assert.rejects(liteocr.retrieve(j, { apiKey: 'k' }), (e) => {
+    await assert.rejects(puffinparse.retrieve(j, { apiKey: 'k' }), (e) => {
       assert.ok(e instanceof ProviderError)
       assert.equal(e.jobId, 'rj-9')
       assert.equal(e.provider, 'reducto')
@@ -135,7 +135,7 @@ describe('async jobs against a mock Reducto', () => {
   test('HTTP errors on retrieve map like parse', async () => {
     queue = [[401, '{"detail":"Invalid API key from mock"}']]
     const j = { provider: 'reducto', model: 'reducto/standard', jobId: 'rj-3', submittedAt: '', baseUrl }
-    await assert.rejects(liteocr.retrieve(j, { apiKey: 'bad', maxRetries: 0 }), (e) => {
+    await assert.rejects(puffinparse.retrieve(j, { apiKey: 'bad', maxRetries: 0 }), (e) => {
       assert.ok(e instanceof AuthenticationError)
       assert.equal(e.statusCode, 401)
       assert.equal(e.message, 'Invalid API key from mock')
@@ -144,12 +144,12 @@ describe('async jobs against a mock Reducto', () => {
   })
 
   test('handleWebhook: pending, finished (one retrieve) and failed bodies', async () => {
-    const pending = await liteocr.handleWebhook({ event_type: 'parse.pending', data: { job_id: 'j1' } }, { model: 'llamaparse' })
+    const pending = await puffinparse.handleWebhook({ event_type: 'parse.pending', data: { job_id: 'j1' } }, { model: 'llamaparse' })
     assert.equal(pending.jobId, 'j1')
     assert.equal(pending.provider, 'llamaparse')
 
     queue = [job('Completed', { result: REDUCTO_RESULT })]
-    const done = await liteocr.handleWebhook(JSON.stringify({ status: 'Completed', job_id: 'rj-7' }), {
+    const done = await puffinparse.handleWebhook(JSON.stringify({ status: 'Completed', job_id: 'rj-7' }), {
       apiKey: 'k',
       baseUrl,
     })
@@ -161,34 +161,34 @@ describe('async jobs against a mock Reducto', () => {
       payload: { object: 'parse_run_status', id: 'pr_9', status: 'FAILED', failureReason: 'OUT_OF_CREDITS', failureMessage: 'No credits left.' },
     }
     await assert.rejects(
-      liteocr.handleWebhook(failed, { model: 'extend' }),
+      puffinparse.handleWebhook(failed, { model: 'extend' }),
       (e) => e instanceof AuthenticationError && /No credits left/.test(e.message) && e.jobId === 'pr_9',
     )
 
     const push = { txt: 'Hello', md: '# Hello', json: [{ page: 1, text: 'Hello', md: '# Hello' }], images: [] }
-    const pushed = await liteocr.handleWebhook(push, { model: 'llamaparse/agentic' })
+    const pushed = await puffinparse.handleWebhook(push, { model: 'llamaparse/agentic' })
     assert.equal(pushed.model, 'llamaparse/agentic')
     assert.equal(pushed.markdown, '# Hello')
     assert.equal(seen.length, 1, 'only the finished body made a network call')
   })
 
   test('arguments are validated before any call', async () => {
-    await assert.rejects(liteocr.submit(DOC, { fallbacks: ['llamaparse'] }), /unknown option\(s\) "fallbacks"/)
-    await assert.rejects(liteocr.submit(DOC, { outputFormat: 'reducto' }), TypeError)
-    await assert.rejects(liteocr.submit(DOC, { webhookUrl: 42 }), TypeError)
-    await assert.rejects(liteocr.submit(DOC, { model: 'mistral/ocr-latest', apiKey: 'k' }), UnsupportedModelError)
+    await assert.rejects(puffinparse.submit(DOC, { fallbacks: ['llamaparse'] }), /unknown option\(s\) "fallbacks"/)
+    await assert.rejects(puffinparse.submit(DOC, { outputFormat: 'reducto' }), TypeError)
+    await assert.rejects(puffinparse.submit(DOC, { webhookUrl: 42 }), TypeError)
+    await assert.rejects(puffinparse.submit(DOC, { model: 'mistral/ocr-latest', apiKey: 'k' }), UnsupportedModelError)
     await assert.rejects(
-      liteocr.submit(DOC, { model: 'extend/parse_light', apiKey: 'k', webhookUrl: 'https://h.example.com/x' }),
+      puffinparse.submit(DOC, { model: 'extend/parse_light', apiKey: 'k', webhookUrl: 'https://h.example.com/x' }),
       (e) => e instanceof InputError && /webhook/i.test(e.message),
     )
-    await assert.rejects(liteocr.retrieve({ jobId: 'x' }), TypeError)
-    await assert.rejects(liteocr.retrieve('rj-1'), TypeError)
+    await assert.rejects(puffinparse.retrieve({ jobId: 'x' }), TypeError)
+    await assert.rejects(puffinparse.retrieve('rj-1'), TypeError)
     const j = { provider: 'reducto', model: 'reducto/standard', jobId: 'rj-1', submittedAt: '' }
-    await assert.rejects(liteocr.retrieve(j, { timeout: 0 }), TypeError)
-    await assert.rejects(liteocr.retrieve(j, { webhookUrl: 'x' }), TypeError)
-    await assert.rejects(liteocr.handleWebhook({ unexpected: true }, { model: 'reducto' }), InputError)
-    await assert.rejects(liteocr.handleWebhook('not json'), InputError)
-    await assert.rejects(liteocr.handleWebhook([1]), TypeError)
+    await assert.rejects(puffinparse.retrieve(j, { timeout: 0 }), TypeError)
+    await assert.rejects(puffinparse.retrieve(j, { webhookUrl: 'x' }), TypeError)
+    await assert.rejects(puffinparse.handleWebhook({ unexpected: true }, { model: 'reducto' }), InputError)
+    await assert.rejects(puffinparse.handleWebhook('not json'), InputError)
+    await assert.rejects(puffinparse.handleWebhook([1]), TypeError)
     assert.equal(seen.length, 0)
   })
 })

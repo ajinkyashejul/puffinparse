@@ -1,15 +1,15 @@
 # Python SDK
 
-`pip install liteocr` — Python 3.9+, fully typed (`py.typed`, `mypy --strict` clean). The package is
-a thin, typed wrapper over the Rust core (`liteocr._core`); no provider logic lives in Python.
+`pip install puffinparse` — Python 3.9+, fully typed (`py.typed`, `mypy --strict` clean). The package is
+a thin, typed wrapper over the Rust core (`puffinparse._core`); no provider logic lives in Python.
 
-Everything below is the public surface exported from `liteocr.__all__`.
+Everything below is the public surface exported from `puffinparse.__all__`.
 
 ```python
-import liteocr
+import puffinparse
 
-liteocr.__version__          # version of the compiled core
-liteocr.modes()              # ["parse", "ocr", "extract"]
+puffinparse.__version__          # version of the compiled core
+puffinparse.modes()              # ["parse", "ocr", "extract"]
 ```
 
 ## Modes
@@ -20,16 +20,16 @@ freely *within* a mode; a model that does not serve the mode you asked for raise
 
 | Mode | Call | Async | Returns | Use it for |
 |---|---|---|---|---|
-| `parse` | `liteocr.parse` | `liteocr.aparse` | `ParseResponse` | Layout-aware markdown and typed blocks with boxes. |
-| `ocr` | `liteocr.ocr` | `liteocr.aocr` | `TextResponse` | Plain text with line and word boxes — search indexes, redaction, overlays. |
-| `extract` | `liteocr.extract` | `liteocr.aextract` | `ExtractResponse` | A JSON object shaped by your schema, with per-field citations. |
+| `parse` | `puffinparse.parse` | `puffinparse.aparse` | `ParseResponse` | Layout-aware markdown and typed blocks with boxes. |
+| `ocr` | `puffinparse.ocr` | `puffinparse.aocr` | `TextResponse` | Plain text with line and word boxes — search indexes, redaction, overlays. |
+| `extract` | `puffinparse.extract` | `puffinparse.aextract` | `ExtractResponse` | A JSON object shaped by your schema, with per-field citations. |
 
 `Mode` is `Literal["parse", "ocr", "extract"]` and `MODES` is the same tuple as a constant.
 
 ```python
-doc  = liteocr.parse("invoice.pdf", model="reducto/standard")     # markdown + blocks
-text = liteocr.ocr("scan.png", model="llamaparse/fast")           # plain text + boxes
-data = liteocr.extract("invoice.pdf", schema, model="reducto/extract")
+doc  = puffinparse.parse("invoice.pdf", model="reducto/standard")     # markdown + blocks
+text = puffinparse.ocr("scan.png", model="llamaparse/fast")           # plain text + boxes
+data = puffinparse.extract("invoice.pdf", schema, model="reducto/extract")
 ```
 
 ## `parse`
@@ -64,7 +64,7 @@ def parse(
 | `pages` | 1-based page selection such as `"1-3,7"`, forwarded best-effort. |
 | `language` | Language hint (ISO 639-1) when the provider supports it. |
 | `output` | Preferred block content: `"markdown"` (default) or `"text"`. |
-| `output_format` | Return a vendor's own JSON `dict` instead of the dataclass: `"reducto"`, `"extend"`, `"llamaparse"`, or `"liteocr"` / `None` for the unified shape. See [Native-format output](#native-format-output-output_format). |
+| `output_format` | Return a vendor's own JSON `dict` instead of the dataclass: `"reducto"`, `"extend"`, `"llamaparse"`, or `"puffinparse"` / `None` for the unified shape. See [Native-format output](#native-format-output-output_format). |
 | `provider_options` | Provider-specific options merged verbatim into the provider request body. |
 | `include_raw` | Attach the provider's raw payload as `response.raw`. |
 | `timeout` | Whole-call deadline in seconds (upload + polling + download). |
@@ -76,16 +76,16 @@ def parse(
 Passing bytes without `filename` raises `InputError` before any network call.
 
 ```python
-resp = liteocr.parse("contract.pdf", model="extend/parse_performance")
-resp = liteocr.parse("https://example.com/doc.pdf", model="reducto/r-1", pages="1-2")
-resp = liteocr.parse(open("scan.png", "rb").read(), filename="scan.png", model="llamaparse/agentic")
+resp = puffinparse.parse("contract.pdf", model="extend/parse_performance")
+resp = puffinparse.parse("https://example.com/doc.pdf", model="reducto/r-1", pages="1-2")
+resp = puffinparse.parse(open("scan.png", "rb").read(), filename="scan.png", model="llamaparse/agentic")
 ```
 
 `aparse` is the same call with `await`. It runs on the Rust runtime, so the event loop is never
 blocked.
 
 ```python
-resp = await liteocr.aparse("contract.pdf", model="llamaparse/cost_effective")
+resp = await puffinparse.aparse("contract.pdf", model="llamaparse/cost_effective")
 ```
 
 ## `ocr`
@@ -112,14 +112,14 @@ Same parameters as `parse` minus `output` (the mode implies plain text). Use it 
 and geometry rather than document structure; for markdown, tables and block types use `parse`.
 
 Providers without a native OCR endpoint serve this mode from their parse output. The response then
-carries `metadata["liteocr_derived_from"] == "parse"`, so you can tell the difference.
+carries `metadata["puffinparse_derived_from"] == "parse"`, so you can tell the difference.
 
 ```python
-text = liteocr.ocr("scan.png", model="reducto/r-1")
+text = puffinparse.ocr("scan.png", model="reducto/r-1")
 text.text                                    # whole document
 for line in text.pages[0].lines:
     line.text, line.bbox, line.confidence
-text = await liteocr.aocr("scan.png")        # async
+text = await puffinparse.aocr("scan.png")        # async
 ```
 
 ## `extract`
@@ -165,7 +165,7 @@ schema = {
     },
 }
 
-resp = liteocr.extract("invoice.pdf", schema, model="reducto/extract",
+resp = puffinparse.extract("invoice.pdf", schema, model="reducto/extract",
                        instructions="Totals are inclusive of tax.", citations=True)
 
 resp.data["total"]                      # the object your schema asked for
@@ -197,32 +197,32 @@ quietly answer an extraction.
 | `mode` | `Mode` (property) | The mode this router serves. |
 | `plan()` | `list[str]` | The order models would be tried for the next call. Advances the round-robin cursor. |
 | `stats()` | `dict[str, dict[str, Any]]` | Per model: `successes`, `failures`, `total_latency_ms`, `total_cost_usd`, `total_pages`. |
-| `parse(input, **kw)` / `aparse` | `ParseResponse` | Same keyword arguments as `liteocr.parse` except `model`, `output_format` included. |
+| `parse(input, **kw)` / `aparse` | `ParseResponse` | Same keyword arguments as `puffinparse.parse` except `model`, `output_format` included. |
 | `ocr(input, **kw)` / `aocr` | `TextResponse` | Same, minus `output`. |
-| `extract(input, schema, *, output_format, instructions, citations, **kw)` / `aextract` | `ExtractResponse` | Same as `liteocr.extract` except `model`. |
+| `extract(input, schema, *, output_format, instructions, citations, **kw)` / `aextract` | `ExtractResponse` | Same as `puffinparse.extract` except `model`. |
 
 `fallback_on` is a list of error-kind names; the default is `provider`, `rate_limit`, `timeout`,
 `network`. Authentication, bad-request, unsupported-model and input errors never trigger a
 fallback. Unknown keyword arguments raise `TypeError` and the message lists what is accepted.
 
 ```python
-router = liteocr.Router(["reducto/standard", "llamaparse/agentic"], strategy="round_robin")
+router = puffinparse.Router(["reducto/standard", "llamaparse/agentic"], strategy="round_robin")
 resp = router.parse("doc.pdf", pages="1-5", timeout=120)
 router.stats()["reducto/standard"]["successes"]
 
-text_router = liteocr.Router(["reducto/r-1", "extend/parse_light"], mode="ocr")
+text_router = puffinparse.Router(["reducto/r-1", "extend/parse_light"], mode="ocr")
 text_router.ocr("scan.png").text
 ```
 
 ## Native-format output (`output_format`)
 
-LiteOCR normalises every provider to one response shape, which is the right default — and a
+PuffinParse normalises every provider to one response shape, which is the right default — and a
 migration cost if you are already integrated with a vendor. `output_format` removes it: ask for a
 vendor's shape and the response is rendered into *that vendor's own JSON*, whatever provider
 actually produced it.
 
 ```python
-doc = liteocr.parse("invoice.pdf", model="extend/parse_light", output_format="reducto")
+doc = puffinparse.parse("invoice.pdf", model="extend/parse_light", output_format="reducto")
 
 for chunk in doc["result"]["chunks"]:          # Reducto's shape, Extend's engine
     for block in chunk["blocks"]:
@@ -231,14 +231,14 @@ for chunk in doc["result"]["chunks"]:          # Reducto's shape, Extend's engin
 
 | Value | Shape |
 |---|---|
-| `None` (default), `"liteocr"`, `"unified"` | LiteOCR's own response — a dataclass for `None`, the same JSON as a `dict` for `"liteocr"`. |
+| `None` (default), `"puffinparse"`, `"unified"` | PuffinParse's own response — a dataclass for `None`, the same JSON as a `dict` for `"puffinparse"`. |
 | `"reducto"` | Reducto `POST /parse` response (`response_type: "parse"`). |
 | `"extend"` | Extend `parse_run` object (`GET /parse_runs/{id}`). |
 | `"llamaparse"` (`"llama"`, `"llama_parse"`) | LlamaParse `…/result/json` payload. |
 
 - Available on `parse`, `aparse`, `extract`, `aextract`, `Router.parse` / `aparse` / `extract` /
   `aextract`, and the CLI (`--output-format`, with `--format json`).
-- Names are case-insensitive and `-`/`_` are interchangeable; `liteocr.output_formats()` lists
+- Names are case-insensitive and `-`/`_` are interchangeable; `puffinparse.output_formats()` lists
   them. An unknown value raises `BadRequestError` **before any network call**.
 - The return type follows the argument: `None` gives the dataclass, a string gives a `dict`.
   Both are `@overload`-typed, so a type checker knows which one it is.
@@ -250,26 +250,26 @@ for chunk in doc["result"]["chunks"]:          # Reducto's shape, Extend's engin
 What is guaranteed is **structural fidelity**, not semantic identity: the key set and nesting, one
 chunk/page per unified page, the content strings, the vendor's own block vocabulary and coordinate
 units, and the billed page count. Not guaranteed: byte equality with what the vendor would have
-returned, fields LiteOCR does not model (they are rendered as `null` / `[]`, never invented), or
+returned, fields PuffinParse does not model (they are rendered as `null` / `[]`, never invented), or
 vendor-specific enrichments. Extract-mode rendering is explicitly best effort.
 [`docs/COMPAT.md`](https://github.com/ajinkyashejul/liteocr/blob/main/docs/COMPAT.md) lists every
 always-null field, the lossy block-type mappings and the coordinate conversions, per format.
 
 ```python
-liteocr.output_formats()      # ["liteocr", "reducto", "extend", "llamaparse"]
+puffinparse.output_formats()      # ["puffinparse", "reducto", "extend", "llamaparse"]
 
 # same call, both shapes
-doc = liteocr.parse("invoice.pdf", model="reducto/standard")                       # ParseResponse
-raw = liteocr.parse("invoice.pdf", model="reducto/standard", output_format="extend")
+doc = puffinparse.parse("invoice.pdf", model="reducto/standard")                       # ParseResponse
+raw = puffinparse.parse("invoice.pdf", model="reducto/standard", output_format="extend")
 raw["object"], raw["status"], raw["metrics"]["pageCount"]
 
-router = liteocr.Router(["reducto/standard", "extend/parse_light"])
+router = puffinparse.Router(["reducto/standard", "extend/parse_light"])
 router.parse("doc.pdf", output_format="llamaparse")["pages"][0]["items"]
 ```
 
 ## Response types
 
-All response dataclasses mirror the Rust structs in `liteocr-core` 1:1 and live in `liteocr.types`.
+All response dataclasses mirror the Rust structs in `puffinparse-core` 1:1 and live in `puffinparse.types`.
 `Response` is the union `ParseResponse | TextResponse | ExtractResponse`.
 
 Every response carries the same envelope: `id`, `provider`, `model`, `provider_job_id`, `usage`,
@@ -423,7 +423,7 @@ properties; `to_pixels(page_width, page_height)` returns absolute `(x0, y0, x1, 
 
 ### `Metrics`
 
-Returned by `liteocr.score`.
+Returned by `puffinparse.score`.
 
 ```python
 @dataclass
@@ -442,10 +442,10 @@ class Metrics:
 
 ## Exceptions
 
-Every error raised by LiteOCR derives from `LiteOCRError`.
+Every error raised by PuffinParse derives from `PuffinParseError`.
 
 ```
-LiteOCRError                 kind = "error"
+PuffinParseError                 kind = "error"
 ├── AuthenticationError      "authentication_error"    401/403, or no API key configured
 ├── RateLimitError           "rate_limit_error"        429 after retries were exhausted
 ├── BadRequestError          "bad_request_error"       other 4xx — the request itself is wrong
@@ -470,52 +470,52 @@ Every instance carries:
 
 ```python
 try:
-    resp = liteocr.parse("doc.pdf", model="reducto/standard")
-except liteocr.RateLimitError as e:
+    resp = puffinparse.parse("doc.pdf", model="reducto/standard")
+except puffinparse.RateLimitError as e:
     print(e.provider, e.status_code, e.retryable)
-except liteocr.LiteOCRError as e:
+except puffinparse.PuffinParseError as e:
     print(e.to_dict())
 ```
 
-`liteocr.exceptions.from_core(exc)` converts a raw `liteocr._core.CoreError` into the typed
+`puffinparse.exceptions.from_core(exc)` converts a raw `puffinparse._core.CoreError` into the typed
 exception; the SDK applies it for you.
 
 ## Callbacks
 
 Two module-level lists, called after every call in every mode, including `Router` calls. Callbacks
 may be plain functions or coroutines; exceptions raised inside a callback are logged to the
-`liteocr` logger and never propagate to the caller.
+`puffinparse` logger and never propagate to the caller.
 
 ```python
-liteocr.success_callback: list[Callable[[Response], None | Awaitable[None]]]
-liteocr.failure_callback: list[Callable[[LiteOCRError], None | Awaitable[None]]]
+puffinparse.success_callback: list[Callable[[Response], None | Awaitable[None]]]
+puffinparse.failure_callback: list[Callable[[PuffinParseError], None | Awaitable[None]]]
 ```
 
 ```python
-liteocr.success_callback.append(lambda r: print(r.model, r.usage.pages, r.cost_usd))
-liteocr.failure_callback.append(lambda e: print("failed:", e))
+puffinparse.success_callback.append(lambda r: print(r.model, r.usage.pages, r.cost_usd))
+puffinparse.failure_callback.append(lambda e: print("failed:", e))
 ```
 
 ## Models and pricing
 
 ```python
-liteocr.modes() -> list[str]
-liteocr.output_formats() -> list[str]              # vendor shapes output_format accepts
-liteocr.list_models(mode: Optional[Mode] = None) -> list[str]
-liteocr.providers() -> list[dict[str, Any]]        # name, env var, base URL, docs, models + modes
-liteocr.resolve_model(model: str, mode: Optional[Mode] = None) -> str
-liteocr.pricing() -> dict[str, dict[str, Any]]     # model -> per-mode $/page, source, updated
-liteocr.set_pricing(prices: dict[str, float], mode: Mode = "parse") -> None
-liteocr.reset_pricing() -> None
-liteocr.estimate_cost(model: str, pages: int, mode: Mode = "parse") -> Optional[float]
+puffinparse.modes() -> list[str]
+puffinparse.output_formats() -> list[str]              # vendor shapes output_format accepts
+puffinparse.list_models(mode: Optional[Mode] = None) -> list[str]
+puffinparse.providers() -> list[dict[str, Any]]        # name, env var, base URL, docs, models + modes
+puffinparse.resolve_model(model: str, mode: Optional[Mode] = None) -> str
+puffinparse.pricing() -> dict[str, dict[str, Any]]     # model -> per-mode $/page, source, updated
+puffinparse.set_pricing(prices: dict[str, float], mode: Mode = "parse") -> None
+puffinparse.reset_pricing() -> None
+puffinparse.estimate_cost(model: str, pages: int, mode: Mode = "parse") -> Optional[float]
 ```
 
 ```python
-liteocr.list_models("extract")                     # only models that serve extract
-liteocr.resolve_model("reducto", "ocr")            # provider default *for that mode*
-liteocr.set_pricing({"reducto/standard": 0.012})   # your negotiated parse rate
-liteocr.estimate_cost("reducto/standard", 1000)    # 12.0
-liteocr.reset_pricing()
+puffinparse.list_models("extract")                     # only models that serve extract
+puffinparse.resolve_model("reducto", "ocr")            # provider default *for that mode*
+puffinparse.set_pricing({"reducto/standard": 0.012})   # your negotiated parse rate
+puffinparse.estimate_cost("reducto/standard", 1000)    # 12.0
+puffinparse.reset_pricing()
 ```
 
 `resolve_model` raises `UnsupportedModelError` for an unknown string, or for a model that does not
@@ -527,7 +527,7 @@ serve the requested mode — which makes it a cheap validator for user input. `e
 The benchmark metrics are exposed directly — deterministic, offline, no LLM judge.
 
 ```python
-liteocr.score(
+puffinparse.score(
     prediction: str,
     truth: str,
     *,
@@ -536,14 +536,14 @@ liteocr.score(
     strip_punctuation: bool = False,
 ) -> Metrics
 
-liteocr.normalize_text(text, *, case_insensitive=True, strip_markdown=True,
+puffinparse.normalize_text(text, *, case_insensitive=True, strip_markdown=True,
                        strip_punctuation=False) -> str
 
-liteocr.markdown_to_text(markdown: str) -> str
+puffinparse.markdown_to_text(markdown: str) -> str
 ```
 
 ```python
-m = liteocr.score(resp.markdown, open("truth.md").read())
+m = puffinparse.score(resp.markdown, open("truth.md").read())
 print(m.char_similarity, m.cer, m.wer, m.word_f1, m.order_score, m.table_score)
 ```
 
@@ -552,12 +552,12 @@ See [Benchmark](/benchmark/) for what each metric means.
 ## Logging
 
 ```python
-liteocr.init_logging(level: str = "info") -> None
+puffinparse.init_logging(level: str = "info") -> None
 ```
 
 Enables the Rust core's `tracing` output on stderr; `"debug"` shows every HTTP step. The CLI uses
-the `LITEOCR_LOG` environment variable for the same thing. Python-side messages (such as a raising
-callback) go to the standard `logging` logger named `liteocr`.
+the `PUFFINPARSE_LOG` environment variable for the same thing. Python-side messages (such as a raising
+callback) go to the standard `logging` logger named `puffinparse`.
 
 ## See also
 

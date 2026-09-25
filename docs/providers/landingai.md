@@ -10,16 +10,16 @@
 | Docs | <https://docs.landing.ai/ade/ade-overview> · <https://docs.landing.ai/ade/parse> · OpenAPI: <https://docs.landing.ai/ade/va_openapi_ade2.json> |
 | Modes | `parse` (native), `ocr` (derived from `parse`), `extract` (parse → extract, two calls) |
 | Verified | 2026-09-11, **from documentation and the published OpenAPI spec only** — no key was available, so the `#[ignore]`d live test has not been run |
-| Implementation | `crates/liteocr-core/src/providers/landingai.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/landingai.rs` |
 
 ADE parses a document into reading-order Markdown plus semantic **chunks**, each grounded to a page
 and a normalised bounding box, with separate grounding entries for tables and individual table cells.
-Field extraction is a *second* API that consumes the parse Markdown, so LiteOCR's `extract` mode is a
+Field extraction is a *second* API that consumes the parse Markdown, so PuffinParse's `extract` mode is a
 parse followed by an extract, with chunk references resolved back into page + box citations.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
-| Model | Provider parameters LiteOCR sets | List price (`pricing.json`) |
+| Model | Provider parameters PuffinParse sets | List price (`pricing.json`) |
 |---|---|---|
 | `landingai/dpt-2` *(default)* | `model=dpt-2-latest`, `split=page` | parse $0.03 / page · extract $0.04 / page |
 
@@ -34,11 +34,11 @@ Pin a snapshot with `provider_options={"model": "dpt-2-20260410"}`; available va
 `dpt-2-latest` and the dated snapshots (`dpt-2-20250919`, `-20251103`, `-20260302`, `-20260410`).
 `dpt-1` and `dpt-2-mini` are **deprecated and rejected by the API**.
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 1. **Parse.** `POST {base}/v1/ade/parse`, `multipart/form-data`:
 
-   | field | value LiteOCR sends |
+   | field | value PuffinParse sends |
    |---|---|
    | `document` | the file part — **or** `document_url` with the URL when the input is a URL (ADE downloads it itself) |
    | `model` | `dpt-2-latest` (or the `provider_options.model` override) |
@@ -58,7 +58,7 @@ Pin a snapshot with `provider_options={"model": "dpt-2-20260410"}`; available va
 `metadata.landingai_pages_filtered_client_side`; `usage.pages` stays at the billed page count for the
 whole document. `language` is not forwarded: ADE detects languages automatically and exposes no hint.
 
-LiteOCR always uses the **synchronous** endpoint. Parse Jobs (`POST /v1/ade/parse/jobs` +
+PuffinParse always uses the **synchronous** endpoint. Parse Jobs (`POST /v1/ade/parse/jobs` +
 `GET /v1/ade/parse/jobs/{job_id}`) lift the limit from 100 pages to 6 000 pages / 1 GB and are the
 obvious next addition; the sync endpoint's own gateway timeout is 475 s.
 
@@ -66,9 +66,9 @@ obvious next addition; the sync endpoint's own gateway timeout is 475 s.
 
 ```json
 {
-  "markdown": "<a id='2831e56d-…'></a>\n\n# Hello LiteOCR\n\n…",
+  "markdown": "<a id='2831e56d-…'></a>\n\n# Hello PuffinParse\n\n…",
   "chunks": [
-    { "markdown": "<a id='2831e56d-…'></a>\n\n# Hello LiteOCR", "type": "text",
+    { "markdown": "<a id='2831e56d-…'></a>\n\n# Hello PuffinParse", "type": "text",
       "id": "2831e56d-94f5-4ec4-b001-6e16e188119b",
       "grounding": { "box": { "left": 0.017, "top": 0.038, "right": 0.463, "bottom": 0.212 }, "page": 0 } }
   ],
@@ -81,17 +81,17 @@ obvious next addition; the sync endpoint's own gateway timeout is 475 s.
 }
 ```
 
-(The full fixtures are `crates/liteocr-core/tests/fixtures/landingai_parse.json` and
+(The full fixtures are `crates/puffinparse-core/tests/fixtures/landingai_parse.json` and
 `landingai_extract.json`.)
 
 ### parse / ocr
 
-| ADE field | LiteOCR unified field | Notes |
+| ADE field | PuffinParse unified field | Notes |
 |---|---|---|
 | `chunks[]` | `Page.blocks[]` | Reading order preserved. |
 | `chunks[].markdown` | `Block.content` | The `<a id='…'></a>` grounding anchors are stripped; table HTML (`<table id="0-1">…`) is kept verbatim. `output="text"` runs it through `markdown_to_text`. |
 | `chunks[].type` | `Block.type` | Mapping below. |
-| `chunks[].grounding.page` | `Block.page_number` | **Zero-indexed on the wire**, +1 in LiteOCR. |
+| `chunks[].grounding.page` | `Block.page_number` | **Zero-indexed on the wire**, +1 in PuffinParse. |
 | `chunks[].grounding.box` | `Block.bbox` | `{left, top, right, bottom}`, already normalised 0–1 with a top-left origin → `{x0, y0, x1, y1}`. |
 | `grounding[<chunk id>].confidence` | `Block.confidence` | Only text-ish chunks carry one. |
 | `splits[]` with `class == "page"` | `Page.markdown` / `Page.text` | Preferred over joining the chunks; `pages[0] + 1` is the page number. |
@@ -100,7 +100,7 @@ obvious next addition; the sync endpoint's own gateway timeout is 475 s.
 | `metadata.job_id` | `provider_job_id` | |
 | `metadata.version` | `metadata.landingai_version` | Resolved snapshot, e.g. `dpt-2-20260410`. |
 | `metadata.failed_pages` | `metadata.landingai_failed_pages` | Converted to 1-based. Present on `206 Partial Content`. |
-| `grounding[<table/cell id>]` | — | Table and cell boxes are not modelled by LiteOCR's `Block`; use `include_raw=True`. |
+| `grounding[<table/cell id>]` | — | Table and cell boxes are not modelled by PuffinParse's `Block`; use `include_raw=True`. |
 | — | `Page.width` / `Page.height` | **Never set**: ADE reports no page dimensions (boxes are already relative). |
 
 Chunk types: `text` → `text`, unless the chunk's Markdown starts with a heading — `# ` → `title`,
@@ -110,7 +110,7 @@ Chunk types: `text` → `text`, unless the chunk's Markdown starts with a headin
 
 ### extract
 
-| ADE field | LiteOCR unified field | Notes |
+| ADE field | PuffinParse unified field | Notes |
 |---|---|---|
 | `extraction` | `ExtractResponse.data` | Exactly the object ADE returns, shaped by your schema. |
 | `extraction_metadata.…{value, references}` | `ExtractResponse.fields["<json pointer>"]` | The metadata mirrors the schema; every leaf becomes one `FieldInfo` keyed by an RFC 6901 pointer into `data` (`/invoice/total`, `/items/0/description`). |
@@ -128,7 +128,7 @@ With `include_raw=True` the extract response's `raw` is `{"parse": <parse payloa
 ADE is a FastAPI service: errors are `{"detail": "…"}` or `{"detail": [ValidationError, …]}`, which
 `Error::from_http` surfaces directly.
 
-| Status | Cause | LiteOCR `ErrorKind` |
+| Status | Cause | PuffinParse `ErrorKind` |
 |---|---|---|
 | 200 | success | — |
 | 206 | **partial content** — some pages failed; `metadata.failed_pages` lists them (zero-indexed) | success, with `metadata.landingai_failed_pages` |
@@ -151,35 +151,35 @@ parses: a large document needs `timeout` ≥ 500 or the Parse Jobs API.
 
 ## 6. Gotchas (documentation-derived; not yet live-verified)
 
-* **Two generations of the API exist.** LiteOCR targets **ADE Gen1** (`api.va.landing.ai/v1/ade/*`,
+* **Two generations of the API exist.** PuffinParse targets **ADE Gen1** (`api.va.landing.ai/v1/ade/*`,
   DPT-2), which is current and documented. A newer **Gen2** (`api.ade.landing.ai/v2/parse`, DPT-3,
   character-span grounding, a structure tree instead of chunks) is live with a different response
   shape; supporting it means a second model (`landingai/dpt-3`) and a second normaliser, not a base-URL
   switch. The *legacy* `v1/tools/agentic-document-analysis` endpoint and the `agentic-doc` library are
   deprecated and return errors.
 * **Auth header ambiguity.** Every code sample in the docs uses `Authorization: Bearer <key>` (what
-  LiteOCR sends), but the OpenAPI security scheme is named "Basic Auth" with
+  PuffinParse sends), but the OpenAPI security scheme is named "Basic Auth" with
   `bearerFormat: Basic`, and the troubleshooting page mentions an `apikey` header. If a key is
   rejected with 401, try `provider_options={"auth_scheme": "basic"}`, which sends
   `Authorization: Basic <key>` verbatim (any other string is used as the scheme as-is).
 * **Pages are zero-indexed everywhere** on the wire — `grounding.page`, `splits[].pages`,
-  `failed_pages`, and the `page_0` identifiers. LiteOCR converts all of them to 1-based.
+  `failed_pages`, and the `page_0` identifiers. PuffinParse converts all of them to 1-based.
 * **Chunk grounding is a single object, not a list.** The Gen1 schema is `grounding: {box, page}`;
-  the legacy endpoint used a list of groundings with `{l, t, r, b}` keys. LiteOCR's deserialiser
+  the legacy endpoint used a list of groundings with `{l, t, r, b}` keys. PuffinParse's deserialiser
   accepts both shapes and both key spellings.
 * **Markdown carries anchors.** Every chunk's Markdown begins with `<a id='<chunk id>'></a>`, and
-  table cells carry `id` attributes — that is how extraction references locations. LiteOCR strips the
+  table cells carry `id` attributes — that is how extraction references locations. PuffinParse strips the
   anchors from `content`/`markdown` but sends the *unstripped* Markdown to the extractor, which is
   what makes citations resolvable.
 * **Tables come back as HTML**, not Markdown pipes, and cell ids are `"{page}-{base62}"` (page
   zero-indexed). `markdown_to_text` strips the tags for `Block.text` and `output="text"`.
 * **There are no headings in the chunk vocabulary.** Titles and section headers are `text` chunks
-  whose Markdown happens to start with `#`; LiteOCR maps those to `title` / `section_header`.
+  whose Markdown happens to start with `#`; PuffinParse maps those to `title` / `section_header`.
 * **`marginalia` is lossy.** It merges what other providers split into `header`, `footer`,
   `page_number` and `footnote`, so it maps to `other`.
 * **Extraction is length-priced, not page-priced**, and a very long document can cost far more to
   extract than to parse. `cost_usd` for `extract` is a per-page estimate and will drift.
-* **`split=page` is LiteOCR's default**, because without it ADE returns a single `full` split and
+* **`split=page` is PuffinParse's default**, because without it ADE returns a single `full` split and
   per-page Markdown would have to be stitched from chunk groundings. `page` is the only documented
   value, and `provider_options` nulls are skipped, so the default cannot be unset — that is
   deliberate. (The `split` *parameter* is unrelated to the ADE **Split API**, which classifies
@@ -190,29 +190,29 @@ parses: a large document needs `timeout` ≥ 500 or the Parse Jobs API.
 
 ```python
 # 1. Pin a model snapshot so results do not move under you.
-liteocr.parse("doc.pdf", model="landingai/dpt-2",
+puffinparse.parse("doc.pdf", model="landingai/dpt-2",
               provider_options={"model": "dpt-2-20260410"})
 
 # 2. Password-protected PDF.
-liteocr.parse("locked.pdf", model="landingai/dpt-2",
+puffinparse.parse("locked.pdf", model="landingai/dpt-2",
               provider_options={"password": "s3cret"})
 
 # 3. Tell the figure captioner what you care about.
-liteocr.parse("chart.png", model="landingai/dpt-2",
+puffinparse.parse("chart.png", model="landingai/dpt-2",
               provider_options={"custom_prompts": '{"figure": "Describe axis labels in detail."}'})
 
 # 4. Schema-driven extraction with citations (parse → extract under the hood).
-liteocr.extract("invoice.pdf", model="landingai/dpt-2", citations=True,
+puffinparse.extract("invoice.pdf", model="landingai/dpt-2", citations=True,
                 schema={"type": "object", "properties": {
                     "invoice": {"type": "object", "properties": {
                         "number": {"type": "string"}, "total": {"type": "number"}}}}})
 
 # 5. If a key is rejected with 401, switch the authorization scheme.
-liteocr.parse("doc.pdf", model="landingai/dpt-2",
+puffinparse.parse("doc.pdf", model="landingai/dpt-2",
               provider_options={"auth_scheme": "basic"})
 
 # 6. EU data residency (key must come from the EU console).
-liteocr.parse("doc.pdf", model="landingai/dpt-2",
+puffinparse.parse("doc.pdf", model="landingai/dpt-2",
               base_url="https://api.va.eu-west-1.landing.ai")
 ```
 

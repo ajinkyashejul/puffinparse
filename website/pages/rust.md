@@ -1,35 +1,35 @@
 # Rust
 
-`liteocr-core` is the whole implementation: unified types, every provider, the router, pricing and
+`puffinparse-core` is the whole implementation: unified types, every provider, the router, pricing and
 the benchmark metrics. The Python SDK and the CLI are thin wrappers over it.
 
 `#![forbid(unsafe_code)]`, no vendor SDK crates — every provider is spoken to over plain HTTPS with
 `reqwest` and `tokio`.
 
-API reference: [docs.rs/liteocr-core](https://docs.rs/liteocr-core) *(published on the first crates.io release)*.
-Until then, `cargo doc -p liteocr-core --open` from a clone.
+API reference: [docs.rs/puffinparse-core](https://docs.rs/puffinparse-core) *(published on the first crates.io release)*.
+Until then, `cargo doc -p puffinparse-core --open` from a clone.
 
 ## Install
 
 ```toml
 [dependencies]
-liteocr-core = "0.1"
+puffinparse-core = "0.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
 
 From the repository while it is pre-release:
 
 ```toml
-liteocr-core = { git = "https://github.com/ajinkyashejul/liteocr" }
+puffinparse-core = { git = "https://github.com/ajinkyashejul/liteocr" }
 ```
 
 ## First call
 
 ```rust
-use liteocr_core::{parse, DocumentRequest};
+use puffinparse_core::{parse, DocumentRequest};
 
 #[tokio::main]
-async fn main() -> liteocr_core::Result<()> {
+async fn main() -> puffinparse_core::Result<()> {
     let resp = parse(DocumentRequest::from_path("invoice.pdf").model("reducto/standard")).await?;
     println!("{} pages, ${:.4}", resp.usage.pages, resp.cost_usd.unwrap_or(0.0));
     println!("{}", resp.markdown);
@@ -69,7 +69,7 @@ pub fn parse_blocking(request: DocumentRequest) -> Result<ParseResponse>;
 Every setter takes `self` and returns `Self`, so requests chain.
 
 ```rust
-use liteocr_core::{DocumentRequest, OutputFormat};
+use puffinparse_core::{DocumentRequest, OutputFormat};
 
 let req = DocumentRequest::from_path("doc.pdf")
     .model("extend/parse_performance")
@@ -142,7 +142,7 @@ pub struct ParseResponse {
 `Usage { pages, credits, provider_cost_usd }`.
 
 Everything derives `Serialize` / `Deserialize`, so a response round-trips through JSON unchanged —
-that is exactly what `liteocr parse -f json` prints.
+that is exactly what `puffinparse parse -f json` prints.
 
 Helpers in `types`: `ParseResponse::from_pages`, `page_count`, `join_pages`, `pages_from_blocks`,
 `strip_html_tags`, `markdown_to_text`.
@@ -168,7 +168,7 @@ pub struct TextPage {
 ## `ExtractRequest` / `ExtractResponse` (extract mode)
 
 ```rust
-use liteocr_core::{extract, DocumentRequest, ExtractRequest};
+use puffinparse_core::{extract, DocumentRequest, ExtractRequest};
 
 let req = ExtractRequest::new(
     DocumentRequest::from_path("invoice.pdf").model("reducto/standard"),
@@ -196,7 +196,7 @@ where `FieldInfo { confidence: Option<f64>, citations: Vec<Citation> }` and
 ## Router
 
 ```rust
-use liteocr_core::{DocumentRequest, Mode, Router, RouterConfig, Strategy};
+use puffinparse_core::{DocumentRequest, Mode, Router, RouterConfig, Strategy};
 
 let router = Router::new(
     RouterConfig::new(vec!["reducto/standard".into(), "llamaparse/agentic".into()])
@@ -239,7 +239,7 @@ pub enum ErrorKind {
 ```rust
 match parse(req).await {
     Ok(resp) => println!("{}", resp.markdown),
-    Err(e) if e.kind == liteocr_core::ErrorKind::RateLimit => { /* back off */ }
+    Err(e) if e.kind == puffinparse_core::ErrorKind::RateLimit => { /* back off */ }
     Err(e) => eprintln!("{e}"),
 }
 ```
@@ -247,7 +247,7 @@ match parse(req).await {
 ## Models and pricing
 
 ```rust
-use liteocr_core::{list_models, list_models_for, model_info, Mode, ModelRef, PROVIDERS};
+use puffinparse_core::{list_models, list_models_for, model_info, Mode, ModelRef, PROVIDERS};
 
 for p in PROVIDERS {                       // name, display_name, env_var, base_url, docs, models
     for m in p.models {
@@ -261,8 +261,8 @@ model_info("reducto", "r-1");              // -> Option<&ModelInfo>
 
 let ModelRef { provider, model } = ModelRef::parse("reducto")?;           // -> reducto / standard
 let checked = ModelRef::parse_for("reducto", Mode::Ocr)?;                 // also checks the mode
-let usd = liteocr_core::pricing::estimate_cost("reducto/standard", Mode::Parse, 12);
-let table = liteocr_core::pricing::all_prices();
+let usd = puffinparse_core::pricing::estimate_cost("reducto/standard", Mode::Parse, 12);
+let table = puffinparse_core::pricing::all_prices();
 ```
 
 `ModelInfo` is `{ provider, model, description, default, modes }`; `default` marks the provider's
@@ -273,11 +273,11 @@ gate: unknown providers, unknown models, or a model that does not serve the requ
 
 ## Benchmark module
 
-`liteocr_core::bench` is the deterministic scoring used by `liteocr bench` and
-`liteocr.score` — no LLM judge, no network.
+`puffinparse_core::bench` is the deterministic scoring used by `puffinparse bench` and
+`puffinparse.score` — no LLM judge, no network.
 
 ```rust
-use liteocr_core::bench::{normalize, score, summarize, Metrics, NormalizeOptions, Summary};
+use puffinparse_core::bench::{normalize, score, summarize, Metrics, NormalizeOptions, Summary};
 
 let opts = NormalizeOptions {
     case_insensitive: true,
@@ -318,7 +318,7 @@ See [Benchmark](/benchmark/) for the definition of each metric.
 
 ## Adding a provider
 
-One file under `crates/liteocr-core/src/providers/`, implementing `Provider`, registered in
+One file under `crates/puffinparse-core/src/providers/`, implementing `Provider`, registered in
 `providers/mod.rs` and `model::PROVIDERS`, plus `pricing.json` entries, a fixture-backed
 normalisation test with a real redacted payload, and a page under [Providers](/providers/).
 The full checklist is in [Contributing](/project/contributing/).

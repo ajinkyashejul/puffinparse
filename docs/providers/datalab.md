@@ -2,8 +2,8 @@
 
 > **Status: docs-only.** Everything below comes from the official Datalab documentation and
 > OpenAPI spec (read 2026-09-11), from the open-source Marker renderer that produces the payloads,
-> and from `crates/liteocr-core/src/providers/datalab.rs`. No live call has been made — this
-> repository has no Datalab key. `crates/liteocr-core/tests/fixtures/datalab_convert.json` is
+> and from `crates/puffinparse-core/src/providers/datalab.rs`. No live call has been made — this
+> repository has no Datalab key. `crates/puffinparse-core/tests/fixtures/datalab_convert.json` is
 > hand-built from the documented shapes. Mark this page **verified** only after the `#[ignore]`d
 > live test in `providers/datalab.rs` passes with a real key.
 
@@ -17,13 +17,13 @@
 | Docs | <https://documentation.datalab.to> |
 | API version | Path-versioned (`/api/v1/convert`). The response echoes the engine versions in `versions` (`marker`, `surya`) |
 | Verified | **not live-verified** (see banner) — documentation read 2026-09-11 |
-| Implementation | `crates/liteocr-core/src/providers/datalab.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/datalab.rs` |
 
 Datalab is the hosted version of **Marker** (plus Surya and Chandra), the open-source PDF → markdown
 pipeline. The response shapes below are Marker's own: `markdown`, an HTML-carrying block tree
 (`json`), pre-chunked blocks (`chunks`), and a `metadata` dictionary with `page_stats`.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
 | Model | Provider parameter | Modes | List price (`pricing.json`) |
 |---|---|---|---|
@@ -42,13 +42,13 @@ marked deprecated in the API reference in favour of `/convert`, `/extract`, `/se
 so there is no `datalab/marker` / `datalab/marker-llm` pair: `use_llm` no longer exists as a request
 field, and its role is taken by `mode=accurate`.
 
-Add-ons that change the bill are **not** enabled by LiteOCR and must be opted into through
+Add-ons that change the bill are **not** enabled by PuffinParse and must be opted into through
 `provider_options`: `word_bboxes` (+$3/1k pages), `extras="table_cell_bboxes"` or `"list_item_bboxes"`
 (+$6/1k each, word prediction included once), `chart_understanding` (+$3/1k), `infographic`
 (+$4/1k), `merge_cross_page` (variable compute, ~$0.50/document), and EU `processing_location`
 (1.25× usage).
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 1. **Submit.** `POST {base}/api/v1/convert`, `multipart/form-data`, header `X-API-Key`:
 
@@ -64,11 +64,11 @@ Add-ons that change the bill are **not** enabled by LiteOCR and must be opted in
    Response: `{"success": true, "request_id": "…", "request_check_url": "https://www.datalab.to/api/v1/convert/…", "versions": {…}}`.
 2. **Poll.** `GET` the check URL every 2 s, backing off ×1.5 to 10 s, with the same `X-API-Key`.
    Done when `status == "complete"`; a failure can also appear as `success == false` (with `status`
-   still `"complete"`) or `status == "failed"`, so all three are terminal for LiteOCR.
+   still `"complete"`) or `status == "failed"`, so all three are terminal for PuffinParse.
    The returned `request_check_url` is re-hosted on the configured base URL (path only), so a
    `base_url` override or proxy keeps working.
 3. **Download, when regional.** If the poll body carries `result_url`, the document content lives
-   there instead of inline (EU processing, and any other region that requires it). LiteOCR fetches
+   there instead of inline (EU processing, and any other region that requires it). PuffinParse fetches
    it **without** the API key — the signed URL authorises by itself — and merges: downloaded body
    first, then every non-null field from the poll response on top, because billing and score fields
    can be updated after the document was stored.
@@ -78,24 +78,24 @@ Add-ons that change the bill are **not** enabled by LiteOCR and must be opted in
 **Where `provider_options` are merged:** the request is a multipart form, so options are flattened
 into extra text fields exactly like the built-in ones. Strings pass through; booleans become
 `"true"`/`"false"`; numbers are stringified; objects/arrays are serialised as JSON text (which is
-what `additional_config` expects); `null` is skipped. A key LiteOCR already set is **replaced**, so
+what `additional_config` expects); `null` is skipped. A key PuffinParse already set is **replaced**, so
 `provider_options={"output_format": "markdown"}` really does turn the JSON block tree off (and with
 it, all `Block`s).
 
 ## 4. Response mapping
 
-| Datalab field | LiteOCR unified field | Notes |
+| Datalab field | PuffinParse unified field | Notes |
 |---|---|---|
 | `request_id` | `ParseResponse.provider_job_id` | |
 | `page_count` | `Usage.pages` | Falls back to the number of reconstructed pages. |
 | `json.children[]` | one `Page` each | The top-level `json` object is Marker's `Document` block; its children are `Page` blocks. |
-| page block `id` (`"/page/10/Page/366"`) | `Page.page_number` | The `/page/<n>/` segment is the **0-based page index in the original document**; LiteOCR adds 1. Falls back to the position in `children`. |
+| page block `id` (`"/page/10/Page/366"`) | `Page.page_number` | The `/page/<n>/` segment is the **0-based page index in the original document**; PuffinParse adds 1. Falls back to the position in `children`. |
 | page block `polygon` | `Page.width` / `Page.height` | Marker pages start at the origin, so the polygon's max x/y are the page size (PDF points for digital PDFs). |
-| page block `children[]` | `Page.blocks[]` | Group blocks (`TableGroup`, `FigureGroup`, `ListGroup`, `PictureGroup`) have HTML made only of `<content-ref src=…>` placeholders, so LiteOCR descends into their children instead of emitting the group. |
+| page block `children[]` | `Page.blocks[]` | Group blocks (`TableGroup`, `FigureGroup`, `ListGroup`, `PictureGroup`) have HTML made only of `<content-ref src=…>` placeholders, so PuffinParse descends into their children instead of emitting the group. |
 | block `block_type` | `Block.type` | See the table below. |
 | block `html` | `Block.content` | Converted to markdown best-effort: `<h1>`–`<h6>` → `#`s, `<li>` → `- `, `<table>` → a markdown table when it is simple (rectangular, no `colspan`/`rowspan`, not nested) and the original HTML otherwise, `<math>` → `$$…$$`, everything else → tag-stripped text. With `output="text"` the tag-stripped text is used. |
 | block `html` (stripped) | `Block.text` | |
-| block `polygon` | `Block.bbox` | 4 points in page units; LiteOCR takes the enclosing box and divides by the page polygon's size. |
+| block `polygon` | `Block.bbox` | 4 points in page units; PuffinParse takes the enclosing box and divides by the page polygon's size. |
 | — | `Block.confidence` | Marker reports no per-block confidence. `parse_quality_score` is document-level. |
 | `markdown` (paginated) | `Page.markdown` | Split on Marker's page markers; preferred over the blocks joined together. `Page.text` is `markdown_to_text` of it. |
 | `parse_quality_score` | `metadata.datalab_parse_quality_score` | 0–5; < 3.0 is Datalab's own "retry with `accurate`" threshold. |
@@ -106,7 +106,7 @@ it, all `Block`s).
 
 **Page markdown splitting.** With `paginate=true` Marker writes `\n\n{<page_id>}` + 48 dashes +
 `\n\n` **before** each page's content (`marker/renderers/markdown.py`), where `page_id` is the same
-0-based index used in block ids. LiteOCR recognises any `{n}` + ≥ 8 dashes line, so a custom
+0-based index used in block ids. PuffinParse recognises any `{n}` + ≥ 8 dashes line, so a custom
 `page_separator` still works.
 
 **Block types** (Marker's vocabulary, `marker/schema/__init__.py`):
@@ -127,19 +127,19 @@ it, all `Block`s).
 | `TableOfContents`, `ComplexRegion`, `Document`, `Page`, anything else | `other` |
 
 Marker has no `Title` type: the document title is a `SectionHeader` rendered as `<h1>`, which
-LiteOCR maps to `title` so the block vocabulary matches the other providers.
+PuffinParse maps to `title` so the block vocabulary matches the other providers.
 
 **`ocr` mode** is derived from `parse` (`TextResponse::from_parse`): lines are block text split on
 newlines, carrying the block's box; `words` have no geometry. Datalab does have a real word-level
 product (`word_bboxes=true`, +$3 per 1 000 pages) but it annotates **HTML output** with
-`data-bbox` / `data-confidence` spans, which LiteOCR does not request or parse.
+`data-bbox` / `data-confidence` spans, which PuffinParse does not request or parse.
 
 ## 5. Errors, status codes, rate limits, timeouts
 
 Every HTTP error is `{"detail": "message"}` (or a FastAPI validation array), which `Error::from_http`
 picks up:
 
-| Status | Datalab type | LiteOCR `ErrorKind` |
+| Status | Datalab type | PuffinParse `ErrorKind` |
 |---|---|---|
 | 400 | `invalid_request_error` (bad file type, file too large) | `bad_request` |
 | 401 | `authentication_error` (`"Invalid API key provided. Set the X-API-Key header…"`) | `authentication` |
@@ -151,7 +151,7 @@ picks up:
 | 429 | `rate_limit_error` (requests/min or concurrency) | `rate_limit` (retried) |
 | 500 / 529 | `api_error` / `overloaded_error` | `provider` (500 retried; 529 is **not** in the retry set) |
 
-**Job-level failures** come back with HTTP 200: `{"success": false, "error": "…"}`. LiteOCR turns
+**Job-level failures** come back with HTTP 200: `{"success": false, "error": "…"}`. PuffinParse turns
 those into a `provider` error carrying the message and the `request_id` — except the **page
 concurrency limit**, which is enforced during processing rather than at submission
 (`"Page rate limit exceeded. Your team has … pages in flight …"`) and is classified as `rate_limit`
@@ -177,15 +177,15 @@ caps each request.
   (Datalab's own Python SDK 0.5.0 does not follow `result_url` for `convert()`.)
 * **Results are deleted one hour after processing.** There is no way to re-fetch afterwards.
 * **Page numbers are original, not sequential.** With `page_range="5-7"` the block ids stay
-  `/page/5/…`, so LiteOCR's pages are 6, 7, 8 — deliberately, so boxes and page numbers still refer
+  `/page/5/…`, so PuffinParse's pages are 6, 7, 8 — deliberately, so boxes and page numbers still refer
   to the input document. `Usage.pages` is `page_count`, i.e. the pages actually converted.
-* **`page_range` is 0-based** while LiteOCR's `pages` is 1-based; for spreadsheets the same field
+* **`page_range` is 0-based** while PuffinParse's `pages` is 1-based; for spreadsheets the same field
   selects **sheet** indices instead.
 * **Group blocks carry no content.** `TableGroup`, `FigureGroup`, `ListGroup` and `PictureGroup`
-  have `html` consisting only of `<content-ref src='…'>` placeholders. LiteOCR replaces them with
+  have `html` consisting only of `<content-ref src='…'>` placeholders. PuffinParse replaces them with
   their children; a naive client that reads group HTML gets empty blocks.
 * **Blocks are HTML, pages are markdown.** The `json` output never contains markdown unless you set
-  `include_markdown_in_chunks=true`. LiteOCR requests both formats so blocks keep their types and
+  `include_markdown_in_chunks=true`. PuffinParse requests both formats so blocks keep their types and
   boxes while the page text stays Marker's own rendering.
 * **Caching is on by default.** A repeated conversion of the same file can be served from cache and
   `checkpoint_reused: true` means the conversion step is not re-billed — good for cost, fatal for
@@ -203,34 +203,34 @@ caps each request.
 
 ```python
 # 1. Benchmarking: defeat the result cache so latency and cost are real.
-liteocr.parse("doc.pdf", model="datalab/balanced", provider_options={"skip_cache": True})
+puffinparse.parse("doc.pdf", model="datalab/balanced", provider_options={"skip_cache": True})
 
 # 2. Per-cell and per-list-item boxes (HTML output, +$6 per 1k pages each).
-liteocr.parse("statement.pdf", model="datalab/accurate", include_raw=True,
+puffinparse.parse("statement.pdf", model="datalab/accurate", include_raw=True,
               provider_options={"extras": "table_cell_bboxes,list_item_bboxes", "word_bboxes": True,
                                 "output_format": "json,html", "disable_html_prettify": True})
 
 # 3. Keep running headers and footers, and preserve spreadsheet formatting.
-liteocr.parse("report.pdf", model="datalab/balanced",
+puffinparse.parse("report.pdf", model="datalab/balanced",
               provider_options={"additional_config": {"keep_pageheader_in_output": True,
                                                       "keep_pagefooter_in_output": True,
                                                       "keep_spreadsheet_formatting": True}})
 
 # 4. Stitch tables and paragraphs that continue across page breaks (beta, compute-billed).
-liteocr.parse("annual-report.pdf", model="datalab/accurate",
+puffinparse.parse("annual-report.pdf", model="datalab/accurate",
               provider_options={"merge_cross_page": True})
 
 # 5. Token-efficient markdown for an LLM pipeline, no images or synthetic captions.
-liteocr.parse("doc.pdf", model="datalab/fast",
+puffinparse.parse("doc.pdf", model="datalab/fast",
               provider_options={"token_efficient_markdown": True, "disable_image_extraction": True,
                                 "disable_image_captions": True})
 
 # 6. EU data residency (requires file_url or a pre-uploaded datalab:// reference, 1.25x usage).
-liteocr.parse("https://example.com/doc.pdf", model="datalab/balanced",
+puffinparse.parse("https://example.com/doc.pdf", model="datalab/balanced",
               provider_options={"processing_location": "eu"})
 
 # 7. Save a checkpoint so a later /extract or /segment call skips re-parsing.
-liteocr.parse("doc.pdf", model="datalab/balanced", provider_options={"save_checkpoint": True})
+puffinparse.parse("doc.pdf", model="datalab/balanced", provider_options={"save_checkpoint": True})
 ```
 
 ## 8. Links

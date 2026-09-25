@@ -7,8 +7,8 @@ entry says what was observed, how it was checked, and what (if anything) changed
 
 The first `combined-v1` run (`benchmark/results/2026-09-11-combined-v1.json`, outputs under
 `benchmark/results/outputs/run-20260911T111039Z/`) exposed five defects in
-`liteocr_core::bench`. All are fixed in scorer v2 (`SCORER_VERSION = 2`), and both committed runs
-were re-scored offline with `liteocr bench rescore` (no provider calls; latency and cost are the
+`puffinparse_core::bench`. All are fixed in scorer v2 (`SCORER_VERSION = 2`), and both committed runs
+were re-scored offline with `puffinparse bench rescore` (no provider calls; latency and cost are the
 originally measured values).
 
 | Defect (scorer v1) | Effect | Fix (scorer v2) |
@@ -72,7 +72,7 @@ walks the content stream without applying the form clip (poppler's `pdftotext`, 
 LlamaParse uses) is unaffected; pipelines that rasterise the page, or drop content clipped by an
 invalid form, see nothing.
 
-**Live checks (4 calls, ≈ $0.085 total, 2026-09-24, `cargo run -p liteocr-cli -- parse …`):**
+**Live checks (4 calls, ≈ $0.085 total, 2026-09-24, `cargo run -p puffinparse-cli -- parse …`):**
 
 | # | Call | Result |
 |---|---|---|

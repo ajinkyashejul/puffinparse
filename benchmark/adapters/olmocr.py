@@ -1,4 +1,4 @@
-"""olmOCR-bench adapter — AI2's unit-test benchmark for PDF → markdown → LiteOCR rules.
+"""olmOCR-bench adapter — AI2's unit-test benchmark for PDF → markdown → PuffinParse rules.
 
 Upstream: https://huggingface.co/datasets/allenai/olmOCR-bench (ODC-BY-1.0), scorer at
 https://github.com/allenai/olmocr (``olmocr/bench/tests.py``, Apache-2.0), paper arXiv:2502.18443.
@@ -9,7 +9,7 @@ document source. Every test is already a machine-checkable assertion, so each do
 ``docs/benchmarks/adapters.md``):
 
 ========== ================================== =================================================
-upstream   LiteOCR                            fidelity
+upstream   PuffinParse                            fidelity
 ========== ================================== =================================================
 present    ``present``                        exact substring (upstream: fuzzy, ``max_diffs``)
 absent     ``absent``                         only without ``first_n`` / ``last_n``; positional
@@ -438,7 +438,7 @@ class OlmOcrBenchAdapter(Adapter):
             "the upstream runner adds, also skipped).",
             f"Skipped by type and reason: {skipped}.",
             f"Kept in a weaker form: {relaxed}.",
-            "`max_diffs` is upstream's fuzzy-match allowance. The LiteOCR scorer matches exactly after "
+            "`max_diffs` is upstream's fuzzy-match allowance. The PuffinParse scorer matches exactly after "
             "normalisation, which is stricter than upstream for present/order/table_cell and looser "
             "for absent whenever max_diffs > 0.",
             "Scores aggregate per document (mean of passed/total), not per test category as "

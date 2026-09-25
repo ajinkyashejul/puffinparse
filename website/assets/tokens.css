@@ -1,6 +1,6 @@
-/* LiteOCR design tokens — the single source for colour, type, space and shape.
+/* PuffinParse design tokens — the single source for colour, type, space and shape.
  *
- * Every LiteOCR surface (docs, landing page, benchmark viewer) links this file first and styles
+ * Every PuffinParse surface (docs, landing page, benchmark viewer) links this file first and styles
  * only through these custom properties. The language is described in docs/DESIGN.md; change a
  * value here and every surface follows.
  *

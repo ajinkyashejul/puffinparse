@@ -147,23 +147,23 @@ jobs:
           key: ${{ matrix.target }}
 
       - name: Build CLI
-        run: cargo build -p liteocr-cli --release --target ${{ matrix.target }}
+        run: cargo build -p puffinparse-cli --release --target ${{ matrix.target }}
 
       - name: Archive (tar.gz)
         if: matrix.archive == 'tar.gz'
         shell: bash
         run: |
           mkdir -p dist
-          tar -czf "dist/liteocr-${{ matrix.target }}.tar.gz" \
-            -C "target/${{ matrix.target }}/release" liteocr
+          tar -czf "dist/puffinparse-${{ matrix.target }}.tar.gz" \
+            -C "target/${{ matrix.target }}/release" puffinparse
 
       - name: Archive (zip)
         if: matrix.archive == 'zip'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Compress-Archive -Path "target/${{ matrix.target }}/release/liteocr.exe" `
-            -DestinationPath "dist/liteocr-${{ matrix.target }}.zip"
+          Compress-Archive -Path "target/${{ matrix.target }}/release/puffinparse.exe" `
+            -DestinationPath "dist/puffinparse-${{ matrix.target }}.zip"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -172,7 +172,7 @@ jobs:
           if-no-files-found: error
 
   # ------------------------------------------------------ Node.js addon (stub) --
-  # Builds the prebuilt `liteocr.<platform>.node` binaries for the npm package (js/) and uploads
+  # Builds the prebuilt `puffinparse.<platform>.node` binaries for the npm package (js/) and uploads
   # them as workflow artifacts. Nothing is published to npm yet and `publish` below does not
   # depend on this job. To ship: add a job that downloads these artifacts, runs
   # `napi create-npm-dirs && napi artifacts && napi prepublish -t npm` in js/, then
@@ -241,9 +241,9 @@ jobs:
       # with PyPI via OIDC ("trusted publishing") instead of an API token.
       #
       # MAINTAINER SETUP (once, before the first release):
-      #   PyPI → project `liteocr` → Publishing → "Add a new pending publisher"
+      #   PyPI → project `puffinparse` → Publishing → "Add a new pending publisher"
       #     Owner:            ajinkyashejul
-      #     Repository name:  liteocr
+      #     Repository name:  puffinparse
       #     Workflow name:    release.yml
       #     Environment name: pypi
       #   Then create a GitHub environment called `pypi` in the repo settings
@@ -269,7 +269,7 @@ jobs:
         run: |
           mkdir -p cli-dist
           find artifacts -path 'artifacts/cli-*' -type f \
-            \( -name 'liteocr-*.tar.gz' -o -name 'liteocr-*.zip' \) -exec cp {} cli-dist/ \;
+            \( -name 'puffinparse-*.tar.gz' -o -name 'puffinparse-*.zip' \) -exec cp {} cli-dist/ \;
           ls -l cli-dist
 
       - name: Publish to PyPI (trusted publishing)

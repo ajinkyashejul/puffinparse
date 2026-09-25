@@ -1,6 +1,6 @@
 # synthetic-v1
 
-A small, fully synthetic OCR benchmark dataset for [LiteOCR](../../../README.md).
+A small, fully synthetic OCR benchmark dataset for [PuffinParse](../../../README.md).
 Every document is rendered by `benchmark/generate_synthetic.py` from a built-in corpus, so the
 markdown in `truth/` is *exact* ground truth rather than a human transcription.
 

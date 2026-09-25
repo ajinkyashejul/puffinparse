@@ -17,7 +17,7 @@
 | API key | none by default. If the server runs with `DOCLING_SERVE_API_KEY`, set `DOCLING_API_KEY` (or `api_key`); it is sent as `X-Api-Key` |
 | Price | $0 per page (`pricing.json` source `self-hosted`); the cost is your compute |
 | API version | docling-serve v1 (`/v1/...`); the older `/v1alpha` paths and the `file_sources` / `http_sources` body fields are gone — current servers want `sources: [{kind, ...}]` |
-| Implementation | `crates/liteocr-core/src/providers/docling.rs` |
+| Implementation | `crates/puffinparse-core/src/providers/docling.rs` |
 
 Start a server:
 
@@ -32,7 +32,7 @@ Docling runs a layout model, TableFormer for table structure and an OCR engine f
 all locally. On a 4-core CPU a one-page image took ~30 s and a 2-page digital PDF ~20 s
 (first-request model loading excluded); a GPU image is much faster.
 
-## 2. Models exposed by LiteOCR
+## 2. Models exposed by PuffinParse
 
 | Model | Modes | List price |
 |---|---|---|
@@ -42,7 +42,7 @@ all locally. On a 4-core CPU a one-page image took ~30 s and a 2-page digital PD
 `accurate`). Other pipelines and presets (`pipeline: "vlm"`, `ocr_preset`, `table_mode: "fast"`)
 are reachable through `provider_options`.
 
-## 3. Request flow LiteOCR uses
+## 3. Request flow PuffinParse uses
 
 Asynchronous, because the synchronous `/v1/convert/source` is capped by the server's
 `DOCLING_SERVE_MAX_SYNC_WAIT` (120 s by default) and long documents exceed it.
@@ -63,7 +63,7 @@ Asynchronous, because the synchronous `/v1/convert/source` is capped by the serv
    ```
 
    URL inputs are sent as `{"kind": "http", "url": "..."}` and fetched by the server.
-   `page_range` is only set when `pages` is given (docling takes one span; LiteOCR requests the
+   `page_range` is only set when `pages` is given (docling takes one span; PuffinParse requests the
    span covering the selection and drops the other pages); `ocr_lang` only when `language` is set.
    `provider_options` are deep-merged into `options`.
    → `{"task_id", "task_status": "pending", "task_position", ...}`
@@ -77,7 +77,7 @@ Asynchronous, because the synchronous `/v1/convert/source` is capped by the serv
 `json_content` is a
 [DoclingDocument](https://docling-project.github.io/docling/concepts/docling_document/):
 `body.children` (and `furniture.children`) are the reading order as `{"$ref": "#/texts/3"}`
-pointers into `texts[]`, `tables[]`, `pictures[]` and `groups[]`. LiteOCR walks `body` depth-first
+pointers into `texts[]`, `tables[]`, `pictures[]` and `groups[]`. PuffinParse walks `body` depth-first
 through groups, so blocks come out in docling's reading order.
 
 | DoclingDocument | Unified block |
@@ -96,7 +96,7 @@ through groups, so blocks come out in docling's reading order.
 | other groups (`list`, `key_value_area`, `form_area`, ...) | walked through for their children |
 
 * **Boxes**: each item's `prov[].bbox` is `{l, t, r, b, coord_origin}`. With the usual
-  `coord_origin: "BOTTOMLEFT"` (PDF convention, y up) LiteOCR converts `y0 = (H − t) / H`,
+  `coord_origin: "BOTTOMLEFT"` (PDF convention, y up) PuffinParse converts `y0 = (H − t) / H`,
   `y1 = (H − b) / H`; `TOPLEFT` boxes are only divided. `H`/`W` come from `pages[n].size`
   (PDF points for PDFs, pixels for images).
 * An item with several `prov` entries (a paragraph continuing on the next page) is split into one
@@ -133,7 +133,7 @@ processing time server-side.
 * The first request after start-up downloads and loads the models and can take minutes; the
   benchmark's latency numbers exclude that only if you warm the server first.
 * The docs at `docs/usage.md` in docling-serve still show `file_sources` / `http_sources` in some
-  examples; servers ≥ 1.x reject those with 422. LiteOCR sends `sources` with `kind`.
+  examples; servers ≥ 1.x reject those with 422. PuffinParse sends `sources` with `kind`.
 * `include_images: false` is sent so picture crops are not embedded in the JSON (they are unused
   and make results large). Override it in `provider_options` if you want them in `raw`.
 * Heading levels are flat (`level 1`) unless you pass `do_pdf_heading_hierarchy: true`.
@@ -141,15 +141,15 @@ processing time server-side.
 ## 7. `provider_options` examples
 
 ```python
-import liteocr
+import puffinparse
 
-liteocr.parse("report.pdf", model="docling")                                   # standard pipeline
-liteocr.parse("report.pdf", model="docling", provider_options={"table_mode": "fast"})
-liteocr.parse("scan.pdf", model="docling",
+puffinparse.parse("report.pdf", model="docling")                                   # standard pipeline
+puffinparse.parse("report.pdf", model="docling", provider_options={"table_mode": "fast"})
+puffinparse.parse("scan.pdf", model="docling",
               provider_options={"force_ocr": True, "ocr_preset": "tesseract"})
-liteocr.parse("paper.pdf", model="docling",
+puffinparse.parse("paper.pdf", model="docling",
               provider_options={"do_formula_enrichment": True, "do_pdf_heading_hierarchy": True})
-liteocr.parse("doc.pdf", model="docling", base_url="http://gpu-box:5001")
+puffinparse.parse("doc.pdf", model="docling", base_url="http://gpu-box:5001")
 ```
 
 Any `ConvertDocumentsOptions` field from the docling-serve API reference is accepted.

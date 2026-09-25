@@ -1,4 +1,4 @@
-# LiteOCR documentation
+# PuffinParse documentation
 
 Start here if you are joining the project. Everything a contributor or agent needs to work
 without asking around is linked from this page; if something is missing, add it here.
@@ -10,13 +10,13 @@ without asking around is linked from this page; if something is missing, add it 
 | [`TASKS.md`](TASKS.md) | **Live task board.** Claim work here before starting; move items as they progress. |
 | [`DECISIONS.md`](DECISIONS.md) | Architecture decision records. Read before proposing a change to something listed there; add an ADR when you change direction. |
 | [`COMPAT.md`](COMPAT.md) | Native-format compatibility (`output_format="reducto"\|"extend"\|"llamaparse"`): what the vendor-shaped renders guarantee, which fields are always null, the coordinate-units rule, and migration examples. |
-| [`SERVER.md`](SERVER.md) | The HTTP gateway (`liteocr serve`): config file, virtual keys, budgets, rate limits, API, errors, metrics, Docker. |
+| [`SERVER.md`](SERVER.md) | The HTTP gateway (`puffinparse serve`): config file, virtual keys, budgets, rate limits, API, errors, metrics, Docker. |
 | [`providers/`](providers/README.md) | Per-provider reference: endpoints, request flow, response mapping, errors, gotchas, passthrough options. |
 | [`research/`](research/README.md) | Market research: competitors, other benchmarks, naming. Start here before positioning or renaming decisions. |
 | [`DESIGN.md`](DESIGN.md) | Design language: tokens, components, writing rules for every surface. |
 | [`benchmarks/`](benchmarks/) | Survey of public OCR benchmarks, adapter notes for the combined dataset, and [`findings.md`](benchmarks/findings.md) (what committed runs taught us: scorer v2, provider quirks). |
 | [`../benchmark/README.md`](../benchmark/README.md) | Benchmark methodology, metrics, how to run, dataset format. |
-| [`../benchmark/LEADERBOARD.md`](../benchmark/LEADERBOARD.md) | Generated leaderboard. Do not edit by hand; regenerate with `liteocr bench report`. |
+| [`../benchmark/LEADERBOARD.md`](../benchmark/LEADERBOARD.md) | Generated leaderboard. Do not edit by hand; regenerate with `puffinparse bench report`. |
 | [`../benchmark/site/README.md`](../benchmark/site/README.md) | The static results viewer (GitHub Pages) and how to build it. |
 | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Setup, checks, how to add a provider or a dataset, PR checklist. |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | Keep-a-Changelog; add a line under Unreleased with every user-visible change. |
@@ -34,9 +34,9 @@ without asking around is linked from this page; if something is missing, add it 
 ## Layout cheat sheet
 
 ```
-crates/liteocr-core/src/
+crates/puffinparse-core/src/
   types.rs        unified request/response, markdown→text, page grouping
-  error.rs        Error + ErrorKind (mirrored by python/liteocr/exceptions.py)
+  error.rs        Error + ErrorKind (mirrored by python/puffinparse/exceptions.py)
   model.rs        provider + model registry (the only place models are declared)
   pricing.rs/.json list prices, overridable
   http.rs         shared client, retry/backoff, deadline, polling helper
@@ -49,11 +49,11 @@ crates/liteocr-core/src/
   router.rs       ordered / round-robin fallbacks, stats
   bench.rs        normalisation + metrics + summaries
   util.rs         deep_merge, page-range parsing
-crates/liteocr-cli/src/   main.rs (parse, providers, serve), bench.rs (run, report, score)
-crates/liteocr-server/src/ api.rs (routes, auth, fallback loop), config.rs, usage.rs, metrics.rs, log.rs
-crates/liteocr-python/    PyO3 module `liteocr._core`
-python/liteocr/           public API, types, exceptions; python/tests/
-crates/liteocr-node/      napi-rs addon behind the npm package
-js/                       npm package `liteocr`: index.js + hand-written index.d.ts; js/test/
+crates/puffinparse-cli/src/   main.rs (parse, providers, serve), bench.rs (run, report, score)
+crates/puffinparse-server/src/ api.rs (routes, auth, fallback loop), config.rs, usage.rs, metrics.rs, log.rs
+crates/puffinparse-python/    PyO3 module `puffinparse._core`
+python/puffinparse/           public API, types, exceptions; python/tests/
+crates/puffinparse-node/      napi-rs addon behind the npm package
+js/                       npm package `puffinparse`: index.js + hand-written index.d.ts; js/test/
 benchmark/                generate_synthetic.py, datasets/, results/, site/, adapters/ (parsebench, olmocr, omnidocbench, dpbench, combined)
 ```

@@ -1,10 +1,10 @@
-"""ParseBench adapter — LlamaIndex's public parsing benchmark → LiteOCR manifests.
+"""ParseBench adapter — LlamaIndex's public parsing benchmark → PuffinParse manifests.
 
 Upstream: https://huggingface.co/datasets/llamaindex/ParseBench (Apache-2.0), code at
 https://github.com/run-llama/ParseBench, paper arXiv:2604.08538.
 
 ParseBench ships 2,078 single-page documents and 169,011 assertions across five JSONL rule
-files. Two of the five convert into LiteOCR's manifest:
+files. Two of the five convert into PuffinParse's manifest:
 
 * ``table.jsonl`` — 503 rows of ``type: "expected_markdown"`` carrying a ground-truth **HTML**
   table. Converted to a GitHub-markdown pipe table → ``kind: "transcript"``.
@@ -277,7 +277,7 @@ class ParseBenchAdapter(Adapter):
                 sentences=sorted(sentences),
                 # Upstream reports a percentage, not a pass/fail. 1.0 made the rule fail on one
                 # reference artifact (two lines fused into a "sentence"); 0.8 keeps it a check
-                # that most of the page's text is there. See liteocr_core::bench::BAG_DEFAULT_THRESHOLD.
+                # that most of the page's text is there. See puffinparse_core::bench::BAG_DEFAULT_THRESHOLD.
                 threshold=0.8,
                 case_sensitive=False,
                 source=upstream_id,
@@ -542,7 +542,7 @@ class ParseBenchAdapter(Adapter):
             name="parsebench-full",
             version="1.0.0",
             description=(
-                "Index of every ParseBench document LiteOCR can convert. The document bytes and "
+                "Index of every ParseBench document PuffinParse can convert. The document bytes and "
                 "the truth/rule files are NOT committed for entries without the `committed` tag: "
                 "fetch them by `upstream_path` from the pinned revision, or raise "
                 "MAX_TOTAL_BYTES / MAX_DOC_BYTES in benchmark/adapters/parsebench.py and "

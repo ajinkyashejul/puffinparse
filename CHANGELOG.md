@@ -4,10 +4,18 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-The workspace crates (`liteocr-core`, `liteocr-cli`, `liteocr-python`) and the
-Python package `liteocr` share a single version.
+The workspace crates (`puffinparse-core`, `puffinparse-cli`, `puffinparse-python`, …) and the
+Python package `puffinparse` share a single version. Entries before the rename say LiteOCR.
 
 ## [Unreleased]
+
+### Changed
+
+- **Renamed to PuffinParse** (ADR-23). Crates `puffinparse-*`, Python package `puffinparse`
+  (`import puffinparse`), Node package and CLI binary `puffinparse`, environment variables
+  `PUFFINPARSE_*` (was `LITEOCR_*`), metadata keys `puffinparse_*`, `PuffinParseError`, and
+  `output_format="puffinparse"` for the native shape. The site moves to puffinparse.vercel.app
+  (liteocr.vercel.app still works). Old result files with `liteocr_version` still load.
 
 ### Added
 

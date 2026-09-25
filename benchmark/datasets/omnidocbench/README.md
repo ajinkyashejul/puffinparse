@@ -75,7 +75,7 @@ Tags: `omnidocbench`, `fetch-required`, the data source, `lang-*`, `layout-*`, `
 ## Read the scores carefully
 
 - `char_similarity` is whole-page edit distance. OmniDocBench matches block by block and
-  forgives some reading-order differences, so LiteOCR numbers are stricter on multi-column and
+  forgives some reading-order differences, so PuffinParse numbers are stricter on multi-column and
   "other layout" pages.
 - A parser that transcribes running headers or page numbers is penalised, because the truth
   omits them.
@@ -84,7 +84,7 @@ Tags: `omnidocbench`, `fetch-required`, the data source, `lang-*`, `layout-*`, `
 
 ## Verified
 
-`cargo test -p liteocr-core --test benchmark_datasets` scores every locally built truth against
+`cargo test -p puffinparse-core --test benchmark_datasets` scores every locally built truth against
 itself (`char_similarity` 1.0) and checks that `has-table` agrees with `table_score` being
-present. `liteocr bench score truth/<id>.md truth/<id>.md` returns 1.0 on every metric, including
+present. `puffinparse bench score truth/<id>.md truth/<id>.md` returns 1.0 on every metric, including
 `table_score`.
