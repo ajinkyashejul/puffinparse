@@ -58,7 +58,7 @@ MARK = (
     f'<rect x="1" y="1" width="30" height="30" rx="7.5" fill="{_TILE}"/>'
     '<ellipse cx="13.2" cy="17.2" rx="6.6" ry="7.4" fill="#fff"/>'
     f'<circle cx="14.6" cy="14.4" r="1.55" fill="{_TILE}"/>'
-    '<path d="M19 9.6 28.6 17.2 19 24.6Z" fill="var(--scan,#ff5230)" stroke="var(--scan,#ff5230)" '
+    '<path d="M19 9.6 28.6 17.2 19 24.6Z" fill="var(--scan,#e95c20)" stroke="var(--scan,#e95c20)" '
     'stroke-width="1.6" stroke-linejoin="round"/>'
     f'<rect x="19" y="14.6" width="7.2" height="1.5" fill="{_TILE}"/>'
     f'<rect x="19" y="18.4" width="5.6" height="1.5" fill="{_TILE}"/></svg>'

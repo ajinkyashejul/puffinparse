@@ -28,7 +28,8 @@ properties. This page explains what the tokens are for.
 ## Brand
 
 PuffinParse is named after the Atlantic puffin: black and white with an orange beak, which is
-exactly the paper, ink and scan palette above. Puffins are known for carrying a neat row of fish
+exactly the paper, ink and scan palette above. The accent is the bird's own colour: **Puffin's Bill,
+`#E95C20`**. Puffins are known for carrying a neat row of fish
 crosswise in their beak; PuffinParse carries a document back as a neat row of typed blocks. Both
 brand assets tell that story with text in the beak: the mark's beak carries two parsed lines, the
 mascot carries a row of three pages.
@@ -51,7 +52,7 @@ ground), the face is white, the beak is `--scan` and carries two ink stripes, th
 with its raised wing, a row of three pages hanging from its beak (white, folded corner, a short
 `--scan` heading bar and two grey text lines). Body `--mascot-body`, wing `--mascot-wing` outlined
 in the body colour (both lift in dark mode), face and belly white, beak and feet `--scan`, a pale
-`#ffb39f` base ridge and gape, a soft blush, two grey wave marks beside the wing.
+`#f5b69b` base ridge and gape, a soft blush, two grey wave marks beside the wing.
 
 - **Brand moments only:** the landing hero (perched on the demo card; it hops and waves once each
   time a response finishes typing), the 404 page, empty states, the social card and the README. Never in
@@ -97,7 +98,7 @@ public site URL.
 | Paper | `--paper`, `--paper-2`, `--paper-3` | `#ffffff` `#f7f8fa` `#eef0f4` | Page ground; recessed wells (code, table stripes); pressed/hover |
 | Ink | `--ink`, `--ink-2`, `--ink-3` | `#14171c` `#4f5866` `#687180` | Primary text (18:1); secondary (7.2:1); labels and captions (4.9:1) |
 | Rules | `--rule`, `--rule-2` | `#e3e6eb` `#eef0f3` | Borders and hairlines; dividers inside a component |
-| Scan (accent) | `--scan`, `--scan-ink`, `--scan-wash`, `--scan-edge` | `#ff5230` `#c43818` `#fff1ec` `#ffc9b9` | Marks, bars, the scan line (graphic); accent text (5.3:1); selected ground; selected border |
+| Scan (accent) | `--scan`, `--scan-ink`, `--scan-wash`, `--scan-edge` | `#e95c20` `#c14713` `#fdf2ed` `#f8cbb8` | Marks, bars, the scan line (graphic); accent text (5.0:1); selected ground; selected border |
 | Verdict | `--good`, `--fair`, `--poor` (+ `-wash`) | `#16794a` `#9a6200` `#b42346` | Score states. Always paired with a CSS-drawn shape: filled dot good, half-filled dot fair, ring poor |
 | Proof marks | `--proof-del`, `--proof-ins` (+ `-wash`) | `#b42346` `#16794a` | Diff: missing from the output is struck through; extra in the output is underlined |
 | Modes | `--mode-parse`, `--mode-ocr`, `--mode-extract` | `#b8431c` `#2c5fd6` `#6b3fc0` | Labels for the three modes only |
@@ -107,7 +108,7 @@ public site URL.
 Neutrals lean slightly toward blue ink. There is no pure grey. Links are ink with a quiet underline
 (`--link-underline`); they turn `--scan-ink` on hover. The accent is **not** a link colour.
 
-Dark theme redefines every token (never introduces new ones). The accent brightens to `#ff6a45`,
+Dark theme redefines every token (never introduces new ones). The accent brightens to `#ec703c`,
 verdicts lift to stay above 6:1, and the paper stays near-black with the same blue bias.
 
 **Score thresholds.** A score (0–100) is *good* at ≥ 90, *fair* at 70–89.9, *poor* below 70. The

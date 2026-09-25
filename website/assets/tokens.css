@@ -19,14 +19,14 @@
   --rule: #e3e6eb;           /* hairlines and borders */
   --rule-2: #eef0f3;         /* faint dividers inside a component */
 
-  /* Scan: the one accent. Graphic use (marks, bars, the scan line) vs text use (AA contrast). */
-  --scan: #ff5230;
-  --scan-ink: #c43818;       /* accent as text or link hover, 5.3:1 on paper */
-  --scan-wash: #fff1ec;      /* selected / focused background */
-  --scan-edge: #ffc9b9;      /* selected border */
+  /* Scan: the one accent, Puffin's Bill #E95C20. Graphic use (marks, bars, the scan line) vs text use (AA contrast). */
+  --scan: #e95c20;
+  --scan-ink: #c14713;       /* accent as text or link hover, 5.0:1 on paper */
+  --scan-wash: #fdf2ed;      /* selected / focused background */
+  --scan-edge: #f8cbb8;      /* selected border */
 
   /* Brand: the puffin mark's tile and the mascot's plumage (docs/DESIGN.md, Brand). The beak is
-   * always --scan; face, belly and fish are always white. */
+   * always --scan; face, belly and pages are always white. */
   --mark-tile: #14171c;
   --mascot-body: #14171c;
   --mascot-wing: #2a303a;
@@ -109,7 +109,7 @@
     --paper: #0e1014; --paper-2: #14171d; --paper-3: #1b1f27;
     --ink: #e6e9ef; --ink-2: #a3abb9; --ink-3: #7f8898;
     --rule: #262b34; --rule-2: #1c2028;
-    --scan: #ff6a45; --scan-ink: #ff8f70; --scan-wash: #2a1510; --scan-edge: #5a2819;
+    --scan: #ec703c; --scan-ink: #ef8558; --scan-wash: #2d1b16; --scan-edge: #612d19;
   --mark-tile: #2a303a; --mascot-body: #2b313b; --mascot-wing: #3b424e;
     --mark-tile: #2a303a; --mascot-body: #2b313b; --mascot-wing: #3b424e;
     --link: var(--ink); --link-underline: #4a5263;
@@ -130,7 +130,7 @@
   --paper: #0e1014; --paper-2: #14171d; --paper-3: #1b1f27;
   --ink: #e6e9ef; --ink-2: #a3abb9; --ink-3: #7f8898;
   --rule: #262b34; --rule-2: #1c2028;
-  --scan: #ff6a45; --scan-ink: #ff8f70; --scan-wash: #2a1510; --scan-edge: #5a2819;
+  --scan: #ec703c; --scan-ink: #ef8558; --scan-wash: #2d1b16; --scan-edge: #612d19;
   --link: var(--ink); --link-underline: #4a5263;
   --good: #4fc587; --good-wash: #10251a;
   --fair: #e2a53a; --fair-wash: #2a200d;

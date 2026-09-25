@@ -1,5 +1,5 @@
 /* PuffinParse landing page — layered on style.css. Same tokens, louder voice.
-   One vivid accent (vermilion), a big type scale, and exactly two moments of motion:
+   One vivid accent (Puffin's Bill orange), a big type scale, and exactly two moments of motion:
    the hero scanner and the leaderboard reveal. No frameworks, no web fonts. */
 
 .lp {
@@ -8,7 +8,7 @@
   --lp-accent: var(--scan);
   --lp-soft: var(--scan-wash);
   --lp-line: var(--scan-edge);
-  --lp-glow: rgb(255 82 48 / .32);
+  --lp-glow: rgb(233 92 32 / .32);
   --lp-btn-fg: #ffffff;
   --lp-skel: var(--line);
   --lp-parse: var(--mode-parse);
@@ -17,9 +17,9 @@
   --lp-max: 74rem;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .lp { --lp-glow: rgb(255 112 72 / .3); --lp-btn-fg: #1b0a05; --lp-skel: #2e3641; }
+  :root:not([data-theme="light"]) .lp { --lp-glow: rgb(236 112 60 / .3); --lp-btn-fg: #1b0a05; --lp-skel: #2e3641; }
 }
-:root[data-theme="dark"] .lp { --lp-glow: rgb(255 112 72 / .3); --lp-btn-fg: #1b0a05; --lp-skel: #2e3641; }
+:root[data-theme="dark"] .lp { --lp-glow: rgb(236 112 60 / .3); --lp-btn-fg: #1b0a05; --lp-skel: #2e3641; }
 
 .lp main { display: block; padding: 0; }
 .lp-wrap { max-width: var(--lp-max); margin: 0 auto; padding-inline: 1.5rem; }
