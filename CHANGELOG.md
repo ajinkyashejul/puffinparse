@@ -11,6 +11,16 @@ Python package `liteocr` share a single version.
 
 ### Added
 
+- **Design language** (`docs/DESIGN.md`, `website/assets/tokens.css`): paper-and-ink neutrals, one
+  scan accent, verdict and proof-mark colours, layout-box hues, a system-font type scale, the
+  bounding-box and scan-line signatures; every text token passes WCAG AA in both themes. The docs,
+  landing page and benchmark viewer all style through it.
+- **Benchmark viewer redesign.** Human document titles ("Headers & footers 3") with raw ids in
+  Details; one primary number per view with secondary metrics, methodology and reproduce commands
+  in disclosures; a compact leaderboard with per-source columns and an All metrics toggle; a calmer
+  score-vs-cost chart with non-overlapping labels; plain-English check rows; a documents list with
+  mean score and best model. PDF pages are rendered at build time with pypdfium2, so olmOCR-bench
+  and ParseBench pages show without pdf.js.
 - **First `combined-v2` results** (7 models × 159 documents, 0 failures, $11.74): llamaparse/cost_effective
   leads (83.79) ahead of llamaparse/agentic (83.05) and reducto/r-1 (81.32); `tesseract/default` is
   the free baseline (48.68, 97.94 on synthetic). `benchmark/LEADERBOARD.md` now has one section per

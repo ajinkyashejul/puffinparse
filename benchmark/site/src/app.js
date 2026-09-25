@@ -781,7 +781,8 @@
     if (opts.anyFailed) {
       cols.push({
         key: "failed",
-        label: "Failed",
+        // Empty outputs (a 200 with no text) are not failed calls; say which the column counts.
+        label: opts.anyCallFailed ? (opts.anyEmpty ? "Failed / empty" : "Failed") : "Empty",
         num: true,
         asc: true,
         value: function (row) {
@@ -1169,6 +1170,12 @@
       var anyFailed = (run.models || []).some(function (m) {
         return (m.summary.failed || 0) + (m.summary.empty_outputs || 0) > 0;
       });
+      var anyCallFailed = (run.models || []).some(function (m) {
+        return (m.summary.failed || 0) > 0;
+      });
+      var anyEmpty = (run.models || []).some(function (m) {
+        return (m.summary.empty_outputs || 0) > 0;
+      });
       var ordered = byScore(run.models);
       var leader = ordered[0];
       var head0 = leader ? leader.stats.head : {};
@@ -1195,7 +1202,7 @@
         sortableTable({
           id: "leaderboard",
           cls: "lb-table",
-          columns: leaderboardColumns(run, { rulesRun: rulesRun, anyFailed: anyFailed, all: all, leader: leader, headTitle: headTitle }),
+          columns: leaderboardColumns(run, { rulesRun: rulesRun, anyFailed: anyFailed, anyCallFailed: anyCallFailed, anyEmpty: anyEmpty, all: all, leader: leader, headTitle: headTitle }),
           rows: run.models,
           sortKey: sortKey,
           sortDir: sortDir,

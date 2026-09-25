@@ -332,3 +332,19 @@ lock. Provider webhooks are received only when the operator opts in with a share
 **Consequences.** Clients poll the gateway, never the provider. Providers can reuse job ids
 (LlamaParse returns the cached job for an identical upload), so one webhook may settle several
 gateway jobs. Vendor HMAC verification and automatic webhook registration remain open.
+
+## ADR-22: One design language; the viewer renders PDF pages at build time
+
+**Context.** The docs, landing page and viewer each had their own palette (blue in the docs,
+vermilion on the landing page), and the viewer showed raw ids, eleven metric tiles per document and
+full-table heatmaps; PDF pages depended on pdf.js from a CDN and often did not render.
+
+**Decision.** `website/assets/tokens.css` is the single source of colour, type, space and shape,
+described in `docs/DESIGN.md`; every surface links it first and styles only through its custom
+properties. The viewer follows the language's principles (one number per view, evidence one click
+away, human names with raw ids on request) and renders PDF pages to WebP at build time with
+pypdfium2 (a pip wheel that works on Vercel); pdf.js remains only as a lazy fallback. Layout-box
+overlays are off by default.
+
+**Consequences.** A palette or type change is one edit. The site build needs pypdfium2 (added to
+`vercel.json` and `pages.yml`); without it the build falls back to Pillow page-1 extraction.
