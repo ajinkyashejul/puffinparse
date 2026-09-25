@@ -1,0 +1,161 @@
+/* LiteOCR design tokens — the single source for colour, type, space and shape.
+ *
+ * Every LiteOCR surface (docs, landing page, benchmark viewer) links this file first and styles
+ * only through these custom properties. The language is described in docs/DESIGN.md; change a
+ * value here and every surface follows.
+ *
+ * Structure: the complete light palette on bare :root; dark values redefined (never introduced)
+ * under prefers-color-scheme (guarded so an explicit light choice wins) and again under
+ * [data-theme="dark"] so the manual toggle wins in both directions.
+ */
+:root {
+  /* Paper and ink: neutrals carry a slight blue-ink bias, never pure grey. */
+  --paper: #ffffff;          /* page ground */
+  --paper-2: #f7f8fa;        /* recessed ground: code, wells, table stripes */
+  --paper-3: #eef0f4;        /* pressed / hovered ground */
+  --ink: #14171c;            /* primary text, 18:1 on paper */
+  --ink-2: #4f5866;          /* secondary text, 7.2:1 */
+  --ink-3: #687180;          /* tertiary: labels and captions, 4.9:1 on paper, 4.6:1 on paper-2 */
+  --rule: #e3e6eb;           /* hairlines and borders */
+  --rule-2: #eef0f3;         /* faint dividers inside a component */
+
+  /* Scan: the one accent. Graphic use (marks, bars, the scan line) vs text use (AA contrast). */
+  --scan: #ff5230;
+  --scan-ink: #c43818;       /* accent as text or link hover, 5.3:1 on paper */
+  --scan-wash: #fff1ec;      /* selected / focused background */
+  --scan-edge: #ffc9b9;      /* selected border */
+
+  /* Links read as ink with an underline; the accent is reserved for the one primary thing. */
+  --link: var(--ink);
+  --link-underline: #b9c0cc;
+
+  /* Verdict: semantic score states, separate from the accent. Always paired with a shape. */
+  --good: #16794a;   --good-wash: #e9f6ef;
+  --fair: #9a6200;   --fair-wash: #fbf3e2;
+  --poor: #b42346;   --poor-wash: #fcecef;
+
+  /* Proof marks for diffs: missing from the output is struck, extra in the output is underlined. */
+  --proof-del: #b42346;  --proof-del-wash: #fcecef;
+  --proof-ins: #16794a;  --proof-ins-wash: #e6f5ec;
+
+  /* Modes: categorical, used only to label parse / ocr / extract. */
+  --mode-parse: #b8431c;
+  --mode-ocr: #2c5fd6;
+  --mode-extract: #6b3fc0;
+
+  /* Layout boxes (block-type overlays): eight hues distinguishable in both themes. */
+  --box-text: #2c5fd6;
+  --box-title: #e0561f;
+  --box-table: #0f8a6c;
+  --box-figure: #8a4bd1;
+  --box-list: #b7850d;
+  --box-furniture: #6b7280;   /* headers, footers, page numbers */
+  --box-formula: #c2327a;
+  --box-other: #4a8fb8;
+
+  /* Type: system faces only. Zero font downloads is part of being lite. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Type scale (1.2 ratio from 14px), line heights and weights. */
+  --t-xs: 0.75rem;    /* 12: labels, captions */
+  --t-sm: 0.8125rem;  /* 13: table cells, meta */
+  --t-md: 0.875rem;   /* 14: UI body */
+  --t-base: 1rem;     /* 16: reading body */
+  --t-lg: 1.25rem;    /* 20: section titles */
+  --t-xl: 1.75rem;    /* 28: page titles */
+  --t-2xl: 2.5rem;    /* 40: the one hero number or headline */
+  --lh-tight: 1.2;
+  --lh-ui: 1.45;
+  --lh-read: 1.7;
+  --w-regular: 400;
+  --w-medium: 540;
+  --w-strong: 640;
+  --tracking-label: 0.08em;
+
+  /* Space: a 4px grid. */
+  --s-1: 0.25rem;  --s-2: 0.5rem;  --s-3: 0.75rem;  --s-4: 1rem;
+  --s-5: 1.5rem;   --s-6: 2rem;    --s-7: 3rem;     --s-8: 4.5rem;
+
+  /* Shape: small radii; boxes are documents, not bubbles. */
+  --r-1: 4px;      /* chips, code, inputs */
+  --r-2: 7px;      /* buttons, panels */
+  --r-pill: 999px; /* segmented controls only */
+  --hair: 1px;
+  --bracket: 7px;  /* length of a bounding-box corner tick */
+
+  /* Elevation: used only for things that float (menus, dialogs). */
+  --lift: 0 12px 32px rgb(20 23 28 / 0.14);
+
+  /* Motion. */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 160ms;
+
+  /* Layout. */
+  --measure: 68ch;
+  --page-max: 76rem;
+  --gutter: clamp(1rem, 3vw, 1.5rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0e1014; --paper-2: #14171d; --paper-3: #1b1f27;
+    --ink: #e6e9ef; --ink-2: #a3abb9; --ink-3: #7f8898;
+    --rule: #262b34; --rule-2: #1c2028;
+    --scan: #ff6a45; --scan-ink: #ff8f70; --scan-wash: #2a1510; --scan-edge: #5a2819;
+    --link: var(--ink); --link-underline: #4a5263;
+    --good: #4fc587; --good-wash: #10251a;
+    --fair: #e2a53a; --fair-wash: #2a200d;
+    --poor: #f06a8a; --poor-wash: #2c1219;
+    --proof-del: #f06a8a; --proof-del-wash: #2c1219;
+    --proof-ins: #4fc587; --proof-ins-wash: #10251a;
+    --mode-parse: #ff8a63; --mode-ocr: #7fa6ff; --mode-extract: #b79bff;
+    --box-text: #6f9bff; --box-title: #ff8452; --box-table: #3cc9a3; --box-figure: #b58bff;
+    --box-list: #e6b93f; --box-furniture: #9aa3b2; --box-formula: #f06aae; --box-other: #6fb6e0;
+    --lift: 0 12px 32px rgb(0 0 0 / 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0e1014; --paper-2: #14171d; --paper-3: #1b1f27;
+  --ink: #e6e9ef; --ink-2: #a3abb9; --ink-3: #7f8898;
+  --rule: #262b34; --rule-2: #1c2028;
+  --scan: #ff6a45; --scan-ink: #ff8f70; --scan-wash: #2a1510; --scan-edge: #5a2819;
+  --link: var(--ink); --link-underline: #4a5263;
+  --good: #4fc587; --good-wash: #10251a;
+  --fair: #e2a53a; --fair-wash: #2a200d;
+  --poor: #f06a8a; --poor-wash: #2c1219;
+  --proof-del: #f06a8a; --proof-del-wash: #2c1219;
+  --proof-ins: #4fc587; --proof-ins-wash: #10251a;
+  --mode-parse: #ff8a63; --mode-ocr: #7fa6ff; --mode-extract: #b79bff;
+  --box-text: #6f9bff; --box-title: #ff8452; --box-table: #3cc9a3; --box-figure: #b58bff;
+  --box-list: #e6b93f; --box-furniture: #9aa3b2; --box-formula: #f06aae; --box-other: #6fb6e0;
+  --lift: 0 12px 32px rgb(0 0 0 / 0.5);
+}
+
+/* Signature: the bounding box. Corner ticks mark the one focused object on a page (the selected
+ * model, the headline score), the way a detector marks a region. Apply with class="bbox". */
+.bbox {
+  --bbox-c: var(--scan);
+  background:
+    linear-gradient(var(--bbox-c), var(--bbox-c)) top left / var(--bracket) var(--hair) no-repeat,
+    linear-gradient(var(--bbox-c), var(--bbox-c)) top left / var(--hair) var(--bracket) no-repeat,
+    linear-gradient(var(--bbox-c), var(--bbox-c)) top right / var(--bracket) var(--hair) no-repeat,
+    linear-gradient(var(--bbox-c), var(--bbox-c)) top right / var(--hair) var(--bracket) no-repeat,
+    linear-gradient(var(--bbox-c), var(--bbox-c)) bottom left / var(--bracket) var(--hair) no-repeat,
+    linear-gradient(var(--bbox-c), var(--bbox-c)) bottom left / var(--hair) var(--bracket) no-repeat,
+    linear-gradient(var(--bbox-c), var(--bbox-c)) bottom right / var(--bracket) var(--hair) no-repeat,
+    linear-gradient(var(--bbox-c), var(--bbox-c)) bottom right / var(--hair) var(--bracket) no-repeat;
+}
+
+/* Signature: the scan line. A short accent rule, used at most once per view (the brand mark, the
+ * active tab). Apply with class="scanline" on an empty element or as a heading eyebrow. */
+.scanline {
+  display: block;
+  width: 1.5rem;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--scan);
+}
