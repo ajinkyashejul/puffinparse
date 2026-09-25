@@ -51,7 +51,7 @@ jobs:
       # markdown renders the docs; Pillow is optional and only used to render page 1
       # of PDF inputs into a preview PNG for the results viewer.
       - name: Install build dependencies
-        run: python -m pip install --upgrade pip markdown pillow
+        run: python -m pip install --upgrade pip markdown pillow pypdfium2
 
       # A GitHub Pages project site is served from /<repo>/, so links and canonical URLs
       # are built for that prefix. --with-benchmark is on by default, so this one command

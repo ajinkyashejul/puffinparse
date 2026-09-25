@@ -6,10 +6,11 @@ outputs under `benchmark/results/outputs/`, and the datasets under `benchmark/da
 and writes a completely static, dependency-free site into `benchmark/site/dist/`:
 
     index.html  app.js  styles.css        copied from benchmark/site/src/
-    data/index.json                       every run + dataset info + model summaries
+    tokens.css                            the LiteOCR design tokens (website/assets/)
+    data/index.json                       every run + dataset info + model summaries + labels
     data/runs/<run_id>.json               the full result file for a run
     data/outputs/<run_id>/<model>/<doc>.md   each model's markdown output per document
-    data/datasets/<name>/manifest.json    manifest (+ a `preview` path per document)
+    data/datasets/<name>/manifest.json    manifest (+ `preview`/`previews`, `title`, labels)
     data/datasets/<name>/truth/<doc>.md   ground truth markdown
     data/datasets/<name>/rules/<doc>.json machine-checkable assertions (`kind: "rules"`)
     data/datasets/<name>/docs/<doc>.<ext> the input documents themselves
@@ -19,9 +20,14 @@ A manifest may reference files outside its own directory (`combined-v1` points a
 manifest and copied to the matching place under `data/datasets/`, so the very same
 relative path keeps working in the browser and no bytes are copied twice.
 
-The script uses only the standard library. Pillow is optional: when it is importable the
-first page of each PDF input is rendered to `<id>.p1.png` so the browser can show a
-preview; without it PDFs are still copied and the site links to them instead.
+The script uses only the standard library. Two optional packages make PDF inputs visible
+without a client-side PDF library: with **pypdfium2** (plus Pillow) every PDF page, up to
+`PREVIEW_MAX_PAGES`, is rendered to `<id>.p<n>.webp`; with Pillow alone only the page-1
+image embedded in LiteOCR's own synthetic PDFs is extracted (`<id>.p1.png`). Without
+either, PDFs are still copied and the viewer falls back to pdf.js or a download link.
+
+Every document in a copied manifest also gets a human name: `title` ("Headers & footers
+3"), `source_label` ("olmOCR-bench") and `category_label`, so no view shows a raw id.
 
 Usage:
     python benchmark/site/build.py [--out DIR] [--base-url /benchmark-results/]
@@ -40,7 +46,7 @@ import sys
 import zlib
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 SITE_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SITE_DIR.parents[1]
@@ -50,6 +56,42 @@ OUTPUTS_DIR = RESULTS_DIR / "outputs"
 DATASETS_DIR = REPO_ROOT / "benchmark" / "datasets"
 
 STATIC_FILES = ("index.html", "app.js", "styles.css")
+# The shared LiteOCR design tokens (docs/DESIGN.md), linked before styles.css.
+TOKENS_CSS = REPO_ROOT / "website" / "assets" / "tokens.css"
+
+# Human names for the dataset sources (the prefix of a combined-dataset id).
+SOURCE_LABELS = {
+    "synthetic": "Synthetic",
+    "parsebench": "ParseBench",
+    "olmocr": "olmOCR-bench",
+    "omnidocbench": "OmniDocBench",
+    "dpbench": "DP-Bench",
+}
+# Category names that sentence case alone would get wrong or leave clumsy.
+CATEGORY_LABELS = {
+    "headers_footers": "Headers & footers",
+    "long_tiny_text": "Tiny text",
+    "table_tests": "Tables",
+    "old_scans": "Old scans",
+    "multi_column": "Multi-column",
+    "two_column": "Two-column",
+    "complex_table": "Complex table",
+    "noisy_scan": "Noisy scan",
+    "low_res": "Low resolution",
+    "key_value": "Key-value",
+    "academic_literature": "Academic paper",
+    "colorful_textbook": "Textbook",
+    "exam_paper": "Exam paper",
+    "historical_document": "Historical document",
+    "research_report": "Research report",
+    "ppt2pdf": "Slides",
+    "multipage": "Multi-page",
+    "note": "Handwritten note",
+}
+
+# pypdfium2 previews: rendered width in pixels, and how many pages of a long PDF to render.
+PREVIEW_RENDER_WIDTH = 1000
+PREVIEW_MAX_PAGES = 4
 
 # Widest PDF page-1 preview we render; wider pages are downscaled to keep dist small.
 PREVIEW_MAX_WIDTH = 1240
@@ -65,12 +107,52 @@ BASE_META_RE = re.compile(r'(<meta\s+name="liteocr-base"\s+content=")[^"]*(")')
 # `<meta name="liteocr-home">` / `liteocr-docs`: where the header's "LiteOCR" and "Docs"
 # links point when the viewer is embedded in the product site (empty = standalone).
 LINK_META_RE = re.compile(r'(<meta\s+name="liteocr-(home|docs)"\s+content=")[^"]*(")')
-ASSET_REF_RE = re.compile(r'((?:href|src)=")(styles\.css|app\.js)(")')
+ASSET_REF_RE = re.compile(r'((?:href|src)=")(tokens\.css|styles\.css|app\.js)(")')
 
 
 # --------------------------------------------------------------------------------------
 # helpers
 # --------------------------------------------------------------------------------------
+
+
+def source_label(source: str) -> str:
+    """`olmocr` -> "olmOCR-bench"; a bare dataset name drops its version (`synthetic-v1`)."""
+    return SOURCE_LABELS.get(source) or SOURCE_LABELS.get(re.sub(r"-v\d+$", "", source), source)
+
+
+def category_label(category: str) -> str:
+    """snake_case -> sentence case, with the overrides in `CATEGORY_LABELS`."""
+    if category in CATEGORY_LABELS:
+        return CATEGORY_LABELS[category]
+    words = category.replace("-", " ").replace("_", " ").split()
+    return " ".join(words).capitalize() if words else "Uncategorised"
+
+
+def doc_source(doc_id: str, fallback: str) -> str:
+    """The source prefix of a combined-dataset id, else the dataset itself (as in app.js)."""
+    cut = doc_id.find("/")
+    return doc_id[:cut] if cut > 0 else fallback
+
+
+def name_documents(documents: list[dict[str, Any]], dataset: str) -> None:
+    """Give every document `title`, `ordinal`, `source_label` and `category_label` in place.
+
+    The title is "<Category label> <n>", n counting the documents of the same source and
+    category in id order, so it is stable for a manifest and never shows a hash.
+    """
+    counters: dict[tuple[str, str], int] = {}
+    ordinal: dict[str, int] = {}
+    for doc in sorted(documents, key=lambda d: str(d.get("id", ""))):
+        doc_id = str(doc.get("id", ""))
+        key = (doc_source(doc_id, dataset), str(doc.get("category", "")))
+        counters[key] = counters.get(key, 0) + 1
+        ordinal[doc_id] = counters[key]
+    for doc in documents:
+        doc_id = str(doc.get("id", ""))
+        doc["source_label"] = source_label(doc_source(doc_id, dataset))
+        doc["category_label"] = category_label(str(doc.get("category", "")))
+        doc["ordinal"] = ordinal.get(doc_id, 1)
+        doc["title"] = f"{doc['category_label']} {doc['ordinal']}"
 
 
 def model_slug(model: str) -> str:
@@ -213,6 +295,49 @@ def render_pdf_preview(pdf_path: Path, out_png: Path) -> bool:
         return False
 
 
+def pdf_preview_ext() -> Optional[str]:
+    """Extension of pypdfium2 page previews, or None without pypdfium2 and Pillow."""
+    try:
+        import pypdfium2  # noqa: F401  (optional dependency, probe only)
+        from PIL import features
+    except ImportError:
+        return None
+    return ".webp" if features.check("webp") else ".png"
+
+
+def render_pdf_pages(pdf_path: Path, out_paths: list[Path]) -> int:
+    """Render the first `len(out_paths)` pages of a PDF with pypdfium2; returns pages written.
+
+    Each page is rendered `PREVIEW_RENDER_WIDTH` pixels wide and saved in the format its
+    extension names (WebP at quality 80 keeps a text page around 60-120 KB).
+    """
+    try:
+        import pypdfium2 as pdfium  # optional dependency, imported lazily
+    except ImportError:
+        return 0
+    written = 0
+    try:
+        pdf = pdfium.PdfDocument(str(pdf_path))
+        try:
+            for index, out in enumerate(out_paths[: len(pdf)]):
+                page = pdf[index]
+                width = page.get_width() or 612.0
+                image = page.render(scale=PREVIEW_RENDER_WIDTH / width).to_pil()
+                if image.mode not in ("L", "RGB"):
+                    image = image.convert("RGB")
+                out.parent.mkdir(parents=True, exist_ok=True)
+                if out.suffix == ".webp":
+                    image.save(out, format="WEBP", quality=80, method=6)
+                else:
+                    image.save(out, format="PNG", optimize=True)
+                written += 1
+        finally:
+            pdf.close()
+    except Exception as exc:  # a preview is best-effort, never fatal
+        print(f"  ! page preview failed for {pdf_path.name}: {exc}", file=sys.stderr)
+    return written
+
+
 def headline_score(summary: dict[str, Any]) -> float:
     """The number a model is ranked by: `summary.headline` when the run has one, else `overall`.
 
@@ -304,6 +429,54 @@ def copy_outputs(run: dict[str, Any], dist: Path) -> tuple[int, dict[str, dict[s
     return copied, inventory
 
 
+def attach_pdf_previews(
+    doc: dict[str, Any],
+    rel_file: str,
+    input_src: Path,
+    place: Callable[[str], Optional[tuple[Path, Path]]],
+    seen: set[Path],
+) -> int:
+    """Set `preview` (page 1) and `previews` (every rendered page) on a PDF document.
+
+    Pages are rendered next to the PDF with pypdfium2 when it is installed; otherwise page 1
+    is extracted with Pillow alone. Images already written for another manifest are reused.
+    Returns the number of images newly written.
+    """
+    stem = rel_file[: -len(input_src.suffix)]
+    ext = pdf_preview_ext()
+    if ext:
+        count = max(1, min(int(doc.get("pages") or 1), PREVIEW_MAX_PAGES))
+        rels = [f"{stem}.p{n}{ext}" for n in range(1, count + 1)]
+        spots = [place(rel) for rel in rels]
+        dsts = [spot[1] for spot in spots if spot is not None]
+        if len(dsts) == len(rels):
+            fresh = 0
+            if dsts[0] in seen:
+                done = sum(1 for dst in dsts if dst in seen)
+            else:
+                done = fresh = render_pdf_pages(input_src, dsts)
+                seen.update(dsts[:done])
+            if done:
+                doc["previews"] = rels[:done]
+                doc["preview"] = rels[0]
+                return fresh
+    preview_rel = f"{stem}.p1.png"
+    preview_spot = place(preview_rel)
+    if preview_spot is None:
+        return 0
+    preview_dst = preview_spot[1]
+    if preview_dst in seen:  # rendered while copying another dataset
+        doc["preview"] = preview_rel
+        doc["previews"] = [preview_rel]
+        return 0
+    if render_pdf_preview(input_src, preview_dst):
+        doc["preview"] = preview_rel
+        doc["previews"] = [preview_rel]
+        seen.add(preview_dst)
+        return 1
+    return 0
+
+
 def copy_dataset(name: str, dist: Path, seen: set[Path]) -> dict[str, Any]:
     """Copy a dataset's manifest, truth/rule files and inputs. Returns the dataset summary.
 
@@ -386,21 +559,12 @@ def copy_dataset(name: str, dist: Path, seen: set[Path]) -> dict[str, Any]:
         inputs += 1
 
         if input_src.suffix.lower() == ".pdf":
-            # PDFs cannot be shown inline, so render page 1 next to the PDF for preview.
-            preview_rel = f"{rel_file[: -len(input_src.suffix)]}.p1.png"
-            preview_spot = place(preview_rel)
-            if preview_spot is None:
-                continue
-            preview_dst = preview_spot[1]
-            if preview_dst in seen:
-                doc["preview"] = preview_rel  # rendered while copying another dataset
-            elif render_pdf_preview(input_src, preview_dst):
-                doc["preview"] = preview_rel
-                seen.add(preview_dst)
-                previews += 1
+            # Browsers cannot show a PDF inline, so render its pages next to it.
+            previews += attach_pdf_previews(doc, rel_file, input_src, place, seen)
         else:
             doc["preview"] = rel_file
 
+    name_documents(manifest.get("documents", []), str(manifest.get("name", name)))
     write_json(out_dir / "manifest.json", manifest)
     print(
         f"  dataset {name} v{manifest.get('version', '?')}: "
@@ -451,6 +615,21 @@ def run_index_entry(
     }
 
 
+def run_labels(runs: list[dict[str, Any]]) -> dict[str, dict[str, str]]:
+    """Human names for every source and category a run mentions (the leaderboard tables)."""
+    sources: dict[str, str] = {}
+    categories: dict[str, str] = {}
+    for run in runs:
+        fallback = str(run.get("dataset", {}).get("name", "dataset"))
+        for model in run.get("models", []):
+            for doc in model.get("docs", []):
+                src = doc_source(str(doc.get("id", "")), fallback)
+                sources.setdefault(src, source_label(src))
+                cat = str(doc.get("category", ""))
+                categories.setdefault(cat, category_label(cat))
+    return {"sources": sources, "categories": categories}
+
+
 def build(dist: Path, base: str = "./", home: str = "", docs: str = "") -> int:
     if not SRC_DIR.is_dir():
         print(f"error: missing source directory {SRC_DIR}", file=sys.stderr)
@@ -472,7 +651,11 @@ def build(dist: Path, base: str = "./", home: str = "", docs: str = "") -> int:
             (dist / name).write_text(page, encoding="utf-8")
         else:
             copy_file(src, dist / name)
-    print(f"  static: {', '.join(STATIC_FILES)}")
+    if TOKENS_CSS.is_file():
+        copy_file(TOKENS_CSS, dist / "tokens.css")
+    else:
+        print(f"  ! {TOKENS_CSS} not found: the viewer renders without its tokens", file=sys.stderr)
+    print(f"  static: {', '.join(STATIC_FILES)}, tokens.css")
 
     runs = load_runs()
     if not runs:
@@ -508,6 +691,7 @@ def build(dist: Path, base: str = "./", home: str = "", docs: str = "") -> int:
             "repo": "https://github.com/ajinkyashejul/liteocr",
             "base": base,
             "datasets": datasets,
+            "labels": run_labels(runs),
             "runs": index_runs,
         },
     )
