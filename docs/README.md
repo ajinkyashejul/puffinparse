@@ -12,6 +12,8 @@ without asking around is linked from this page; if something is missing, add it 
 | [`COMPAT.md`](COMPAT.md) | Native-format compatibility (`output_format="reducto"\|"extend"\|"llamaparse"`): what the vendor-shaped renders guarantee, which fields are always null, the coordinate-units rule, and migration examples. |
 | [`SERVER.md`](SERVER.md) | The HTTP gateway (`liteocr serve`): config file, virtual keys, budgets, rate limits, API, errors, metrics, Docker. |
 | [`providers/`](providers/README.md) | Per-provider reference: endpoints, request flow, response mapping, errors, gotchas, passthrough options. |
+| [`research/`](research/README.md) | Market research: competitors, other benchmarks, naming. Start here before positioning or renaming decisions. |
+| [`DESIGN.md`](DESIGN.md) | Design language: tokens, components, writing rules for every surface. |
 | [`benchmarks/`](benchmarks/) | Survey of public OCR benchmarks, adapter notes for the combined dataset, and [`findings.md`](benchmarks/findings.md) (what committed runs taught us: scorer v2, provider quirks). |
 | [`../benchmark/README.md`](../benchmark/README.md) | Benchmark methodology, metrics, how to run, dataset format. |
 | [`../benchmark/LEADERBOARD.md`](../benchmark/LEADERBOARD.md) | Generated leaderboard. Do not edit by hand; regenerate with `liteocr bench report`. |
