@@ -1,26 +1,13 @@
-/* LiteOCR docs — one stylesheet, no frameworks, no web fonts. */
+/* LiteOCR docs — layered on tokens.css; no frameworks, no web fonts. */
+/* Colour, type and shape come from tokens.css (docs/DESIGN.md); these are local aliases so the
+   rules below stay short. Dark theme is handled entirely by tokens.css. */
 :root {
-  --bg: #ffffff; --bg-soft: #fafafa; --surface: #f6f7f9;
-  --fg: #15181d; --fg-dim: #5c6472; --fg-faint: #8b93a1;
-  --line: #e6e8ec; --line-soft: #f0f1f4;
-  --accent: #2c5fd6; --accent-soft: #eef2fd; --ok: #1a7f4b;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --sidebar: 15.5rem; --toc: 13rem; --radius: 7px;
-}
-:root:not([data-theme="light"]) { color-scheme: light dark; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0d0f13; --bg-soft: #111419; --surface: #161a20;
-  --fg: #e3e7ee; --fg-dim: #99a1b0; --fg-faint: #6d7686;
-  --line: #222831; --line-soft: #1a1f26;
-  --accent: #7fa6ff; --accent-soft: #182135; --ok: #56c48a;
-} }
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #0d0f13; --bg-soft: #111419; --surface: #161a20;
-  --fg: #e3e7ee; --fg-dim: #99a1b0; --fg-faint: #6d7686;
-  --line: #222831; --line-soft: #1a1f26;
-  --accent: #7fa6ff; --accent-soft: #182135; --ok: #56c48a;
+  --bg: var(--paper); --bg-soft: var(--paper-2); --surface: var(--paper-3);
+  --fg: var(--ink); --fg-dim: var(--ink-2); --fg-faint: var(--ink-3);
+  --line: var(--rule); --line-soft: var(--rule-2);
+  --accent: var(--scan-ink); --accent-soft: var(--scan-wash); --ok: var(--good);
+  --mono: var(--font-mono); --sans: var(--font-sans);
+  --sidebar: 15.5rem; --toc: 13rem; --radius: var(--r-2);
 }
 
 * { box-sizing: border-box; }
@@ -28,8 +15,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 5rem; -webkit-text-size-adju
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans);
   font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; text-underline-offset: 2px; }
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--scan-ink); }
+article a { text-decoration: underline; text-decoration-color: var(--link-underline);
+  text-underline-offset: 2px; text-decoration-thickness: 1px; }
+article a:hover { color: var(--scan-ink); text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--scan-ink); outline-offset: 2px; }
 
 /* ---- chrome ---- */
 .top { position: sticky; top: 0; z-index: 20; height: 3.25rem; border-bottom: 1px solid var(--line);
@@ -138,8 +129,8 @@ td code { white-space: nowrap; }
 .btn { display: inline-block; padding: .38rem .85rem; border-radius: var(--radius); font-size: .86rem;
   border: 1px solid var(--line); color: var(--fg); background: var(--bg-soft); font-weight: 530; }
 .btn:hover { text-decoration: none; border-color: var(--accent); color: var(--accent); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn.primary:hover { color: #fff; opacity: .9; }
+.btn.primary { background: var(--scan-ink); border-color: var(--scan-ink); color: var(--paper); }
+.btn.primary:hover { color: var(--paper); opacity: .9; }
 .cta code { background: var(--surface); border: 1px solid var(--line); padding: .34rem .6rem; border-radius: var(--radius); }
 .card { border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem; margin: 1.5rem 0;
   background: var(--bg-soft); }

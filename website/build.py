@@ -628,6 +628,7 @@ def page_html(site: Site, page: Page, pages: list[Page]) -> str:
 <link rel="canonical" href="{canonical}">
 {alt}
 <link rel="icon" href="{FAVICON}">
+<link rel="stylesheet" href="{site.base}tokens.css">
 <link rel="stylesheet" href="{site.base}style.css">
 <script>(function(){{try{{var t=localStorage.getItem('liteocr-theme');
 if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
@@ -767,7 +768,7 @@ def build(base: str, out_dir: Path, site_url: str, docs_prefix: str = "docs") ->
 
 
 def write_extras(site: Site, pages: list[Page], out: Path) -> None:
-    for asset in ("style.css", "landing.css", "app.js"):
+    for asset in ("tokens.css", "style.css", "landing.css", "app.js"):
         shutil.copyfile(WEB / "assets" / asset, out / asset)
 
     index = [{"t": p.title, "u": site.url(p.slug), "h": flat_headings(p.toc)} for p in pages]
