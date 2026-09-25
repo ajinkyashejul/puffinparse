@@ -19,6 +19,11 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ### Added
 
+- **First `combined-v3` results** (6 API models × 199 documents, adds a 40-page DP-Bench subset;
+  0 failures, $14.65): llamaparse/cost_effective leads (84.35) ahead of llamaparse/agentic (83.49)
+  and reducto/r-1 (82.40). It is the new headline in `benchmark/LEADERBOARD.md` and the viewer;
+  `combined-v2` keeps the Tesseract baseline row.
+
 - **Design language** (`docs/DESIGN.md`, `website/assets/tokens.css`): paper-and-ink neutrals, one
   scan accent, verdict and proof-mark colours, layout-box hues, a system-font type scale, the
   bounding-box and scan-line signatures; every text token passes WCAG AA in both themes. The docs,

@@ -8,20 +8,79 @@ disabled. Prices are public pay-as-you-go list prices. Methodology and caveats:
 [`benchmark/README.md`](README.md). Every document, output, diff and rule check is browsable at
 [puffinparse.vercel.app/benchmark-results](https://puffinparse.vercel.app/benchmark-results/).
 
-**Headline: `combined-v2`** (run 2026-09-24, scorer v2) — 159 documents from four sources, each
+**Headline: `combined-v3`** (run 2026-09-25, scorer v2) — 199 documents from five sources, each
 scored by its own ground truth: `synthetic-v1` (exact transcripts), a ParseBench subset (rules and
-table truth), an olmOCR-bench subset (its unit-test style rules, `max_diffs` honoured) and an
-OmniDocBench subset (reading-order transcripts; English and Chinese). Compare models within a source
-column rather than across sources. `tesseract/default` is a free local OCR baseline with no layout
-model, so it scores 0 wherever table structure is scored. 1,113 calls, 0 failures, $11.74 at list
-price. OmniDocBench is research-only, so its per-page outputs are not committed (scores are).
+table truth), an olmOCR-bench subset (its unit-test style rules, `max_diffs` honoured), an
+OmniDocBench subset (reading-order transcripts; English and Chinese) and a DP-Bench subset (Upstage's
+document-parsing benchmark: reading-order transcripts and table truth, MIT). Compare models within a
+source column rather than across sources. 1,194 calls, 0 failures, $14.65 at list price.
+OmniDocBench is research-only, so its per-page outputs are not committed (scores are).
+`tesseract/default` is not in this run; its free-baseline row is in `combined-v2`.
 
-Older runs are kept for comparison: `combined-v1` (79 documents, 2026-09-11) and `synthetic-v1`
-(39 documents, 2026-09-11), both re-scored offline with scorer v2 on 2026-09-24 (`puffinparse bench
-rescore`; latency and cost as originally measured). See
+Older runs are kept for comparison: `combined-v2` (159 documents, 2026-09-24, includes the
+Tesseract baseline), `combined-v1` (79 documents, 2026-09-11) and `synthetic-v1` (39 documents,
+2026-09-11); the 2026-09-11 runs were re-scored offline with scorer v2 on 2026-09-24
+(`puffinparse bench rescore`; latency and cost as originally measured). See
 [`docs/benchmarks/findings.md`](../docs/benchmarks/findings.md) for what scorer v2 changed.
 
-## combined-v2 (headline)
+## combined-v3 (headline)
+
+| Rank | Model | Overall | Char sim | CER | WER | Word F1 | Order | Table | TEDS | Rules | p50 latency | p95 latency | ms/page | $/1k pages | Failed | Dataset |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 1 | `llamaparse/cost_effective` | **84.35** | 0.802 | 0.492 | 0.584 | 0.787 | 0.911 | 0.857 | 0.865 | 70.2% | 9452 ms | 19494 ms | 11154 | $3.75 | 0/199 | combined-v3 v3.0.0 |
+| 2 | `llamaparse/agentic` | **83.49** | 0.790 | 0.523 | 0.651 | 0.791 | 0.920 | 0.876 | 0.868 | 70.9% | 14127 ms | 29269 ms | 15368 | $12.50 | 0/199 | combined-v3 v3.0.0 |
+| 3 | `reducto/r-1` | **82.40** | 0.780 | 0.548 | 0.680 | 0.779 | 0.921 | 0.897 | 0.878 | 70.7% | 3459 ms | 9305 ms | 4329 | $10.00 | 0/199 | combined-v3 v3.0.0 |
+| 4 | `reducto/standard` | **79.78** | 0.756 | 0.567 | 0.703 | 0.755 | 0.913 | 0.872 | 0.859 | 66.0% | 3019 ms | 8443 ms | 3797 | $15.00 | 0/199 (+1 empty) | combined-v3 v3.0.0 |
+| 5 | `extend/parse_performance` | **77.43** | 0.734 | 0.678 | 0.875 | 0.748 | 0.920 | 0.885 | 0.856 | 67.4% | 21965 ms | 33103 ms | 25309 | $25.00 | 0/199 | combined-v3 v3.0.0 |
+| 6 | `extend/parse_light` | **76.46** | 0.725 | 0.690 | 0.890 | 0.735 | 0.914 | 0.870 | 0.867 | 65.4% | 32038 ms | 52619 ms | 33067 | $6.25 | 0/199 | combined-v3 v3.0.0 |
+
+### Overall score by category
+
+| Model | academic_literature | book | chart | colorful_textbook | complex_table | dense | equation | exam_paper | faded | figure | headers_footers | headings | historical_document | index | invoice | list | long_tiny_text | low_res | magazine | multi_column | multipage | newspaper | noisy_scan | note | old_scans | plain | ppt2pdf | receipt | research_report | skewed | table | table_tests | text | two_column |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `llamaparse/cost_effective` | 77.6 | 83.8 | 70.7 | 85.9 | 100.0 | 100.0 | 94.4 | 77.0 | 100.0 | 88.2 | 25.0 | 100.0 | 70.9 | 92.9 | 100.0 | 98.8 | 94.3 | 100.0 | 72.3 | 71.2 | 100.0 | 86.9 | 100.0 | 93.1 | 66.3 | 100.0 | 89.3 | 100.0 | 84.6 | 100.0 | 87.7 | 72.9 | 87.2 | 100.0 |
+| `llamaparse/agentic` | 83.4 | 82.8 | 71.2 | 73.9 | 100.0 | 100.0 | 94.7 | 54.9 | 100.0 | 84.9 | 19.8 | 100.0 | 57.3 | 80.8 | 100.0 | 98.8 | 89.4 | 100.0 | 80.4 | 82.5 | 100.0 | 85.7 | 100.0 | 92.3 | 62.5 | 100.0 | 79.6 | 100.0 | 83.8 | 100.0 | 88.5 | 72.9 | 89.7 | 100.0 |
+| `reducto/r-1` | 75.0 | 81.2 | 58.4 | 70.4 | 100.0 | 100.0 | 95.5 | 46.7 | 100.0 | 79.8 | 14.6 | 100.0 | 76.4 | 82.7 | 100.0 | 99.6 | 94.7 | 100.0 | 58.2 | 83.1 | 100.0 | 64.3 | 100.0 | 93.4 | 66.3 | 100.0 | 88.7 | 100.0 | 83.4 | 100.0 | 89.1 | 85.4 | 83.4 | 100.0 |
+| `reducto/standard` | 78.9 | 76.6 | 58.3 | 63.1 | 100.0 | 99.9 | 93.1 | 54.3 | 99.9 | 80.3 | 11.5 | 100.0 | 16.8 | 81.5 | 99.9 | 99.5 | 84.1 | 100.0 | 67.3 | 83.1 | 99.9 | 64.4 | 99.8 | 90.7 | 62.6 | 100.0 | 81.0 | 100.0 | 86.8 | 100.0 | 88.7 | 79.5 | 80.1 | 100.0 |
+| `extend/parse_performance` | 78.2 | 76.9 | 38.3 | 57.4 | 99.6 | 99.9 | 93.2 | 47.4 | 100.0 | 60.1 | 5.2 | 100.0 | 41.5 | 80.9 | 100.0 | 97.4 | 90.9 | 100.0 | 53.2 | 83.1 | 100.0 | 61.5 | 99.7 | 91.8 | 58.8 | 100.0 | 77.6 | 99.9 | 73.7 | 83.9 | 84.4 | 92.7 | 79.1 | 100.0 |
+| `extend/parse_light` | 74.5 | 77.0 | 39.1 | 56.4 | 100.0 | 99.9 | 92.8 | 46.6 | 100.0 | 60.9 | 8.3 | 100.0 | 45.1 | 81.8 | 100.0 | 97.1 | 77.7 | 100.0 | 52.7 | 73.8 | 100.0 | 59.4 | 99.4 | 91.4 | 61.3 | 100.0 | 74.3 | 99.9 | 74.0 | 81.0 | 83.2 | 84.4 | 83.1 | 100.0 |
+
+### `combined-v3` by source
+
+| Source | Docs | Model | Overall |
+|---|---:|---|---:|
+| dpbench | 40 | `llamaparse/cost_effective` | 90.29 |
+| dpbench | 40 | `llamaparse/agentic` | 88.77 |
+| dpbench | 40 | `reducto/standard` | 87.65 |
+| dpbench | 40 | `reducto/r-1` | 86.90 |
+| dpbench | 40 | `extend/parse_light` | 79.63 |
+| dpbench | 40 | `extend/parse_performance` | 79.45 |
+| olmocr | 40 | `reducto/r-1` | 68.82 |
+| olmocr | 40 | `extend/parse_performance` | 66.15 |
+| olmocr | 40 | `llamaparse/cost_effective` | 65.96 |
+| olmocr | 40 | `llamaparse/agentic` | 65.43 |
+| olmocr | 40 | `reducto/standard` | 64.15 |
+| olmocr | 40 | `extend/parse_light` | 61.09 |
+| omnidocbench | 40 | `llamaparse/cost_effective` | 82.14 |
+| omnidocbench | 40 | `llamaparse/agentic` | 77.39 |
+| omnidocbench | 40 | `reducto/r-1` | 73.77 |
+| omnidocbench | 40 | `reducto/standard` | 68.00 |
+| omnidocbench | 40 | `extend/parse_performance` | 65.93 |
+| omnidocbench | 40 | `extend/parse_light` | 65.15 |
+| parsebench | 40 | `llamaparse/agentic` | 86.27 |
+| parsebench | 40 | `llamaparse/cost_effective` | 83.74 |
+| parsebench | 40 | `reducto/r-1` | 82.96 |
+| parsebench | 40 | `reducto/standard` | 79.66 |
+| parsebench | 40 | `extend/parse_light` | 78.52 |
+| parsebench | 40 | `extend/parse_performance` | 77.44 |
+| synthetic | 39 | `reducto/r-1` | 100.00 |
+| synthetic | 39 | `llamaparse/agentic` | 100.00 |
+| synthetic | 39 | `llamaparse/cost_effective` | 100.00 |
+| synthetic | 39 | `reducto/standard` | 99.96 |
+| synthetic | 39 | `extend/parse_performance` | 98.70 |
+| synthetic | 39 | `extend/parse_light` | 98.48 |
+
+## combined-v2
 
 | Rank | Model | Overall | Char sim | CER | WER | Word F1 | Order | Table | TEDS | Rules | p50 latency | p95 latency | ms/page | $/1k pages | Failed | Dataset |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
