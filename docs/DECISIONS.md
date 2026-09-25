@@ -388,3 +388,7 @@ sentence case, and bold marks a best value only when it is unique as displayed.
 live in `website/build.py` (`MARK`) and the viewer's `index.html`; the social card must be
 re-rendered (`website/og/render.py`, Playwright) when the card, mark or mascot changes. The launch
 videos still show the text wordmark until they are re-rendered.
+
+*Amended 2026-09-25:* the mark is C2 of the explored set (kept after comparing six alternatives), and
+the mascot became the waving puffin with three pages in its beak (instead of three document fish),
+which says "documents" more directly. `docs/DESIGN.md` gained a Brand motion section.

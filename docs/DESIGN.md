@@ -30,7 +30,8 @@ properties. This page explains what the tokens are for.
 PuffinParse is named after the Atlantic puffin: black and white with an orange beak, which is
 exactly the paper, ink and scan palette above. Puffins are known for carrying a neat row of fish
 crosswise in their beak; PuffinParse carries a document back as a neat row of typed blocks. Both
-brand assets tell that story with lines of text in the beak.
+brand assets tell that story with text in the beak: the mark's beak carries two parsed lines, the
+mascot carries a row of three pages.
 
 ### The mark
 
@@ -46,19 +47,41 @@ ground), the face is white, the beak is `--scan` and carries two ink stripes, th
 
 ### The puffin (mascot)
 
-[`website/assets/puffin.svg`](../website/assets/puffin.svg): a chubby, front-facing puffin holding
-three document fish (white fish with two grey text lines). Body `--mascot-body`, wing
-`--mascot-wing` (both lift in dark mode), face and belly white, beak and feet `--scan`, a pale
-`#ffb39f` base ridge and gape, a soft blush.
+[`website/assets/puffin.svg`](../website/assets/puffin.svg): a chubby, front-facing puffin waving
+with its raised wing, a row of three pages hanging from its beak (white, folded corner, a short
+`--scan` heading bar and two grey text lines). Body `--mascot-body`, wing `--mascot-wing` outlined
+in the body colour (both lift in dark mode), face and belly white, beak and feet `--scan`, a pale
+`#ffb39f` base ridge and gape, a soft blush, two grey wave marks beside the wing.
 
-- **Brand moments only:** the landing hero (perched on the demo card; it hops once each time a
-  response finishes typing), the 404 page, empty states, the social card and the README. Never in
+- **Brand moments only:** the landing hero (perched on the demo card; it hops and waves once each
+  time a response finishes typing), the 404 page, empty states, the social card and the README. Never in
   the working views of the viewer or docs, never next to data.
 - Inline it (`puffin(width)` in `website/build.py`) where the manual theme toggle must reach it;
   as an `<img>` it follows the OS colour scheme through its own media query.
 - Keep its classes `pp-*`: an inline SVG's `<style>` applies to the whole page.
 - One puffin per view. It does not talk, wink or wear props; new poses keep the same shapes and
-  colours.
+  colours, and keep something in the beak. Explored poses for later (reading, sleepy for empty
+  states, terminal for the CLI, a round sticker) follow the same rules.
+- The wing is its own group (`.pp-arm`), so a page can animate the wave by rotating it about the
+  shoulder (68, 125 in SVG units).
+
+### Brand motion
+
+Tools keep the motion rules below (state changes only). Brand moments may move more, always
+within these rules:
+
+- **One gesture at a time, tied to an event.** The landing puffin hops and waves when a response
+  finishes typing; nothing loops idly on a page people read. Everything stops under
+  `prefers-reduced-motion`.
+- **The logo reveal is the canonical intro:** corner ticks lock on like a detector, the tile lands,
+  the face pops, the beak slides in and its two stripes type out, then the wordmark rises. Use it to
+  open or close videos and talks; do not invent other logo animations.
+- **Physical, not floaty:** springs and squash-and-stretch for the puffin, ease-out for things that
+  arrive, 160–600 ms per gesture. No spinning, bouncing loops or particle effects.
+- **Loops are seamless:** every periodic motion divides the loop length.
+- Sources live in [`marketing/videos/brand-motion/`](../marketing/videos/brand-motion/README.md)
+  (Remotion): `LogoReveal`, `MascotIdle`, and the 3D `Puffin3D` and `Icon3D` explorations, which
+  are not yet part of the brand.
 
 ### Social card
 

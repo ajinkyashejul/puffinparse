@@ -1,4 +1,4 @@
-<p align="center"><img src="website/assets/puffin.svg" width="112" alt="The PuffinParse puffin holding three document fish"></p>
+<p align="center"><img src="website/assets/puffin.svg" width="128" alt="The PuffinParse puffin waving, three pages in its beak"></p>
 
 # PuffinParse
 

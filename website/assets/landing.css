@@ -32,6 +32,9 @@
 .lp-perch { position: absolute; top: -107px; right: 2.25rem; z-index: 2; pointer-events: none;
   transform-origin: 50% 100%; }
 .lp-perch.hop { animation: lp-hop .42s cubic-bezier(.3, .7, .4, 1) 1; }
+.lp-perch .pp-arm { transform-box: view-box; transform-origin: 68px 125px; }
+.lp-perch.hop .pp-arm { animation: lp-wave .9s ease-in-out 1; }
+@keyframes lp-wave { 0%, 100% { transform: rotate(0); } 25%, 75% { transform: rotate(-14deg); } 50% { transform: rotate(8deg); } }
 @keyframes lp-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-9px); } }
 
 /* ---------------------------------------------------------------------- hero */
@@ -274,5 +277,5 @@ mark.lp-diff { background: var(--lp-soft); color: var(--lp-ink); border-radius: 
   .lp .topin { gap: .6rem; padding: 0 1.15rem; }
   .lp-hero-demo { margin-top: 4rem; }
   .lp-perch { top: -70px; right: 1.25rem; }
-  .lp-perch .puffin { width: 64px; }
+  .lp-perch .puffin { width: 74px; }
 }

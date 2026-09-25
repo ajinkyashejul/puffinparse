@@ -583,7 +583,7 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
         "RESULTS": site.blob("benchmark/results", tree=True),
         "FAVICON": FAVICON,
         "MARK": MARK,
-        "PUFFIN_HERO": puffin(100, "lp-puffin"),
+        "PUFFIN_HERO": puffin(115, "lp-puffin"),
         "SOCIAL": social_meta(site, f"{site.title}: {site.tagline}", description, site.absolute(site.base)),
         "CANONICAL": site.absolute(site.base),
         "DESCRIPTION": html.escape(description, quote=True),
@@ -878,7 +878,7 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         section="",
         has_md=False,
         body_html=(
-            f'<div class="notfound">{puffin(120)}</div>'
+            f'<div class="notfound">{puffin(138)}</div>'
             "<h1>Page not found</h1><p>That URL is not part of the PuffinParse site. The documentation "
             f'moved under <a href="{site.docs_base}"><code>{site.docs_base}</code></a>.</p>'
             f'<p><a href="{site.base}">Home</a> · '

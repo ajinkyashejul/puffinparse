@@ -23,7 +23,7 @@ Python package `puffinparse` share a single version. Entries before the rename s
 ### Added
 
 - **Puffin brand** (ADR-24, `docs/DESIGN.md` Brand): a puffin mark (favicon and header logo on the
-  landing page, docs and benchmark viewer) and a puffin mascot holding three document fish, shown
+  landing page, docs and benchmark viewer) and a waving puffin mascot with three pages in its beak, shown
   on the landing hero, the 404 page and the README. Every page now has an Open Graph / Twitter
   social card (`website/assets/og.png`). The landing demo shows a response on arrival instead of
   starting blank.
