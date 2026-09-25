@@ -3,30 +3,23 @@
    the hero scanner and the leaderboard reveal. No frameworks, no web fonts. */
 
 .lp {
-  --lp-ink: #c53a1a;          /* accent used as text: 5.1:1 on white */
-  --lp-accent: #ff5230;       /* accent used as a graphic */
-  --lp-soft: #fff2ee;
-  --lp-line: #ffd4c8;
+  /* Accent and mode colours come from tokens.css; only landing-specific effects are defined here. */
+  --lp-ink: var(--scan-ink);
+  --lp-accent: var(--scan);
+  --lp-soft: var(--scan-wash);
+  --lp-line: var(--scan-edge);
   --lp-glow: rgb(255 82 48 / .32);
   --lp-btn-fg: #ffffff;
   --lp-skel: var(--line);
-  --lp-parse: #b8431c;
-  --lp-ocr: #2c5fd6;
-  --lp-extract: #6b3fc0;
+  --lp-parse: var(--mode-parse);
+  --lp-ocr: var(--mode-ocr);
+  --lp-extract: var(--mode-extract);
   --lp-max: 74rem;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .lp {
-    --lp-ink: #ff8a6b; --lp-accent: #ff7048; --lp-soft: #2a1611; --lp-line: #4d2419;
-    --lp-glow: rgb(255 112 72 / .3); --lp-btn-fg: #1b0a05; --lp-skel: #2e3641;
-    --lp-parse: #ff8a63; --lp-ocr: #7fa6ff; --lp-extract: #b79bff;
-  }
+  :root:not([data-theme="light"]) .lp { --lp-glow: rgb(255 112 72 / .3); --lp-btn-fg: #1b0a05; --lp-skel: #2e3641; }
 }
-:root[data-theme="dark"] .lp {
-  --lp-ink: #ff8a6b; --lp-accent: #ff7048; --lp-soft: #2a1611; --lp-line: #4d2419;
-  --lp-glow: rgb(255 112 72 / .3); --lp-btn-fg: #1b0a05; --lp-skel: #2e3641;
-  --lp-parse: #ff8a63; --lp-ocr: #7fa6ff; --lp-extract: #b79bff;
-}
+:root[data-theme="dark"] .lp { --lp-glow: rgb(255 112 72 / .3); --lp-btn-fg: #1b0a05; --lp-skel: #2e3641; }
 
 .lp main { display: block; padding: 0; }
 .lp-wrap { max-width: var(--lp-max); margin: 0 auto; padding-inline: 1.5rem; }
@@ -65,7 +58,8 @@
 .lp-copybtn:hover { color: var(--lp-ink); border-color: var(--lp-line); background: var(--lp-soft); }
 .lp-copybtn.done, .copy.done { color: var(--ok); border-color: var(--ok); }
 
-.lp-hero-code pre { margin: 0 0 1.4rem; background: var(--bg); }
+.lp-hero-code { margin-bottom: 1.4rem; }
+.lp-hero-code pre { margin: 0; background: var(--bg); }
 .lp-hero-code code { font-size: .79rem; }
 .lp-slot { color: var(--lp-ink); transition: opacity .16s; }
 .lp-slot.fade { opacity: .2; }
