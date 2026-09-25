@@ -156,9 +156,6 @@ header.top {
 .brand:hover {
   color: var(--ink);
 }
-.brand .scanline {
-  width: 1rem;
-}
 .brand-sub {
   font-weight: var(--w-regular);
   color: var(--ink-3);
@@ -613,9 +610,7 @@ td:last-child {
   padding-right: 0;
 }
 thead th {
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
+  font-size: var(--t-sm);
   color: var(--ink-3);
   font-weight: var(--w-medium);
   border-bottom: var(--hair) solid var(--rule);
@@ -708,9 +703,7 @@ a.model-id:hover {
 }
 th.cat-group {
   padding-top: var(--s-4);
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
+  font-size: var(--t-sm);
   color: var(--ink-3);
   font-weight: var(--w-medium);
   border-bottom: var(--hair) solid var(--rule);

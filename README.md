@@ -1,3 +1,5 @@
+<p align="center"><img src="website/assets/puffin.svg" width="112" alt="The PuffinParse puffin holding three document fish"></p>
+
 # PuffinParse
 
 **One API for every document parser: parse, OCR and extract.** Rust core, Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost.

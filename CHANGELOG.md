@@ -11,6 +11,9 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ### Changed
 
+- Benchmark and docs tables use sentence-case headers, and a column's best value is bold only
+  when it is unique as displayed (ties are no longer bolded).
+
 - **Renamed to PuffinParse** (ADR-23). Crates `puffinparse-*`, Python package `puffinparse`
   (`import puffinparse`), Node package and CLI binary `puffinparse`, environment variables
   `PUFFINPARSE_*` (was `LITEOCR_*`), metadata keys `puffinparse_*`, `PuffinParseError`, and
@@ -18,6 +21,12 @@ Python package `puffinparse` share a single version. Entries before the rename s
   (liteocr.vercel.app still works). Old result files with `liteocr_version` still load.
 
 ### Added
+
+- **Puffin brand** (ADR-24, `docs/DESIGN.md` Brand): a puffin mark (favicon and header logo on the
+  landing page, docs and benchmark viewer) and a puffin mascot holding three document fish, shown
+  on the landing hero, the 404 page and the README. Every page now has an Open Graph / Twitter
+  social card (`website/assets/og.png`). The landing demo shows a response on arrival instead of
+  starting blank.
 
 - **First `combined-v3` results** (6 API models × 199 documents, adds a 40-page DP-Bench subset;
   0 failures, $14.65): llamaparse/cost_effective leads (84.35) ahead of llamaparse/agentic (83.49)

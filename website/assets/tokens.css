@@ -25,6 +25,12 @@
   --scan-wash: #fff1ec;      /* selected / focused background */
   --scan-edge: #ffc9b9;      /* selected border */
 
+  /* Brand: the puffin mark's tile and the mascot's plumage (docs/DESIGN.md, Brand). The beak is
+   * always --scan; face, belly and fish are always white. */
+  --mark-tile: #14171c;
+  --mascot-body: #14171c;
+  --mascot-wing: #2a303a;
+
   /* Links read as ink with an underline; the accent is reserved for the one primary thing. */
   --link: var(--ink);
   --link-underline: #b9c0cc;
@@ -104,6 +110,8 @@
     --ink: #e6e9ef; --ink-2: #a3abb9; --ink-3: #7f8898;
     --rule: #262b34; --rule-2: #1c2028;
     --scan: #ff6a45; --scan-ink: #ff8f70; --scan-wash: #2a1510; --scan-edge: #5a2819;
+  --mark-tile: #2a303a; --mascot-body: #2b313b; --mascot-wing: #3b424e;
+    --mark-tile: #2a303a; --mascot-body: #2b313b; --mascot-wing: #3b424e;
     --link: var(--ink); --link-underline: #4a5263;
     --good: #4fc587; --good-wash: #10251a;
     --fair: #e2a53a; --fair-wash: #2a200d;
@@ -158,4 +166,18 @@
   height: 2px;
   border-radius: 1px;
   background: var(--scan);
+}
+
+/* Brand: the puffin mark beside the wordmark. Inline SVG so it follows the theme toggle. */
+.mark {
+  display: inline-block;
+  flex: none;
+  width: 1.375rem;
+  height: 1.375rem;
+  vertical-align: middle;
+}
+/* Brand: the mascot, only in brand moments (landing, 404, empty states), never in working views. */
+.puffin {
+  display: block;
+  height: auto;
 }

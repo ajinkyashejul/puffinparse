@@ -24,8 +24,15 @@
 .lp main { display: block; padding: 0; }
 .lp-wrap { max-width: var(--lp-max); margin: 0 auto; padding-inline: 1.5rem; }
 .lp .brand { display: inline-flex; align-items: center; }
-.lp-mark { width: .55rem; height: .55rem; border-radius: 2px; background: var(--lp-accent);
-  margin-right: .5rem; display: inline-block; }
+.lp-footer-brand { display: flex; align-items: center; gap: .5rem; }
+
+/* The puffin perches on the demo card, fish (document strips) hanging over its edge. It hops once
+   each time a response finishes typing: part of the hero scanner moment, not a third animation. */
+.lp-hero-demo { position: relative; }
+.lp-perch { position: absolute; top: -107px; right: 2.25rem; z-index: 2; pointer-events: none;
+  transform-origin: 50% 100%; }
+.lp-perch.hop { animation: lp-hop .42s cubic-bezier(.3, .7, .4, 1) 1; }
+@keyframes lp-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-9px); } }
 
 /* ---------------------------------------------------------------------- hero */
 .lp-hero { position: relative; overflow: hidden; padding-block: clamp(2.75rem, 6vw, 5.5rem) clamp(2.5rem, 5vw, 4.5rem); }
@@ -249,7 +256,7 @@ mark.lp-diff { background: var(--lp-soft); color: var(--lp-ink); border-radius: 
 @media (max-width: 960px) {
   .lp-hero-grid, .lp-two { grid-template-columns: minmax(0, 1fr); }
   .lp-hero h1 { max-width: 14ch; }
-  .lp-hero-demo { max-width: 34rem; }
+  .lp-hero-demo { max-width: 34rem; margin-top: 6rem; }
 }
 @media (max-width: 620px) {
   .lp-wrap { padding-inline: 1.15rem; }
@@ -265,4 +272,7 @@ mark.lp-diff { background: var(--lp-soft); color: var(--lp-ink); border-radius: 
   .lp-btn { flex: 1 1 auto; text-align: center; }
   .lp .top a.plain { font-size: .78rem; }
   .lp .topin { gap: .6rem; padding: 0 1.15rem; }
+  .lp-hero-demo { margin-top: 4rem; }
+  .lp-perch { top: -70px; right: 1.25rem; }
+  .lp-perch .puffin { width: 64px; }
 }

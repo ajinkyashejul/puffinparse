@@ -20,9 +20,52 @@ properties. This page explains what the tokens are for.
    `olmocr/headers_footers_0678963a…`. The raw id is always available, in monospace, with a copy
    button, inside Details.
 4. **Lite means light.** System fonts only (no font downloads), no framework, few borders, no
-   decorative imagery. A page should render usefully before any script runs.
+   decorative imagery in the tools. The puffin appears only in brand moments (see Brand). A page
+   should render usefully before any script runs.
 5. **Colour carries meaning.** The accent marks the one primary thing. Verdict colours mark good,
    fair and poor. Mode colours label parse, OCR and extract. Nothing is coloured for decoration.
+
+## Brand
+
+PuffinParse is named after the Atlantic puffin: black and white with an orange beak, which is
+exactly the paper, ink and scan palette above. Puffins are known for carrying a neat row of fish
+crosswise in their beak; PuffinParse carries a document back as a neat row of typed blocks. Both
+brand assets tell that story with lines of text in the beak.
+
+### The mark
+
+[`website/assets/mark.svg`](../website/assets/mark.svg): a puffin head in a rounded-square tile. The
+tile is `--mark-tile` (ink in light, a lifted slate in dark so it never disappears on the dark
+ground), the face is white, the beak is `--scan` and carries two ink stripes, the parsed lines.
+
+- Sits left of the wordmark "PuffinParse" (`--font-sans`, weight 640, tracking -0.02em) with an
+  `--s-2` gap. Headers inline it (`MARK` in `website/build.py`) so the tile follows the theme toggle;
+  the favicon is the file itself, which carries its own dark-mode tile.
+- Minimum size 16px (favicon). Header size 22px (`.mark`). Clear space: a quarter of its width.
+- Never recolour the beak, add a shadow or outline, rotate it, or place it on the accent colour.
+
+### The puffin (mascot)
+
+[`website/assets/puffin.svg`](../website/assets/puffin.svg): a chubby, front-facing puffin holding
+three document fish (white fish with two grey text lines). Body `--mascot-body`, wing
+`--mascot-wing` (both lift in dark mode), face and belly white, beak and feet `--scan`, a pale
+`#ffb39f` base ridge and gape, a soft blush.
+
+- **Brand moments only:** the landing hero (perched on the demo card; it hops once each time a
+  response finishes typing), the 404 page, empty states, the social card and the README. Never in
+  the working views of the viewer or docs, never next to data.
+- Inline it (`puffin(width)` in `website/build.py`) where the manual theme toggle must reach it;
+  as an `<img>` it follows the OS colour scheme through its own media query.
+- Keep its classes `pp-*`: an inline SVG's `<style>` applies to the whole page.
+- One puffin per view. It does not talk, wink or wear props; new poses keep the same shapes and
+  colours.
+
+### Social card
+
+[`website/assets/og.png`](../website/assets/og.png) (1200×630), rendered from
+[`website/og/card.html`](../website/og/card.html) with `python website/og/render.py` and committed.
+Every page (landing, docs, viewer) sets it as `og:image` / `twitter:image` when the build knows the
+public site URL.
 
 ## Colour
 
@@ -36,6 +79,7 @@ properties. This page explains what the tokens are for.
 | Proof marks | `--proof-del`, `--proof-ins` (+ `-wash`) | `#b42346` `#16794a` | Diff: missing from the output is struck through; extra in the output is underlined |
 | Modes | `--mode-parse`, `--mode-ocr`, `--mode-extract` | `#b8431c` `#2c5fd6` `#6b3fc0` | Labels for the three modes only |
 | Layout boxes | `--box-*` (8 hues) | see tokens | Block-type overlays on a page: text, title, table, figure, list, furniture, formula, other |
+| Brand | `--mark-tile`, `--mascot-body`, `--mascot-wing` | `#14171c` `#14171c` `#2a303a` | The mark's tile; the mascot's plumage. Dark: `#2a303a` `#2b313b` `#3b424e` |
 
 Neutrals lean slightly toward blue ink. There is no pure grey. Links are ink with a quiet underline
 (`--link-underline`); they turn `--scan-ink` on hover. The accent is **not** a link colour.
@@ -54,7 +98,7 @@ tabular-nums`).
 
 | Token | Size | Use |
 |---|---|---|
-| `--t-xs` | 12px | Uppercase labels (tracking `--tracking-label`), captions |
+| `--t-xs` | 12px | Uppercase labels (tracking `--tracking-label`) outside tables, captions |
 | `--t-sm` | 13px | Table cells, meta lines, chips |
 | `--t-md` | 14px | UI body (viewer, controls) |
 | `--t-base` | 16px | Reading body (docs) |
@@ -80,13 +124,15 @@ use `text-wrap: balance`. Reading text stays within `--measure` (68ch).
 
 ## Signatures
 
-Two motifs make PuffinParse recognisable. Each is used sparingly.
+Besides the puffin (see Brand), two interface motifs make PuffinParse recognisable. Each is used
+sparingly.
 
 - **The bounding box** (`.bbox`): four corner ticks in `--scan`, like a detector's box around a
   region. It marks the single focused object on a view: the selected model, the headline score.
   Never more than one per view, never on every card.
-- **The scan line** (`.scanline`): a short 2px `--scan` rule. It is the brand mark next to the
-  wordmark and the underline of the active tab. At most once per region.
+- **The scan line** (`.scanline`): a short 2px `--scan` rule. It underlines the active tab and
+  leads an eyebrow label. At most once per region. (It used to stand in for a logo; the puffin
+  mark does that now.)
 
 ## Components
 
@@ -97,8 +143,10 @@ Two motifs make PuffinParse recognisable. Each is used sparingly.
 - **Tabs:** text labels, the active one underlined by the scan line. No boxed tabs.
 - **Disclosure:** a native `<details>` with a quiet chevron and a `--t-sm` summary in `--ink-2`.
   Use it for anything secondary: details, all metrics, methodology, reproduce commands.
-- **Table:** hairline row dividers only, no vertical rules, header in `--t-xs` uppercase
-  `--ink-3`, numbers right-aligned and tabular. The best value in a column is bold, not coloured.
+- **Table:** hairline row dividers only, no vertical rules, header in `--t-sm` sentence case
+  `--ink-3` (never uppercase: column names include brand names such as DP-Bench and olmOCR-bench),
+  numbers right-aligned and tabular. The best value in a column is bold, not coloured, and only
+  when it is unique as displayed: two cells that both read "100.0" are a tie, and nothing is bold.
 - **Check row** (rule results): one line, a ✓ or ✗ shape in the verdict colour, then a plain
   sentence ("Should not contain “ARTICLE IN PRESS”"). A second muted line only when it adds
   information.
@@ -121,7 +169,8 @@ Two motifs make PuffinParse recognisable. Each is used sparingly.
 | Do | Don't |
 |---|---|
 | One accent mark per view | Accent on every heading, badge and border |
-| Plain numbers, best in bold | Full-table heatmaps |
+| Plain numbers, a unique best in bold | Full-table heatmaps, bold ties |
 | Collapse methodology, commands, raw ids | Paragraphs of attribution above the content |
 | System fonts, tabular numbers | Web fonts, emoji section markers |
+| The puffin in brand moments, once per view | The puffin beside data, or several on a page |
 | Hairlines and whitespace | A card with a shadow around every block |

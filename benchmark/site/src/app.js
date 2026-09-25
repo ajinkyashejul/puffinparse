@@ -608,13 +608,23 @@
     var bests = {};
     columns.forEach(function (col) {
       if (!col.best || rows.length < 2) return;
-      var vals = rows.map(col.value).filter(isNum);
-      if (!vals.length) return;
-      var best = col.best === "min" ? Math.min.apply(null, vals) : Math.max.apply(null, vals);
-      var distinct = vals.some(function (v) {
-        return v !== best;
+      var scored = rows.filter(function (r) {
+        return isNum(col.value(r));
       });
-      if (distinct) bests[col.key] = best;
+      if (!scored.length) return;
+      var vals = scored.map(col.value);
+      var best = col.best === "min" ? Math.min.apply(null, vals) : Math.max.apply(null, vals);
+      var leader = scored[vals.indexOf(best)];
+      // Bold only a unique best, judged on the value as displayed: two cells that both read
+      // "100.0" are a tie even if the raw scores differ (docs/DESIGN.md, Table).
+      var shown = function (r) {
+        return String(col.cell(r).html).replace(/<[^>]*>/g, "");
+      };
+      var top = shown(leader);
+      var ties = scored.filter(function (r) {
+        return shown(r) === top;
+      }).length;
+      if (ties === 1) bests[col.key] = leader;
     });
 
     var head = columns
@@ -644,7 +654,7 @@
         var cells = columns
           .map(function (col) {
             var cell = col.cell(row, position);
-            var best = col.key in bests && col.value(row) === bests[col.key];
+            var best = bests[col.key] === row;
             var cls = ((col.num ? "num " : "") + (col.cls || "") + " " + (cell.cls || "") + (best ? " best" : "")).trim();
             var tag = col.rowHeader ? "th" : "td";
             return (
@@ -857,9 +867,9 @@
               });
               var clean = vals.filter(isNum);
               var best = clean.length ? Math.max.apply(null, clean) : null;
-              var distinct = clean.some(function (v) {
-                return v !== best;
-              });
+              var distinct = clean.filter(function (v) {
+                return fixed(v, 1) === fixed(best, 1);
+              }).length === 1;
               var n = (models[0] && models[0].stats.byCat[key]) || { docs: 0 };
               return (
                 '<tr><th scope="row" class="sticky-col"><a href="' + esc(listHref("documents", run.run_id, { src: src, cat: cat })) + '">' +

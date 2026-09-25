@@ -83,6 +83,7 @@
   if (scan) {
     var slots = [].slice.call(document.querySelectorAll("[data-model-slot]"));
     var out = document.getElementById("lp-out");
+    var perch = document.querySelector(".lp-perch");
     var scanModels = JSON.parse(scan.getAttribute("data-models") || "[]");
     var text = JSON.parse(scan.getAttribute("data-lines") || "[]").join("\n");
     var cursor = document.createElement("span");
@@ -101,7 +102,15 @@
         n = Math.min(n + 4, text.length);
         out.textContent = text.slice(0, n);
         out.appendChild(cursor);
-        if (n >= text.length) { clearInterval(timer); setTimeout(done, 1500); }
+        if (n >= text.length) {
+          clearInterval(timer);
+          if (perch) {                      // the puffin hops once per delivered response
+            perch.classList.remove("hop");
+            void perch.offsetWidth;
+            perch.classList.add("hop");
+          }
+          setTimeout(done, 1800);
+        }
       }, 16);
     };
     var cycle = function () {
@@ -114,9 +123,11 @@
       setTimeout(function () { type(cycle); }, 1150);
     };
 
+    // The server-rendered response for the first model stays up on arrival (never an empty pane);
+    // cycling to the next provider starts once the reader has had time to take it in.
     if (!REDUCED && scanModels.length && out) {
-      at = -1;
-      setTimeout(cycle, 600);
+      at = 0;
+      setTimeout(cycle, 3200);
     }
   }
 

@@ -32,6 +32,7 @@ import posixpath
 import re
 import shutil
 import sys
+import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
@@ -46,13 +47,53 @@ WEB = ROOT / "website"
 BENCH_PREFIX = "benchmark-results"
 BENCH_BUILD = ROOT / "benchmark" / "site" / "build.py"
 
-FAVICON = (
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E"
-    "%3Crect width='16' height='16' rx='3.5' fill='%232c5fd6'/%3E%3Cg fill='white'%3E"
-    "%3Crect x='4' y='4' width='8' height='1.6' rx='.8'/%3E"
-    "%3Crect x='4' y='7.2' width='8' height='1.6' rx='.8'/%3E"
-    "%3Crect x='4' y='10.4' width='5' height='1.6' rx='.8'/%3E%3C/g%3E%3C/svg%3E"
+# Brand (docs/DESIGN.md, Brand). The favicon is the mark file itself (it carries its own dark-mode
+# tile); headers inline MARK so the tile follows the theme toggle through --mark-tile.
+FAVICON = "data:image/svg+xml," + urllib.parse.quote(
+    (WEB / "assets" / "mark.svg").read_text(encoding="utf-8").strip(), safe=" =:/'"
 )
+_TILE = "var(--mark-tile,#14171c)"
+MARK = (
+    '<svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">'
+    f'<rect x="1" y="1" width="30" height="30" rx="7.5" fill="{_TILE}"/>'
+    '<ellipse cx="13.2" cy="17.2" rx="6.6" ry="7.4" fill="#fff"/>'
+    f'<circle cx="14.6" cy="14.4" r="1.55" fill="{_TILE}"/>'
+    '<path d="M19 9.6 28.6 17.2 19 24.6Z" fill="var(--scan,#ff5230)" stroke="var(--scan,#ff5230)" '
+    'stroke-width="1.6" stroke-linejoin="round"/>'
+    f'<rect x="19" y="14.6" width="7.2" height="1.5" fill="{_TILE}"/>'
+    f'<rect x="19" y="18.4" width="5.6" height="1.5" fill="{_TILE}"/></svg>'
+)
+OG_IMAGE = "og.png"  # 1200x630, rendered by website/og/render.py and committed
+
+
+def puffin(width: int, extra_class: str = "") -> str:
+    """The mascot, inlined (so --mascot-body follows the theme toggle) at a given CSS width."""
+    svg = (WEB / "assets" / "puffin.svg").read_text(encoding="utf-8")
+    svg = svg[svg.index("<svg") :].strip()
+    cls = f"puffin {extra_class}".strip()
+    return svg.replace("<svg ", f'<svg class="{cls}" width="{width}" ', 1)
+
+
+def social_meta(site: Site, title: str, description: str, url: str) -> str:
+    """Open Graph / Twitter card tags; the image needs an absolute URL, so none without site_url."""
+    image = site.absolute(site.base + OG_IMAGE) if site.site_url else ""
+    tags = [
+        ("property", "og:type", "website"),
+        ("property", "og:site_name", site.title),
+        ("property", "og:title", title),
+        ("property", "og:description", description),
+        ("property", "og:url", url),
+        ("name", "twitter:card", "summary_large_image" if image else "summary"),
+    ]
+    if image:
+        tags += [
+            ("property", "og:image", image),
+            ("property", "og:image:width", "1200"),
+            ("property", "og:image:height", "630"),
+            ("name", "twitter:image", image),
+        ]
+    return "\n".join(f'<meta {k}="{v}" content="{html.escape(c, quote=True)}">' for k, v, c in tags)
+
 
 THEME_BUTTON = (
     '<button class="iconbtn" id="theme" type="button" aria-label="Switch theme" title="Switch theme">'
@@ -541,6 +582,9 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
         "REPO": site.repo,
         "RESULTS": site.blob("benchmark/results", tree=True),
         "FAVICON": FAVICON,
+        "MARK": MARK,
+        "PUFFIN_HERO": puffin(100, "lp-puffin"),
+        "SOCIAL": social_meta(site, f"{site.title}: {site.tagline}", description, site.absolute(site.base)),
         "CANONICAL": site.absolute(site.base),
         "DESCRIPTION": html.escape(description, quote=True),
         "THEME_BUTTON": THEME_BUTTON,
@@ -628,6 +672,7 @@ def page_html(site: Site, page: Page, pages: list[Page]) -> str:
 <link rel="canonical" href="{canonical}">
 {alt}
 <link rel="icon" href="{FAVICON}">
+{social_meta(site, title, page.description, canonical)}
 <link rel="stylesheet" href="{site.base}tokens.css">
 <link rel="stylesheet" href="{site.base}style.css">
 <script>(function(){{try{{var t=localStorage.getItem('puffinparse-theme');
@@ -635,7 +680,7 @@ if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();<
 </head>
 <body>
 <header class="top"><div class="topin">
-<a class="brand" href="{site.base}">PuffinParse</a>
+<a class="brand" href="{site.base}">{MARK}PuffinParse</a>
 <a class="brand-sub hide-sm" href="{site.docs_base}">docs</a>
 <div class="spacer"></div>
 <div class="searchwrap">
@@ -768,7 +813,7 @@ def build(base: str, out_dir: Path, site_url: str, docs_prefix: str = "docs") ->
 
 
 def write_extras(site: Site, pages: list[Page], out: Path) -> None:
-    for asset in ("tokens.css", "style.css", "landing.css", "app.js"):
+    for asset in ("tokens.css", "style.css", "landing.css", "app.js", "mark.svg", "puffin.svg", OG_IMAGE):
         shutil.copyfile(WEB / "assets" / asset, out / asset)
 
     index = [{"t": p.title, "u": site.url(p.slug), "h": flat_headings(p.toc)} for p in pages]
@@ -833,6 +878,7 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         section="",
         has_md=False,
         body_html=(
+            f'<div class="notfound">{puffin(120)}</div>'
             "<h1>Page not found</h1><p>That URL is not part of the PuffinParse site. The documentation "
             f'moved under <a href="{site.docs_base}"><code>{site.docs_base}</code></a>.</p>'
             f'<p><a href="{site.base}">Home</a> · '
@@ -884,6 +930,17 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
         print(f"benchmark viewer: build.py exited {code}, skipping", file=sys.stderr)
         shutil.rmtree(out / BENCH_PREFIX, ignore_errors=True)
         return False
+    # The viewer is the page people share most; give it the same social card as the site.
+    index = out / BENCH_PREFIX / "index.html"
+    if index.is_file():
+        tags = social_meta(
+            site,
+            f"{site.title} Benchmark",
+            "Accuracy, latency and cost for every document-parsing provider, with every output inspectable.",
+            site.absolute(site.viewer_url),
+        )
+        text = index.read_text(encoding="utf-8")
+        index.write_text(text.replace("</head>", tags + "\n</head>", 1), encoding="utf-8")
     return True
 
 

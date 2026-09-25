@@ -368,3 +368,23 @@ and no product collision; the puffin's black, white and orange match the existin
 written before the rename carry `liteocr_version`, which the CLI and site builder read as an alias.
 `liteocr.vercel.app` keeps serving the same project. The GitHub repository rename, domain purchase,
 handles and trademark clearance are owner actions.
+
+## ADR-24: A puffin mark and mascot; brand imagery only in brand moments
+
+**Context.** After the rename (ADR-23) the product had no logo: each surface improvised a different
+mark (a scan line, an orange square, plain text), and the favicon was still the pre-ADR-22 blue.
+The puffin's black, white and orange already matched the palette.
+
+**Decision.** Two brand assets. The **mark** (`website/assets/mark.svg`): a puffin head in a
+rounded-square tile, the beak carrying two stripes read as parsed lines; it is the favicon and sits
+beside the wordmark on every surface. The **puffin** (`website/assets/puffin.svg`): a mascot holding
+three document fish, used only in brand moments (landing hero, 404, empty states, social card,
+README), never beside data in the tools. Both are flat SVG in existing tokens plus three brand
+tokens (`--mark-tile`, `--mascot-body`, `--mascot-wing`) that lift in dark mode. A committed social
+card (`og.png`) is the `og:image` for every page. Alongside, two table rules tightened: headers are
+sentence case, and bold marks a best value only when it is unique as displayed.
+
+**Consequences.** "No decorative imagery" now reads "none in the tools". Inline copies of the mark
+live in `website/build.py` (`MARK`) and the viewer's `index.html`; the social card must be
+re-rendered (`website/og/render.py`, Playwright) when the card, mark or mascot changes. The launch
+videos still show the text wordmark until they are re-rendered.

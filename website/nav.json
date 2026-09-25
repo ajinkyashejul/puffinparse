@@ -1,7 +1,7 @@
 {
   "site": {
     "title": "PuffinParse",
-    "tagline": "One API for every OCR / document-parsing provider.",
+    "tagline": "One API for every document parser.",
     "summary": "PuffinParse is one API for every OCR and document-parsing provider (Reducto, Extend, LlamaParse, Mistral, Azure, Textract, Tesseract, Docling, ...). A Rust core with typed Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost. Switching provider is a one-string change.",
     "repo": "https://github.com/ajinkyashejul/liteocr",
     "branch": "main",

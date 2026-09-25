@@ -1,0 +1,38 @@
+<!doctype html>
+<!-- Social card source (1200x630). Render with `python website/og/render.py`; the PNG is committed as
+     website/assets/og.png and referenced by every page's og:image. Design: docs/DESIGN.md, Brand. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../assets/tokens.css">
+<style>
+  html, body { margin: 0; }
+  body { width: 1200px; height: 630px; background: var(--paper); color: var(--ink); font-family: var(--font-sans);
+    position: relative; overflow: hidden; }
+  .wrap { position: absolute; inset: 64px 80px 84px; display: grid; grid-template-columns: 1fr 300px; gap: 48px; }
+  .word { display: flex; align-items: center; gap: 16px; font-size: 34px; font-weight: 640; letter-spacing: -.02em; }
+  .word img { width: 46px; height: 46px; }
+  h1 { margin: 52px 0 0; font-size: 66px; line-height: 1.04; letter-spacing: -.035em; font-weight: 700; max-width: 13ch; }
+  p { margin: 26px 0 0; font-size: 27px; line-height: 1.4; color: var(--ink-2); max-width: 32ch; }
+  .modes { margin-top: 30px; display: flex; gap: 10px; }
+  .modes span { font-family: var(--font-mono); font-size: 20px; padding: 6px 14px; border-radius: 6px; background: var(--paper-2); color: var(--ink-2); }
+  .modes span:first-child { background: var(--scan-wash); color: var(--scan-ink); }
+  .art { position: relative; align-self: end; }
+  .art img { width: 300px; display: block; }
+  .scan { position: absolute; left: 80px; right: 80px; bottom: 52px; height: 3px; background: var(--rule); }
+  .scan::before { content: ""; position: absolute; left: 0; top: 0; width: 96px; height: 3px; background: var(--scan); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="position: relative">
+      <div class="word"><img src="../assets/mark.svg" alt="">PuffinParse</div>
+      <h1>One API for every document parser.</h1>
+      <p>Switch providers by changing one string. Open benchmark included.</p>
+      <div class="modes"><span>parse</span><span>ocr</span><span>extract</span></div>
+    </div>
+    <div class="art"><img src="../assets/puffin.svg" alt=""></div>
+  </div>
+  <div class="scan"></div>
+</body>
+</html>

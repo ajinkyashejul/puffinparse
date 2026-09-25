@@ -27,8 +27,9 @@ article a:hover { color: var(--scan-ink); text-decoration-color: currentColor; }
   background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(1.4) blur(8px); }
 .topin { display: flex; align-items: center; gap: .75rem; height: 100%;
   max-width: 84rem; margin: 0 auto; padding: 0 1.25rem; }
-.brand { font-weight: 640; letter-spacing: -.02em; color: var(--fg); font-size: 1rem; }
-.brand-sub { color: var(--fg-faint); font-weight: 400; margin-left: -.45rem; font-size: .8rem; }
+.brand { display: inline-flex; align-items: center; gap: .5rem; font-weight: 640; letter-spacing: -.02em; color: var(--fg); font-size: 1rem; }
+.notfound { margin-bottom: 1rem; }
+.brand-sub { color: var(--fg-faint); font-weight: 400; margin-left: -.35rem; font-size: .8rem; }
 .brand-sub:hover { color: var(--fg-dim); }
 .top .spacer { flex: 1; }
 .top a.plain, .iconbtn { color: var(--fg-dim); font-size: .82rem; }
@@ -114,7 +115,7 @@ table { border-collapse: collapse; width: 100%; font-size: .84rem; line-height: 
   font-variant-numeric: tabular-nums; }
 th, td { text-align: left; padding: .42rem .7rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
 th { font-weight: 600; color: var(--fg-dim); background: var(--bg-soft); white-space: nowrap;
-  font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; }
+  font-size: .8rem; }
 tr:last-child td { border-bottom: 0; }
 td code { white-space: nowrap; }
 
