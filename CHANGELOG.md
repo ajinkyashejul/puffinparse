@@ -20,6 +20,14 @@ Python package `puffinparse` share a single version. Entries before the rename s
   Model output is rendered by an escaping Markdown renderer, and `/playground/` has a stricter
   Content-Security-Policy. The browser/gateway contract is in `docs/SERVER.md` ("Playground API"),
   the free-tier counters in `infra/supabase/`, and offline tests in `website/tests/`.
+- Gateway playground API (`[playground]`, off by default): `GET /v1/playground/config` and
+  `POST /v1/playground/runs`, one async job per model, polled through `GET /v1/jobs/{id}` by the
+  same signed-in user or the same provider key only. The free tier verifies Supabase access tokens
+  (JWKS, or HS256 with a legacy secret), requires Turnstile, reserves the user's daily model-pages
+  (counted by the gateway, compressed PDF object streams included) and caps the day's spend; own
+  keys arrive as `x-provider-key-<provider>` and are never stored or logged. Per-IP run limits,
+  per-owner poll limits, CORS for the configured origins on those routes only, and error bodies may
+  now carry `details`. A Cloud Run service and config are in `deploy/cloudrun/`.
 
 ### Security
 

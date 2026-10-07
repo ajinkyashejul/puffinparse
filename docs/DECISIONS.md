@@ -417,9 +417,12 @@ reached only through `security definer` functions callable by the service role. 
 model output with its own escaping Markdown renderer under a stricter CSP than the rest of the site.
 
 **Consequences.** The site stays static and works without the gateway (samples only). The gateway
-gains its first public, unauthenticated-by-gateway-key surface, so it must be deployed with the
-hardening defaults and the `[playground]` limits; free-tier spend is capped per day by
+gains its first public surface that takes no gateway key, so it runs with the hardening defaults
+and the `[playground]` limits, and the free tier stays off until Supabase, Turnstile and a budget
+are all configured; free-tier spend is capped per day by
 configuration, not by provider accounts. Three choices are left to the owner and are single
 constants: the API origin (`PLAYGROUND_API_ORIGIN`, also in `vercel.json`'s CSP), the free-tier
 price ceiling (`FREE_TIER_MAX_PRICE_PER_PAGE`, mirrored by the gateway's
 `free_tier_max_price_per_page`) and the sample set (`PLAYGROUND_SAMPLES`).
+Playground jobs live in the gateway's memory like other jobs, so the hosted service runs a single
+instance (`deploy/cloudrun/`); the free-tier counters are shared state in Supabase.

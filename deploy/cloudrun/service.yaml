@@ -1,0 +1,67 @@
+# Cloud Run service for the playground gateway. Deploy with:
+#   gcloud run services replace deploy/cloudrun/service.yaml --region REGION
+# after replacing PROJECT, REGION and the image tag, creating the secrets below in Secret Manager
+# (the config file itself is the `puffinparse-playground-config` secret, from
+# deploy/cloudrun/puffinparse.toml), and granting the service account secretAccessor on them.
+# Map the custom domain (api.puffinparse.com, an OWNER DECISION) with a domain mapping or a load
+# balancer; the website's CSP (vercel.json) and PLAYGROUND_API_ORIGIN (website/build.py) name it.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: puffinparse-playground
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        # Jobs are held in this process's memory: one instance, so every poll finds its job.
+        autoscaling.knative.dev/maxScale: "1"
+        autoscaling.knative.dev/minScale: "0"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      serviceAccountName: puffinparse-playground@PROJECT.iam.gserviceaccount.com
+      containerConcurrency: 64
+      timeoutSeconds: 300
+      containers:
+        # Cloud Run pulls from Artifact Registry: mirror ghcr.io/ajinkyashejul/puffinparse through a
+        # remote repository, and pin a released version (never `latest`).
+        - image: REGION-docker.pkg.dev/PROJECT/ghcr/ajinkyashejul/puffinparse:0.1.6
+          args: ["serve", "--config", "/etc/puffinparse/puffinparse.toml"]
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          env:
+            - name: RUST_LOG
+              value: warn
+            - name: PUFFINPARSE_MASTER_KEY
+              valueFrom: { secretKeyRef: { name: puffinparse-master-key, key: latest } }
+            - name: REDUCTO_API_KEY
+              valueFrom: { secretKeyRef: { name: reducto-api-key, key: latest } }
+            - name: EXTEND_API_KEY
+              valueFrom: { secretKeyRef: { name: extend-api-key, key: latest } }
+            - name: LLAMA_API_KEY
+              valueFrom: { secretKeyRef: { name: llama-api-key, key: latest } }
+            - name: TURNSTILE_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: turnstile-secret-key, key: latest } }
+            - name: SUPABASE_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: supabase-secret-key, key: latest } }
+          volumeMounts:
+            - name: config
+              mountPath: /etc/puffinparse
+              readOnly: true
+          startupProbe:
+            httpGet: { path: /health, port: 8080 }
+          livenessProbe:
+            httpGet: { path: /health, port: 8080 }
+            periodSeconds: 30
+      volumes:
+        - name: config
+          secret:
+            secretName: puffinparse-playground-config
+            items:
+              - key: latest
+                path: puffinparse.toml
