@@ -1,6 +1,6 @@
 {
   "name": "puffinparse",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "One API for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, ...). Node.js bindings to the PuffinParse Rust core.",
   "keywords": ["ocr", "document-parsing", "pdf", "reducto", "llamaparse", "extend", "napi-rs"],
   "license": "MIT",

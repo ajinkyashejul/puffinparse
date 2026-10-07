@@ -9,6 +9,17 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-08
+
+### Security
+
+- Gateway: `provider_options.cmd` and `provider_options.pdftoppm_cmd` are rejected (400). They
+  choose the program the Tesseract provider runs, so any key holder could run commands on the
+  gateway host. Operators keep `TESSERACT_CMD` / `PDFTOPPM_CMD`.
+- Textract `region` and Google Document AI `location` must be a single DNS label. Both are spliced
+  into the provider hostname, so a crafted value could send the signed request (Textract) or the
+  OAuth access token (Document AI) to another host.
+
 ## [0.1.3] - 2026-10-08
 
 ### Fixed
@@ -30,15 +41,6 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 - The results viewer build never copies documents tagged `fetch-required` (OmniDocBench,
   research-only), nor provider outputs for them, even in a clone that fetched them locally.
-
-### Security
-
-- Gateway: `provider_options.cmd` and `provider_options.pdftoppm_cmd` are rejected (400). They
-  choose the program the Tesseract provider runs, so any key holder could run commands on the
-  gateway host. Operators keep `TESSERACT_CMD` / `PDFTOPPM_CMD`.
-- Textract `region` and Google Document AI `location` must be a single DNS label. Both are spliced
-  into the provider hostname, so a crafted value could send the signed request (Textract) or the
-  OAuth access token (Document AI) to another host.
 
 ## [0.1.2] - 2026-10-08
 
@@ -316,7 +318,8 @@ Initial release.
   across the three providers; `bench run` disables provider result caches by
   default (`--allow-cache` to opt out) so latency reflects real work.
 
-[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.0...v0.1.2
 [0.1.1]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.0...v0.1.1

@@ -26,6 +26,14 @@ Without `--config` it reads `./puffinparse.toml` if present (or `$PUFFINPARSE_CO
 defaults: `127.0.0.1:4000`, no aliases, **no auth** (a warning is printed). Anything reachable
 beyond localhost should have a `master_key` or `[[keys]]`.
 
+> **Do not expose the gateway to untrusted callers yet.** Run it on localhost or a private
+> network, behind auth. Two hardening items are still open: some models download
+> `document_url` inside the gateway process (Tesseract, PaddleOCR, Unstructured, Textract,
+> Gemini, the OpenAI and Anthropic vision models, Upstage, Document AI, LlamaParse extract), and
+> the download does not yet refuse private or link-local addresses; and the gateway does not
+> yet cap concurrency or request time. Put it behind a reverse proxy with limits, and only
+> accept URLs from callers you trust.
+
 Docker (multi-stage build, distroless runtime, runs as non-root). Releases publish a linux/amd64
 image to `ghcr.io/ajinkyashejul/puffinparse` (tags `latest`, the version such as `0.1.2`, and `0.1`);
 on Apple Silicon pass `--platform linux/amd64` (an arm64 image is planned), or build it yourself
@@ -120,7 +128,7 @@ JSON-valued ones — `provider_options`, `schema`, `metadata`, `fallbacks` — a
 | Field | Type | Notes |
 |---|---|---|
 | `model` | string | **Required.** Alias or `provider/model`. |
-| `document_url` | string | Public http(s) URL, passed to the provider. |
+| `document_url` | string | Public http(s) URL. Passed to the provider where it accepts URLs; otherwise the gateway downloads it (see the warning above). |
 | `document` | string | Base64 bytes (a `data:…;base64,` prefix is accepted). Needs `filename`. |
 | `file` | multipart file part | The upload; its filename sets the type (or send `filename`). |
 | `filename` | string | Sets the MIME type for `document` / overrides the part's filename. |
