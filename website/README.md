@@ -214,6 +214,22 @@ leaderboard reveal, scroll-spy on "On this page", the theme toggle, and the clie
 
 Keep `style.css` under ~250 lines, `landing.css` under ~300, and resist adding a build step.
 
+## Third-party assets
+
+Almost everything here is original: the puffin mascot, the mark, the social card and every line of
+CSS and JavaScript were made for PuffinParse. The exceptions, and their notices:
+
+| Asset | Where | Source and licence |
+|---|---|---|
+| GitHub mark in the header star button | `GH_STAR_ICON` in `build.py`, `benchmark/site/src/index.html` | GitHub [Octicons](https://github.com/primer/octicons) `mark-github-16`, Copyright (c) GitHub Inc., MIT. The notice is kept as an HTML comment next to the icon in the served markup. |
+| pdf.js 3.11.174 (results viewer only) | loaded on demand from cdnjs, pinned with SRI | [Mozilla pdf.js](https://github.com/mozilla/pdf.js), Apache-2.0. Not vendored. |
+| Vercel Web Analytics script | `/_vercel/insights/script.js`, Vercel builds only | Served by Vercel; not vendored. |
+| Fonts | `tokens.css` | System font stacks only; no font files are shipped or downloaded. |
+
+Benchmark data shown in the viewer keeps its own licence (see each
+`benchmark/datasets/*/README.md`). If you add a third-party asset, add a row here and a credit in
+the README's Acknowledgements.
+
 ## Deploying
 
 Vercel builds and serves the site from `vercel.json`: `buildCommand` runs this script with

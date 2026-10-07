@@ -35,6 +35,30 @@ pages come from arXiv, the Internet Archive, the Library of Congress and AI2's c
 itself redistributes them under ODC-BY. We rely on the same basis and keep each page's
 `source_url` so a rights holder can identify a page and ask for it to be removed.
 
+## Licence notice and citation
+
+This directory contains a derivative of **olmOCR-bench** by the Allen Institute for AI, made
+available under the [Open Data Commons Attribution License v1.0
+(ODC-BY-1.0)](https://opendatacommons.org/licenses/by/1-0/) (notice in
+[`LICENSE-ODC-BY-1.0`](LICENSE-ODC-BY-1.0)). The PuffinParse changes (a 40-page subset, tests
+rewritten as `rules/<id>.json`) are made by `benchmark/adapters/olmocr.py`. The rule semantics
+re-implement `olmocr/bench/tests.py` from `github.com/allenai/olmocr` (Apache-2.0) in Rust; no
+upstream code is copied.
+
+If you use these documents or scores, cite olmOCR as its authors ask:
+
+```bibtex
+@misc{olmocrbench,
+  title={{olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language Models}},
+  author={Jake Poznanski and Jon Borchardt and Jason Dunkelberger and Regan Huff and Daniel Lin and Aman Rangapur and Christopher Wilhelm and Kyle Lo and Luca Soldaini},
+  year={2025},
+  eprint={2502.18443},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2502.18443},
+}
+```
+
 ## Layout
 
 ```

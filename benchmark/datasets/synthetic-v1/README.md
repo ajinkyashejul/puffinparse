@@ -65,3 +65,7 @@ DejaVu and FreeFont families shipped with most Linux distributions
 CC0-1.0. The documents, the ground truth and the generator are dedicated to the
 public domain; the text corpus was written for this dataset. Use it for any
 purpose without attribution.
+
+The images are rendered with the DejaVu fonts (Bitstream Vera / Arev licence, public-domain
+changes) and GNU FreeFont (GPL-3.0-or-later with the font exception). Neither font is
+redistributed here, and both licences leave documents rendered with the fonts unrestricted.

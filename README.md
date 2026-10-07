@@ -572,6 +572,42 @@ developers find it. Reports of a wrong score, a missing provider or a confusing 
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Adding a provider is one Rust file plus a fixture test; the checklist is in the [new provider issue template](.github/ISSUE_TEMPLATE/new_provider.md). Issues labelled [`good first issue`](https://github.com/ajinkyashejul/puffinparse/labels/good%20first%20issue) are a good place to start, and [AGENTS.md](AGENTS.md) summarises the build commands and conventions for coding agents.
 
+## Acknowledgements
+
+PuffinParse stands on other people's work:
+
+- **Benchmarks and datasets.** The combined benchmark is built on
+  [ParseBench](https://github.com/run-llama/ParseBench) (LlamaIndex; Zhang et al., 2026,
+  arXiv:2604.08538; Apache-2.0),
+  [olmOCR-bench](https://huggingface.co/datasets/allenai/olmOCR-bench) (Allen Institute for AI;
+  Poznanski et al., 2025, arXiv:2502.18443; ODC-BY-1.0),
+  [OmniDocBench](https://github.com/opendatalab/OmniDocBench) (OpenDataLab / Shanghai AI
+  Laboratory; Ouyang et al., 2024, arXiv:2412.07626; research-only, so only an index is committed)
+  and [DP-Bench](https://huggingface.co/datasets/upstage/dp-bench) (Upstage AI; MIT). Each
+  `benchmark/datasets/<name>/README.md` gives the pinned revision, the licence, what we changed and
+  the citation the authors ask for. If you use these numbers, please cite those benchmarks too.
+- **Metrics.** The rule checks re-implement the test semantics of olmOCR-bench and ParseBench, and
+  table structure is scored with TEDS (Zhong, ShafieiBavani and Jimeno Yepes, 2020, "Image-based
+  table recognition: data, model, and evaluation"). The scorer is our own Rust code; the source
+  comments say whose behaviour each part mirrors.
+- **API design.** The `"<provider>/<model>"` model strings and the gateway server follow
+  [LiteLLM](https://github.com/BerriAI/litellm), which did this first for LLM APIs.
+- **Providers and engines.** The compatibility shapes mirror the public response formats of
+  Reducto, Extend and LlamaParse so existing code can switch, and the open baselines are
+  [Tesseract](https://github.com/tesseract-ocr/tesseract) and
+  [Docling](https://github.com/docling-project/docling). Provider names are trademarks of their
+  owners. PuffinParse is not affiliated with or endorsed by any of them.
+- **Libraries.** [tokio](https://tokio.rs), [reqwest](https://github.com/seanmonstar/reqwest),
+  [serde](https://serde.rs), [axum](https://github.com/tokio-rs/axum),
+  [clap](https://github.com/clap-rs/clap), [PyO3](https://pyo3.rs),
+  [maturin](https://github.com/PyO3/maturin), [napi-rs](https://napi.rs) and the other crates in
+  [THIRD_PARTY_NOTICES.md](https://github.com/ajinkyashejul/puffinparse/blob/main/THIRD_PARTY_NOTICES.md).
+  The site uses GitHub's [Octicons](https://github.com/primer/octicons) GitHub mark (MIT), and the
+  results viewer uses [pdf.js](https://github.com/mozilla/pdf.js) (Apache-2.0).
+
 ## License
 
-MIT. See [LICENSE](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE).
+MIT. See [LICENSE](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE). The third-party
+crates compiled into the binaries are listed in
+[THIRD_PARTY_NOTICES.md](https://github.com/ajinkyashejul/puffinparse/blob/main/THIRD_PARTY_NOTICES.md),
+and the benchmark data keeps its own licence, stated per dataset.

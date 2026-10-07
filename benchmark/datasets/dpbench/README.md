@@ -16,6 +16,12 @@ converted into PuffinParse `kind: "transcript"` documents by
   https://huggingface.co/datasets/upstage/dp-bench. Every document in `manifest.json` carries
   this in `attribution`.
 
+A copy of the MIT licence as it applies to this subset is in [`LICENSE-MIT`](LICENSE-MIT). The
+dataset card asks for no particular citation; please credit *DP-Bench: Document Parsing
+Benchmark* (Upstage AI) with the link above when you use these documents or scores. The
+truth construction mirrors the semantics of upstream's `evaluate.py` (MIT); no upstream code is
+copied.
+
 ## Rebuild
 
 ```bash

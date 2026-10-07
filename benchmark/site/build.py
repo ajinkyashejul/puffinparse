@@ -385,6 +385,26 @@ def load_runs() -> list[dict[str, Any]]:
     return runs
 
 
+#: Documents with this tag come from a source whose licence does not allow redistribution
+#: (OmniDocBench is research-only). A clone that fetched them locally must still never publish
+#: their page images, derived truth or provider outputs, so the site skips all three.
+INDEX_ONLY_TAG = "fetch-required"
+
+
+def index_only_ids() -> set[str]:
+    """Ids (as written in every manifest and result) of documents tagged ``INDEX_ONLY_TAG``."""
+    ids: set[str] = set()
+    for manifest_path in DATASETS_DIR.glob("*/manifest.json"):
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for doc in manifest.get("documents", []):
+            if INDEX_ONLY_TAG in (doc.get("tags") or []):
+                ids.add(str(doc.get("id", "")))
+    return ids
+
+
 def copy_outputs(run: dict[str, Any], dist: Path) -> tuple[int, dict[str, dict[str, list[str]]]]:
     """Copy the saved per-document outputs for one run.
 
@@ -406,6 +426,7 @@ def copy_outputs(run: dict[str, Any], dist: Path) -> tuple[int, dict[str, dict[s
         print(f"  ! no saved outputs for run {run_id} (looked in {src_root})", file=sys.stderr)
         return 0, inventory
     copied = 0
+    skip = index_only_ids()
     for model in run.get("models", []):
         slug = model_slug(str(model["model"]))
         src_dir = src_root / slug
@@ -417,6 +438,9 @@ def copy_outputs(run: dict[str, Any], dist: Path) -> tuple[int, dict[str, dict[s
             continue
         for doc in model.get("docs", []):
             doc_id = str(doc["id"])
+            if doc_id in skip:
+                entry["missing"].append(doc_id)
+                continue
             for ext in (".md", ".json"):
                 rel = f"{doc_id}{ext}"
                 src = normalised(src_dir / rel)
@@ -536,6 +560,8 @@ def copy_dataset(name: str, dist: Path, seen: set[Path]) -> dict[str, Any]:
         doc_id = str(doc.get("id", "?"))
         kind = str(doc.get("kind", "transcript") or "transcript")
         kinds[kind] = kinds.get(kind, 0) + 1
+        if INDEX_ONLY_TAG in (doc.get("tags") or []):
+            continue  # not redistributable: listed and scored, never copied
 
         rel_truth = str(doc.get("truth", "") or "")
         rel_rules = str(doc.get("rules", "") or "")

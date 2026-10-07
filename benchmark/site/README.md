@@ -91,8 +91,14 @@ per view, everything secondary one click away in a native `<details>`, human nam
 footers 3") with the raw id in Details, verdict colour only with a CSS-drawn dot (good ≥ 90,
 fair ≥ 70, poor below), best-in-column bold instead of heatmaps. PDF pages are shown from the
 build-time page images; **pdf.js 3.11.174** (cdnjs, pinned SRI, worker fetched with the same
-integrity check and run from a blob URL) is loaded only for a PDF page the build did not render.
-Nothing else is fetched from outside `data/`.
+integrity check and run from a blob URL; Mozilla, Apache-2.0) is loaded only for a PDF page the
+build did not render. Nothing else is fetched from outside `data/`. The header star icon is
+GitHub's Octicons `mark-github-16` (MIT); see *Third-party assets* in
+[`website/README.md`](../../website/README.md).
+
+Documents tagged `fetch-required` (OmniDocBench, research-only) are listed and scored but never
+copied: their page images, truth and provider outputs stay out of `dist/` even in a clone that
+fetched them locally.
 
 Every view is a shareable hash link:
 

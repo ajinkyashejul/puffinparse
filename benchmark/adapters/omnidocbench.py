@@ -97,7 +97,12 @@ _CJK = re.compile(r"[぀-ヿ㐀-䶿一-鿿豈-﫿]")
 
 
 def _text_norm(text: str) -> str:
-    """Upstream ``json2md.text_norm`` plus the literal ``\\t`` indents the annotations carry."""
+    """Upstream ``json2md.text_norm`` plus the literal ``\\t`` indents the annotations carry.
+
+    The three regular expressions reproduce ``replace_repeated_chars`` (called by ``text_norm``)
+    in ``tools/json2md.py`` of github.com/opendatalab/OmniDocBench at :data:`SCORER_REVISION`
+    (Apache-2.0), so the truth is normalised exactly as upstream's own conversion does.
+    """
     text = text.replace("\\t", "")
     text = re.sub(r"_{4,}", "____", text)
     text = re.sub(r" {4,}", "    ", text)

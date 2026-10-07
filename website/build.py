@@ -65,7 +65,7 @@ MARK = (
 )
 # Vercel Web Analytics (cookieless). Only on Vercel builds: the script path exists only there.
 ANALYTICS = '<script defer src="/_vercel/insights/script.js"></script>' if os.environ.get("VERCEL") else ""
-# GitHub mark from Primer Octicons (MIT, github.com/primer/octicons).
+# GitHub mark: Octicons `mark-github-16`, Copyright (c) GitHub Inc., MIT (github.com/primer/octicons).
 GH_STAR_ICON = (
     '<svg class="gh-star-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">'
     '<path fill="currentColor" d="'

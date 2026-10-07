@@ -444,6 +444,13 @@ pub fn summarize_with(metrics: &[Option<Metrics>], table_only: &[bool]) -> Summa
 // of a reference transcript: `kind: "rules"` documents in `docs/benchmarks/adapters.md`. A document
 // scores `passed / total`, which has the same shape as an accuracy in `0..=1` and therefore slots
 // into [`Metrics`] via [`metrics_from_rules`].
+//
+// Credit: the rule types and their semantics come from the benchmarks that define them and are
+// re-implemented here from their published descriptions and code, without copying any of it:
+// olmOCR-bench (`olmocr/bench/tests.py` in github.com/allenai/olmocr, Apache-2.0: `present`,
+// `absent`, `order`, `table`, and `max_diffs` fuzzy matching) and ParseBench
+// (github.com/run-llama/ParseBench, Apache-2.0: `missing_sentence_percent` → `bag_of_sentences`).
+// The fuzzy substring search is Sellers' algorithm (1980), see [`approx_contains`].
 
 /// What a [`Rule`] asserts about the parsed markdown.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]

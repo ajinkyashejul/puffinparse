@@ -96,3 +96,22 @@ if a document has to be withdrawn it can be removed from `docs/` and still be fe
 > ParseBench — Zhang, Acosta, Carlson, Bron, Doulcet, Ospina, Suo (2026), arXiv:2604.08538.
 > Dataset: <https://huggingface.co/datasets/llamaindex/ParseBench> ·
 > Code: <https://github.com/run-llama/ParseBench> · Apache-2.0.
+
+The committed PDFs, truth and rules are a modified subset (one page per document, HTML tables
+converted to pipe tables, rules rewritten into the common schema); the changes are described above
+and made by `benchmark/adapters/parsebench.py`. A copy of the Apache License 2.0 is in
+[`LICENSE-APACHE-2.0`](LICENSE-APACHE-2.0); the upstream repository ships no `NOTICE` file.
+
+If you use these documents or scores, cite ParseBench as its authors ask:
+
+```bibtex
+@misc{zhang2026parsebench,
+  title={ParseBench: A Document Parsing Benchmark for AI Agents},
+  author={Boyang Zhang and Sebastián G. Acosta and Preston Carlson and Sacha Bron and Pierre-Loïc Doulcet and Daniel B. Ospina and Simon Suo},
+  year={2026},
+  eprint={2604.08538},
+  archivePrefix={arXiv},
+  primaryClass={cs.CV},
+  url={https://arxiv.org/abs/2604.08538},
+}
+```

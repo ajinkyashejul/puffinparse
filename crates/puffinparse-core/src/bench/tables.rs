@@ -390,6 +390,11 @@ pub fn decode_entities(s: &str) -> String {
 // grids — the same formula, costs and Zhang–Shasha edit distance, just without `thead`/`tbody` and
 // span attributes. It still punishes missing, extra, split or merged rows and cells, which the
 // flat `table_score` string similarity does not see.
+//
+// Credit: the metric is from the paper above; its reference implementation is IBM's PubTabNet
+// `src/metric.py` (github.com/ibm-aur-nlp/PubTabNet, Apache-2.0), which uses APTED. This file is an
+// independent Rust implementation (Zhang & Shasha, 1989, "Simple fast algorithms for the editing
+// distance between trees and related problems"); no PubTabNet code is copied.
 
 /// Node budget above which [`teds_grid`] declines (`None`): Zhang–Shasha is O(n·m) memory.
 const TEDS_MAX_PAIRS: usize = 16_000_000;

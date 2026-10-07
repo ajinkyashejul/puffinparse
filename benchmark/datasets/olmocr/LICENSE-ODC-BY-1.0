@@ -1,0 +1,20 @@
+olmOCR-bench subset (benchmark/datasets/olmocr)
+
+This directory contains a derivative of olmOCR-bench
+(https://huggingface.co/datasets/allenai/olmOCR-bench, revision
+54a96a6fb6a2bd3b297e59869491db4d3625b711) by the Allen Institute for AI (AI2).
+
+olmOCR-bench is made available under the Open Data Commons Attribution License v1.0
+(ODC-BY-1.0): https://opendatacommons.org/licenses/by/1-0/
+Full text: https://opendatacommons.org/licenses/by/1-0/index.html
+
+This derivative database (a 40-document subset whose unit tests were converted into the
+PuffinParse rule schema by benchmark/adapters/olmocr.py) is likewise made available under
+ODC-BY-1.0. The intended use of the upstream data is research and education, in accordance
+with AI2's Responsible Use Guidelines: https://allenai.org/responsible-use
+
+The individual PDF pages keep the rights of their original publishers; each document's
+original `source_url` is recorded in manifest.json.
+
+Citation: Poznanski et al., "olmOCR: Unlocking Trillions of Tokens in PDFs with Vision
+Language Models", arXiv:2502.18443 (2025).

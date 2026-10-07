@@ -12,6 +12,22 @@ A 40-page subset of **[OmniDocBench](https://huggingface.co/datasets/opendatalab
 - Cite: Ouyang et al., *OmniDocBench: Benchmarking Diverse PDF Document Parsing with
   Comprehensive Annotations*, arXiv:2412.07626.
 
+```bibtex
+@misc{ouyang2024omnidocbenchbenchmarkingdiversepdf,
+  title={OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations},
+  author={Linke Ouyang and Yuan Qu and Hongbin Zhou and Jiawei Zhu and Rui Zhang and Qunshu Lin and Bin Wang and Zhiyuan Zhao and Man Jiang and Xiaomeng Zhao and Jin Shi and Fan Wu and Pei Chu and Minghao Liu and Zhenxiang Li and Chao Xu and Bo Zhang and Botian Shi and Zhongying Tu and Conghui He},
+  year={2024},
+  eprint={2412.07626},
+  archivePrefix={arXiv},
+  primaryClass={cs.CV},
+  url={https://arxiv.org/abs/2412.07626},
+}
+```
+
+The evaluation code at `github.com/opendatalab/OmniDocBench` is Apache-2.0 (the dataset is
+not). The adapter's `_text_norm` reproduces the three repeated-character rules of upstream's
+`json2md.text_norm` so the truth matches upstream's; no other upstream code is used.
+
 ## Index only: fetch before running
 
 The dataset card has **no licence**. Its copyright statement says the data is *"for research
@@ -30,6 +46,10 @@ image `sha256` and the `truth_sha256` it must produce. If you skip this step, ev
 here (and every `omnidocbench/…` document in `combined-v2`) fails with file-not-found, and the
 result's dataset `sha256` covers only the manifest. By using the fetched data you accept
 OpenDataLab's research-only terms.
+
+**Provider outputs are never committed for this source** (`.gitignore` excludes
+`benchmark/results/outputs/*/*/omnidocbench/`, ADR-16): a parser's transcript of a page is a
+copy of that page. Only per-document scores live in the result JSON.
 
 ```
 benchmark/datasets/omnidocbench/
