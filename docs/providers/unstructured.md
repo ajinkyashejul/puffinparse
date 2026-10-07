@@ -6,6 +6,7 @@
 > repository has no Unstructured key. `crates/puffinparse-core/tests/fixtures/unstructured_elements.json`
 > is hand-built from the documented element shapes. Mark this page **verified** only after the
 > `#[ignore]`d live test in `providers/unstructured.rs` passes with a real key.
+> Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
 
 ## 1. Summary
 
@@ -16,7 +17,7 @@
 | API key | `UNSTRUCTURED_API_KEY` (or `api_key` on the request) — sent as the `unstructured-api-key` header |
 | Docs | <https://docs.unstructured.io/api-reference/partition/overview> |
 | API version | Path-versioned: `POST /general/v0/general`. The deployed spec reports its own build (`1.5.99` when read) |
-| Verified | **not live-verified** (see banner) — documentation read 2026-09-11 |
+| Checked against | **not live-verified** (see banner) — documentation read 2026-09-11 |
 | Implementation | `crates/puffinparse-core/src/providers/unstructured.rs` |
 
 The Partition Endpoint is the only synchronous, single-file API Unstructured offers, and it is the

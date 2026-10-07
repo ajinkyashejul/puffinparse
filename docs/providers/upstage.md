@@ -1,5 +1,9 @@
 # Upstage Document Parse
 
+> **Status: docs-only.** Implemented from Upstage's published API documentation and tested
+> against fixture payloads built from it. It has not yet been run against the live API, so
+> expect wire-format differences. Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+
 ## 1. Summary
 
 | | |
@@ -9,7 +13,7 @@
 | API key | `UPSTAGE_API_KEY` (or `api_key` on the request) — sent as `Authorization: Bearer <key>` |
 | Docs | <https://console.upstage.ai/docs/capabilities/document-digitization/document-parsing> · agent-oriented dump: <https://console.upstage.ai/api/docs/for-agents/raw> |
 | Modes | `parse` (native), `ocr` (derived from `parse`) |
-| Verified | 2026-09-11, **from documentation only** — no key was available, so the `#[ignore]`d live test has not been run |
+| Checked against | 2026-09-11, **from documentation only** — no key was available, so the `#[ignore]`d live test has not been run |
 | Implementation | `crates/puffinparse-core/src/providers/upstage.rs` |
 
 Document Parse turns a document into layout **elements** (`paragraph`, `heading1`, `table`, `figure`,

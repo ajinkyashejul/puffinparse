@@ -132,8 +132,10 @@ print(doc.usage.pages, doc.cost_usd)</code></pre>
     <p class="lp-kicker">The registry</p>
     <h2>{{N_PROVIDERS}} providers, {{N_MODELS}} models, one client.</h2>
     <p class="lp-sub">Read straight out of the Rust registry at build time, so this grid cannot
-      drift from the code — {{N_VERIFIED}} of them verified against live API responses, the rest
-      implemented from the official reference with fixture-backed tests.</p>
+      drift from the code. {{N_VERIFIED}} are live-verified against the real provider APIs and
+      {{N_LOCAL}} self-hosted engines are verified locally; the other {{N_DOCS_ONLY}} are implemented
+      from the provider's documentation and tested against fixtures built from it, but have not been run
+      live yet (<a href="{{URL_ISSUE_VERIFY}}">help verify them</a>).</p>
     <div class="lp-grid">{{PROVIDER_CARDS}}</div>
     <p class="lp-note"><a href="{{URL_PROVIDERS}}">Provider reference →</a> exactly what PuffinParse
       sends, what comes back, and how every field is mapped.</p>

@@ -1,5 +1,8 @@
 # LlamaParse (LlamaCloud)
 
+> **Status: live-verified.** The `#[ignore]`d live tests pass against the real LlamaParse API,
+> and its fixtures under `crates/puffinparse-core/tests/fixtures/` include redacted live responses.
+
 ## 1. Summary
 
 | | |

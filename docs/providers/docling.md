@@ -1,6 +1,7 @@
 # Docling (docling-serve, self-hosted)
 
-> **Status: live-verified locally.** docling-serve 1.35.0 (docling 2.130.0, docling-core 2.98.0)
+> **Status: verified locally** (a self-hosted engine, so there is no hosted API to verify against).
+> docling-serve 1.35.0 (docling 2.130.0, docling-core 2.98.0)
 > was installed with `pip install docling-serve` (CPU torch) and run with `docling-serve run` in
 > the development sandbox on 2026-09-24. The `#[ignore]`d live test in `providers/docling.rs`
 > passes, and both fixtures (`docling_multipage.json` for `multipage_001.pdf`,

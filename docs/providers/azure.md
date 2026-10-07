@@ -1,5 +1,9 @@
 # Azure AI Document Intelligence
 
+> **Status: docs-only.** Implemented from Azure's published API documentation and tested
+> against fixture payloads built from it. It has not yet been run against the live API, so
+> expect wire-format differences. Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+
 ## 1. Summary
 
 | | |
@@ -9,7 +13,7 @@
 | API key | `AZURE_DOCUMENT_INTELLIGENCE_KEY` (or `api_key` on the request) — sent as the `Ocp-Apim-Subscription-Key` header |
 | Docs | <https://learn.microsoft.com/azure/ai-services/document-intelligence/> |
 | API version | **`2024-11-30`** (v4.0 GA), pinned by PuffinParse as the `api-version` query parameter (`azure::API_VERSION`) |
-| Verified | 2026-09-11 — **against the published REST reference only**; no Azure resource was available when this provider was written, so the fixtures are built from the documented response schema, not captured from a live call. The `#[ignore]`d live tests in `providers/azure.rs` are the check to run once a key exists. |
+| Checked against | 2026-09-11 — **against the published REST reference only**; no Azure resource was available when this provider was written, so the fixtures are built from the documented response schema, not captured from a live call. The `#[ignore]`d live tests in `providers/azure.rs` are the check to run once a key exists. |
 | Implementation | `crates/puffinparse-core/src/providers/azure.rs` |
 | Modes | `parse`, `ocr`, `extract` |
 

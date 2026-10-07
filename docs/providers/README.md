@@ -1,8 +1,19 @@
 # Provider reference
 
 One page per provider, describing exactly what PuffinParse sends, what comes back, and how the two are
-mapped onto the unified `OcrResponse`. Each page is verified against live API responses (2026-09-11)
-and against the implementation in `crates/puffinparse-core/src/providers/`.
+mapped onto the unified `OcrResponse`, checked against the implementation in
+`crates/puffinparse-core/src/providers/`.
+
+Verification differs by provider, and the **Status** column says which applies:
+
+* **live-verified** (Reducto, Extend, LlamaParse): the `#[ignore]`d live tests pass against the real
+  API with a key, and the fixtures include redacted live responses.
+* **verified locally** (Tesseract, Docling): self-hosted engines; the live tests pass against a local
+  install and the fixtures are real output from it.
+* **docs-only** (everything else): implemented from the provider's API documentation and tested
+  against fixture payloads built from it, but not yet run against the live API. Expect wire-format
+  differences until they are verified; [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10)
+  tracks this, and help with a key is welcome.
 
 | Provider | Doc | Implementation | Env var | Models | Status |
 |---|---|---|---|---|---|
@@ -11,8 +22,8 @@ and against the implementation in `crates/puffinparse-core/src/providers/`.
 | LlamaParse | [`llamaparse.md`](llamaparse.md) | `providers/llamaparse.rs` | `LLAMA_API_KEY` | `fast`, `cost_effective` *(default)*, `agentic`, `agentic_plus` | live-verified |
 | Mistral | [`mistral.md`](mistral.md) | `providers/mistral.rs` | `MISTRAL_API_KEY` | `ocr-latest` *(default)*, `ocr-4-1`, `ocr-4-0`, `ocr-2512` | docs-only |
 | Azure AI Document Intelligence | [`azure.md`](azure.md) | `providers/azure.rs` | `AZURE_DOCUMENT_INTELLIGENCE_KEY` + `AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT` | `read` *(ocr default)*, `layout` *(parse default)*, `invoice` *(extract default)*, `receipt`, `id_document`, `tax_us_w2`, `custom` | docs-only |
-| AWS Textract | [`textract.md`](textract.md) | `providers/textract.rs` | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` (+ `AWS_SESSION_TOKEN`, `AWS_REGION`) | `detect-text` *(ocr default)*, `layout`, `queries` *(extract default)*, `forms` | docs-only (transport verified) |
-| Google Gemini | [`gemini.md`](gemini.md) | `providers/gemini.rs` | `GEMINI_API_KEY` | `2.5-flash` *(default)*, `2.5-pro`, `2.5-flash-lite`, `3.5-flash`, `3.5-flash-lite`, `3.8-flash` | docs-only (wire tests) |
+| AWS Textract | [`textract.md`](textract.md) | `providers/textract.rs` | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` (+ `AWS_SESSION_TOKEN`, `AWS_REGION`) | `detect-text` *(ocr default)*, `layout`, `queries` *(extract default)*, `forms` | docs-only |
+| Google Gemini | [`gemini.md`](gemini.md) | `providers/gemini.rs` | `GEMINI_API_KEY` | `2.5-flash` *(default)*, `2.5-pro`, `2.5-flash-lite`, `3.5-flash`, `3.5-flash-lite`, `3.8-flash` | docs-only |
 | OpenAI | [`openai.md`](openai.md) | `providers/openai.rs` | `OPENAI_API_KEY` | `gpt-5.6-luna` *(default)*, `gpt-5.6-terra`, `gpt-5.6-sol`, `gpt-6-astra` | docs-only |
 | Anthropic | [`anthropic.md`](anthropic.md) | `providers/anthropic.rs` | `ANTHROPIC_API_KEY` | `claude-sonnet-5` *(default)*, `claude-haiku-4-5`, `claude-opus-5` | docs-only |
 | Mathpix | [`mathpix.md`](mathpix.md) | `providers/mathpix.rs` | `MATHPIX_APP_ID` + `MATHPIX_APP_KEY` | `pdf` *(default)*, `text` | docs-only |
@@ -21,8 +32,8 @@ and against the implementation in `crates/puffinparse-core/src/providers/`.
 | Upstage | [`upstage.md`](upstage.md) | `providers/upstage.rs` | `UPSTAGE_API_KEY` | `document-parse` *(default)*, `document-parse-nightly` | docs-only |
 | Landing AI (ADE) | [`landingai.md`](landingai.md) | `providers/landingai.rs` | `LANDINGAI_API_KEY` | `dpt-2` *(default)* | docs-only |
 | Google Document AI | [`google-documentai.md`](google-documentai.md) | `providers/google_documentai.rs` | `GOOGLE_DOCUMENTAI_ACCESS_TOKEN` (+ `_PROJECT`, `_LOCATION`, `_PROCESSOR_ID`) | `ocr` *(default)*, `layout`, `form`, `prebuilt` | docs-only |
-| Tesseract *(local)* | [`tesseract.md`](tesseract.md) | `providers/tesseract.rs` | none (`TESSERACT_CMD`, `PDFTOPPM_CMD`) | `default` | live-verified (local binary) |
-| Docling *(self-hosted)* | [`docling.md`](docling.md) | `providers/docling.rs` | none (`DOCLING_BASE_URL`; optional `DOCLING_API_KEY`) | `default` | live-verified (local docling-serve 1.35) |
+| Tesseract *(local)* | [`tesseract.md`](tesseract.md) | `providers/tesseract.rs` | none (`TESSERACT_CMD`, `PDFTOPPM_CMD`) | `default` | verified locally |
+| Docling *(self-hosted)* | [`docling.md`](docling.md) | `providers/docling.rs` | none (`DOCLING_BASE_URL`; optional `DOCLING_API_KEY`) | `default` | verified locally |
 | PaddleOCR *(self-hosted)* | [`paddleocr.md`](paddleocr.md) | `providers/paddleocr.rs` | none (`PADDLEOCR_BASE_URL`, `PADDLEOCR_PARSE_BASE_URL`) | `default` | docs-only |
 
 The three self-hosted engines need no API key and are priced at $0/page (`puffinparse providers` shows
@@ -74,4 +85,4 @@ See [`CONTRIBUTING.md`](../../CONTRIBUTING.md), section **"3. Adding a provider"
 `pricing.json` entries, a fixture-backed normalisation test, and a doc page here following the same
 eight sections as the pages above.
 
-**Status:** *live-verified* means the provider's `#[ignore]` live tests have passed with a real key. *docs-only* means it was implemented from the official API reference with fixtures shaped from documented responses; run `cargo test -p puffinparse-core <provider> -- --ignored` with a key to promote it.
+**Promoting a docs-only provider:** run `cargo test -p puffinparse-core <provider> -- --ignored` with a key, fix any wire-format differences, replace the hand-built fixture with a redacted real response, and change the status here, in the provider page's banner and in the README model table. Comment on [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10) to claim one.

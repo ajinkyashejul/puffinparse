@@ -1,5 +1,9 @@
 # Google Cloud Document AI
 
+> **Status: docs-only.** Implemented from Google Cloud's published API documentation and tested
+> against fixture payloads built from it. It has not yet been run against the live API, so
+> expect wire-format differences. Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+
 ## 1. Summary
 
 | | |
@@ -10,7 +14,7 @@
 | Required config | `GOOGLE_DOCUMENTAI_PROJECT`, `GOOGLE_DOCUMENTAI_PROCESSOR_ID`, optional `GOOGLE_DOCUMENTAI_LOCATION` (`us` default, `eu`, …) — each overridable via `provider_options` |
 | Docs | <https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors/process> |
 | Modes | `ocr` (**native**), `parse`, `extract` (entities) |
-| Verified | 2026-09-11, **from documentation only** — no credentials were available, so the `#[ignore]`d live test has not been run |
+| Checked against | 2026-09-11, **from documentation only** — no credentials were available, so the `#[ignore]`d live test has not been run |
 | Implementation | `crates/puffinparse-core/src/providers/google_documentai.rs` |
 
 Document AI is a fleet of *processors* you create in your own Google Cloud project. PuffinParse makes one

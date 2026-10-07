@@ -1,5 +1,9 @@
 # OpenAI (Responses API)
 
+> **Status: docs-only.** Implemented from OpenAI's published API documentation and tested
+> against fixture payloads built from it. It has not yet been run against the live API, so
+> expect wire-format differences. Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+
 ## 1. Summary
 
 | | |
@@ -10,7 +14,7 @@
 | Docs | <https://developers.openai.com/api/docs> (the old `platform.openai.com/docs/*` links 301 here) |
 | Endpoint | `POST /v1/responses` — one synchronous call per document, no job id, no polling |
 | Modes | `parse`, `ocr` (derived from `parse`), `extract` |
-| Verified | 2026-09-11 **against the published docs only** — no OpenAI key was available, so the fixtures are built from the documented response shape and the live tests are `#[ignore]` |
+| Checked against | 2026-09-11 **against the published docs only** — no OpenAI key was available, so the fixtures are built from the documented response shape and the live tests are `#[ignore]` |
 | Implementation | `crates/puffinparse-core/src/providers/openai.rs` |
 
 This is not a document-parsing product: it is a general vision LLM asked, with a strict JSON schema,

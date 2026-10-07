@@ -1,5 +1,9 @@
 # AWS Textract
 
+> **Status: docs-only.** Implemented from AWS's published API documentation and tested
+> against fixture payloads built from it. It has not yet been run against the live API, so
+> expect wire-format differences. Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+
 ## 1. Summary
 
 | | |
@@ -10,7 +14,7 @@
 | Auth header | `Authorization: AWS4-HMAC-SHA256 …` — SigV4, computed in `providers/textract.rs`; no AWS SDK crate is vendored |
 | Protocol | AWS JSON 1.1 RPC: always `POST /`, operation chosen by `X-Amz-Target`, `Content-Type: application/x-amz-json-1.1` |
 | API version | `textract-2018-06-27` (implicit in the target names; there is no version header) |
-| Verified | 2026-09-11 — request/response shapes and quotas from the AWS API reference; pricing from the AWS Price List API (`AmazonTextract`, `us-east-1`, publication `2026-08-31`). **Response fixtures are built from the AWS documentation's own examples, not from a live capture** (see §6). |
+| Checked against | 2026-09-11 — request/response shapes and quotas from the AWS API reference; pricing from the AWS Price List API (`AmazonTextract`, `us-east-1`, publication `2026-08-31`). **Response fixtures are built from the AWS documentation's own examples, not from a live capture** (see §6). |
 | Implementation | `crates/puffinparse-core/src/providers/textract.rs` |
 
 Textract is not a "parse a document to markdown" product: it returns a flat array of `Block` objects
@@ -320,7 +324,7 @@ retries).
 job polling and `NextToken` pagination — and also caps each individual HTTP request, shrinking as the
 budget is spent.
 
-## 6. Gotchas (verified)
+## 6. Gotchas
 
 * **The "API key" is a key pair.** `api_key` on a PuffinParse request can only stand in for
   `AWS_ACCESS_KEY_ID`; `AWS_SECRET_ACCESS_KEY` must be in the environment, otherwise the request is

@@ -1,5 +1,9 @@
 # Mistral
 
+> **Status: docs-only.** Implemented from Mistral's published API documentation and tested
+> against fixture payloads built from it. It has not yet been run against the live API, so
+> expect wire-format differences. Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+
 ## 1. Summary
 
 | | |
@@ -9,7 +13,7 @@
 | API key | `MISTRAL_API_KEY` (or `api_key` on the request) — sent as `Authorization: Bearer <key>` |
 | Docs | <https://docs.mistral.ai/capabilities/OCR/basic_ocr> · API reference <https://docs.mistral.ai/api/> |
 | API version | Unversioned path prefix `/v1`; no version header. Model version is pinned through the model id (`mistral-ocr-4-1`, …). |
-| Verified | 2026-09-11, against the published docs and the machine-readable spec at <https://docs.mistral.ai/openapi.yaml> (no live key in this environment — see §6) |
+| Checked against | 2026-09-11, against the published docs and the machine-readable spec at <https://docs.mistral.ai/openapi.yaml> (no live key in this environment — see §6) |
 | Implementation | `crates/puffinparse-core/src/providers/mistral.rs` |
 
 Mistral's Document AI OCR is a **single synchronous call**: `POST /v1/ocr` returns the whole document's
@@ -194,7 +198,7 @@ retrieval and the OCR call, and also caps each individual HTTP request. Because 
 synchronous, a 1 000-page PDF is one long request — raise `timeout_secs` rather than expecting a job
 id, or use Mistral's Batch API directly for bulk work.
 
-## 6. Gotchas (verified)
+## 6. Gotchas
 
 * **No live-key verification.** Unlike the other provider pages, this one was written from the published
   docs and the OpenAPI spec (`https://docs.mistral.ai/openapi.yaml`), not from live traffic; the

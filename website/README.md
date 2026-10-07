@@ -137,7 +137,7 @@ build. Nothing on the page is hand-maintained prose about counts or results:
 | Source | What it feeds |
 |---|---|
 | `crates/puffinparse-core/src/model.rs` | `read_registry()` parses the `PROVIDERS` table — provider id, display name, every `ModelInfo` and its `modes` expression (`PARSE_OCR`, `Mode::ALL`, `&[Mode::Extract]`). It drives the provider grid (one card per provider: id, name, mode chips, model count), the `15 / 53 / 3` stat band, and the list of model strings the hero cycles through. |
-| `docs/providers/README.md` | The status column of the provider table → the *live-verified* / *docs-only* dot on each card, and the verified count in the section intro. |
+| `docs/providers/README.md` | The status column of the provider table → the *live-verified* / *verified locally* / *docs-only* dot on each card, and the per-status counts in the section intro. |
 | `benchmark/results/*.json` | `read_leaderboard(7)` — best score per model → the leaderboard table (the same reader the docs home uses with a limit of 5). |
 | `website/nav.json` | Every link on the page is `site.url(slug)`, so the landing follows the docs prefix automatically. |
 

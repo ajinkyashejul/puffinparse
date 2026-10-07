@@ -209,6 +209,7 @@ mark.lp-diff { background: var(--lp-soft); color: var(--lp-ink); border-radius: 
 .lp-status::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
   margin-right: .35rem; background: var(--fg-faint); }
 .lp-status-live::before { background: var(--ok); }
+.lp-status-local::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ok); }
 
 /* --------------------------------------------------------------------- modes */
 .lp-modecards { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .9rem; }

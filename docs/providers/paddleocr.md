@@ -9,6 +9,7 @@
 > `paddleocr_ocr.json` and `paddleocr_layout_parsing.json` are hand-built from those documented
 > shapes. Mark this page **verified** after the `#[ignore]`d live test in `providers/paddleocr.rs`
 > passes against a real server.
+> Tracked in [issue #17](https://github.com/ajinkyashejul/puffinparse/issues/17).
 
 ## 1. Summary
 

@@ -339,6 +339,7 @@ def read_registry() -> list[dict[str, Any]]:
         info["modes"] = [m for m in MODES if any(m in mod["modes"] for mod in models)]
         info["status"] = status.get(info["slug"], "")
         info["verified"] = info["status"].startswith("live-verified")
+        info["local"] = info["status"].startswith("verified locally")
         found.append(info)
     return found
 
@@ -537,8 +538,12 @@ def landing_providers(site: Site, providers: list[dict[str, Any]]) -> str:
     for p in providers:
         chips = "".join(f'<span class="lp-chip lp-chip-{m}">{m}</span>' for m in p["modes"])
         count = len(p["models"])
-        state = "live" if p["verified"] else "docs"
-        label = "live-verified" if p["verified"] else "docs-only"
+        if p["verified"]:
+            state, label = "live", "live-verified"
+        elif p["local"]:
+            state, label = "local", "verified locally"
+        else:
+            state, label = "docs", "docs-only"
         cards.append(
             f'<a class="lp-provider" href="{site.url("providers/" + p["slug"])}">'
             f'<span class="lp-pid">{html.escape(p["name"])}</span>'
@@ -596,6 +601,9 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
         "N_MODELS": str(len(models)),
         "N_MODES": str(len(MODES)),
         "N_VERIFIED": str(sum(1 for p in providers if p["verified"])),
+        "N_LOCAL": str(sum(1 for p in providers if p["local"])),
+        "N_DOCS_ONLY": str(sum(1 for p in providers if not p["verified"] and not p["local"])),
+        "URL_ISSUE_VERIFY": f"{site.repo}/issues/10",
         "SWITCH_TABS": landing_switch_tabs(),
         "PROVIDER_CARDS": landing_providers(site, providers),
         "LEADERBOARD_ROWS": rows,

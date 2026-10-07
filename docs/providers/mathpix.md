@@ -6,6 +6,7 @@
 > `crates/puffinparse-core/tests/fixtures/mathpix_*.json` are hand-built from the documented response
 > shapes, not captured traffic. Mark this page **verified** only after the `#[ignore]`d live tests
 > in `providers/mathpix.rs` pass with a real key pair.
+> Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
 
 ## 1. Summary
 
@@ -16,7 +17,7 @@
 | API key | **two** values: `MATHPIX_APP_ID` + `MATHPIX_APP_KEY`, sent as the `app_id` and `app_key` **headers** (no `Authorization:` header). `api_key` on the request overrides `MATHPIX_APP_KEY`; `provider_options={"app_id": …}` overrides `MATHPIX_APP_ID` |
 | Docs | <https://docs.mathpix.com> |
 | API version | Path-versioned (`/v3/...`). No version header; the model is reported per response as `version` (e.g. `SuperNet-200`) |
-| Verified | **not live-verified** (see banner) — documentation read 2026-09-11 |
+| Checked against | **not live-verified** (see banner) — documentation read 2026-09-11 |
 | Implementation | `crates/puffinparse-core/src/providers/mathpix.rs` |
 
 Mathpix is an OCR engine rather than a layout parser: it is built for STEM content (printed *and*

@@ -1,5 +1,9 @@
 # Google Gemini
 
+> **Status: docs-only.** Implemented from Google's published API documentation and tested
+> against fixture payloads built from it. It has not yet been run against the live API, so
+> expect wire-format differences. Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+
 ## 1. Summary
 
 | | |
@@ -10,7 +14,7 @@
 | Docs | <https://ai.google.dev/gemini-api/docs> |
 | API version | Path-versioned; PuffinParse uses `/v1beta` (the Files API and the newest models live there). `/v1` serves the same `generateContent` method. |
 | Modes | `parse`, `ocr` (derived from `parse`), `extract` |
-| Verified | 2026-09-11 against the documented wire format; **the live call was not exercised** — see §6, "Unverified against a live key" |
+| Checked against | 2026-09-11 against the documented wire format; **the live call was not exercised** — see §6, "Unverified against a live key" |
 | Implementation | `crates/puffinparse-core/src/providers/gemini.rs` |
 
 Gemini is not a document-AI product but a general vision LLM: PuffinParse sends the file plus a

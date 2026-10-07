@@ -1,5 +1,9 @@
 # Landing AI — Agentic Document Extraction (ADE)
 
+> **Status: docs-only.** Implemented from Landing AI's published API documentation and tested
+> against fixture payloads built from it. It has not yet been run against the live API, so
+> expect wire-format differences. Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+
 ## 1. Summary
 
 | | |
@@ -9,7 +13,7 @@
 | API key | `LANDINGAI_API_KEY`, falling back to `VISION_AGENT_API_KEY` (the name Landing AI's own libraries use), or `api_key` on the request — sent as `Authorization: Bearer <key>` |
 | Docs | <https://docs.landing.ai/ade/ade-overview> · <https://docs.landing.ai/ade/parse> · OpenAPI: <https://docs.landing.ai/ade/va_openapi_ade2.json> |
 | Modes | `parse` (native), `ocr` (derived from `parse`), `extract` (parse → extract, two calls) |
-| Verified | 2026-09-11, **from documentation and the published OpenAPI spec only** — no key was available, so the `#[ignore]`d live test has not been run |
+| Checked against | 2026-09-11, **from documentation and the published OpenAPI spec only** — no key was available, so the `#[ignore]`d live test has not been run |
 | Implementation | `crates/puffinparse-core/src/providers/landingai.rs` |
 
 ADE parses a document into reading-order Markdown plus semantic **chunks**, each grounded to a page

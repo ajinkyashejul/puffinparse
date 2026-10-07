@@ -6,6 +6,7 @@
 > repository has no Datalab key. `crates/puffinparse-core/tests/fixtures/datalab_convert.json` is
 > hand-built from the documented shapes. Mark this page **verified** only after the `#[ignore]`d
 > live test in `providers/datalab.rs` passes with a real key.
+> Help verify it: [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
 
 ## 1. Summary
 
@@ -16,7 +17,7 @@
 | API key | `DATALAB_API_KEY` (or `api_key` on the request) — sent as the `X-API-Key` header |
 | Docs | <https://documentation.datalab.to> |
 | API version | Path-versioned (`/api/v1/convert`). The response echoes the engine versions in `versions` (`marker`, `surya`) |
-| Verified | **not live-verified** (see banner) — documentation read 2026-09-11 |
+| Checked against | **not live-verified** (see banner) — documentation read 2026-09-11 |
 | Implementation | `crates/puffinparse-core/src/providers/datalab.rs` |
 
 Datalab is the hosted version of **Marker** (plus Surya and Chandra), the open-source PDF → markdown

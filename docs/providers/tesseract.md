@@ -1,6 +1,7 @@
 # Tesseract (local)
 
-> **Status: live-verified locally.** Tesseract 5.3.4 and poppler-utils 24.02 (Ubuntu 24.04
+> **Status: verified locally** (a self-hosted engine, so there is no hosted API to verify against).
+> Tesseract 5.3.4 and poppler-utils 24.02 (Ubuntu 24.04
 > packages) were installed in the development sandbox on 2026-09-24; the `#[ignore]`d live test
 > in `providers/tesseract.rs` passes and the fixture
 > `crates/puffinparse-core/tests/fixtures/tesseract_headings.tsv` is real `tesseract ... tsv` output for
