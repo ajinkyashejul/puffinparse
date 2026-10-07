@@ -176,6 +176,9 @@ impl Ctx {
     fn new(request: &DocumentRequest) -> Result<Self> {
         let creds = resolve_credentials(request)?;
         let region = resolve_region(request);
+        // The region is spliced into the hostname the signed request (access key id, session
+        // token) goes to, so it must be a single DNS label.
+        provider::host_label(NAME, "region", &region)?;
         let default_base = format!("https://{SERVICE}.{region}.amazonaws.com");
         let endpoint = provider::resolve_base_url(request, ENV_BASE, &default_base);
         let parsed = url::Url::parse(&endpoint)

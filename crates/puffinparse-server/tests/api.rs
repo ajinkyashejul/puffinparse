@@ -414,6 +414,19 @@ async fn rejects_bad_requests_before_calling_a_provider() {
 }
 
 #[tokio::test]
+async fn provider_options_cannot_choose_a_local_program() {
+    let (app, _) = app().await;
+    for (path, key) in [("/v1/parse", "cmd"), ("/v1/ocr", "pdftoppm_cmd"), ("/v1/jobs", "cmd")] {
+        let mut body = doc("tesseract");
+        body["provider_options"] = json!({ key: "/bin/sh" });
+        let (s, _, body, _) = send(&app, post_json(path, Some("sk-master"), body)).await;
+        assert_eq!(s, StatusCode::BAD_REQUEST, "{path} {key}: {body}");
+        let msg = body["error"]["message"].as_str().unwrap();
+        assert!(msg.contains(&format!("provider_options.{key}")), "{msg}");
+    }
+}
+
+#[tokio::test]
 async fn metrics_count_requests_errors_pages_and_cost() {
     let (app, _) = app().await;
     send(&app, post_json("/v1/parse", Some("sk-master"), doc("mistral"))).await;

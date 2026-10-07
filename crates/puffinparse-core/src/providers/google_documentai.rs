@@ -153,13 +153,16 @@ impl Config {
                     .with_provider(NAME)
             })
         };
+        let location = opt("location")
+            .or_else(|| env(ENV_LOCATION))
+            .filter(|v| !v.trim().is_empty())
+            .unwrap_or_else(|| DEFAULT_LOCATION.to_string())
+            .to_ascii_lowercase();
+        // `location` becomes part of the hostname the access token is sent to.
+        provider::host_label(NAME, "location", &location)?;
         Ok(Self {
             project: need(opt("project").or_else(|| env(ENV_PROJECT)), "project", ENV_PROJECT)?,
-            location: opt("location")
-                .or_else(|| env(ENV_LOCATION))
-                .filter(|v| !v.trim().is_empty())
-                .unwrap_or_else(|| DEFAULT_LOCATION.to_string())
-                .to_ascii_lowercase(),
+            location,
             processor_id: need(opt("processor_id").or_else(|| env(ENV_PROCESSOR)), "processor_id", ENV_PROCESSOR)?,
             processor_version: opt("processor_version"),
         })
@@ -1162,6 +1165,13 @@ mod tests {
         let e = Config::resolve(&req).unwrap_err();
         assert_eq!(e.kind, crate::error::ErrorKind::Input);
         assert!(e.message.contains(ENV_PROCESSOR), "{e}");
+        // The location is spliced into the hostname that receives the token: one DNS label only.
+        for bad in ["evil.example/", "evil.example#", "eu.evil", "us@evil.example"] {
+            let req = DocumentRequest::from_path("a.pdf")
+                .provider_options(json!({"project": "p", "processor_id": "x", "location": bad}));
+            let e = Config::resolve(&req).unwrap_err();
+            assert_eq!(e.kind, crate::error::ErrorKind::Input, "{bad}");
+        }
     }
 
     #[test]

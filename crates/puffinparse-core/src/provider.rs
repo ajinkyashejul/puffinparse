@@ -86,6 +86,25 @@ pub fn resolve_api_key(request: &DocumentRequest, env_var: &str, provider: &str)
     })
 }
 
+/// Check that a value spliced into a provider hostname (an AWS region, a Google location) is a
+/// single DNS label. Without this, `provider_options.region = "evil.example/"` would turn
+/// `https://textract.{region}.amazonaws.com` into a request — credentials attached — to another host.
+pub(crate) fn host_label(provider: &str, what: &str, value: &str) -> crate::error::Result<()> {
+    let ok = !value.is_empty()
+        && value.len() <= 63
+        && value.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
+        && !value.starts_with('-')
+        && !value.ends_with('-');
+    if ok {
+        Ok(())
+    } else {
+        Err(crate::error::Error::input(format!(
+            "{provider}: invalid {what} '{value}' (expected lowercase letters, digits and '-', e.g. us-east-1)"
+        ))
+        .with_provider(provider))
+    }
+}
+
 /// Resolve base URL: request override, then `<PREFIX>_BASE_URL` env, then default.
 pub fn resolve_base_url(request: &DocumentRequest, env_var: &str, default: &str) -> String {
     request
@@ -137,5 +156,22 @@ pub fn file_part(data: bytes::Bytes, input: &crate::types::DocumentInput) -> req
             .file_name(input.filename())
             .mime_str("application/octet-stream")
             .expect("static mime is valid"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::host_label;
+
+    #[test]
+    fn host_label_accepts_regions_and_rejects_host_injection() {
+        for ok in ["us-east-1", "eu", "us-gov-west-1", "ap-southeast-2"] {
+            assert!(host_label("p", "region", ok).is_ok(), "{ok}");
+        }
+        for bad in ["", "evil.example/", "evil.example#", "a.b", "x:443", "us@evil", "-us", "us-", "US-EAST-1", "eu/x"]
+        {
+            let e = host_label("p", "region", bad).unwrap_err();
+            assert_eq!(e.kind, crate::error::ErrorKind::Input, "{bad}");
+        }
     }
 }

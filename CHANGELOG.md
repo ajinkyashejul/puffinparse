@@ -31,6 +31,15 @@ Python package `puffinparse` share a single version. Entries before the rename s
 - The results viewer build never copies documents tagged `fetch-required` (OmniDocBench,
   research-only), nor provider outputs for them, even in a clone that fetched them locally.
 
+### Security
+
+- Gateway: `provider_options.cmd` and `provider_options.pdftoppm_cmd` are rejected (400). They
+  choose the program the Tesseract provider runs, so any key holder could run commands on the
+  gateway host. Operators keep `TESSERACT_CMD` / `PDFTOPPM_CMD`.
+- Textract `region` and Google Document AI `location` must be a single DNS label. Both are spliced
+  into the provider hostname, so a crafted value could send the signed request (Textract) or the
+  OAuth access token (Document AI) to another host.
+
 ## [0.1.2] - 2026-10-08
 
 ### Fixed

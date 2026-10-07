@@ -474,9 +474,22 @@ async fn run(State(state): State<Arc<AppState>>, mode: Mode, req: Request) -> Re
     finish(&state, &ctx, result)
 }
 
+/// `provider_options` keys a gateway caller may not set. `cmd` / `pdftoppm_cmd` choose the local
+/// executable Tesseract runs (with the uploaded file as its first argument), so accepting them
+/// would let any key holder run arbitrary programs on the gateway host. Operators configure these
+/// through `TESSERACT_CMD` / `PDFTOPPM_CMD` instead.
+const OPERATOR_ONLY_OPTIONS: &[&str] = &["cmd", "pdftoppm_cmd"];
+
 /// The `DocumentRequest` shared by `/v1/{parse,ocr,extract}` and `/v1/jobs` (model and
 /// credentials are set per deployment by the caller).
 pub(crate) fn build_doc(state: &AppState, body: &mut ApiRequest) -> Result<DocumentRequest, ApiError> {
+    if let Some(Value::Object(opts)) = &body.provider_options {
+        if let Some(k) = OPERATOR_ONLY_OPTIONS.iter().find(|k| opts.contains_key(**k)) {
+            return Err(ApiError::input(format!(
+                "provider_options.{k} is not accepted by the gateway (it selects a program on the server)"
+            )));
+        }
+    }
     let input = build_input(body)?;
     let mut doc = DocumentRequest::new(input);
     doc.pages = body.pages.take();
