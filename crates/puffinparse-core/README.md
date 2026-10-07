@@ -1,6 +1,6 @@
 # puffinparse-core
 
-Rust core of [PuffinParse](https://github.com/ajinkyashejul/liteocr): a single API
+Rust core of [PuffinParse](https://github.com/ajinkyashejul/puffinparse): a single API
 for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, …).
 
 ```rust

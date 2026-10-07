@@ -3,7 +3,7 @@
     "title": "PuffinParse",
     "tagline": "One API for every document parser.",
     "summary": "PuffinParse is one API for every OCR and document-parsing provider (Reducto, Extend, LlamaParse, Mistral, Azure, Textract, Tesseract, Docling, ...). A Rust core with typed Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost. Switching provider is a one-string change.",
-    "repo": "https://github.com/ajinkyashejul/liteocr",
+    "repo": "https://github.com/ajinkyashejul/puffinparse",
     "branch": "main",
     "license": "MIT"
   },
@@ -248,13 +248,6 @@
           "description": "Architecture decision records — what was decided, why, and what it rules out."
         },
         {
-          "slug": "project/tasks",
-          "title": "Task board",
-          "source": "docs/TASKS.md",
-          "description": "Live task board: what is done, in progress and next.",
-          "optional": true
-        },
-        {
           "slug": "project/contributing",
           "title": "Contributing",
           "source": "CONTRIBUTING.md",
@@ -272,12 +265,6 @@
           "title": "Security",
           "source": "SECURITY.md",
           "description": "Supported versions, how to report a vulnerability, and how PuffinParse handles API keys."
-        },
-        {
-          "slug": "project/for-agents",
-          "title": "For agents",
-          "source": "CLAUDE.md",
-          "description": "Working agreement for AI agents and contributors: branch, identity, required checks, and where each kind of change goes."
         }
       ]
     }

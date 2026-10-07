@@ -152,7 +152,7 @@ def extract(
 | `model` | Must support `extract`; a parse-only model raises `UnsupportedModelError` before any network call. |
 | `instructions` | Optional natural-language guidance, forwarded to providers that accept it. |
 | `citations` | Ask for per-field citations (page, box, source text) where the provider supports them. |
-| `output_format` | As for `parse`, rendering the vendor's *extract* envelope. Best effort — see [`docs/COMPAT.md`](https://github.com/ajinkyashejul/liteocr/blob/main/docs/COMPAT.md) §7. |
+| `output_format` | As for `parse`, rendering the vendor's *extract* envelope. Best effort — see [`docs/COMPAT.md`](https://github.com/ajinkyashejul/puffinparse/blob/main/docs/COMPAT.md) §7. |
 
 Everything else matches `parse`. `aextract` is the async variant.
 
@@ -252,7 +252,7 @@ chunk/page per unified page, the content strings, the vendor's own block vocabul
 units, and the billed page count. Not guaranteed: byte equality with what the vendor would have
 returned, fields PuffinParse does not model (they are rendered as `null` / `[]`, never invented), or
 vendor-specific enrichments. Extract-mode rendering is explicitly best effort.
-[`docs/COMPAT.md`](https://github.com/ajinkyashejul/liteocr/blob/main/docs/COMPAT.md) lists every
+[`docs/COMPAT.md`](https://github.com/ajinkyashejul/puffinparse/blob/main/docs/COMPAT.md) lists every
 always-null field, the lossy block-type mappings and the coordinate conversions, per format.
 
 ```python

@@ -58,7 +58,7 @@ response is rendered into the named vendor's JSON, so a script that already pars
 Extend's output keeps working after a model swap. It only applies to `--format json` — with
 `markdown` or `text` output the flag is ignored and a warning goes to stderr. An unknown name
 fails before any network call (exit code `2`) and the message lists the valid values.
-[`docs/COMPAT.md`](https://github.com/ajinkyashejul/liteocr/blob/main/docs/COMPAT.md) documents
+[`docs/COMPAT.md`](https://github.com/ajinkyashejul/puffinparse/blob/main/docs/COMPAT.md) documents
 exactly what is guaranteed (key set, counts, content, block vocabulary, coordinate units, billed
 pages) and what is always `null`.
 

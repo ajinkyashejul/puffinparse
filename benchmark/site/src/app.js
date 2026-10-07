@@ -19,7 +19,7 @@
 (function () {
   "use strict";
 
-  var REPO = "https://github.com/ajinkyashejul/liteocr";
+  var REPO = "https://github.com/ajinkyashejul/puffinparse";
   var METHODOLOGY = REPO + "/blob/main/benchmark/README.md";
   var DIFF_CELL_CAP = 6000000; // LCS table cells we are willing to allocate
   var RULE_PAGE = 60; // check rows rendered per "show more"

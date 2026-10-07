@@ -1,8 +1,8 @@
 # Vendor-published OCR / document-parsing benchmarks — feasibility review for PuffinParse
 
 Researched 2026-09-11. All three benchmarks were **verified by actually downloading a sample**
-into `/tmp/claude-0/-home-user-puffinparse/b117fcb6-379d-5abe-b4ce-bac65d298215/scratchpad/benchres/`.
-Nothing under `/home/user/puffinparse` was modified.
+into a scratch directory.
+Nothing in this repository was modified.
 
 PuffinParse manifest target format (from `benchmark/README.md`):
 `benchmark/datasets/<name>/manifest.json` = `{name, version, description, license,
@@ -455,7 +455,7 @@ Realistic uses:
 ## Reproduce the downloads
 
 ```bash
-cd /tmp/claude-0/-home-user-puffinparse/b117fcb6-379d-5abe-b4ce-bac65d298215/scratchpad/benchres
+cd "$SCRATCH"/benchres
 export REQUESTS_CA_BUNDLE=/root/.ccr/ca-bundle.crt SSL_CERT_FILE=/root/.ccr/ca-bundle.crt
 pip install huggingface_hub
 python - <<'PY'

@@ -20,7 +20,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 From the repository while it is pre-release:
 
 ```toml
-puffinparse-core = { git = "https://github.com/ajinkyashejul/liteocr" }
+puffinparse-core = { git = "https://github.com/ajinkyashejul/puffinparse" }
 ```
 
 ## First call

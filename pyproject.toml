@@ -29,10 +29,10 @@ dev = ["pytest>=7", "pytest-asyncio>=0.23", "ruff>=0.5", "mypy>=1.8", "maturin>=
 bench = ["pillow>=10"]
 
 [project.urls]
-Homepage = "https://github.com/ajinkyashejul/liteocr"
-Repository = "https://github.com/ajinkyashejul/liteocr"
-Issues = "https://github.com/ajinkyashejul/liteocr/issues"
-Changelog = "https://github.com/ajinkyashejul/liteocr/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/ajinkyashejul/puffinparse"
+Repository = "https://github.com/ajinkyashejul/puffinparse"
+Issues = "https://github.com/ajinkyashejul/puffinparse/issues"
+Changelog = "https://github.com/ajinkyashejul/puffinparse/blob/main/CHANGELOG.md"
 
 [tool.maturin]
 manifest-path = "crates/puffinparse-python/Cargo.toml"

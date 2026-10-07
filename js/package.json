@@ -4,10 +4,10 @@
   "description": "One API for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, ...). Node.js bindings to the PuffinParse Rust core.",
   "keywords": ["ocr", "document-parsing", "pdf", "reducto", "llamaparse", "extend", "napi-rs"],
   "license": "MIT",
-  "homepage": "https://github.com/ajinkyashejul/liteocr",
+  "homepage": "https://github.com/ajinkyashejul/puffinparse",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ajinkyashejul/liteocr.git",
+    "url": "git+https://github.com/ajinkyashejul/puffinparse.git",
     "directory": "js"
   },
   "main": "index.js",

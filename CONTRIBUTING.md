@@ -19,7 +19,7 @@ Prerequisites:
 - A C toolchain (whatever `cc` your platform ships) for the native deps.
 
 ```bash
-git clone https://github.com/ajinkyashejul/liteocr
+git clone https://github.com/ajinkyashejul/puffinparse
 cd puffinparse
 
 # Rust side
@@ -98,7 +98,7 @@ Rules of the road:
 
 This is the highest-value contribution. A provider is a single file
 implementing one trait. Check for an existing
-[`new provider` issue](https://github.com/ajinkyashejul/liteocr/issues) first,
+[`new provider` issue](https://github.com/ajinkyashejul/puffinparse/issues) first,
 or open one from the template so we can agree on model naming before you write
 code.
 

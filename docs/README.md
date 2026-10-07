@@ -7,12 +7,10 @@ without asking around is linked from this page; if something is missing, add it 
 |---|---|
 | [`../README.md`](../README.md) | User-facing overview, install, usage, model table. |
 | [`SPEC.md`](SPEC.md) | Product and architecture specification: goals, unified request/response, errors, router, provider mappings, benchmark design, quality bar. Update it when behaviour changes. |
-| [`TASKS.md`](TASKS.md) | **Live task board.** Claim work here before starting; move items as they progress. |
 | [`DECISIONS.md`](DECISIONS.md) | Architecture decision records. Read before proposing a change to something listed there; add an ADR when you change direction. |
 | [`COMPAT.md`](COMPAT.md) | Native-format compatibility (`output_format="reducto"\|"extend"\|"llamaparse"`): what the vendor-shaped renders guarantee, which fields are always null, the coordinate-units rule, and migration examples. |
 | [`SERVER.md`](SERVER.md) | The HTTP gateway (`puffinparse serve`): config file, virtual keys, budgets, rate limits, API, errors, metrics, Docker. |
 | [`providers/`](providers/README.md) | Per-provider reference: endpoints, request flow, response mapping, errors, gotchas, passthrough options. |
-| [`research/`](research/README.md) | Market research: competitors, other benchmarks, naming. Start here before positioning or renaming decisions. |
 | [`DESIGN.md`](DESIGN.md) | Design language: tokens, components, writing rules for every surface. |
 | [`benchmarks/`](benchmarks/) | Survey of public OCR benchmarks, adapter notes for the combined dataset, and [`findings.md`](benchmarks/findings.md) (what committed runs taught us: scorer v2, provider quirks). |
 | [`../benchmark/README.md`](../benchmark/README.md) | Benchmark methodology, metrics, how to run, dataset format. |
@@ -20,11 +18,10 @@ without asking around is linked from this page; if something is missing, add it 
 | [`../benchmark/site/README.md`](../benchmark/site/README.md) | The static results viewer (GitHub Pages) and how to build it. |
 | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Setup, checks, how to add a provider or a dataset, PR checklist. |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | Keep-a-Changelog; add a line under Unreleased with every user-visible change. |
-| [`../CLAUDE.md`](../CLAUDE.md) | Working agreement for AI agents (and humans): branch, identity, checks, what not to do. |
 
 ## Working in parallel
 
-1. Pick or add a task in [`TASKS.md`](TASKS.md); mark it `[~]` with your name and date.
+1. Pick or open an issue on GitHub and say you are working on it.
 2. Work on `main` (see ADR-9). Small, reviewable commits; run `make lint test` before pushing.
 3. Anything that changes an interface (unified types, model names, manifest format, result JSON)
    is a spec change: update `SPEC.md` in the same commit and add an ADR if it reverses a decision.

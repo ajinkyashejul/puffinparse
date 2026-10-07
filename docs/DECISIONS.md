@@ -86,22 +86,9 @@ real scans; the combined open dataset (see TASKS) is the answer to that, not a l
 **Consequences.** Latency in the leaderboard reflects real processing. Repeated runs cost real
 credits.
 
-## ADR-9: Development happens on `main-clean`
+## ADR-9: (withdrawn)
 
-**Context.** The first three commits were pushed to `main` with a different author email. The
-owner wants every commit attributed to `ajinkyashejul <ajinkyashejul4195@gmail.com>`. History
-rewriting was blocked in the automated environment, so the same four commits were rebuilt with
-`git commit-tree` under the correct identity and pushed as `main-clean`.
-
-**Decision.** All work continues on `main-clean`. A repo admin will make it the default branch,
-delete `main` (and the session mirror branch), and rename `main-clean` to `main`; until then,
-references to `main` in workflows and docs are intentional and describe the post-rename state.
-
-**Consequences.** Commits on `main-clean` never carry the old email. Dependabot PRs opened
-against the old `main` will be re-created once the default branch changes.
-
-*Update 2026-09-11:* done. The old `main` and the session branch were deleted and `main-clean`
-was renamed to `main`; all development now happens on `main`.
+Repository housekeeping that no longer applies.
 
 ## ADR-10: Combined open benchmark instead of a new vendor benchmark
 
@@ -354,7 +341,7 @@ overlays are off by default.
 **Context.** `liteocr` on PyPI belongs to an unrelated OCR engine, several GitHub projects already
 use the name, and "OCR" undersells a tool whose modes are parse, OCR and extract. The owner's
 preference, LiteParse, is a LlamaIndex product. About 110 names were checked against domains,
-PyPI/npm/crates.io and web collisions (`docs/research/naming.md`).
+PyPI/npm/crates.io and web collisions.
 
 **Decision.** The product, crates (`puffinparse-{core,cli,python,node,server}`), Python package
 (`puffinparse`, native module `puffinparse._core`), Node package, CLI binary, environment variables
@@ -366,8 +353,7 @@ and no product collision; the puffin's black, white and orange match the existin
 **Consequences.** Committed benchmark results, recorded provider fixtures (which contain
 "LiteOCR" in document text), the CHANGELOG history and earlier ADRs keep the old name. Result files
 written before the rename carry `liteocr_version`, which the CLI and site builder read as an alias.
-`liteocr.vercel.app` keeps serving the same project. The GitHub repository rename, domain purchase,
-handles and trademark clearance are owner actions.
+`liteocr.vercel.app` keeps serving the same project.
 
 ## ADR-24: A puffin mark and mascot; brand imagery only in brand moments
 

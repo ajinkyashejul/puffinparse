@@ -690,7 +690,7 @@ def build(dist: Path, base: str = "./", home: str = "", docs: str = "") -> int:
         dist / "data" / "index.json",
         {
             "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "repo": "https://github.com/ajinkyashejul/liteocr",
+            "repo": "https://github.com/ajinkyashejul/puffinparse",
             "base": base,
             "datasets": datasets,
             "labels": run_labels(runs),

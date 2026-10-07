@@ -17,7 +17,7 @@ print(text.text, text.pages[0].lines[0].bbox)
 
 Switch providers by changing one string. Same request, same response shape, same errors.
 
-[![CI](https://github.com/ajinkyashejul/liteocr/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/liteocr/actions/workflows/ci.yml)
+[![CI](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 
@@ -69,7 +69,7 @@ which ones are set in your shell.
 From source (Rust stable + Python 3.9+):
 
 ```bash
-git clone https://github.com/ajinkyashejul/liteocr && cd puffinparse
+git clone https://github.com/ajinkyashejul/puffinparse && cd puffinparse
 python -m venv .venv && . .venv/bin/activate
 pip install maturin && maturin develop --release     # builds the extension into the venv
 cargo build --release -p puffinparse-cli                 # ./target/release/puffinparse
@@ -533,7 +533,7 @@ docs/SPEC.md            specification
 
 ## Roadmap
 
-The live list is [`docs/TASKS.md`](docs/TASKS.md). Next up:
+Planned work is tracked in [GitHub Issues](https://github.com/ajinkyashejul/puffinparse/issues). Next up:
 
 - Publish to PyPI and npm with prebuilt wheels and addons.
 - More public benchmarks (DP-Bench next) and fuzzy rule matching to mirror upstream scorers.

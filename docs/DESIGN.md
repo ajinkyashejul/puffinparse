@@ -80,9 +80,6 @@ within these rules:
 - **Physical, not floaty:** springs and squash-and-stretch for the puffin, ease-out for things that
   arrive, 160–600 ms per gesture. No spinning, bouncing loops or particle effects.
 - **Loops are seamless:** every periodic motion divides the loop length.
-- Sources live in [`marketing/videos/brand-motion/`](../marketing/videos/brand-motion/README.md)
-  (Remotion): `LogoReveal`, `MascotIdle`, and the 3D `Puffin3D` and `Icon3D` explorations, which
-  are not yet part of the brand.
 
 ### Social card
 

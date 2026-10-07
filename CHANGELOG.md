@@ -235,5 +235,5 @@ Initial release.
   across the three providers; `bench run` disables provider result caches by
   default (`--allow-cache` to opt out) so latency reflects real work.
 
-[Unreleased]: https://github.com/ajinkyashejul/liteocr/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/ajinkyashejul/liteocr/releases/tag/v0.1.0
+[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/ajinkyashejul/puffinparse/releases/tag/v0.1.0

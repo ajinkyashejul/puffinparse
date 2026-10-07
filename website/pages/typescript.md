@@ -14,7 +14,7 @@ Prebuilt binaries are not published to npm yet, so build the addon from a clone 
 toolchain):
 
 ```bash
-git clone https://github.com/ajinkyashejul/liteocr && cd puffinparse/js
+git clone https://github.com/ajinkyashejul/puffinparse && cd puffinparse/js
 npm install
 npm run build          # cargo build --release of crates/puffinparse-node -> puffinparse.<platform>.node
 npm test               # offline unit tests

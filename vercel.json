@@ -202,11 +202,6 @@
       "permanent": true
     },
     {
-      "source": "/project/tasks/",
-      "destination": "/docs/project/tasks/",
-      "permanent": true
-    },
-    {
       "source": "/project/contributing/",
       "destination": "/docs/project/contributing/",
       "permanent": true
@@ -219,11 +214,6 @@
     {
       "source": "/project/security/",
       "destination": "/docs/project/security/",
-      "permanent": true
-    },
-    {
-      "source": "/project/for-agents/",
-      "destination": "/docs/project/for-agents/",
       "permanent": true
     }
   ]

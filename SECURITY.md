@@ -16,7 +16,7 @@ only the latest released version is supported.
 
 Report it privately through GitHub security advisories:
 
-1. Go to https://github.com/ajinkyashejul/liteocr/security/advisories/new
+1. Go to https://github.com/ajinkyashejul/puffinparse/security/advisories/new
    (repository → **Security** → **Advisories** → **Report a vulnerability**).
 2. Describe the issue, the affected version or commit, and — if you can — a
    minimal reproduction and the impact you believe it has.

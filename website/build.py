@@ -456,8 +456,8 @@ points are meant for you:</p>
 description of every page.</li>
 <li><a href="{site.base}llms-full.txt"><code>/llms-full.txt</code></a> — every page concatenated,
 in nav order.</li>
-<li><a href="{site.url("project/for-agents")}"><code>/project/for-agents/</code></a> — the working agreement
-for contributing to this repository: branch, required checks, and where each kind of change goes.</li>
+<li><a href="{site.url("project/contributing")}"><code>/project/contributing/</code></a> — how to contribute:
+required checks and where each kind of change goes.</li>
 </ul>
 </section>"""
 

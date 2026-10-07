@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement by opening an
-issue at https://github.com/ajinkyashejul/liteocr/issues. If the report contains
+issue at https://github.com/ajinkyashejul/puffinparse/issues. If the report contains
 information you do not want to be public, open a minimal issue asking a
 maintainer to get in touch and we will follow up privately.
 

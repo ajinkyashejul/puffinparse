@@ -19,7 +19,7 @@ SDK to add.
 The `puffinparse` binary is built from the Rust workspace:
 
 ```bash
-cargo install --git https://github.com/ajinkyashejul/liteocr puffinparse-cli
+cargo install --git https://github.com/ajinkyashejul/puffinparse puffinparse-cli
 # or, from a clone:
 cargo build --release -p puffinparse-cli     # ./target/release/puffinparse
 ```
@@ -35,7 +35,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ### From source
 
 ```bash
-git clone https://github.com/ajinkyashejul/liteocr && cd puffinparse
+git clone https://github.com/ajinkyashejul/puffinparse && cd puffinparse
 python -m venv .venv && . .venv/bin/activate
 pip install maturin && maturin develop --release    # builds puffinparse._core into the venv
 cargo build --release -p puffinparse-cli
@@ -58,7 +58,7 @@ export LLAMA_API_KEY=llx-...
 ```
 
 Keys can also be passed per call (`api_key=...` / `--api-key`), and base URLs overridden with
-`REDUCTO_BASE_URL`, `EXTEND_BASE_URL`, `LLAMA_BASE_URL`. See [`.env.example`](https://github.com/ajinkyashejul/liteocr/blob/main/.env.example).
+`REDUCTO_BASE_URL`, `EXTEND_BASE_URL`, `LLAMA_BASE_URL`. See [`.env.example`](https://github.com/ajinkyashejul/puffinparse/blob/main/.env.example).
 
 Check what is configured:
 
