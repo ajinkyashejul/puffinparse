@@ -9,6 +9,17 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-08
+
+### Fixed
+
+- The source distribution now includes the LICENSE file its metadata names; PyPI rejected the
+  0.1.0 sdist for this, so 0.1.0 shipped wheels only.
+
+## [0.1.0] - 2026-10-08
+
+First public release (PyPI wheels, CLI binaries, gateway image).
+
 ### Changed
 
 - Provider verification labels are consistent across the README, the provider reference, the
@@ -212,7 +223,7 @@ Python package `puffinparse` share a single version. Entries before the rename s
   parameter; it used to go in the request body, so the presigned-output path never triggered.
   Reducto and Extend url-typed results are now covered by live-captured fixtures and loopback tests.
 
-## [0.1.0] - 2026-09-11
+## Initial development - 2026-09-11
 
 Initial release.
 

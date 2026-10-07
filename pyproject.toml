@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "puffinparse"
-version = "0.1.0"
+version = "0.1.1"
 description = "One API for every OCR / document-parsing provider (Reducto, Extend, LlamaParse, ...). Rust core, Python SDK, open benchmark."
 readme = "README.md"
 license = { text = "MIT" }
@@ -41,6 +41,8 @@ python-source = "python"
 module-name = "puffinparse._core"
 features = ["pyo3/extension-module"]
 strip = true
+# The sdist is assembled from the binding crate; ship the repo-root LICENSE its metadata names.
+include = [{ path = "LICENSE", format = "sdist" }]
 
 [tool.ruff]
 line-length = 110
