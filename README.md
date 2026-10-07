@@ -152,7 +152,7 @@ schema = {
     "properties": {"invoice_number": {"type": "string"}, "total": {"type": "number"}},
     "required": ["invoice_number", "total"],
 }
-result = puffinparse.extract("invoice.pdf", schema, model="...", citations=True)
+result = puffinparse.extract("invoice.pdf", schema, model="reducto/extract", citations=True)
 
 result.data                          # {"invoice_number": "INV-42", "total": 1280.5}
 result.fields["/total"].confidence   # per-field confidence, keyed by JSON pointer
@@ -489,7 +489,8 @@ println!("{} pages, ${:.4}\n{}", doc.usage.pages, doc.cost_usd.unwrap_or(0.0), d
 let text = ocr(DocumentRequest::from_path("scan.png").model("llamaparse/fast")).await?;
 println!("{} lines on page 1", text.pages[0].lines.len());
 
-let req = ExtractRequest::new(DocumentRequest::from_path("invoice.pdf").model("..."), schema);
+let schema = serde_json::json!({"type": "object", "properties": {"total": {"type": "number"}}});
+let req = ExtractRequest::new(DocumentRequest::from_path("invoice.pdf").model("reducto/extract"), schema);
 let data = extract(req.citations(true)).await?.data;
 ```
 
@@ -501,7 +502,7 @@ PuffinParse ships an open, reproducible benchmark. Ground truth is exact by cons
 python benchmark/generate_synthetic.py                       # regenerate the dataset (byte-reproducible)
 puffinparse bench run --dataset benchmark/datasets/synthetic-v1 \
     --models reducto/standard extend/parse_performance llamaparse/cost_effective
-puffinparse bench report benchmark/results/*.json > benchmark/LEADERBOARD.md
+puffinparse bench report benchmark/results/2026-09-25-combined-v3.json   # one dataset's leaderboard section
 puffinparse bench score prediction.md truth.md                   # metrics for one pair, no network
 ```
 
@@ -560,8 +561,8 @@ Open items:
   multi-arch gateway image and a notarized macOS binary ([#9](https://github.com/ajinkyashejul/puffinparse/issues/9)).
 - **Providers**: live-verify the docs-only providers ([#10](https://github.com/ajinkyashejul/puffinparse/issues/10)), including PaddleOCR
   against a real server ([#17](https://github.com/ajinkyashejul/puffinparse/issues/17)).
-- **Benchmark**: add `tesseract/default` ([#11](https://github.com/ajinkyashejul/puffinparse/issues/11)) and `docling/default` with a hardware note
-  ([#12](https://github.com/ajinkyashejul/puffinparse/issues/12)) to `combined-v3`; regenerate the leaderboard in one command
+- **Benchmark**: add `docling/default` with a hardware note
+  ([#12](https://github.com/ajinkyashejul/puffinparse/issues/12)) to `combined-v3` (`tesseract/default` is already in it); regenerate the leaderboard in one command
   ([#13](https://github.com/ajinkyashejul/puffinparse/issues/13)); score table-cell neighbour relations exactly ([#15](https://github.com/ajinkyashejul/puffinparse/issues/15)); a READoc
   long-document track ([#16](https://github.com/ajinkyashejul/puffinparse/issues/16)).
 - **SDK**: `output_format="mistral"` for code written against Mistral OCR responses

@@ -13,13 +13,12 @@ map for agents is `https://puffinparse.com/llms.txt`.
 
 ```bash
 pip install puffinparse                       # Python 3.9+, wheel bundles the Rust core
-cargo install --git https://github.com/ajinkyashejul/puffinparse puffinparse-cli   # the CLI
+cargo install --git https://github.com/ajinkyashejul/puffinparse puffinparse-cli   # the `puffinparse` CLI
 ```
 
-The Node.js SDK is not on npm yet; build it from `js/` in a clone (see the TypeScript docs).
-
-Prebuilt CLI archives are attached to each GitHub release. If a package is not available for
-your platform yet, [Getting started](/getting-started/) shows how to build from source.
+Prebuilt CLI archives are attached to each GitHub release. The Node.js package is not on npm yet
+and the crates are not on crates.io yet; [Getting started](/getting-started/) shows how to build
+them from source.
 
 ## Model strings
 
@@ -109,7 +108,8 @@ Paste this into your coding agent to set PuffinParse up in a project:
 ```text
 Add document parsing to this project with PuffinParse (https://puffinparse.com).
 1. Read https://puffinparse.com/agents.md and https://puffinparse.com/llms.txt first.
-2. Install it: `pip install puffinparse` (Python; the Node.js SDK is not on npm yet).
+2. Install it: `pip install puffinparse` (Python). For Node.js, build `js/` from a clone of the
+   repository (it is not on npm yet).
 3. Pick a model string `<provider>/<model>` from the benchmark leaderboard
    (https://puffinparse.com/docs/benchmark/leaderboard/) for my documents and budget, and tell
    me why. Prefer live-verified providers (Reducto, Extend, LlamaParse) or local ones
