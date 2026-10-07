@@ -31,6 +31,12 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ### Added
 
+- **Release pipeline** (`docs/RELEASING.md`). A `v*` tag publishes abi3 wheels and an sdist to PyPI,
+  `puffinparse` plus five prebuilt platform packages to npm, `puffinparse-core`/`-server`/`-cli` to
+  crates.io, the gateway image to `ghcr.io/ajinkyashejul/puffinparse`, and CLI archives with
+  `SHA256SUMS` to GitHub Releases, all through trusted publishing (no stored registry tokens).
+  npm and crates.io are switched on per repository variable once their one-time setup is done.
+
 - **Tesseract baseline in `combined-v3`.** `tesseract/default` (Tesseract 5.5.1, one OpenMP
   thread per process) was added to the 2026-09-25 run with `bench run --resume`: 199 documents,
   0 failures, Overall 56.36 (dpbench 86.77, olmocr 41.67, omnidocbench 35.70, parsebench 20.73,

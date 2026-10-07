@@ -1,9 +1,22 @@
 name: Release
 
+# A `v*` tag builds every artifact and publishes it:
+#   PyPI      puffinparse                        (trusted publishing, environment `pypi`)
+#   npm       puffinparse + 5 platform packages  (trusted publishing, environment `npm`)
+#   crates.io puffinparse-core, -server, -cli    (trusted publishing, environment `crates-io`)
+#   GHCR      ghcr.io/ajinkyashejul/puffinparse  (GITHUB_TOKEN, `packages: write`)
+#   GitHub    Release with CLI archives, wheels, sdist and SHA256SUMS
+# No long-lived registry token is stored anywhere. One-time registry setup: docs/RELEASING.md.
+# npm and crates.io are opt-in via the repository variables PUBLISH_NPM / PUBLISH_CRATES = true.
+#
+# `workflow_dispatch` runs the same builds (and the image build) without publishing anything,
+# so the matrix can be checked before tagging.
+
 on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,9 +29,30 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  # ------------------------------------------------------------------ version --
+  version:
+    name: Check versions match the tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cargo, pyproject and package.json agree (and match the tag)
+        run: |
+          cargo_v=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r '.packages[] | select(.name == "puffinparse-core") | .version')
+          py_v=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          js_v=$(node -p 'require("./js/package.json").version')
+          lock_v=$(node -p 'require("./js/package-lock.json").version')
+          echo "cargo=$cargo_v pyproject=$py_v js=$js_v js-lock=$lock_v"
+          test "$cargo_v" = "$py_v" && test "$cargo_v" = "$js_v" && test "$cargo_v" = "$lock_v"
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            test "${GITHUB_REF_NAME#v}" = "$cargo_v" || { echo "tag $GITHUB_REF_NAME != $cargo_v"; exit 1; }
+          fi
+
   # ---------------------------------------------------------------- wheels --
+  # One abi3 wheel per platform (pyo3 `abi3-py39`): it installs on CPython 3.9 and newer.
   linux:
     name: Wheel · linux-${{ matrix.target }}
+    needs: version
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -31,12 +65,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      # manylinux_2_28: aws-lc-sys (rustls' crypto backend) needs a newer GCC than manylinux2014's.
       - name: Build wheel
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          manylinux: auto
-          args: --release --out dist --interpreter python3.9
+          manylinux: "2_28"
+          args: --release --out dist
           sccache: "true"
 
       - uses: actions/upload-artifact@v4
@@ -47,6 +82,7 @@ jobs:
 
   macos:
     name: Wheel · macos-${{ matrix.target }}
+    needs: version
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -63,7 +99,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --interpreter python3.9
+          args: --release --out dist
           sccache: "true"
 
       - uses: actions/upload-artifact@v4
@@ -74,6 +110,7 @@ jobs:
 
   windows:
     name: Wheel · windows-x64
+    needs: version
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -87,7 +124,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: x64
-          args: --release --out dist --interpreter python3.9
+          args: --release --out dist
           sccache: "true"
 
       - uses: actions/upload-artifact@v4
@@ -98,6 +135,7 @@ jobs:
 
   sdist:
     name: Source distribution
+    needs: version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -108,6 +146,9 @@ jobs:
           command: sdist
           args: --out dist
 
+      - name: Check metadata
+        run: pipx run twine check --strict dist/*
+
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-sdist
@@ -115,21 +156,26 @@ jobs:
           if-no-files-found: error
 
   # ------------------------------------------------------------ CLI binaries --
+  # Linux builds run on Ubuntu 22.04 so the binaries need glibc 2.35, not the newest runner's.
   cli:
     name: CLI · ${{ matrix.target }}
+    needs: version
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-22.04
+            archive: tar.gz
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-22.04-arm
             archive: tar.gz
           - target: aarch64-apple-darwin
             os: macos-latest
             archive: tar.gz
           - target: x86_64-apple-darwin
-            os: macos-13
+            os: macos-latest
             archive: tar.gz
           - target: x86_64-pc-windows-msvc
             os: windows-latest
@@ -147,7 +193,7 @@ jobs:
           key: ${{ matrix.target }}
 
       - name: Build CLI
-        run: cargo build -p puffinparse-cli --release --target ${{ matrix.target }}
+        run: cargo build -p puffinparse-cli --release --locked --target ${{ matrix.target }}
 
       - name: Archive (tar.gz)
         if: matrix.archive == 'tar.gz'
@@ -171,30 +217,32 @@ jobs:
           path: dist
           if-no-files-found: error
 
-  # ------------------------------------------------------ Node.js addon (stub) --
-  # Builds the prebuilt `puffinparse.<platform>.node` binaries for the npm package (js/) and uploads
-  # them as workflow artifacts. Nothing is published to npm yet and `publish` below does not
-  # depend on this job. To ship: add a job that downloads these artifacts, runs
-  # `napi create-npm-dirs && napi artifacts && napi prepublish -t npm` in js/, then
-  # `npm publish --provenance` with `id-token: write` (npm trusted publishing, no NPM_TOKEN).
-  # See js/README.md, "Releasing prebuilt binaries".
+  # ---------------------------------------------------------- Node.js addon --
+  # Builds `puffinparse.<platform>.node` for every target in js/package.json `napi.targets`.
   node-addon:
     name: Node addon · ${{ matrix.target }}
+    needs: version
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-22.04
+            test: true
           - target: aarch64-unknown-linux-gnu
-            os: ubuntu-24.04-arm
+            os: ubuntu-22.04-arm
+            test: true
           - target: aarch64-apple-darwin
             os: macos-latest
+            test: true
+          # Cross-compiled on an arm64 runner: the x64 addon cannot load in an arm64 Node.
           - target: x86_64-apple-darwin
-            os: macos-13
+            os: macos-latest
+            test: false
           - target: x86_64-pc-windows-msvc
             os: windows-latest
+            test: true
     defaults:
       run:
         working-directory: js
@@ -222,6 +270,7 @@ jobs:
         run: npm run build -- --target ${{ matrix.target }}
 
       - name: Smoke test
+        if: matrix.test
         run: npm test
 
       - uses: actions/upload-artifact@v4
@@ -230,59 +279,252 @@ jobs:
           path: js/*.node
           if-no-files-found: error
 
-  # ----------------------------------------------------------------- publish --
-  publish:
-    name: Publish to PyPI and create the GitHub Release
-    runs-on: ubuntu-latest
-    needs: [linux, macos, windows, sdist, cli]
-    environment: pypi
-    permissions:
-      # `id-token: write` is what lets pypa/gh-action-pypi-publish authenticate
-      # with PyPI via OIDC ("trusted publishing") instead of an API token.
-      #
-      # MAINTAINER SETUP (once, before the first release):
-      #   PyPI → project `puffinparse` → Publishing → "Add a new pending publisher"
-      #     Owner:            ajinkyashejul
-      #     Repository name:  puffinparse
-      #     Workflow name:    release.yml
-      #     Environment name: pypi
-      #   Then create a GitHub environment called `pypi` in the repo settings
-      #   (Settings → Environments) and, optionally, add required reviewers.
-      # No PyPI token/secret is needed — do not add one.
-      id-token: write
-      # Needed to create the GitHub Release and upload the CLI archives.
-      contents: write
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      # The generated loader and typings are platform independent; ship the Linux x64 copy.
+      - uses: actions/upload-artifact@v4
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
         with:
-          path: artifacts
+          name: node-loader
+          path: |
+            js/native.js
+            js/native.d.ts
+          if-no-files-found: error
 
-      - name: Collect wheels and sdist
-        run: |
-          mkdir -p dist
-          find artifacts -path 'artifacts/wheels-*' -type f \
-            \( -name '*.whl' -o -name '*.tar.gz' \) -exec cp {} dist/ \;
-          ls -l dist
+  # -------------------------------------------------------------- GHCR image --
+  docker:
+    name: Gateway image (ghcr.io)
+    needs: version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Collect CLI archives
-        run: |
-          mkdir -p cli-dist
-          find artifacts -path 'artifacts/cli-*' -type f \
-            \( -name 'puffinparse-*.tar.gz' -o -name 'puffinparse-*.zip' \) -exec cp {} cli-dist/ \;
-          ls -l cli-dist
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Publish to PyPI (trusted publishing)
+      - name: Log in to GHCR
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # On v0.1.0: 0.1.0, 0.1 and latest (pre-releases like v0.2.0-rc.1 do not move latest).
+      - name: Image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=false
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-') }}
+            type=sha
+          labels: |
+            org.opencontainers.image.title=PuffinParse gateway
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.url=https://puffinparse.com
+
+      - name: Build (and push on a tag)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ===================================================== publish (tags only) ==
+  # Every registry job waits for every build, so a broken target publishes nothing.
+  pypi:
+    name: Publish · PyPI
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux, macos, windows, sdist, cli, node-addon]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/puffinparse/
+    permissions:
+      # OIDC trusted publishing: no PyPI token or secret.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+
+      - run: ls -l dist
+
+      - name: Publish (trusted publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist
+          # A re-run after a partial failure skips files that are already up.
+          skip-existing: true
+
+  # Off until the repository variable PUBLISH_NPM is `true` (Settings → Secrets and variables →
+  # Actions → Variables): npm trusted publishing needs the packages to exist first. Skipped, not failed.
+  npm:
+    name: Publish · npm
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PUBLISH_NPM == 'true'
+    needs: [linux, macos, windows, sdist, cli, node-addon]
+    runs-on: ubuntu-latest
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/puffinparse
+    permissions:
+      contents: read
+      # OIDC trusted publishing (npm >= 11.5.1); provenance is attached as well.
+      id-token: write
+    defaults:
+      run:
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org
+
+      - name: npm with trusted-publishing support
+        run: npm install -g npm@latest && npm --version
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: node-addon-*
+          path: js/artifacts
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: node-loader
+          path: js
+
+      # napi-rs v3 layout: one package per platform (`puffinparse-<platform>`, created under
+      # npm/<platform>/) listed as optionalDependencies of `puffinparse`; npm installs only the one
+      # matching the user's os/cpu/libc. `napi artifacts` fails if any target's binary is missing.
+      - name: Assemble platform packages
+        run: |
+          npx napi create-npm-dirs
+          npx napi artifacts --output-dir artifacts
+          rm -f ./*.node
+          node -e '
+            const fs = require("fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            pkg.optionalDependencies = {};
+            for (const dir of fs.readdirSync("npm")) {
+              const sub = JSON.parse(fs.readFileSync(`npm/${dir}/package.json`, "utf8"));
+              pkg.optionalDependencies[sub.name] = sub.version;
+            }
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+            console.log(pkg.optionalDependencies);
+          '
+          ls -l npm/*
+
+      - name: Publish platform packages, then puffinparse
+        run: |
+          publish() {
+            local dir="$1" name version
+            name=$(node -p "require('./$dir/package.json').name")
+            version=$(node -p "require('./$dir/package.json').version")
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "$name@$version is already on npm, skipping"
+            else
+              npm publish "./$dir" --provenance --access public
+            fi
+          }
+          for dir in npm/*; do publish "$dir"; done
+          publish .
+
+  # Off until the repository variable PUBLISH_CRATES is `true`; see docs/RELEASING.md.
+  crates-io:
+    name: Publish · crates.io
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PUBLISH_CRATES == 'true'
+    needs: [linux, macos, windows, sdist, cli, node-addon]
+    runs-on: ubuntu-latest
+    environment:
+      name: crates-io
+      url: https://crates.io/crates/puffinparse-cli
+    permissions:
+      contents: read
+      # OIDC trusted publishing via rust-lang/crates-io-auth-action: a short-lived token that is
+      # revoked when the job ends.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+
+      # Dependency order. puffinparse-python and puffinparse-node are `publish = false`
+      # (they ship as the PyPI and npm packages).
+      - name: Publish puffinparse-core, puffinparse-server, puffinparse-cli
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r '.packages[] | select(.name == "puffinparse-core") | .version')
+          for crate in puffinparse-core puffinparse-server puffinparse-cli; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' \
+              -A "puffinparse-release (https://github.com/${GITHUB_REPOSITORY})" \
+              "https://crates.io/api/v1/crates/$crate/$version")
+            if [ "$status" = "200" ]; then
+              echo "$crate $version is already on crates.io, skipping"
+            else
+              cargo publish --locked -p "$crate"
+            fi
+          done
+
+  github-release:
+    name: GitHub Release
+    # Runs once every registry job succeeded or was switched off (skipped).
+    if: >-
+      !cancelled() && startsWith(github.ref, 'refs/tags/v')
+      && needs.cli.result == 'success' && needs.pypi.result == 'success'
+      && needs.docker.result == 'success'
+      && contains(fromJSON('["success", "skipped"]'), needs.npm.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.crates-io.result)
+    needs: [cli, pypi, npm, crates-io, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cli-*
+          path: release
+          merge-multiple: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: release
+          merge-multiple: true
+
+      - name: Checksums
+        working-directory: release
+        run: |
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true
-          files: |
-            cli-dist/*
-            dist/*.whl
-            dist/*.tar.gz
+          body: |
+            Install with `pip install puffinparse`, `npm install puffinparse`, `cargo install puffinparse-cli`,
+            `docker pull ghcr.io/${{ github.repository }}:latest`, or one of the CLI archives below
+            (checksums in `SHA256SUMS`). What changed: [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md).
+          files: release/*

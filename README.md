@@ -1,4 +1,4 @@
-<p align="center"><img src="website/assets/puffin.svg" width="128" alt="The PuffinParse puffin waving, three pages in its beak"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/ajinkyashejul/puffinparse/main/website/assets/puffin.svg" width="128" alt="The PuffinParse puffin waving, three pages in its beak"></p>
 
 # PuffinParse
 
@@ -42,7 +42,10 @@ Two things make switching real rather than aspirational. **Modes**: every call n
 ## Install
 
 ```bash
-pip install puffinparse
+pip install puffinparse              # Python SDK (abi3 wheels: Linux, macOS, Windows)
+npm install puffinparse              # Node.js SDK (prebuilt for Linux x64/arm64 glibc, macOS, Windows x64)
+cargo install puffinparse-cli        # CLI + gateway; or grab an archive from GitHub Releases
+docker pull ghcr.io/ajinkyashejul/puffinparse   # gateway image
 ```
 
 Set the keys for the providers you use:
@@ -188,7 +191,8 @@ const doc = await parse("invoice.pdf", { model: "reducto/standard", fallbacks: [
 console.log(doc.markdown, doc.usage.pages, doc.costUsd);
 ```
 
-Build from source for now (`cd js && npm ci && npm run build`); see [`js/README.md`](js/README.md).
+`npm install puffinparse` ships prebuilt binaries for Linux x64/arm64 (glibc), macOS and Windows x64;
+other platforms build from source (`cd js && npm ci && npm run build`), see [`js/README.md`](js/README.md).
 
 ### Model names
 
@@ -455,7 +459,7 @@ puffinparse providers --json | jq '.output_formats'               # the vendor s
 Run PuffinParse as one HTTP endpoint so applications never hold provider keys:
 
 ```bash
-puffinparse serve --config puffinparse.toml       # or: docker build -t puffinparse . && docker run ...
+puffinparse serve --config puffinparse.toml       # or: docker run ghcr.io/ajinkyashejul/puffinparse (docs/SERVER.md)
 curl -H "Authorization: Bearer $TEAM_KEY" -F file=@invoice.pdf -F model=invoices \
      http://localhost:4000/v1/parse
 ```

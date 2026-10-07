@@ -16,6 +16,7 @@ without asking around is linked from this page; if something is missing, add it 
 | [`../benchmark/README.md`](../benchmark/README.md) | Benchmark methodology, metrics, how to run, dataset format. |
 | [`../benchmark/LEADERBOARD.md`](../benchmark/LEADERBOARD.md) | Leaderboard generated from committed results with `puffinparse bench report` (one section per dataset). Do not edit the numbers by hand. |
 | [`../benchmark/site/README.md`](../benchmark/site/README.md) | The static results viewer (GitHub Pages) and how to build it. |
+| [`RELEASING.md`](RELEASING.md) | Tag-driven release to PyPI, npm, crates.io, GHCR and GitHub Releases; one-time trusted-publishing setup. |
 | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Setup, checks, how to add or verify a provider or a dataset, PR checklist. [`../AGENTS.md`](../AGENTS.md) is the short version for coding agents. |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | Keep-a-Changelog; add a line under Unreleased with every user-visible change. |
 

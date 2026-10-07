@@ -11,12 +11,12 @@ Full reference: [`website/pages/typescript.md`](../website/pages/typescript.md) 
 ## Quickstart
 
 ```bash
-# from a clone of the repo (prebuilt binaries are not on npm yet; needs Rust + Node 18+)
-cd js
-npm install
-npm run build            # release build of the addon -> puffinparse.<platform>.node + native.js
+npm install puffinparse  # prebuilt: Linux x64/arm64 (glibc), macOS x64/arm64, Windows x64; Node 18+
 export LLAMA_API_KEY=... # or REDUCTO_API_KEY, EXTEND_API_KEY, ...
 ```
+
+Other platforms build from a clone of the repo (needs Rust): `cd js && npm install && npm run build`
+(release build of the addon -> `puffinparse.<platform>.node` + `native.js`).
 
 ```ts
 import { parse, extract, submit, retrieve, handleWebhook, Router, listModels, estimateCost } from 'puffinparse'
@@ -75,18 +75,15 @@ PUFFINPARSE_LIVE_TESTS=1 LLAMA_API_KEY=... node --test test/live.test.js   # cos
 In the monorepo, point cargo at the shared target dir to avoid a second build tree:
 `CARGO_TARGET_DIR=../target npm run build`.
 
-## Releasing prebuilt binaries (plan, not wired yet)
+## Releasing prebuilt binaries
 
-The `napi.targets` list in `package.json` is the platform matrix. The release flow napi-rs expects:
+The `napi.targets` list in `package.json` is the platform matrix. On a `v*` tag,
+`.github/workflows/release.yml` builds `npm run build -- --target <triple>` on each runner, then the
+`npm` job runs `napi create-npm-dirs` and `napi artifacts` to put each binary in its own package
+(`puffinparse-linux-x64-gnu`, `puffinparse-linux-arm64-gnu`, `puffinparse-darwin-x64`,
+`puffinparse-darwin-arm64`, `puffinparse-win32-x64-msvc`), adds them as `optionalDependencies` of
+`puffinparse`, and runs `npm publish --provenance` for each through npm trusted publishing (no
+`NPM_TOKEN`). The root package carries no binaries. See [`docs/RELEASING.md`](../docs/RELEASING.md).
 
-1. Build `npm run build -- --target <triple>` on each runner (linux x64/arm64 gnu, macOS x64/arm64,
-   windows x64) and upload the `puffinparse.<platform>.node` files as artifacts.
-2. In one publish job, `napi create-npm-dirs` then `napi artifacts` to move each binary into
-   `npm/<platform>/`, and `napi prepublish -t npm` to publish the per-platform packages
-   (`puffinparse-linux-x64-gnu`, ...) and add them as `optionalDependencies` of `puffinparse`.
-3. `npm publish` with provenance (`id-token: write`, npm trusted publishing), so no long-lived
-   `NPM_TOKEN` secret is needed.
-
-The generated `native.js` loader already looks for `./puffinparse.<platform>.node` first and then the
-`puffinparse-<platform>` package, so the same code works from a source build and from npm. The build
-matrix is stubbed in `.github/workflows/release.yml` (`node-addon` job); publishing is not.
+The generated `native.js` loader looks for `./puffinparse.<platform>.node` first and then the
+`puffinparse-<platform>` package, so the same code works from a source build and from npm.

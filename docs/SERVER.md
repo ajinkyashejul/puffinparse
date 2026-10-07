@@ -26,13 +26,14 @@ Without `--config` it reads `./puffinparse.toml` if present (or `$PUFFINPARSE_CO
 defaults: `127.0.0.1:4000`, no aliases, **no auth** (a warning is printed). Anything reachable
 beyond localhost should have a `master_key` or `[[keys]]`.
 
-Docker (multi-stage build, distroless runtime, runs as non-root):
+Docker (multi-stage build, distroless runtime, runs as non-root). Releases publish a linux/amd64
+image to `ghcr.io/ajinkyashejul/puffinparse` (tags `latest`, `0.1.0`, `0.1`); or build it yourself
+with `docker build -t puffinparse .`:
 
 ```bash
-docker build -t puffinparse .
 docker run --rm -p 4000:4000 -v $PWD/examples/server/puffinparse.toml:/etc/puffinparse/puffinparse.toml:ro \
   -e PUFFINPARSE_MASTER_KEY -e PUFFINPARSE_KEY_BILLING -e PUFFINPARSE_KEY_RESEARCH \
-  -e REDUCTO_API_KEY -e EXTEND_API_KEY -e LLAMA_API_KEY puffinparse
+  -e REDUCTO_API_KEY -e EXTEND_API_KEY -e LLAMA_API_KEY ghcr.io/ajinkyashejul/puffinparse
 ```
 
 The image's default command is `serve --host 0.0.0.0 --config /etc/puffinparse/puffinparse.toml`; it exits
