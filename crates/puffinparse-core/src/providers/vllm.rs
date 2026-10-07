@@ -32,7 +32,9 @@ use crate::error::{Error, Result};
 use crate::http::{self, Deadline, Retry};
 use crate::provider::{self, Provider};
 use crate::providers::local::{self, FileKind, ScratchDir};
-use crate::types::{markdown_to_text, BBox, Block, BlockType, DocumentRequest, OutputFormat, Page, ParseResponse, Usage};
+use crate::types::{
+    markdown_to_text, BBox, Block, BlockType, DocumentRequest, OutputFormat, Page, ParseResponse, Usage,
+};
 use async_trait::async_trait;
 use futures::stream::{self, StreamExt};
 use serde_json::{json, Value};

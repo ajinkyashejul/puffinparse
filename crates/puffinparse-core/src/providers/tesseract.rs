@@ -16,9 +16,9 @@
 use crate::error::{Error, Result};
 use crate::http::Deadline;
 use crate::provider::Provider;
-use crate::providers::local::{self, FileKind, ScratchDir};
 #[cfg(test)]
 use crate::providers::local::PDFTOPPM_INPUT_EXITS;
+use crate::providers::local::{self, FileKind, ScratchDir};
 use crate::types::{
     BBox, Block, BlockType, DocumentInput, DocumentRequest, Line, OutputFormat, Page, ParseResponse, TextPage,
     TextResponse, Usage, Word,
