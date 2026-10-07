@@ -9,6 +9,8 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-10-08
+
 ### Fixed
 
 - Tesseract: a corrupt PDF or a page range past the end is now an `InputError` (not retryable),
@@ -305,7 +307,8 @@ Initial release.
   across the three providers; `bench run` disables provider result caches by
   default (`--allow-cache` to opt out) so latency reflects real work.
 
-[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.0...v0.1.2
 [0.1.1]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ajinkyashejul/puffinparse/releases/tag/v0.1.0
