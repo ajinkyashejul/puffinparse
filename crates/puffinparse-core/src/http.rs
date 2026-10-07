@@ -106,7 +106,7 @@ where
     }
 }
 
-fn is_transient(e: &Error) -> bool {
+pub(crate) fn is_transient(e: &Error) -> bool {
     matches!(e.kind, ErrorKind::RateLimit | ErrorKind::Network)
         || (e.kind == ErrorKind::Provider && matches!(e.status_code, Some(500 | 502 | 503 | 504)))
 }

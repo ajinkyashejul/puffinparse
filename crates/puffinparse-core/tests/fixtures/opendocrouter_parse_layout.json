@@ -1,0 +1,61 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "completed",
+  "model": "google/gemini-3.8-flash-low",
+  "model_version": "2026-09-28",
+  "price_version": "2026-10-06",
+  "mode": "sync",
+  "created_at": "2026-10-08T09:00:00.000Z",
+  "error_code": null,
+  "page_count": 2,
+  "pages_done": 2,
+  "pages": [
+    {
+      "page": 1,
+      "status": "ok",
+      "markdown": "# Hello LiteOCR\n\nInvoice #1234\nTotal: $56.78\n\n- Widget A\n- Widget B\n\n| Item | Amount |\n| --- | --- |\n| Widget | $56.78 |\n\nCedar Ridge Supply · page 1",
+      "cached": false,
+      "usage": { "input_tokens": 1290, "output_tokens": 96 },
+      "charge_usd": 0.00133,
+      "layout": {
+        "status": "ok",
+        "width": 612,
+        "height": 792,
+        "elements": [
+          { "type": "title", "lines": [0, 0], "confidence": 0.95, "boxes": [{ "x": 0.12, "y": 0.08, "w": 0.4, "h": 0.04 }] },
+          { "type": "text", "lines": [2, 3], "confidence": 0.93, "boxes": [{ "x": 0.12, "y": 0.15, "w": 0.3, "h": 0.03 }, { "x": 0.12, "y": 0.18, "w": 0.25, "h": 0.03 }] },
+          { "type": "list_item", "lines": [5, 6], "confidence": 0.9, "boxes": [{ "x": 0.12, "y": 0.24, "w": 0.2, "h": 0.05 }] },
+          { "type": "table", "lines": [8, 10], "confidence": 0.88, "boxes": [{ "x": 0.1, "y": 0.32, "w": 0.6, "h": 0.12 }] },
+          { "type": "page_footer", "lines": [12, 12], "confidence": 0.8, "boxes": [{ "x": 0.35, "y": 0.95, "w": 0.3, "h": 0.02 }] },
+          { "type": "picture", "lines": null, "confidence": 0.82, "boxes": [{ "x": 0.7, "y": 0.05, "w": 0.18, "h": 0.1 }] }
+        ]
+      }
+    },
+    {
+      "page": 2,
+      "status": "ok",
+      "markdown": "## Page Two Heading\n\nSecond page body text.\nReference: ABC-9876\n\n$$E = mc^2$$\n\nFigure 1: Stamp\n\nconfidential",
+      "cached": true,
+      "usage": { "input_tokens": 0, "output_tokens": 0 },
+      "charge_usd": 0,
+      "layout": {
+        "status": "ok",
+        "width": 612,
+        "height": 792,
+        "elements": [
+          { "type": "section_header", "lines": [0, 0], "confidence": 0.94, "boxes": [{ "x": 0.12, "y": 0.08, "w": 0.45, "h": 0.04 }] },
+          { "type": "text", "lines": [2, 3], "confidence": 0.92, "boxes": [{ "x": 0.12, "y": 0.15, "w": 0.4, "h": 0.06 }] },
+          { "type": "formula", "lines": [5, 5], "confidence": 0.9, "boxes": [{ "x": 0.3, "y": 0.3, "w": 0.2, "h": 0.04 }] },
+          { "type": "caption", "lines": [7, 7], "confidence": 0.86, "boxes": [{ "x": 0.3, "y": 0.6, "w": 0.3, "h": 0.03 }] },
+          { "type": "text", "lines": [9, 9], "confidence": 0.7, "boxes": [{ "x": 0.6, "y": 0.8, "w": 0.2, "h": 0.04, "r": 30 }] },
+          { "type": "key_value", "lines": [2, 2], "confidence": 0.6, "boxes": [] }
+        ]
+      }
+    }
+  ],
+  "has_more": false,
+  "next_cursor": null,
+  "usage": { "input_tokens": 1290, "output_tokens": 96 },
+  "charge_usd": 0.00133,
+  "results_expire_at": null
+}

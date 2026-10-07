@@ -99,7 +99,8 @@ pub(crate) fn authenticate(state: &AppState, headers: &HeaderMap) -> Result<Prin
     found.map(Principal::Key).ok_or_else(|| ApiError::unauthorized("invalid API key"))
 }
 
-/// `models` entries: exact names, `*`, or `provider/*`.
+/// `models` entries: exact names, `*`, or a prefix ending in `/*` (`provider/*`, or
+/// `opendocrouter/google/*` for model ids that themselves contain '/').
 fn allowed(patterns: &[String], name: &str) -> bool {
     if patterns.is_empty() {
         return true;
@@ -107,7 +108,11 @@ fn allowed(patterns: &[String], name: &str) -> bool {
     let qualified = ModelRef::parse(name).ok().map(|m| m.qualified());
     patterns.iter().any(|p| {
         let matches = |n: &str| {
-            p == "*" || p == n || p.strip_suffix("/*").is_some_and(|prefix| n.split('/').next() == Some(prefix))
+            p == "*"
+                || p == n
+                || p.strip_suffix("/*").is_some_and(|prefix| {
+                    n.strip_prefix(prefix).is_some_and(|rest| rest.starts_with('/') && rest.len() > 1)
+                })
         };
         matches(name) || qualified.as_deref().is_some_and(matches)
     })
@@ -782,4 +787,22 @@ async fn usage(State(state): State<Arc<AppState>>, headers: HeaderMap) -> Respon
         _ => state.keys.iter().map(row).collect(),
     };
     Json(json!({ "keys": keys })).into_response()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::allowed;
+
+    #[test]
+    fn allow_list_prefixes_work_for_nested_model_ids() {
+        let p = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        assert!(allowed(&p(&["reducto/*"]), "reducto"));
+        assert!(allowed(&p(&["reducto/*"]), "reducto/r-1"));
+        assert!(!allowed(&p(&["reducto/*"]), "reductox/r-1"));
+        assert!(allowed(&p(&["opendocrouter/*"]), "opendocrouter/google/gemini-3-flash"));
+        assert!(allowed(&p(&["opendocrouter/google/*"]), "opendocrouter/google/gemini-3-flash"));
+        assert!(!allowed(&p(&["opendocrouter/google/*"]), "opendocrouter/openai/gpt-6-luna"));
+        assert!(allowed(&p(&["opendocrouter/openai/gpt-6-luna"]), "OpenDocRouter/OpenAI/GPT-6-Luna"));
+        assert!(allowed(&p(&[]), "anything"));
+    }
 }

@@ -217,6 +217,11 @@
       "permanent": true
     },
     {
+      "source": "/providers/opendocrouter/",
+      "destination": "/docs/providers/opendocrouter/",
+      "permanent": true
+    },
+    {
       "source": "/providers/tesseract/",
       "destination": "/docs/providers/tesseract/",
       "permanent": true
@@ -658,6 +663,21 @@
         }
       ],
       "dest": "/docs/providers/google-documentai/index.md",
+      "headers": {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Vary": "Accept"
+      }
+    },
+    {
+      "src": "^/docs/providers/opendocrouter/?$",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": "(.*)text/markdown(.*)"
+        }
+      ],
+      "dest": "/docs/providers/opendocrouter/index.md",
       "headers": {
         "Content-Type": "text/markdown; charset=utf-8",
         "Vary": "Accept"

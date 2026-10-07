@@ -172,6 +172,12 @@
           "description": "Document OCR, Layout Parser, Form Parser and prebuilt processors."
         },
         {
+          "slug": "providers/opendocrouter",
+          "title": "OpenDocRouter",
+          "source": "docs/providers/opendocrouter.md",
+          "description": "LlamaIndex's hosted parsing router: frontier VLMs and open OCR models, per-page status and charge, layout boxes."
+        },
+        {
           "slug": "providers/tesseract",
           "title": "Tesseract (local)",
           "source": "docs/providers/tesseract.md",

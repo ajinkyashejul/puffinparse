@@ -27,7 +27,7 @@ Two things make switching real rather than aspirational. **Modes**: every call n
 
 | | |
 |---|---|
-| **Providers (v0.1)** | 18 providers · 60 models · 3 modes. **Live-verified** against the real APIs: [Reducto](https://reducto.ai), [Extend](https://extend.ai), [LlamaParse](https://cloud.llamaindex.ai). **Verified locally**: the self-hosted Tesseract and Docling. **Docs-only** (implemented from the provider's API documentation and tested against fixture payloads, not yet run live): Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI and the self-hosted PaddleOCR ([help verify them](https://github.com/ajinkyashejul/puffinparse/issues/10)). [Full table](#model-names) |
+| **Providers (v0.1)** | 19 providers · 71 models · 3 modes. **Live-verified** against the real APIs: [Reducto](https://reducto.ai), [Extend](https://extend.ai), [LlamaParse](https://cloud.llamaindex.ai). **Verified locally**: the self-hosted Tesseract and Docling. **Docs-only** (implemented from the provider's API documentation and tested against fixture payloads, not yet run live): Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI, OpenDocRouter and the self-hosted PaddleOCR ([help verify them](https://github.com/ajinkyashejul/puffinparse/issues/10)). [Full table](#model-names) |
 | **Modes** | `parse` (markdown + blocks), `ocr` (plain text + boxes), `extract` (JSON from a schema) |
 | **Core** | Rust (`puffinparse-core`): `reqwest` + `tokio`, no vendor SDKs, `#![forbid(unsafe_code)]` |
 | **SDKs** | Python 3.9+ (sync + async, fully typed) and Node.js / TypeScript ([`js/`](https://github.com/ajinkyashejul/puffinparse/blob/main/js/README.md)), both on the same Rust core |
@@ -182,8 +182,9 @@ result = puffinparse.retrieve(job)              # Job (still pending) or ParseRe
 result = puffinparse.handle_webhook(request.json(), model="reducto")  # verify the signature first
 ```
 
-Reducto, Extend and LlamaParse support jobs; `webhook_url` maps to each provider's per-job webhook
-where one exists (Extend only has workspace-level webhooks, so it is rejected there). See
+Reducto, Extend, LlamaParse and OpenDocRouter support jobs; `webhook_url` maps to each provider's
+per-job webhook where one exists (Extend only has workspace-level webhooks and OpenDocRouter has
+none, so it is rejected there). See
 [`docs/SPEC.md`](https://github.com/ajinkyashejul/puffinparse/blob/main/docs/SPEC.md) §15.
 
 ### TypeScript / Node.js
@@ -360,6 +361,22 @@ page per provider.
 | `google_documentai/layout` | parse, ocr | $0.01 · $0.01 · — | Layout Parser processor: documentLayout blocks (headings, tables, lists) |
 | `google_documentai/form` | parse, ocr, extract `*` | $0.03 · $0.03 · $0.03 | Form Parser processor: paragraphs + tables, entities as extraction |
 | `google_documentai/prebuilt` | parse, ocr, extract | $0.03 · $0.03 · $0.03 | Prebuilt or custom extractor (invoice, W2, ...): entities as extraction |
+
+**OpenDocRouter** · `OPEN_DOC_ROUTER_API_KEY` · docs-only — LlamaIndex's hosted router: frontier VLMs and open OCR models behind one endpoint, billed per token at the providers' prices, per-page status and charge, layout boxes on request. Model ids keep the router's own `<vendor>/<model>` after the provider name. Prices here are the site's average charge per page (price version 2026-10-06); `cost_usd` is the actual `charge_usd`.
+
+| Model | Modes | List price / page (parse · ocr · extract) | Notes |
+|---|---|---|---|
+| `opendocrouter/google/gemini-3.8-flash-low` | parse `*`, ocr `*` | $0.005908 · $0.005908 · — | Gemini 3.8 Flash (low thinking); the router's quickstart model |
+| `opendocrouter/google/gemini-3-flash` | parse, ocr | $0.019667 · $0.019667 · — | Gemini 3 Flash |
+| `opendocrouter/anthropic/claude-opus-5-5` | parse, ocr | $0.04882 · $0.04882 · — | Claude Opus 5.5 (frontier, most expensive) |
+| `opendocrouter/anthropic/claude-haiku-5-5` | parse, ocr | $0.001225 · $0.001225 · — | Claude Haiku 5.5 |
+| `opendocrouter/openai/gpt-5.6-terra` | parse, ocr | $0.019886 · $0.019886 · — | GPT-5.6 Terra |
+| `opendocrouter/openai/gpt-6-luna` | parse, ocr | $0.000798 · $0.000798 · — | GPT-6 Luna (cheapest frontier model) |
+| `opendocrouter/infly/infinity-parser2-flash` | parse, ocr | $0.004344 · $0.004344 · — | Infinity-Parser2-Flash (open model hosted by the router) |
+| `opendocrouter/opendatalab/mineru2.5-pro` | parse, ocr | $0.000861 · $0.000861 · — | MinerU2.5-Pro (open model hosted by the router) |
+| `opendocrouter/xingchen-agi/teleocr` | parse, ocr | $0.002702 · $0.002702 · — | TeleOCR (open model hosted by the router) |
+| `opendocrouter/rednote-hilab/dots.mocr` | parse, ocr | $0.00397 · $0.00397 · — | dots.mocr (open model hosted by the router) |
+| `opendocrouter/paddlepaddle/paddleocr-vl-1.6` | parse, ocr | $0.002111 · $0.002111 · — | PaddleOCR-VL-1.6 (open model hosted by the router) |
 
 **Self-hosted engines** · no key · $0/page — out-of-process: a local binary or a server you run. Tesseract and Docling are verified locally; PaddleOCR is docs-only.
 

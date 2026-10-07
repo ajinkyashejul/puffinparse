@@ -13,6 +13,8 @@ pub mod landingai;
 pub mod mathpix;
 pub mod mistral;
 pub mod openai;
+// Hosted router over many parsing models (vendor-qualified model ids).
+pub mod opendocrouter;
 pub mod textract;
 pub mod unstructured;
 pub mod upstage;
@@ -46,6 +48,7 @@ pub fn build(name: &str) -> Result<Arc<dyn Provider>> {
         "upstage" => Ok(Arc::new(upstage::Upstage)),
         "landingai" => Ok(Arc::new(landingai::LandingAi)),
         "google_documentai" => Ok(Arc::new(google_documentai::GoogleDocumentAi)),
+        "opendocrouter" => Ok(Arc::new(opendocrouter::OpenDocRouter)),
         "tesseract" => Ok(Arc::new(tesseract::Tesseract)),
         "docling" => Ok(Arc::new(docling::Docling)),
         "paddleocr" => Ok(Arc::new(paddleocr::PaddleOcr)),

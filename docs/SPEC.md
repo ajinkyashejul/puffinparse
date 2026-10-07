@@ -3,7 +3,7 @@
 > **One API for every OCR / document-parsing provider.** Rust core, Python SDK, CLI,
 > and an open benchmark that ranks providers on accuracy, latency and cost.
 
-Status: `v0.1` — 18 providers (the registry in `crates/puffinparse-core/src/model.rs`; per-provider
+Status: `v0.1` — 19 providers (the registry in `crates/puffinparse-core/src/model.rs`; per-provider
 references in [`providers/`](providers/README.md)). §8 spells out the wire mapping for the three
 live-verified providers, **Reducto**, **Extend** and **LlamaParse**, and the self-hosted engines.
 
