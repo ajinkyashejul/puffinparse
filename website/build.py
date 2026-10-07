@@ -947,6 +947,9 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
 # ------------------------------------------------------------------------------------ redirects
 
 VERCEL_JSON = ROOT / "vercel.json"
+# Former hostnames of the site; every path on them redirects to the same path on the canonical domain.
+OLD_HOSTS = ("puffinparse.vercel.app", "liteocr.vercel.app")
+CANONICAL_ORIGIN = "https://puffinparse.com"
 
 
 def redirect_map(site: Site, pages: list[Page]) -> list[dict[str, Any]]:
@@ -956,7 +959,16 @@ def redirect_map(site: Site, pages: list[Page]) -> list[dict[str, Any]]:
     stay at the site root and are not redirected either.
     """
     prefix = site.docs_prefix
-    return [
+    hosts = [
+        {
+            "source": "/:path*",
+            "has": [{"type": "host", "value": host}],
+            "destination": f"{CANONICAL_ORIGIN}/:path*",
+            "permanent": True,
+        }
+        for host in OLD_HOSTS
+    ]
+    return hosts + [
         {"source": f"/{p.slug}/", "destination": f"/{prefix}/{p.slug}/", "permanent": True}
         for p in pages
         if p.slug
@@ -984,6 +996,8 @@ def check_redirects(site: Site, pages: list[Page], out: Path, path: Path = VERCE
             "— run `python website/build.py --write-redirects`"
         )
     for r in expected:
+        if r["destination"].startswith("http"):
+            continue  # host redirects leave the site
         target = out / r["destination"].strip("/") / "index.html"
         if not target.exists():
             problems.append(f"{path.name}: redirect {r['source']} -> missing {r['destination']}")

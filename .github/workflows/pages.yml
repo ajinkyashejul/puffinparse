@@ -3,7 +3,7 @@ name: Pages
 # Publishes the whole PuffinParse site to GitHub Pages: the landing page, the docs under
 # /docs/ and the benchmark results viewer under /benchmark-results/. This is the same
 # build Vercel runs (website/build.py, which invokes benchmark/site/build.py itself), so
-# Pages mirrors https://puffinparse.vercel.app rather than publishing a different artefact.
+# Pages mirrors https://puffinparse.com rather than publishing a different artefact.
 #
 # SETUP (one time, by a maintainer): in the repository settings open
 # Settings -> Pages and set "Source" to "GitHub Actions", then add the repository

@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "echo 'deps resolved by uv run at build time'",
-  "buildCommand": "uv run --no-project --with markdown --with pillow --with pypdfium2 python website/build.py --out website/dist --site-url https://puffinparse.vercel.app",
+  "buildCommand": "uv run --no-project --with markdown --with pillow --with pypdfium2 python website/build.py --out website/dist --site-url https://puffinparse.com",
   "outputDirectory": "website/dist",
   "cleanUrls": true,
   "trailingSlash": true,
@@ -36,6 +36,28 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "puffinparse.vercel.app"
+        }
+      ],
+      "destination": "https://puffinparse.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "liteocr.vercel.app"
+        }
+      ],
+      "destination": "https://puffinparse.com/:path*",
+      "permanent": true
+    },
     {
       "source": "/getting-started/",
       "destination": "/docs/getting-started/",

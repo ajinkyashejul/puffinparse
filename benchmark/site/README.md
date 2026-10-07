@@ -142,7 +142,7 @@ width with no horizontal page scroll (wide tables scroll inside their frame).
 ## Deployment
 
 The viewer ships with the product site, at
-[`https://puffinparse.vercel.app/benchmark-results/`](https://puffinparse.vercel.app/benchmark-results/).
+[`https://puffinparse.com/benchmark-results/`](https://puffinparse.com/benchmark-results/).
 `website/build.py` imports this script and runs it with
 `--out <dist>/benchmark-results --base-url /benchmark-results/` as part of every build
 (`--no-benchmark` skips it). Nothing in `vercel.json` is specific to the viewer beyond `--with

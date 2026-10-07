@@ -6,7 +6,7 @@ better (100 = character-exact after normalisation, or every rule passing). Laten
 from the client through the public API, including upload and polling, with provider result caches
 disabled. Prices are public pay-as-you-go list prices. Methodology and caveats:
 [`benchmark/README.md`](README.md). Every document, output, diff and rule check is browsable at
-[puffinparse.vercel.app/benchmark-results](https://puffinparse.vercel.app/benchmark-results/).
+[puffinparse.com/benchmark-results](https://puffinparse.com/benchmark-results/).
 
 **Headline: `combined-v3`** (run 2026-09-25, scorer v2) — 199 documents from five sources, each
 scored by its own ground truth: `synthetic-v1` (exact transcripts), a ParseBench subset (rules and

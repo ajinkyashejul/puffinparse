@@ -188,7 +188,7 @@ Keep `style.css` under ~250 lines, `landing.css` under ~300, and resist adding a
 ## Deploying
 
 Vercel builds and serves the site from `vercel.json`: `buildCommand` runs this script with
-`--site-url https://puffinparse.vercel.app`, `outputDirectory` is `website/dist`, and `cleanUrls` +
+`--site-url https://puffinparse.com`, `outputDirectory` is `website/dist`, and `cleanUrls` +
 `trailingSlash` give the pretty URLs. The benchmark results viewer is a separate artifact published
 under **`/benchmark-results/`**, so the two never collide.
 

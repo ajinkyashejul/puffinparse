@@ -2,6 +2,8 @@
 
 # PuffinParse
 
+[![CI](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE) [![Docs](https://img.shields.io/badge/docs-puffinparse.com-E95C20)](https://puffinparse.com/docs/) [![Benchmark](https://img.shields.io/badge/benchmark-results-E95C20)](https://puffinparse.com/benchmark-results/)
+
 **One API for every document parser: parse, OCR and extract.** Rust core, Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost.
 
 ```python
@@ -18,7 +20,7 @@ print(text.text, text.pages[0].lines[0].bbox)
 Switch providers by changing one string. Same request, same response shape, same errors.
 
 [![CI](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 
 ## Why
@@ -39,7 +41,7 @@ Two things make switching real rather than aspirational. **Modes**: every call n
 | **Reliability** | Retries with jittered backoff, whole-call deadlines, `Router` with ordered fallbacks / round-robin |
 | **Compatibility** | `output_format` renders any provider's result in Reducto's, Extend's or LlamaParse's own JSON, so an existing integration keeps its parser ([`docs/COMPAT.md`](docs/COMPAT.md)) |
 | **Cost** | Embedded, overridable price table → `cost_usd` on every response |
-| **Benchmark** | One harness over synthetic data and public benchmarks (ParseBench, olmOCR-bench, OmniDocBench); deterministic metrics and rule checks, latency, $/1k pages; every output inspectable at [puffinparse.vercel.app/benchmark-results](https://puffinparse.vercel.app/benchmark-results/) |
+| **Benchmark** | One harness over synthetic data and public benchmarks (ParseBench, olmOCR-bench, OmniDocBench); deterministic metrics and rule checks, latency, $/1k pages; every output inspectable at [puffinparse.com/benchmark-results](https://puffinparse.com/benchmark-results/) |
 
 ## Install
 
@@ -497,7 +499,7 @@ Metrics (after NFKC + markdown stripping + whitespace collapsing, case-insensiti
 
 The current leaderboard is in [`benchmark/LEADERBOARD.md`](benchmark/LEADERBOARD.md), and every
 document, output, diff and rule check is browsable at
-[puffinparse.vercel.app/benchmark-results](https://puffinparse.vercel.app/benchmark-results/). Datasets:
+[puffinparse.com/benchmark-results](https://puffinparse.com/benchmark-results/). Datasets:
 `synthetic-v1` (exact truth by construction) and `combined-v2`, which adds subsets of
 [ParseBench](https://github.com/run-llama/ParseBench), [olmOCR-bench](https://huggingface.co/datasets/allenai/olmOCR-bench)
 and [OmniDocBench](https://github.com/opendatalab/OmniDocBench) converted by
@@ -548,4 +550,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Adding a provider is one Rust file plus 
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE).
