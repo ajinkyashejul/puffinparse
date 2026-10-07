@@ -245,6 +245,7 @@ async fn run(request: &DocumentRequest) -> Result<Run> {
                 &deadline,
                 "pdftoppm",
                 "install poppler-utils (apt install poppler-utils / brew install poppler) or set PDFTOPPM_CMD",
+                PDFTOPPM_INPUT_EXITS,
             )
             .await?;
             for (n, path) in rendered_pages(scratch.path()).await? {
@@ -285,6 +286,7 @@ async fn run(request: &DocumentRequest) -> Result<Run> {
             &deadline,
             "tesseract",
             "install Tesseract (apt install tesseract-ocr / brew install tesseract) or set TESSERACT_CMD",
+            &[],
         )
         .await?;
         let tsv = String::from_utf8_lossy(&stdout).into_owned();
@@ -319,8 +321,34 @@ async fn rendered_pages(dir: &Path) -> Result<Vec<(u32, PathBuf)>> {
     Ok(out)
 }
 
-/// Run a local binary with the call's deadline; non-zero exits carry the tool's stderr verbatim.
-async fn exec(cmd: &str, args: &[String], deadline: &Deadline, tool: &str, install_hint: &str) -> Result<Vec<u8>> {
+/// `pdftoppm` exit codes that mean the input is at fault: 1 cannot open/read the PDF (corrupt or not
+/// a PDF), 3 PDF permissions, 99 anything else, which in practice is a page range past the end.
+/// These are input errors, not retryable: another model would fail on the same file.
+const PDFTOPPM_INPUT_EXITS: &[i32] = &[1, 3, 99];
+
+/// Lines of a tool's stderr kept in an error message; a corrupt PDF can produce hundreds.
+const STDERR_LINES: usize = 5;
+
+/// The first [`STDERR_LINES`] lines of a tool's stderr, noting how many were dropped.
+fn stderr_excerpt(stderr: &str) -> String {
+    let lines: Vec<&str> = stderr.trim().lines().collect();
+    if lines.len() <= STDERR_LINES {
+        return lines.join("\n");
+    }
+    format!("{}\n... ({} more lines)", lines[..STDERR_LINES].join("\n"), lines.len() - STDERR_LINES)
+}
+
+/// Run a local binary with the call's deadline. A non-zero exit carries the start of the tool's
+/// stderr; exit codes in `input_exits` are reported as input errors, and 127 (the shell's "command
+/// not found", as seen in minimal containers) as a missing binary.
+async fn exec(
+    cmd: &str,
+    args: &[String],
+    deadline: &Deadline,
+    tool: &str,
+    install_hint: &str,
+    input_exits: &[i32],
+) -> Result<Vec<u8>> {
     let mut command = tokio::process::Command::new(cmd);
     // Tesseract's OpenMP threads oversubscribe the CPU when several pages run concurrently (a
     // small PNG took 70 s instead of 0.7 s on 4 cores); one thread per process is the documented
@@ -348,10 +376,16 @@ async fn exec(cmd: &str, args: &[String], deadline: &Deadline, tool: &str, insta
         Err(_) => return Err(Error::timeout(format!("deadline exceeded while running {tool}")).with_provider(NAME)),
     };
     if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(
-            Error::provider(format!("{tool} exited with {}: {}", output.status, stderr.trim())).with_provider(NAME)
-        );
+        let stderr = stderr_excerpt(&String::from_utf8_lossy(&output.stderr));
+        let code = output.status.code();
+        let err = match code {
+            Some(127) => Error::provider(format!("{tool} binary '{cmd}' could not be run (exit 127): {install_hint}")),
+            Some(c) if input_exits.contains(&c) => {
+                Error::input(format!("{tool} could not read the input (exit {c}): {stderr}"))
+            }
+            _ => Error::provider(format!("{tool} exited with {}: {stderr}", output.status)),
+        };
+        return Err(err.with_provider(NAME));
     }
     Ok(output.stdout)
 }
@@ -620,6 +654,40 @@ mod tests {
             .provider_options(json!({"pdftoppm_cmd": "/nonexistent/pdftoppm-puffinparse"}));
         let e = Tesseract.parse(&req, "default").await.unwrap_err();
         assert!(e.message.contains("pdftoppm binary") && e.message.contains("poppler"), "{e}");
+    }
+
+    #[test]
+    fn stderr_is_trimmed_to_a_few_lines() {
+        assert_eq!(stderr_excerpt("  one\ntwo\n"), "one\ntwo");
+        let long: String = (1..=300).map(|i| format!("Syntax Error ({i}): Illegal character\n")).collect();
+        let short = stderr_excerpt(&long);
+        assert_eq!(short.lines().count(), STDERR_LINES + 1);
+        assert!(short.ends_with("... (295 more lines)"), "{short}");
+    }
+
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn exit_codes_are_classified() {
+        let deadline = Deadline::new(10.0);
+        let sh = |script: &str| vec!["-c".to_string(), script.to_string()];
+        let e = exec(
+            "sh",
+            &sh("echo 'Wrong page range' >&2; exit 99"),
+            &deadline,
+            "pdftoppm",
+            "hint",
+            PDFTOPPM_INPUT_EXITS,
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(e.kind, crate::error::ErrorKind::Input);
+        assert!(!e.retryable && e.message.contains("Wrong page range"), "{e}");
+        let e = exec("sh", &sh("exit 127"), &deadline, "tesseract", "install it", &[]).await.unwrap_err();
+        assert_eq!(e.kind, crate::error::ErrorKind::Provider);
+        assert!(e.message.contains("could not be run") && e.message.contains("install it"), "{e}");
+        let e = exec("sh", &sh("exit 2"), &deadline, "pdftoppm", "hint", PDFTOPPM_INPUT_EXITS).await.unwrap_err();
+        assert_eq!(e.kind, crate::error::ErrorKind::Provider);
+        assert!(e.retryable, "{e}");
     }
 
     #[tokio::test]
