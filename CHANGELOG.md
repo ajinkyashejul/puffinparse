@@ -9,6 +9,13 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-08
+
+### Fixed
+
+- Release versions now match across all manifests (`js/package-lock.json` still said 0.1.0), so
+  the release pipeline publishes again; 0.1.1 was tagged but never published.
+
 ### Added
 
 - Agent-friendly website: docs URLs return their Markdown for `Accept: text/markdown` (with
@@ -19,7 +26,7 @@ Python package `puffinparse` share a single version. Entries before the rename s
   endpoints; and a new `/docs/agents/` page, also served as `/agents.md`, with a copyable
   onboarding prompt.
 
-## [0.1.1] - 2026-10-08
+## [0.1.1] - 2026-10-08 [not published]
 
 ### Fixed
 
@@ -278,5 +285,7 @@ Initial release.
   across the three providers; `bench run` disables provider result caches by
   default (`--allow-cache` to opt out) so latency reflects real work.
 
-[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.0...v0.1.2
+[0.1.1]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ajinkyashejul/puffinparse/releases/tag/v0.1.0
