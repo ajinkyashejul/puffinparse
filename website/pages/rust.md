@@ -6,7 +6,7 @@ the benchmark metrics. The Python SDK and the CLI are thin wrappers over it.
 `#![forbid(unsafe_code)]`, no vendor SDK crates — every provider is spoken to over plain HTTPS with
 `reqwest` and `tokio`.
 
-API reference: [docs.rs/puffinparse-core](https://docs.rs/puffinparse-core) *(published on the first crates.io release)*.
+API reference: docs.rs/puffinparse-core once the crate is on crates.io.
 Until then, `cargo doc -p puffinparse-core --open` from a clone.
 
 ## Install

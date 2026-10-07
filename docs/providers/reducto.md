@@ -378,7 +378,7 @@ puffinparse.ocr("locked.pdf", model="reducto/standard",
 
 * Docs home: <https://docs.reducto.ai> · agent guide: <https://docs.reducto.ai/agent-guide.md> ·
   index: <https://docs.reducto.ai/llms.txt>
-* Parse API reference: <https://docs.reducto.ai/api-reference/endpoint/parse>
+* Parse API reference: <https://docs.reducto.ai/parse/overview>
 * Legacy parse schema: <https://docs.reducto.ai/api-reference/legacy/parse>
 * Credit usage / pricing: <https://docs.reducto.ai/reference/credit-usage> · <https://reducto.ai/pricing>
 * Error codes: <https://docs.reducto.ai/reference/error-codes>

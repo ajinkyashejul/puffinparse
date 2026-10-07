@@ -33,7 +33,7 @@ triggers its own parse run and is billed for both, which is why the extract pric
 two line items; re-extracting a file Extend has already parsed bills only the extraction.
 
 Credits are the billing unit; pay-as-you-go is $0.0125/credit (Scale: $0.01). Prices above are the PAYG
-list rate from <https://docs.extend.ai/credits>, used for `ParseResponse.cost_usd`. `parse_auto` is priced
+list rate from <https://docs.extend.ai/general/how-credits-work>, used for `ParseResponse.cost_usd`. `parse_auto` is priced
 at the performance rate, so its estimate is an upper bound. Surcharges PuffinParse does not model: agentic
 text/table correction +1 credit per triggered page, priority parsing ×2, advanced Excel parsing
 3 credits / 1 000 non-empty cells.
@@ -424,7 +424,7 @@ puffinparse.ocr("book.xlsx", model="extend/parse_performance",
 
 * Docs home: <https://docs.extend.ai> · index: <https://docs.extend.ai/llms.txt> ·
   compact platform context: <https://docs.extend.ai/agents.md>
-* Credits and pricing: <https://docs.extend.ai/credits>
+* Credits and pricing: <https://docs.extend.ai/general/how-credits-work>
 * API versions in use: `2026-02-09` (current), `2025-04-21`, `2024-12-23`, `2024-11-14`, `2024-07-30`,
   `2024-02-01` — pin one with `x-extend-api-version`.
 * Webhooks for `parse_run.processed` / `parse_run.failed` (HMAC-SHA256 over `v0:{timestamp}:{body}`)

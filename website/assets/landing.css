@@ -172,8 +172,8 @@ mark.lp-diff { background: var(--lp-soft); color: var(--lp-ink); border-radius: 
   border: 1px solid var(--line); background: var(--bg); color: var(--fg-dim); cursor: pointer;
   transition: border-color .15s, color .15s, background .15s; }
 .lp-tab:hover { border-color: var(--lp-accent); color: var(--fg); }
-.lp-panels { display: grid; }
-.lp-panel { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity .18s; }
+.lp-panels { display: grid; grid-template-columns: minmax(0, 1fr); }
+.lp-panel { grid-area: 1 / 1; min-width: 0; opacity: 0; visibility: hidden; transition: opacity .18s; }
 #lp-tab0:checked ~ .lp-tablist [for="lp-tab0"], #lp-tab1:checked ~ .lp-tablist [for="lp-tab1"],
 #lp-tab2:checked ~ .lp-tablist [for="lp-tab2"], #lp-tab3:checked ~ .lp-tablist [for="lp-tab3"] {
   background: var(--lp-soft); border-color: var(--lp-line); color: var(--lp-ink); font-weight: 600; }
@@ -276,6 +276,8 @@ mark.lp-diff { background: var(--lp-soft); color: var(--lp-ink); border-radius: 
   .lp-btn { flex: 1 1 auto; text-align: center; }
   .lp .top a.plain { font-size: .78rem; }
   .lp .topin { gap: .6rem; padding: 0 1.15rem; }
+  .lp .gh-star [data-gh-label], .lp .gh-star .gh-count { display: none; }  /* icon only on phones */
+  .lp .gh-star { padding-inline: .45rem; }
   .lp-hero-demo { margin-top: 4rem; }
   .lp-perch { top: -70px; right: 1.25rem; }
   .lp-perch .puffin { width: 74px; }

@@ -600,8 +600,8 @@ def leaderboard_card(site: Site) -> str:
     )
     return f"""<section class="card">
 <h2 id="leaderboard-strip">Open benchmark<a class="headerlink" href="#leaderboard-strip">#</a></h2>
-<p>Accuracy, latency and cost, measured through the same client you would use. Exact ground truth,
-deterministic metrics, no LLM judge.</p>
+<p>Accuracy, latency and cost, measured through the same client you would use. Published ground
+truth, deterministic metrics, no LLM judge.</p>
 <div class="table-wrap"><table>
 <thead><tr><th>#</th><th>Model</th><th>Overall</th><th>p50 latency</th><th>$/1k pages</th></tr></thead>
 <tbody>{cells}</tbody></table></div>
@@ -763,6 +763,8 @@ def landing_leaderboard(site: Site, limit: int = 7) -> tuple[str, str]:
 def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
     template = (WEB / "landing" / "index.html").read_text(encoding="utf-8")
     models = [m["qualified"] for p in providers for m in p["models"]]
+    # The hero cycles model strings inside a parse() call, so only models that serve parse.
+    parse_models = [m["qualified"] for p in providers for m in p["models"] if "parse" in m["modes"]]
     rows, dataset = landing_leaderboard(site)
     description = (
         f"{site.tagline} Parse, OCR and schema extraction across {len(providers)} providers and "
@@ -783,10 +785,10 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
         "JSONLD": landing_jsonld(site, description),
         "DESCRIPTION": html.escape(description, quote=True),
         "THEME_BUTTON": THEME_BUTTON,
-        "MODELS": html.escape(json.dumps(models), quote=True),
+        "MODELS": html.escape(json.dumps(parse_models), quote=True),
         "SCAN_LINES": html.escape(json.dumps(list(SCAN_OUTPUT)), quote=True),
         "SCAN_STATIC": html.escape("\n".join(SCAN_OUTPUT)),
-        "DEFAULT_MODEL": models[0] if models else "reducto/standard",
+        "DEFAULT_MODEL": parse_models[0] if parse_models else "reducto/standard",
         "N_PROVIDERS": str(len(providers)),
         "N_MODELS": str(len(models)),
         "N_MODES": str(len(MODES)),
@@ -849,7 +851,7 @@ def page_html(site: Site, page: Page, pages: list[Page]) -> str:
         if toc
         else "<aside></aside>"
     )
-    title = page.title if page.home else f"{page.title} · {site.title}"
+    title = f"Docs · {site.title}" if page.home else f"{page.title} · {site.title}"
     canonical = site.absolute(site.url(page.slug))
     md_url = site.url(page.slug, md=True)
     edit = site.blob(page.source)
@@ -959,7 +961,7 @@ def build(base: str, out_dir: Path, site_url: str, docs_prefix: str = "docs") ->
     by_source = {p.source: p for p in pages}
     by_slug = {p.slug: p for p in pages}
     providers = read_providers()
-    models = [m["qualified"] for p in providers for m in p["models"]]
+    models = [m["qualified"] for p in providers for m in p["models"] if "parse" in m["modes"]]
     md = make_md()
 
     if out_dir.exists():
@@ -1251,11 +1253,17 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
             site.absolute(site.viewer_url),
             OG_IMAGE_BENCHMARK,
         )
+        tags += f'\n<link rel="canonical" href="{site.absolute(site.viewer_url)}">'
         tags += "\n" + benchmark_jsonld(site)
         text = index.read_text(encoding="utf-8")
         stars = f'<script src="{site.base}stars.js" defer></script>'
         head = "\n".join(part for part in (tags, ANALYTICS, stars) if part)
         index.write_text(text.replace("</head>", head + "\n</head>", 1), encoding="utf-8")
+        sitemap = out / "sitemap.xml"
+        if sitemap.is_file():  # written by build() before the viewer exists
+            entry = f"<url><loc>{site.absolute(site.viewer_url)}</loc></url></urlset>"
+            text = sitemap.read_text(encoding="utf-8")
+            sitemap.write_text(text.replace("</urlset>", entry, 1), encoding="utf-8")
     return True
 
 

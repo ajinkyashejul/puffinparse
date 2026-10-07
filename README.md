@@ -496,7 +496,7 @@ let data = extract(req.citations(true)).await?.data;
 
 ## Benchmark
 
-PuffinParse ships an open, reproducible benchmark. Ground truth is exact by construction (the documents are rendered from the same source as the truth files), metrics are deterministic text comparisons, and every run records the dataset hash, model, latency and cost.
+PuffinParse ships an open, reproducible benchmark. Pages from public benchmarks are scored against their own published truth or rules, the synthetic set's truth is exact by construction (its documents are rendered from the same source as the truth files), metrics are deterministic text comparisons with no LLM judge, and every run records the dataset hash, model, latency and cost.
 
 ```bash
 python benchmark/generate_synthetic.py                       # regenerate the dataset (byte-reproducible)
@@ -508,7 +508,7 @@ puffinparse bench score prediction.md truth.md                   # metrics for o
 
 Metrics (after NFKC + markdown stripping + whitespace collapsing, case-insensitive by default):
 
-- **Overall** = `100 × mean(char_similarity)`, where `char_similarity = 1 − levenshtein / max(len)`
+- **Overall** = `100 ×` the mean of each document's headline metric: `char_similarity` (`1 − levenshtein / max(len)`) for transcripts, the table score for table-only pages, the rule pass rate for rule-checked pages; a failed call scores 0 (details in [`benchmark/README.md`](https://github.com/ajinkyashejul/puffinparse/blob/main/benchmark/README.md))
 - **CER**, **WER**, **word F1** (bag-of-words precision / recall)
 - **Order**: Kendall-τ-style agreement of shared line order (reading order)
 - **Table**: character similarity restricted to markdown table rows

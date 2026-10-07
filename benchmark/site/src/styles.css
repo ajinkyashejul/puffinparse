@@ -1534,8 +1534,10 @@ dialog h2 {
   h1 {
     font-size: var(--t-lg);
   }
-  .hide-sm {
-    display: none;
+  .hide-sm,
+  .gh-star.hide-sm,
+  #help-btn {
+    display: none; /* keyboard shortcuts: no use on a phone */
   }
   .brand-sub {
     display: none;

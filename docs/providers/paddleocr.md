@@ -141,4 +141,4 @@ puffinparse.parse("report.pdf", model="paddleocr", base_url="http://gpu-box:8081
 
 * OCR pipeline, serving API: <https://www.paddleocr.ai/latest/en/version3.x/pipeline_usage/OCR.html>
 * PP-StructureV3, serving API: <https://www.paddleocr.ai/latest/en/version3.x/pipeline_usage/PP-StructureV3.html>
-* Serving deployment guide: <https://www.paddleocr.ai/latest/en/version3.x/deployment/serving.html>
+* Serving deployment guide: <https://www.paddleocr.ai> (Deployment → Serving)

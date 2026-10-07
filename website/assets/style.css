@@ -64,6 +64,8 @@ article a:hover { color: var(--scan-ink); text-decoration-color: currentColor; }
 
 main { padding: 2.25rem 0 5rem; min-width: 0; display: grid; grid-template-columns: minmax(0, 76ch) var(--toc); gap: 2.5rem; }
 article { min-width: 0; }
+/* Long identifiers and bare URLs must wrap on phones instead of widening the page. */
+article :not(pre) > code, article a { overflow-wrap: anywhere; }
 .toc { padding-top: .35rem; }
 .toc nav { position: sticky; top: 5rem; max-height: calc(100vh - 7rem); overflow-y: auto; }
 .toc strong { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .09em;

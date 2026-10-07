@@ -224,8 +224,9 @@ doc.raw["result"]["chunks"][0]["blocks"][0]["bbox"]["left"]</code></pre>
   <div class="lp-wrap">
     <p class="lp-kicker">Open benchmark</p>
     <h2>Pick a provider on evidence, not marketing.</h2>
-    <p class="lp-sub">Ground truth is exact by construction — the documents are rendered from the
-      same source as the truth files. The metrics are deterministic text comparisons with no LLM
+    <p class="lp-sub">Public benchmark pages are scored against their own published truth, and the
+      synthetic set is exact by construction (rendered from the same source as its truth). The
+      metrics are deterministic text comparisons with no LLM
       judge, provider result caches are disabled, and every per-document output is committed next
       to the run so you can verify any number yourself.</p>
     <div class="lp-board">
@@ -234,12 +235,12 @@ doc.raw["result"]["chunks"][0]["blocks"][0]["bbox"]["left"]</code></pre>
         <tbody id="lp-board-body">{{LEADERBOARD_ROWS}}</tbody>
       </table>
     </div>
-    <p class="lp-caption">{{LEADERBOARD_DATASET}} (synthetic, ParseBench, olmOCR-bench and
-      OmniDocBench pages, each scored by its own truth) · higher Overall is better</p>
+    <p class="lp-caption">{{LEADERBOARD_DATASET}} (synthetic, ParseBench, olmOCR-bench,
+      OmniDocBench and DP-Bench pages, each scored by its own truth) · higher Overall is better</p>
     <div class="lp-code">
-      <pre><code class="language-bash">puffinparse bench run --dataset benchmark/datasets/combined-v2 \
+      <pre><code class="language-bash">puffinparse bench run --dataset benchmark/datasets/combined-v3 \
     --models reducto/r-1 extend/parse_light llamaparse/cost_effective --dry-run
-puffinparse bench report benchmark/results/2026-09-24-combined-v2.json</code></pre>
+puffinparse bench report benchmark/results/2026-09-25-combined-v3.json</code></pre>
     </div>
     <p class="lp-note">The results viewer opens every run document by document: the input, the
       ground truth, each model's raw output, a word-level diff and the commands to reproduce that
