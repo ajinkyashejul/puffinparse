@@ -13,13 +13,15 @@ scored by its own ground truth: `synthetic-v1` (exact transcripts), a ParseBench
 table truth), an olmOCR-bench subset (its unit-test style rules, `max_diffs` honoured), an
 OmniDocBench subset (reading-order transcripts; English and Chinese) and a DP-Bench subset (Upstage's
 document-parsing benchmark: reading-order transcripts and table truth, MIT). Compare models within a
-source column rather than across sources. 1,194 calls, 0 failures, $14.65 at list price.
+source column rather than across sources. 1,194 API calls, 0 failures, $14.65 at list price.
+The free `tesseract/default` baseline (Tesseract 5.5.1, `eng`, one OpenMP thread per process,
+10 documents at a time on a 10-core Mac) was added to the same run on 2026-10-08 with
+`bench run --resume`, scored by the same scorer v2: 199 documents, 0 failures, 2 min 42 s wall.
+Its latency is local CPU time on a shared machine, not comparable to the API rows.
 OmniDocBench is research-only, so its per-page outputs are not committed (scores are).
-`tesseract/default` is not in this run; its free-baseline row is in `combined-v2`.
 
-Older runs are kept for comparison: `combined-v2` (159 documents, 2026-09-24, includes the
-Tesseract baseline), `combined-v1` (79 documents, 2026-09-11) and `synthetic-v1` (39 documents,
-2026-09-11); the 2026-09-11 runs were re-scored offline with scorer v2 on 2026-09-24
+Older runs are kept for comparison: `combined-v2` (159 documents, 2026-09-24), `combined-v1`
+(79 documents, 2026-09-11) and `synthetic-v1` (39 documents, 2026-09-11); the 2026-09-11 runs were re-scored offline with scorer v2 on 2026-09-24
 (`puffinparse bench rescore`; latency and cost as originally measured). See
 [`docs/benchmarks/findings.md`](../docs/benchmarks/findings.md) for what scorer v2 changed.
 
@@ -33,6 +35,7 @@ Tesseract baseline), `combined-v1` (79 documents, 2026-09-11) and `synthetic-v1`
 | 4 | `reducto/standard` | **79.78** | 0.756 | 0.567 | 0.703 | 0.755 | 0.913 | 0.872 | 0.859 | 66.0% | 3019 ms | 8443 ms | 3797 | $15.00 | 0/199 (+1 empty) | combined-v3 v3.0.0 |
 | 5 | `extend/parse_performance` | **77.43** | 0.734 | 0.678 | 0.875 | 0.748 | 0.920 | 0.885 | 0.856 | 67.4% | 21965 ms | 33103 ms | 25309 | $25.00 | 0/199 | combined-v3 v3.0.0 |
 | 6 | `extend/parse_light` | **76.46** | 0.725 | 0.690 | 0.890 | 0.735 | 0.914 | 0.870 | 0.867 | 65.4% | 32038 ms | 52619 ms | 33067 | $6.25 | 0/199 | combined-v3 v3.0.0 |
+| 7 | `tesseract/default` | **56.36** | 0.620 | 0.685 | 1.116 | 0.639 | 0.841 | 0.007 | 0.008 | 45.4% | 5381 ms | 26893 ms | 7749 | $0.00 | 0/199 (+4 empty) | combined-v3 v3.0.0 |
 
 ### Overall score by category
 
@@ -44,6 +47,7 @@ Tesseract baseline), `combined-v1` (79 documents, 2026-09-11) and `synthetic-v1`
 | `reducto/standard` | 78.9 | 76.6 | 58.3 | 63.1 | 100.0 | 99.9 | 93.1 | 54.3 | 99.9 | 80.3 | 11.5 | 100.0 | 16.8 | 81.5 | 99.9 | 99.5 | 84.1 | 100.0 | 67.3 | 83.1 | 99.9 | 64.4 | 99.8 | 90.7 | 62.6 | 100.0 | 81.0 | 100.0 | 86.8 | 100.0 | 88.7 | 79.5 | 80.1 | 100.0 |
 | `extend/parse_performance` | 78.2 | 76.9 | 38.3 | 57.4 | 99.6 | 99.9 | 93.2 | 47.4 | 100.0 | 60.1 | 5.2 | 100.0 | 41.5 | 80.9 | 100.0 | 97.4 | 90.9 | 100.0 | 53.2 | 83.1 | 100.0 | 61.5 | 99.7 | 91.8 | 58.8 | 100.0 | 77.6 | 99.9 | 73.7 | 83.9 | 84.4 | 92.7 | 79.1 | 100.0 |
 | `extend/parse_light` | 74.5 | 77.0 | 39.1 | 56.4 | 100.0 | 99.9 | 92.8 | 46.6 | 100.0 | 60.9 | 8.3 | 100.0 | 45.1 | 81.8 | 100.0 | 97.1 | 77.7 | 100.0 | 52.7 | 73.8 | 100.0 | 59.4 | 99.4 | 91.4 | 61.3 | 100.0 | 74.3 | 99.9 | 74.0 | 81.0 | 83.2 | 84.4 | 83.1 | 100.0 |
+| `tesseract/default` | 14.9 | 50.6 | 66.3 | 44.3 | 99.9 | 99.6 | 93.8 | 32.9 | 99.2 | 85.4 | 28.1 | 100.0 | 5.8 | 68.8 | 100.0 | 95.2 | 80.2 | 99.9 | 59.9 | 61.3 | 99.5 | 50.6 | 97.9 | 2.1 | 38.8 | 100.0 | 50.6 | 97.7 | 45.2 | 80.1 | 31.4 | 0.0 | 69.3 | 100.0 |
 
 ### `combined-v3` by source
 
@@ -53,6 +57,7 @@ Tesseract baseline), `combined-v1` (79 documents, 2026-09-11) and `synthetic-v1`
 | dpbench | 40 | `llamaparse/agentic` | 88.77 |
 | dpbench | 40 | `reducto/standard` | 87.65 |
 | dpbench | 40 | `reducto/r-1` | 86.90 |
+| dpbench | 40 | `tesseract/default` | 86.77 |
 | dpbench | 40 | `extend/parse_light` | 79.63 |
 | dpbench | 40 | `extend/parse_performance` | 79.45 |
 | olmocr | 40 | `reducto/r-1` | 68.82 |
@@ -61,24 +66,28 @@ Tesseract baseline), `combined-v1` (79 documents, 2026-09-11) and `synthetic-v1`
 | olmocr | 40 | `llamaparse/agentic` | 65.43 |
 | olmocr | 40 | `reducto/standard` | 64.15 |
 | olmocr | 40 | `extend/parse_light` | 61.09 |
+| olmocr | 40 | `tesseract/default` | 41.67 |
 | omnidocbench | 40 | `llamaparse/cost_effective` | 82.14 |
 | omnidocbench | 40 | `llamaparse/agentic` | 77.39 |
 | omnidocbench | 40 | `reducto/r-1` | 73.77 |
 | omnidocbench | 40 | `reducto/standard` | 68.00 |
 | omnidocbench | 40 | `extend/parse_performance` | 65.93 |
 | omnidocbench | 40 | `extend/parse_light` | 65.15 |
+| omnidocbench | 40 | `tesseract/default` | 35.70 |
 | parsebench | 40 | `llamaparse/agentic` | 86.27 |
 | parsebench | 40 | `llamaparse/cost_effective` | 83.74 |
 | parsebench | 40 | `reducto/r-1` | 82.96 |
 | parsebench | 40 | `reducto/standard` | 79.66 |
 | parsebench | 40 | `extend/parse_light` | 78.52 |
 | parsebench | 40 | `extend/parse_performance` | 77.44 |
+| parsebench | 40 | `tesseract/default` | 20.73 |
 | synthetic | 39 | `reducto/r-1` | 100.00 |
 | synthetic | 39 | `llamaparse/agentic` | 100.00 |
 | synthetic | 39 | `llamaparse/cost_effective` | 100.00 |
 | synthetic | 39 | `reducto/standard` | 99.96 |
 | synthetic | 39 | `extend/parse_performance` | 98.70 |
 | synthetic | 39 | `extend/parse_light` | 98.48 |
+| synthetic | 39 | `tesseract/default` | 97.98 |
 
 ## combined-v2
 

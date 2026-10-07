@@ -1,0 +1,84 @@
+KR IAAGS Pacatl wer ah
+Sa PAC PAA FATS TARA
+AL Wa aAAsT a HE WES AREA
+GAT TAY ATT FaOt OPA AU
+IAA AAA ofeefa Wa weoha
+SIA ROT TATA PAU ARIS, SAAT
+Taf A ST VT WA AAT PTAC AAT
+a ea Aa INA GAT GATT FATT
+7 22 SARI SASIhOC SAMA
+SRR TAROT SET FC a
+IPEAST A TMA TT BAA
+
+Long Island
+Community Hospital
+101 Hospital Road
+Patchogue, NY 11772
+631-654-7100
+
+www.licommunityhospital.org 9 AY 448
+“a. Bt 3 aR Be” BIA “ater
+QR & Wv[3 HEI PAO NAC:
+
+MAAS AGA HAT FCAT THT?
+
+Shife SAE a Hie Gay oats yAWTET
+ABI TWA A HAVA ah AS aT HPA
+apna yar A BC MRC! AS BIAS HOA
+amefof afar AA BSP SMSOM AI Welly
+TARA TH Wear 148 2APT WHOIS Aso
+TT HT TN SAAT CMTS AI Wry
+TART AE asthe PAT WAC AT Stal SATA
+TAT FAS AAT
+
+ora Shar Sf?
+
+TWIT AT ak apa TAA TSAR CIT
+oan Sra FART AT BC AR AT, AAT
+PI HTS AAG AK, H-ATAA AANA AAW,
+aT 3R-aPT WRN, OR TANIA TA-Tod 228
+STARE TW WASPS ATBIRIN YFHorAvsly
+aamay Spr (FPL) "eal
+
+orrat zat arena art TAP TN PaOl AT MAG,
+TRSt NAC SPA At AABN TAY AGT PATA OT
+R A8 PIA, Ol MA MT GT AMS IAG
+10% am act 3a AT
+
+PAC WATT?
+
+ATATT?
+
+Ri, WPA Me PT WATS) STTIT] SPIES
+at is orate wae afer 631-654-7140
+
+orrat aC DT Shr wl arraTet STANTS
+FART GAOT MATA, IAS SAARC
+APPR AT FA AACA AT, WHA WoT
+aT AIBAR Ww WS WY WAPGMA
+SANS TAROT Aa GANT A AMAA Pa
+AAA IAA GAT A PA Aa, ORL OA
+BAT FAT SAO 188 TMATTAC BH AVl TeTSe
+RI Bl MATS HRA PATS SAAT Bacher
+SM A FTO TAN PO AMA BPA
+
+Pf TAI Tere?
+
+Tan Pade, aT ota ARIMA BIA
+ee bf Aafibs Fal aol TAT AL
+waMaAtesCh Fat Pqq sa Avi oI
+SIAN FARIA HAA TAA Bl TT ASEH
+oa Ufa
+
+IA SSSA Ff Sf TAPAAT ATSAT ATA?
+& jet TOA A a: PG AASART,
+R URS Pafcaeh MATS SPA
+Bess Fae Peg WAM WAT ARO
+ay 14 Ola AAP! ay TAC AAT ATO MIA
+MPC ATTA afer aA AaST ESSA AA
+TAMAP A; ABAITG/TAAS Fy eAlerts
+agro a Fine sae afaaal reat
+TW WAKA WA RPO FA; 248
+AAGATS AAG ATA CEP A, BEEP,
+
+I Aoi PIG FWP AAG!

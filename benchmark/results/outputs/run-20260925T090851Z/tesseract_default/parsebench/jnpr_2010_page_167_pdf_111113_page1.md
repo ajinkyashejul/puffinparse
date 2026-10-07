@@ -1,0 +1,74 @@
+Table of Contents
+
+Exhibit Index
+Incorporated by Reference
+Exhibit No. Exhibit Filing Exhibit No. File No. File Date
+31 Juniper Networks, Inc. Amended and Restated Certificate of 10-K 31 0000-26339 3/27/2001
+Incorporation
+3.2 Amended and Restated Bylaws of Juniper Networks, Inc. 8-K 3.1 000-34501 9/3/2010
+10.1 Form of Indemnification Agreement entered into by the Registrant with 10-Q 10.1 0000-26339 11/14/2003
+
+each of its directors, officers and certain employees
+10.2 Amended and Restated 1996 Stock Plant++ 8-K 10.1 000-26339 11/9/2005
+
+Form of Stock Option Agreement for the Juniper Networks, Inc.
+Amended and Restated 1996 Stock Plant++
+
+Form of Notice of Grant and Restricted Stock Unit Agreement for the
+Juniper Networks, Inc. Amended and Restated 1996 Stock Plan++
+
+10.5 Juniper Networks 2000 Nonstatutory Stock Option Plant++ S-8 10.1 333-92086 7/9/2002
+
+Form of Option Agreement for the Juniper Networks 2000
+Nonstatutory Stock Option Plan++
+
+10.7 Juniper Networks, Inc. 2006 Equity Incentive Plan, as amended++ 10-Q 10.1 000-34501 11/5/2010
+Form of Stock Option Agreement for the Juniper Networks, Inc. 2006
+
+10.3 10-Q 10.16 000-26339 11/2/2004
+
+10.4 8-K 10.2 000-26339 11/9/2005
+
+10.6 10-K 10.6 000-26339 3/4/2005
+
+10.8 Equity Incentive Plan++ 8-K 10.2 000-26339 5/24/2006
+Form of Non-Employee Director Stock Option Agreement for the
+
+10.9 Juniper Networks, Inc. 2006 Equity Incentive Plant++ 8-K 10.3 000-26339 9/24/2006
+Form of Notice of Grant and Restricted Stock Unit Agreement for the
+
+10.10 Juniper Networks, Inc. 2006 Equity Incentive Plant++ 10-K 10.20 000-26339 2/29/2008
+Form of Notice of Grant and Performance Share Agreement for the
+
+10.11 Juniper Networks, Inc. 2006 Equity Incentive Plant++ 10-K 10.21 000-26339 2/29/2008
+Form of India Stock Option Agreement under the Juniper Networks,
+
+10.12 Inc. 2006 Equity Incentive Plan 10-Q 10.2 000-26339 5/9/2008
+Form of India Restricted Stock Unit Agreement under the Juniper
+
+10.13 Networks, Inc. 2006 Equity Incentive Plan 10-Q 10.3 000-26339 9/9/2008
+
+10.14 Unisphere Networks, Inc. Second Amended and Restated 1999 Stock 8-8 10.1 333-92090 7/9/2002
+Incentive Plant++
+
+10.15 NetScreen Technologies, Inc. 1997 Equity Incentive Plant++ S-1+ 10.2 333-71048 10/5/2001
+
+10.16 NetScreen Technologies, Inc. 2001 Equity Incentive Plant++ S-1+ 10.3 333-71048 12/10/2001
+
+10.17 NetScreen Technologies, Inc. 2002 Stock Option Plant++ S-8 4.7 333-114688 4/21/2004
+
+10.18 Neoteris 2001 Stock Plant++ S-8+ 4.1 333-110709 11/24/2003
+
+10.19 Kagoor Networks, Inc. 2003 General Stock Option Plan++ S-8 4.1 333-124572 5/3/2005
+
+10.20 Kagoor Networks, Inc. 2003 Israel Stock Option Plan++ S-8 4.2 333-124572 5/3/2005
+
+10.21 Redline Networks 2000 Stock Plant++ S-8 4.1 333-124610 5/4/2005
+
+10.22 Peribit Networks 2000 Stock Plan++ S-8 99.1 333-126404 7/6/2005
+
+10.23 Amended and Restated Juniper Networks 1999 10-Q 10.2 000-26339 8/9/2007
+
+Employee Stock Purchase Plan++
+
+108

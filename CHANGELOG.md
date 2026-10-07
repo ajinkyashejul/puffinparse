@@ -31,6 +31,13 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ### Added
 
+- **Tesseract baseline in `combined-v3`.** `tesseract/default` (Tesseract 5.5.1, one OpenMP
+  thread per process) was added to the 2026-09-25 run with `bench run --resume`: 199 documents,
+  0 failures, Overall 56.36 (dpbench 86.77, olmocr 41.67, omnidocbench 35.70, parsebench 20.73,
+  synthetic 97.98). The six API rows are unchanged. Licence audit notes in the DP-Bench README
+  (5 of the 40 vendored pages are Upstage's own documents, kept under its MIT declaration) and
+  the olmOCR README (redistribution with attribution complies with ODC-BY and AI2's guidelines).
+
 - **Puffin brand** (ADR-24, `docs/DESIGN.md` Brand): a puffin mark (favicon and header logo on the
   landing page, docs and benchmark viewer) and a waving puffin mascot with three pages in its beak, shown
   on the landing hero, the 404 page and the README. Every page now has an Open Graph / Twitter
