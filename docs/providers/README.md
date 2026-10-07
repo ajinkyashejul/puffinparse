@@ -1,7 +1,7 @@
 # Provider reference
 
 One page per provider, describing exactly what PuffinParse sends, what comes back, and how the two are
-mapped onto the unified `OcrResponse`, checked against the implementation in
+mapped onto the unified response types (`ParseResponse`, `TextResponse`, `ExtractResponse`), checked against the implementation in
 `crates/puffinparse-core/src/providers/`.
 
 Verification differs by provider, and the **Status** column says which applies:

@@ -40,15 +40,16 @@ crates/puffinparse-core/src/
   pricing.rs/.json list prices, overridable
   http.rs         shared client, retry/backoff, deadline, polling helper
   jobs.rs         async jobs API types: JobHandle, JobStatus, webhook events (SPEC §15)
-  provider.rs     OcrProvider trait + helpers (keys, base URLs, multipart)
-  providers/      reducto.rs, extend.rs, llamaparse.rs (+ mod.rs build()); vlm.rs = shared
-                  helpers of the vision-LLM providers (gemini, openai, anthropic)
+  provider.rs     Provider trait + helpers (keys, base URLs, multipart)
+  providers/      one file per provider (18) + mod.rs build(); vlm.rs = shared helpers of the
+                  vision-LLM providers (gemini, openai, anthropic); local.rs = shared helpers of
+                  the self-hosted engines (tesseract, docling, paddleocr)
   testutil.rs     test-only loopback HTTP server for provider wire tests
   compat/         render a unified response in a vendor's native JSON shape (docs/COMPAT.md)
   router.rs       ordered / round-robin fallbacks, stats
   bench.rs        normalisation + metrics + summaries
   util.rs         deep_merge, page-range parsing
-crates/puffinparse-cli/src/   main.rs (parse, providers, serve), bench.rs (run, report, score)
+crates/puffinparse-cli/src/   main.rs (parse, ocr, extract, providers, serve), bench.rs (run, report, score, rescore)
 crates/puffinparse-server/src/ api.rs (routes, auth, fallback loop), config.rs, usage.rs, metrics.rs, log.rs
 crates/puffinparse-python/    PyO3 module `puffinparse._core`
 python/puffinparse/           public API, types, exceptions; python/tests/

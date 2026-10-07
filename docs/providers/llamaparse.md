@@ -37,7 +37,7 @@ parse-only tier. Extract prices are per page, on top of the parse the extraction
 | `llamaparse/agentic_plus` | `configuration.tier=agentic_plus` | $0.11875 / page (50 + 45 credits) |
 
 1 000 credits = $1.25 ⇒ 1 credit = $0.00125. Prices come from
-<https://developers.llamaindex.ai/llamaparse/general/pricing/> and drive `OcrResponse.cost_usd`;
+<https://developers.llamaindex.ai/llamaparse/general/pricing/> and drive `ParseResponse.cost_usd`;
 add-ons PuffinParse does not model include `extract_layout` (+3 credits/page) and enriched forms
 (+10 credits per form page). The live per-tier version list is `GET /api/v2/parse/versions`.
 
@@ -95,7 +95,7 @@ values are skipped; objects/arrays are serialised as JSON text. A key already pr
 
 | LlamaParse field | PuffinParse unified field | Notes |
 |---|---|---|
-| upload/poll `id` | `OcrResponse.provider_job_id` | |
+| upload/poll `id` | `ParseResponse.provider_job_id` | |
 | `pages[].page` | `Page.page_number` | Already 1-based. |
 | `pages[].md` | `Page.markdown` | Trimmed. With `output="text"` the page text is used instead. |
 | `pages[].text` | `Page.text` | Trimmed; falls back to `markdown_to_text(md)` when blank. |

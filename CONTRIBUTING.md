@@ -43,7 +43,7 @@ cargo build --workspace
 
 # Python side — use a virtualenv; maturin installs into the active one.
 python -m venv .venv && source .venv/bin/activate
-pip install maturin ruff mypy pytest
+pip install maturin ruff mypy pytest pytest-asyncio
 maturin develop            # builds crates/puffinparse-python, installs `puffinparse`
 ```
 
@@ -125,27 +125,33 @@ code.
 
 1. **Implement the trait.** Create
    `crates/puffinparse-core/src/providers/<name>.rs` and implement
-   `OcrProvider` (see `crates/puffinparse-core/src/provider.rs`). Use the shared
+   `Provider` (see `crates/puffinparse-core/src/provider.rs`): `parse`, plus
+   `ocr` (derived from `parse` by default) and `extract` for the modes the
+   provider serves. Use the shared
    HTTP helpers in `src/http.rs` so you inherit retries, backoff, deadlines and
    error classification — do not build your own `reqwest::Client`, and do not
    vendor a provider SDK. Map the provider's response onto the unified
-   `OcrResponse` / `Page` / `Block` / `Usage` types in `src/types.rs`:
+   `ParseResponse` / `TextResponse` / `ExtractResponse`, `Page`, `Block` and
+   `Usage` types in `src/types.rs`:
    - normalise `bbox` to 0..1 with a top-left origin;
    - map the provider's block vocabulary onto `BlockType`, unknown → `other`;
    - fill `Usage.pages` with the *billed* page count;
    - map provider errors onto the `Error` variants in `src/error.rs`
      (401/403 → auth, 429 → rate limit, 5xx / failed job → provider error);
-     only `ProviderError`, `RateLimitError` and `TimeoutError` are fallback-eligible
-     in the router, so classify carefully.
+     only `ProviderError`, `RateLimitError`, `TimeoutError` and `NetworkError` are
+     fallback-eligible in the router by default, so classify carefully.
 2. **Register it.** Add the module and a `match` arm to `build()` in
    `crates/puffinparse-core/src/providers/mod.rs`.
 3. **Declare its models.** Add a `ProviderInfo` entry to `PROVIDERS` in
    `crates/puffinparse-core/src/model.rs`: `name`, `display_name`, `env_var`,
-   `base_url`, `docs`, and one `ModelInfo` per mode with exactly one
-   `default: true`. Model strings are `"<provider>/<model>"`; keep them short,
+   `base_url`, `docs`, and one `ModelInfo` per model listing the `modes` it
+   serves; mark the provider's default with `default: true` (a bare provider
+   name resolves to the default model that serves the requested mode, else
+   the first model that does). Model strings are `"<provider>/<model>"`; keep them short,
    lowercase and stable — they are public API.
 4. **Add pricing.** Add `"<provider>/<model>"` entries to
-   `crates/puffinparse-core/src/pricing.json` with `per_page_usd`, a `source` URL
+   `crates/puffinparse-core/src/pricing.json` with a USD-per-page price for each
+   mode the model serves (`"parse"`, `"ocr"`, `"extract"`), a `source` URL
    pointing at the public pricing page, and the `updated` date. Public list
    prices only.
 5. **Add a fixture + normalisation test.** Save one real (redacted) response as
@@ -290,8 +296,12 @@ agree on the design.
 
 1. Update `CHANGELOG.md`: move `## [Unreleased]` items under a new
    `## [x.y.z] - YYYY-MM-DD` heading.
-2. Bump `workspace.package.version` in the root `Cargo.toml`, run
-   `cargo check --workspace` to refresh `Cargo.lock`, and commit.
+2. Bump the version in every manifest (root `Cargo.toml`,
+   `crates/puffinparse-cli/Cargo.toml`, `pyproject.toml`, `js/package.json`
+   and `js/package-lock.json`), run `cargo check --workspace` to refresh
+   `Cargo.lock`, and commit. The release workflow fails if any of them
+   disagree with the tag.
 3. Tag `vx.y.z` and push the tag. `.github/workflows/release.yml` builds
-   wheels + an sdist + CLI archives, publishes to PyPI via trusted publishing,
-   and creates the GitHub Release.
+   wheels, an sdist, CLI archives and the gateway image, publishes them, and
+   creates the GitHub Release. [docs/RELEASING.md](docs/RELEASING.md) has the
+   full procedure.

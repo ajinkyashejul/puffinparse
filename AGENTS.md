@@ -22,7 +22,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 
 # Python (inside a virtualenv; rebuild after any Rust change that Python calls)
-pip install maturin ruff mypy pytest
+pip install maturin ruff mypy pytest pytest-asyncio
 maturin develop --release
 ruff check python/ benchmark/ examples/ && ruff format --check python/ benchmark/ examples/
 mypy python/puffinparse

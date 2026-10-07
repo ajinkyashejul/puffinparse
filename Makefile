@@ -1,7 +1,7 @@
 # PuffinParse developer tasks. Run `make help` for a list.
 #
 # Python targets expect an active virtualenv with the dev tooling installed:
-#   python -m venv .venv && . .venv/bin/activate && pip install maturin ruff mypy pytest
+#   python -m venv .venv && . .venv/bin/activate && pip install maturin ruff mypy pytest pytest-asyncio
 
 BENCH_DATASET ?= benchmark/datasets/synthetic-v1
 BENCH_MODELS  ?= reducto/standard extend/parse_performance llamaparse/cost_effective

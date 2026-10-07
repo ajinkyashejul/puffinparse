@@ -65,16 +65,16 @@ assignees: ""
 
 See [CONTRIBUTING.md](../../CONTRIBUTING.md#3-adding-a-provider).
 
-- [ ] `crates/puffinparse-core/src/providers/<name>.rs` implements `OcrProvider`
+- [ ] `crates/puffinparse-core/src/providers/<name>.rs` implements `Provider`
       using the shared HTTP helpers (retries, backoff, deadlines)
-- [ ] Response mapped to `OcrResponse` / `Page` / `Block` / `Usage`; block types
+- [ ] Response mapped to `ParseResponse` (and `TextResponse` / `ExtractResponse` where served) / `Page` / `Block` / `Usage`; block types
       mapped to `BlockType` (unknown → `other`); bboxes normalised to 0..1,
       top-left origin
 - [ ] Provider errors mapped onto the `Error` variants (401/403 → auth,
       429 → rate limit, 5xx / failed job → provider)
 - [ ] Registered in `providers/mod.rs` `build()`
-- [ ] Models added to `model.rs` `PROVIDERS` (exactly one `default: true`)
-- [ ] Pricing added to `crates/puffinparse-core/src/pricing.json` with `source`
+- [ ] Models added to `model.rs` `PROVIDERS` with their `modes` and a `default: true`
+- [ ] Per-mode pricing added to `crates/puffinparse-core/src/pricing.json` with `source`
       and `updated`
 - [ ] Redacted fixture in `crates/puffinparse-core/tests/fixtures/` plus a
       normalisation unit test (no network)

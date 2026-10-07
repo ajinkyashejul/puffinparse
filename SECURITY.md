@@ -58,7 +58,7 @@ dependency you introduced.
 - **Keys are never logged.** `PUFFINPARSE_LOG=debug` traces requests, retries and
   polling, but `Authorization` headers and key values are redacted; errors carry
   provider, status code, message and request/job id only. If you ever see a key
-  in log output, in an error message, or in a serialized `OcrResponse`, that is
+  in log output, in an error message, or in a serialized response, that is
   a vulnerability — please report it.
 - Document bytes are sent only to the selected provider. PuffinParse has no
   telemetry and makes no network calls other than to the provider you choose.

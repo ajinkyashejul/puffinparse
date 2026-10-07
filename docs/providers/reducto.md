@@ -31,7 +31,7 @@ not the legacy `document_url` schema.
 
 The first three models serve `parse` and `ocr`; the last two serve `extract` only (§5).
 Prices are public pay-as-you-go list prices (source: <https://docs.reducto.ai/reference/credit-usage>),
-used only to fill `OcrResponse.cost_usd = per_page_usd × usage.pages`. Reducto bills "complex" pages a
+used only to fill `ParseResponse.cost_usd = per_page_usd × usage.pages`. Reducto bills "complex" pages a
 surcharge credit on top of the base page credit, so the estimate is a floor for `standard`/`agentic`.
 
 ## 3. Request flow PuffinParse uses
@@ -106,7 +106,7 @@ replace). So `provider_options` keys are top-level Reducto request keys — `set
 
 | Reducto field | PuffinParse unified field | Notes |
 |---|---|---|
-| `job_id` | `OcrResponse.provider_job_id` | |
+| `job_id` | `ParseResponse.provider_job_id` | |
 | `result.chunks[].content` | `Page.markdown` | Only when every block in the chunk is on one page; multiple such chunks on a page are joined with a blank line. |
 | `result.chunks[].blocks[]` | `Page.blocks[]` | Grouped by page, reading order preserved. |
 | `blocks[].type` | `Block.type` | See mapping below. |

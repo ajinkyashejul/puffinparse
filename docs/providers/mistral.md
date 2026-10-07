@@ -113,7 +113,7 @@ PuffinParse's own fields, so its keys are top-level `/v1/ocr` request keys — `
 
 | Mistral field | PuffinParse unified field | Notes |
 |---|---|---|
-| — | `OcrResponse.provider_job_id` | Never set: the call is synchronous and returns no job id. |
+| — | `ParseResponse.provider_job_id` | Never set: the call is synchronous and returns no job id. |
 | `pages[].index` | `Page.page_number` | **0-based on the wire**, `page_number = index + 1`. |
 | `pages[].markdown` | `Page.markdown` | Used verbatim; `output="text"` runs it through `markdown_to_text`. Whole-document `markdown` is the pages joined by a blank line. |
 | `pages[].dimensions.{width,height}` | `Page.width` / `Page.height` | Pixels of the page screenshot at `dimensions.dpi` (typically 200), not PDF points. |

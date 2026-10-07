@@ -33,7 +33,7 @@ triggers its own parse run and is billed for both, which is why the extract pric
 two line items; re-extracting a file Extend has already parsed bills only the extraction.
 
 Credits are the billing unit; pay-as-you-go is $0.0125/credit (Scale: $0.01). Prices above are the PAYG
-list rate from <https://docs.extend.ai/credits>, used for `OcrResponse.cost_usd`. `parse_auto` is priced
+list rate from <https://docs.extend.ai/credits>, used for `ParseResponse.cost_usd`. `parse_auto` is priced
 at the performance rate, so its estimate is an upper bound. Surcharges PuffinParse does not model: agentic
 text/table correction +1 credit per triggered page, priority parsing ×2, advanced Excel parsing
 3 credits / 1 000 non-empty cells.
@@ -119,8 +119,8 @@ deep-merges everything that remains at the **top level** of the body — which i
 
 | Extend field | PuffinParse unified field | Notes |
 |---|---|---|
-| `id` (`pr_…`) | `OcrResponse.provider_job_id` | |
-| `config.engine` | `OcrResponse.model` | `extend/<engine>` read back from the resolved config; falls back to `parse_performance`. |
+| `id` (`pr_…`) | `ParseResponse.provider_job_id` | |
+| `config.engine` | `ParseResponse.model` | `extend/<engine>` read back from the resolved config; falls back to `parse_performance`. |
 | `output.chunks[].content` | `Page.markdown` | Only for chunks with `type == "page"` and `pageRange.start == pageRange.end`. |
 | `output.chunks[].blocks[]` | `Page.blocks[]` | Reading order preserved. |
 | `blocks[].type` | `Block.type` | See mapping below. |
