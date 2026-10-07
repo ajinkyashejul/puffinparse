@@ -30,12 +30,16 @@ confidences**. Every page comes back as a single `text` block whose `content` is
 | `openai/gpt-5.6-terra` | `model=gpt-5.6-terra`, `reasoning.effort=low` | ~$0.0114 / page |
 | `openai/gpt-5.6-sol` | `model=gpt-5.6-sol`, `reasoning.effort=low` | ~$0.0200 / page |
 | `openai/gpt-6-astra` | `model=gpt-6-astra`, `reasoning.effort=low` | ~$0.0500 / page |
+| `openai/gpt-6-luna` | `model=gpt-6-luna`, `reasoning.effort=low` | ~$0.0005 / page |
 
 **Pricing is per token, not per page**, so `pricing.json` holds an *estimate*: **1,500 input +
 700 output tokens per page** (OpenAI bills a PDF page as extracted text *plus* a page image;
 1.5k input tokens is the low end of the published 1,500–3,000 range, so a dense page costs more).
 Rates per 1M tokens (<https://developers.openai.com/api/docs/pricing>, 2026-09-11):
-luna $0.20/$1.20, terra $2/$12, sol $4/$20, astra $10/$50.
+luna $0.20/$1.20, terra $2/$12, sol $4/$20, astra $10/$50. `gpt-6-luna` (added 2026-10-08 from
+<https://developers.openai.com/api/docs/models/gpt-6-luna>: text and image input, Responses API,
+structured outputs, reasoning effort `none`…`max`) is $0.10/$0.50 short context ($0.20/$0.75 long
+context, which `PRICES` does not model).
 
 The authoritative number for a call is `response.usage.provider_cost_usd`, which PuffinParse computes
 from the **actual** `usage.input_tokens`/`usage.output_tokens` and the per-token table embedded in

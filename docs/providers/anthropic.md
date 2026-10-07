@@ -29,12 +29,19 @@ handwriting, and you lose geometry — **no bounding boxes, no per-block types, 
 | `anthropic/claude-sonnet-5` *(default)* | `model=claude-sonnet-5`, `output_config.effort=low` | ~$0.0100 / page |
 | `anthropic/claude-haiku-4-5` | `model=claude-haiku-4-5`, `temperature=0` | ~$0.0050 / page |
 | `anthropic/claude-opus-5` | `model=claude-opus-5`, `output_config.effort=low` | ~$0.0250 / page |
+| `anthropic/claude-opus-5-5` | `model=claude-opus-5-5`, `output_config.effort=low`, `tool_choice: auto` + strict parse tool | ~$0.0200 / page |
+| `anthropic/claude-haiku-5-5` | `model=claude-haiku-5-5`, `output_config.effort=low` | ~$0.0005 / page |
 
 **Pricing is per token, not per page**, so `pricing.json` holds an *estimate*: **1,500 input +
 700 output tokens per page** — Anthropic's own guidance is 1,500–3,000 text tokens per page *plus*
 the page image's visual tokens, so a dense page costs more than the estimate. Rates per 1M tokens
 (<https://platform.claude.com/docs/en/about-claude/pricing>, 2026-09-11): Sonnet 5 $2/$10,
-Haiku 4.5 $1/$5, Opus 5 $5/$25.
+Haiku 4.5 $1/$5, Opus 5 $5/$25. Added 2026-10-08 from the model pages
+(<https://platform.claude.com/docs/en/models/opus-5-5/overview>,
+<https://platform.claude.com/docs/en/models/haiku-5-5/overview>; PDF support for all active models per
+<https://platform.claude.com/docs/en/build-with-claude/pdf-support>): Opus 5.5 $4/$20; Haiku 5.5
+$0.10/$0.50 for prompts up to 100,000 tokens and $0.50/$2.50 above (the whole call moves to the
+higher tier; `provider_cost_usd` models it, the per-page estimate uses the short-prompt rate).
 
 `response.usage.provider_cost_usd` is computed from the **actual** `usage.input_tokens` /
 `usage.output_tokens` and the per-token table embedded in `anthropic.rs` (`PRICES`, dated
@@ -43,8 +50,9 @@ Haiku 4.5 $1/$5, Opus 5 $5/$25.
 
 Other model ids work without a registry change via `provider_options={"model": "claude-opus-4-8"}`;
 the embedded table covers the Opus 4.6–5, Sonnet 4.6/5, Haiku 4.5 and Fable 5/5.1 ids, and cost
-falls back to `None` for anything it does not know. **Claude Fable 5.1 / Mythos 5.1 do not work
-here**: they reject forced `tool_choice` with a 400 (see §6).
+falls back to `None` for anything it does not know. Models that reject a forced `tool_choice`
+(Opus 5.5, Sonnet 5.5, Fable 5.1, Mythos 5.1) are sent `tool_choice: {"type": "auto"}` instead
+(see §6); the gate follows the model id actually sent, including a `provider_options.model` override.
 
 ## 3. Request flow PuffinParse uses
 
@@ -88,8 +96,9 @@ One call. `POST {base}/v1/messages` with `x-api-key`, `anthropic-version: 2023-0
 * **`temperature: 0` is only sent to Claude 4.5-era and older models** (`claude-haiku-4-5`,
   `claude-sonnet-4-5`, `claude-opus-4-5`, `claude-3*`). Claude 4.6 and later removed sampling
   parameters and return a 400 if you send them.
-* **`output_config: {"effort": "low"}` is only sent to models that support effort** (Opus 4.6–5,
-  Sonnet 4.6/5). Haiku 4.5 rejects it. Effort controls how much (billed) thinking Claude does;
+* **`output_config: {"effort": "low"}` is only sent to models that support effort** (Opus 4.6–5.5,
+  Sonnet 4.6–5.5, Fable 5.1, Haiku 5.5). Haiku 4.5 rejects it. Opus 5.5 and Haiku 5.5 default to
+  `medium` and cannot turn thinking off, so `low` is the cheapest setting. Effort controls how much (billed) thinking Claude does;
   transcription is perception, not reasoning, so `low` is the default.
 * **`thinking` is never sent.** Adaptive thinking (on by default on Sonnet 5 / Opus 5) is compatible
   with forced tool use; *manual* extended thinking (`thinking: {"type": "enabled"}`) is not and
@@ -176,10 +185,16 @@ so keep documents small enough to finish inside the deadline.
 
 ## 6. Gotchas
 
-* **Forced tool use is not universal.** Claude Fable 5.1 and Mythos 5.1 reject
+* **Forced tool use is not universal.** Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1 reject
   `tool_choice: {"type": "tool"}` with `400 tool_choice: type "tool" and "any" are not supported for
-  this model`, so they are deliberately absent from the registry. Manual extended thinking
-  (`thinking: {"type": "enabled"}`) has the same restriction — do not add it via `provider_options`.
+  this model`. For those (`AUTO_TOOL_MODELS`) PuffinParse sends `tool_choice: {"type": "auto"}`, marks
+  the fixed `emit_pages` tool `strict: true`, and appends "Answer by calling the `<tool>` tool exactly
+  once; never answer in prose." to the system prompt. If the model still answers in prose, the call
+  fails with the usual "no 'emit_pages' tool_use block" provider error (fixture:
+  `anthropic_messages_parse_auto_tool.json`). Haiku 5.5 accepts a forced tool (its answer then starts
+  with the tool call and has no thinking block). Manual extended thinking
+  (`thinking: {"type": "enabled"}`) is rejected on all 4.7+ / 5.x models — do not add it via
+  `provider_options`.
 * **Sampling parameters are gone on Claude 4.6+.** `temperature`, `top_p` and `top_k` return a 400 on
   Sonnet 5 / Opus 5 and the 4.6+ family. PuffinParse only sends `temperature: 0` to the older models that
   still accept it; determinism on the newer ones comes from the schema and the prompt, not sampling.

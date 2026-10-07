@@ -17,6 +17,17 @@ Python package `puffinparse` share a single version. Entries before the rename s
   list the failed ones in `metadata.opendocrouter_failed_pages`, files over ~3 MB go through the
   uploads flow, documents over 50 pages run async, and `submit` / `retrieve` jobs are supported.
 - Gateway key allow-lists accept nested prefixes such as `opendocrouter/google/*`.
+- Frontier vision models in the existing providers (docs-only, from each vendor's model and pricing
+  pages, checked 2026-10-08): `anthropic/claude-opus-5-5`, `anthropic/claude-haiku-5-5`,
+  `gemini/3-flash-preview`, `gemini/3.8-flash-low` (Gemini 3.8 Flash with
+  `thinkingLevel: "low"`) and `openai/gpt-6-luna`, with per-page estimates in `pricing.json` and
+  exact token prices (including Haiku 5.5's over-100k-token tier) in the providers.
+
+### Changed
+
+- Anthropic: models that reject a forced `tool_choice` (Opus 5.5, Sonnet 5.5, Fable 5.1, Mythos 5.1)
+  now get `tool_choice: auto` with a strict parse tool and an instruction to call it, decided from
+  the model id actually sent (so a `provider_options.model` override is covered too).
 
 ## [0.1.4] - 2026-10-08
 

@@ -85,6 +85,8 @@ struct Call {
     api_key: String,
     base: String,
     api_model: String,
+    /// `generationConfig.thinkingConfig.thinkingLevel` a registry preset pins (e.g. `3.8-flash-low`).
+    thinking_level: Option<&'static str>,
     deadline: Deadline,
     retry: Retry,
 }
@@ -108,6 +110,7 @@ impl Call {
             api_key,
             base,
             api_model: api_model(request, model),
+            thinking_level: thinking_level(model),
             deadline: Deadline::new(request.timeout_secs),
             retry: Retry::new(request.max_retries),
         })
@@ -125,6 +128,9 @@ impl Call {
                 "response_schema": schema,
             },
         });
+        if let Some(level) = self.thinking_level {
+            body["generationConfig"]["thinkingConfig"] = json!({"thinkingLevel": level});
+        }
         if let Some(Value::Object(opts)) = &request.provider_options {
             let mut opts = opts.clone();
             for own in ["model", "prompt", "prompt_suffix"] {
@@ -327,11 +333,23 @@ impl Source {
 }
 
 /// `gemini/2.5-flash` → API model `gemini-2.5-flash`; `provider_options.model` overrides it
-/// verbatim so a model newer than the registry can still be reached.
+/// verbatim so a model newer than the registry can still be reached. A thinking preset such as
+/// `3.8-flash-low` calls its base model (`gemini-3.8-flash`).
 fn api_model(request: &DocumentRequest, model: &str) -> String {
     match request.option("model").and_then(Value::as_str).map(str::trim).filter(|s| !s.is_empty()) {
         Some(m) => m.to_string(),
+        None if thinking_level(model).is_some() => format!("gemini-{}", model.strip_suffix("-low").unwrap_or(model)),
         None => format!("gemini-{model}"),
+    }
+}
+
+/// Registry presets that pin a Gemini 3 thinking level. `low` is the lowest level Gemini 3.8 Flash
+/// accepts (`minimal` is 3.5/3.6 only); its default is `medium`.
+/// Source: <https://ai.google.dev/gemini-api/docs/generate-content/thinking> (checked 2026-10-08).
+fn thinking_level(model: &str) -> Option<&'static str> {
+    match model {
+        "3.8-flash-low" => Some("low"),
+        _ => None,
     }
 }
 
@@ -848,7 +866,8 @@ fn response_text(wire: &GenerateContentResponse) -> Result<String> {
 
 /// Public list prices in USD per 1M tokens (paid tier), used to fill `usage.provider_cost_usd`
 /// exactly from `usageMetadata` instead of the per-page estimate in `pricing.json`.
-/// Source: <https://ai.google.dev/gemini-api/docs/pricing> (checked 2026-09-11).
+/// Source: <https://ai.google.dev/gemini-api/docs/pricing> (checked 2026-09-11; Gemini 3 Flash preview
+/// added 2026-10-08).
 struct TokenPrice {
     input: f64,
     output: f64,
@@ -864,7 +883,8 @@ fn token_price(model: &str) -> Option<TokenPrice> {
         "3.5-flash" => TokenPrice { input: 1.50, output: 9.00, long: None },
         "3.5-flash-lite" => TokenPrice { input: 0.30, output: 2.50, long: None },
         // Introductory pricing through 2026-12-31; the list rate doubles to 1.50 / 7.50 after that.
-        "3.8-flash" => TokenPrice { input: 0.75, output: 3.75, long: None },
+        "3.8-flash" | "3.8-flash-low" => TokenPrice { input: 0.75, output: 3.75, long: None },
+        "3-flash-preview" => TokenPrice { input: 0.50, output: 3.00, long: None },
         _ => return None,
     })
 }
@@ -1087,6 +1107,7 @@ mod tests {
             api_key: "k".into(),
             base: DEFAULT_BASE.into(),
             api_model: api_model(&req, "2.5-flash"),
+            thinking_level: None,
             deadline: Deadline::new(10.0),
             retry: Retry::new(0),
         };
@@ -1105,6 +1126,34 @@ mod tests {
         let file = Source::File { uri: "https://x/files/abc".into(), mime: "application/pdf".into() };
         let body = call.body(&file, "p".into(), json!({}), &DocumentRequest::from_path("a.pdf"));
         assert_eq!(body["contents"][0]["parts"][0]["file_data"]["file_uri"], "https://x/files/abc");
+    }
+
+    #[test]
+    fn low_thinking_preset_calls_the_base_model_with_thinking_level_low() {
+        let req = DocumentRequest::from_path("a.pdf");
+        assert_eq!(api_model(&req, "3.8-flash-low"), "gemini-3.8-flash");
+        assert_eq!(api_model(&req, "3-flash-preview"), "gemini-3-flash-preview");
+        assert_eq!(thinking_level("3.8-flash"), None);
+        let call = Call {
+            api_key: "k".into(),
+            base: DEFAULT_BASE.into(),
+            api_model: api_model(&req, "3.8-flash-low"),
+            thinking_level: thinking_level("3.8-flash-low"),
+            deadline: Deadline::new(10.0),
+            retry: Retry::new(0),
+        };
+        let source = Source::Inline { data: bytes::Bytes::from_static(b"%PDF-1.4"), mime: "application/pdf".into() };
+        let body = call.body(&source, "p".into(), pages_schema(), &req);
+        assert_eq!(body["generationConfig"]["thinkingConfig"], json!({"thinkingLevel": "low"}));
+        // A caller can still raise it.
+        let req = req.provider_options(json!({"generationConfig": {"thinkingConfig": {"thinkingLevel": "high"}}}));
+        let body = call.body(&source, "p".into(), pages_schema(), &req);
+        assert_eq!(body["generationConfig"]["thinkingConfig"]["thinkingLevel"], "high");
+        // Same token prices as the base model.
+        let u = UsageMetadata { prompt_token_count: 1000, candidates_token_count: 100, ..Default::default() };
+        assert_eq!(token_cost("3.8-flash-low", &u), token_cost("3.8-flash", &u));
+        let preview = token_cost("3-flash-preview", &u).unwrap();
+        assert!((preview - (1000.0 * 0.50 + 100.0 * 3.00) / 1e6).abs() < 1e-12);
     }
 
     #[test]

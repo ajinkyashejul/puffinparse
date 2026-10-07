@@ -23,9 +23,9 @@ Verification differs by provider, and the **Status** column says which applies:
 | Mistral | [`mistral.md`](mistral.md) | `providers/mistral.rs` | `MISTRAL_API_KEY` | `ocr-latest` *(default)*, `ocr-4-1`, `ocr-4-0`, `ocr-2512` | docs-only |
 | Azure AI Document Intelligence | [`azure.md`](azure.md) | `providers/azure.rs` | `AZURE_DOCUMENT_INTELLIGENCE_KEY` + `AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT` | `read` *(ocr default)*, `layout` *(parse default)*, `invoice` *(extract default)*, `receipt`, `id_document`, `tax_us_w2`, `custom` | docs-only |
 | AWS Textract | [`textract.md`](textract.md) | `providers/textract.rs` | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` (+ `AWS_SESSION_TOKEN`, `AWS_REGION`) | `detect-text` *(ocr default)*, `layout`, `queries` *(extract default)*, `forms` | docs-only |
-| Google Gemini | [`gemini.md`](gemini.md) | `providers/gemini.rs` | `GEMINI_API_KEY` | `2.5-flash` *(default)*, `2.5-pro`, `2.5-flash-lite`, `3.5-flash`, `3.5-flash-lite`, `3.8-flash` | docs-only |
-| OpenAI | [`openai.md`](openai.md) | `providers/openai.rs` | `OPENAI_API_KEY` | `gpt-5.6-luna` *(default)*, `gpt-5.6-terra`, `gpt-5.6-sol`, `gpt-6-astra` | docs-only |
-| Anthropic | [`anthropic.md`](anthropic.md) | `providers/anthropic.rs` | `ANTHROPIC_API_KEY` | `claude-sonnet-5` *(default)*, `claude-haiku-4-5`, `claude-opus-5` | docs-only |
+| Google Gemini | [`gemini.md`](gemini.md) | `providers/gemini.rs` | `GEMINI_API_KEY` | `2.5-flash` *(default)*, `2.5-pro`, `2.5-flash-lite`, `3.5-flash`, `3.5-flash-lite`, `3.8-flash`, `3.8-flash-low`, `3-flash-preview` | docs-only |
+| OpenAI | [`openai.md`](openai.md) | `providers/openai.rs` | `OPENAI_API_KEY` | `gpt-5.6-luna` *(default)*, `gpt-5.6-terra`, `gpt-5.6-sol`, `gpt-6-astra`, `gpt-6-luna` | docs-only |
+| Anthropic | [`anthropic.md`](anthropic.md) | `providers/anthropic.rs` | `ANTHROPIC_API_KEY` | `claude-sonnet-5` *(default)*, `claude-haiku-4-5`, `claude-opus-5`, `claude-opus-5-5`, `claude-haiku-5-5` | docs-only |
 | Mathpix | [`mathpix.md`](mathpix.md) | `providers/mathpix.rs` | `MATHPIX_APP_ID` + `MATHPIX_APP_KEY` | `pdf` *(default)*, `text` | docs-only |
 | Datalab (Marker) | [`datalab.md`](datalab.md) | `providers/datalab.rs` | `DATALAB_API_KEY` | `fast`, `balanced` *(default)*, `accurate` | docs-only |
 | Unstructured | [`unstructured.md`](unstructured.md) | `providers/unstructured.rs` | `UNSTRUCTURED_API_KEY` | `hi_res` *(default)*, `fast`, `auto` | docs-only |

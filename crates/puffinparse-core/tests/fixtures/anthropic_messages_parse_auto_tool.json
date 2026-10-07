@@ -1,0 +1,36 @@
+{
+  "id": "msg_01Opus55AutoToolChoice0001",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-opus-5-5",
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "EqQBCkYIBxgCKkA-redacted-signature"
+    },
+    {
+      "type": "tool_use",
+      "id": "toolu_01Opus55emitpages000001",
+      "name": "emit_pages",
+      "input": {
+        "pages": [
+          {
+            "page_number": 1,
+            "markdown": "# Cedar Ridge Supply\n\nInvoice #5521\n\n| Item | Qty | Price |\n| --- | --- | --- |\n| Fence post | 12 | $8.50 |"
+          }
+        ]
+      }
+    }
+  ],
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "stop_details": null,
+  "usage": {
+    "input_tokens": 2480,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 512,
+    "service_tier": "standard"
+  }
+}

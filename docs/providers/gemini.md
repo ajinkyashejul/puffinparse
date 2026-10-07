@@ -39,11 +39,26 @@ The PuffinParse model name is the Gemini model id minus the `gemini-` prefix.
 | `gemini/3.5-flash` | `gemini-3.5-flash` | $1.50 / $9.00 | $0.00945 |
 | `gemini/3.5-flash-lite` | `gemini-3.5-flash-lite` | $0.30 / $2.50 | $0.00245 |
 | `gemini/3.8-flash` | `gemini-3.8-flash` | $0.75 / $3.75 *(introductory, through 2026-12-31; $1.50 / $7.50 after)* | $0.004125 |
+| `gemini/3.8-flash-low` | `gemini-3.8-flash` + `thinkingConfig.thinkingLevel: "low"` | same as `3.8-flash` | $0.004125 |
+| `gemini/3-flash-preview` | `gemini-3-flash-preview` | $0.50 / $3.00 | $0.00315 |
 
-All six support `parse`, `ocr` and `extract` — the mode is a prompt + schema, not an endpoint, so
+All eight support `parse`, `ocr` and `extract` — the mode is a prompt + schema, not an endpoint, so
 every model serves every mode. The 2.5 trio is the safe default; the 3.x entries come from the
 models page and the changelog (3.5 Flash GA 2026-05-19, 3.5 Flash-Lite GA 2026-07-21, 3.8 Flash GA
 2026-09-02) and have not been exercised against a live key here.
+
+`3-flash-preview` and `3.8-flash-low` were added 2026-10-08 from the official pages:
+<https://ai.google.dev/gemini-api/docs/models/gemini-3-flash-preview> (model code
+`gemini-3-flash-preview`, preview; inputs text, image, video, audio and PDF),
+<https://ai.google.dev/gemini-api/docs/pricing> (Gemini 3 Flash preview $0.50 in / $3.00 out per 1M,
+thinking included) and <https://ai.google.dev/gemini-api/docs/generate-content/thinking> (Gemini 3
+models take `generationConfig.thinkingConfig.thinkingLevel`; 3.8 Flash accepts `low`, `medium`
+(its default) and `high`, not `minimal`). **`3.8-flash-low` is a preset, not a separate API model**:
+it calls `gemini-3.8-flash` and sets `thinkingLevel: "low"`, the variant OpenDocRouter runs. Thinking
+tokens are billed as output, so the low level is what makes it cheaper in practice; the per-page
+estimate (which ignores thinking) is the same as `3.8-flash`. Pass
+`provider_options={"generationConfig": {"thinkingConfig": {"thinkingLevel": "medium"}}}` to override
+the level on either model.
 
 **Cost is computed from tokens, not from pages.** Each response's `usageMetadata` is priced exactly
 (`promptTokenCount × input + (candidatesTokenCount + thoughtsTokenCount) × output`) and lands in

@@ -27,7 +27,7 @@ Two things make switching real rather than aspirational. **Modes**: every call n
 
 | | |
 |---|---|
-| **Providers (v0.1)** | 19 providers · 71 models · 3 modes. **Live-verified** against the real APIs: [Reducto](https://reducto.ai), [Extend](https://extend.ai), [LlamaParse](https://cloud.llamaindex.ai). **Verified locally**: the self-hosted Tesseract and Docling. **Docs-only** (implemented from the provider's API documentation and tested against fixture payloads, not yet run live): Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI, OpenDocRouter and the self-hosted PaddleOCR ([help verify them](https://github.com/ajinkyashejul/puffinparse/issues/10)). [Full table](#model-names) |
+| **Providers (v0.1)** | 19 providers · 76 models · 3 modes. **Live-verified** against the real APIs: [Reducto](https://reducto.ai), [Extend](https://extend.ai), [LlamaParse](https://cloud.llamaindex.ai). **Verified locally**: the self-hosted Tesseract and Docling. **Docs-only** (implemented from the provider's API documentation and tested against fixture payloads, not yet run live): Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI, OpenDocRouter and the self-hosted PaddleOCR ([help verify them](https://github.com/ajinkyashejul/puffinparse/issues/10)). [Full table](#model-names) |
 | **Modes** | `parse` (markdown + blocks), `ocr` (plain text + boxes), `extract` (JSON from a schema) |
 | **Core** | Rust (`puffinparse-core`): `reqwest` + `tokio`, no vendor SDKs, `#![forbid(unsafe_code)]` |
 | **SDKs** | Python 3.9+ (sync + async, fully typed) and Node.js / TypeScript ([`js/`](https://github.com/ajinkyashejul/puffinparse/blob/main/js/README.md)), both on the same Rust core |
@@ -299,6 +299,8 @@ page per provider.
 | `gemini/3.5-flash` | parse, ocr, extract | $0.00945 · $0.00945 · $0.00495 | Gemini 3.5 Flash: frontier Flash generation (GA 2026-05-19) |
 | `gemini/3.5-flash-lite` | parse, ocr, extract | $0.00245 · $0.00245 · $0.0012 | Gemini 3.5 Flash-Lite: low-latency 3.x tier (GA 2026-07-21) |
 | `gemini/3.8-flash` | parse, ocr, extract | $0.004125 · $0.004125 · $0.00225 | Gemini 3.8 Flash: newest Flash model (GA 2026-09-02, introductory pricing) |
+| `gemini/3.8-flash-low` | parse, ocr, extract | $0.004125 · $0.004125 · $0.00225 | Gemini 3.8 Flash with thinkingConfig.thinkingLevel=low (cheaper, faster transcription) |
+| `gemini/3-flash-preview` | parse, ocr, extract | $0.00315 · $0.00315 · $0.00165 | Gemini 3 Flash preview (gemini-3-flash-preview; PDF and image input) |
 
 **OpenAI** · `OPENAI_API_KEY` · docs-only — Vision transcription through the Responses API. Per-page prices are estimates, as for Gemini.
 
@@ -308,6 +310,7 @@ page per provider.
 | `openai/gpt-5.6-terra` | parse, ocr, extract | $0.0114 · $0.0114 · $0.0114 | OpenAI Responses API, gpt-5.6-terra (balanced capability/price) |
 | `openai/gpt-5.6-sol` | parse, ocr, extract | $0.02 · $0.02 · $0.02 | OpenAI Responses API, gpt-5.6-sol (flagship GPT-5.6) |
 | `openai/gpt-6-astra` | parse, ocr, extract | $0.05 · $0.05 · $0.05 | OpenAI Responses API, gpt-6-astra (most capable, most expensive) |
+| `openai/gpt-6-luna` | parse, ocr, extract | $0.0005 · $0.0005 · $0.0005 | OpenAI Responses API, gpt-6-luna (cheapest GPT-6, image and PDF input) |
 
 **Anthropic (Claude)** · `ANTHROPIC_API_KEY` · docs-only — Vision transcription through the Messages API. Per-page prices are estimates.
 
@@ -316,6 +319,8 @@ page per provider.
 | `anthropic/claude-sonnet-5` | parse `*`, ocr `*`, extract `*` | $0.01 · $0.01 · $0.01 | Claude Messages API, claude-sonnet-5 (balanced vision transcription) |
 | `anthropic/claude-haiku-4-5` | parse, ocr, extract | $0.005 · $0.005 · $0.005 | Claude Messages API, claude-haiku-4-5 (cheapest, 200K context) |
 | `anthropic/claude-opus-5` | parse, ocr, extract | $0.025 · $0.025 · $0.025 | Claude Messages API, claude-opus-5 (highest accuracy) |
+| `anthropic/claude-opus-5-5` | parse, ocr, extract | $0.02 · $0.02 · $0.02 | Claude Messages API, claude-opus-5-5 (current Opus; tool_choice auto, no forced tool) |
+| `anthropic/claude-haiku-5-5` | parse, ocr, extract | $0.0005 · $0.0005 · $0.0005 | Claude Messages API, claude-haiku-5-5 (cheapest Claude, 1M context) |
 
 **Mathpix** · `MATHPIX_APP_KEY` (+ `MATHPIX_APP_ID`) · docs-only — Maths-first OCR: Mathpix Markdown with LaTeX, line and word polygons.
 
