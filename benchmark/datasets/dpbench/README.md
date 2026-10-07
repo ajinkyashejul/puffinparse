@@ -75,8 +75,38 @@ plus `merged-cells` and `has-formula`.
 | **Total** | **200** | **40** |
 
 All 200 upstream pages convert; none is skipped. One candidate over the 600 KB per-page limit
-was passed over during selection. The reference carries no per-page source or domain, so the
-subset cannot be balanced or tagged by Library of Congress / OER / Upstage.
+was passed over during selection. The reference carries no per-page source or domain field, so
+the adapter does not balance or tag the subset by Library of Congress / OER / Upstage; the
+provenance audit below was done by hand.
+
+## Provenance and licence audit (2026-10-08)
+
+The dataset card says the 200 pages come from 90 Library of Congress pages, 90 Open Educational
+Resources pages and 20 Upstage internal documents, and `reference.json` has no source field.
+Reading the reference text of every page at the pinned commit, the ids fall into contiguous
+blocks: `…0001`–`…0090` are Library of Congress material (they end with the Law Library of
+Congress report `…0085`–`…0090`), `…0091`–`…0180` are openly licensed textbooks and reports, and
+**`…0181`–`…0200` are the 20 Upstage documents**: an Upstage company deck (`…0181`–`…0184`), the
+SOLAR 10.7B paper (`…0185`–`…0197`, arXiv:2312.15166) and an Upstage OCR Pack deck
+(`…0198`–`…0200`).
+
+**5 of our 40 vendored PDFs are Upstage documents:**
+
+| Id | Content | Rights |
+|---|---|---|
+| `01030000000181` | Upstage company deck ("Making AI Beneficial") | Upstage's own; covered only by the dataset's MIT declaration |
+| `01030000000199` | Upstage OCR Pack deck, model evaluation slide | Upstage's own; covered only by the dataset's MIT declaration |
+| `01030000000187` | SOLAR 10.7B paper, Table 1 page | Upstage authors; MIT here, and the paper is also CC BY 4.0 on arXiv |
+| `01030000000191` | SOLAR 10.7B paper, acknowledgements page | as above |
+| `01030000000195` | SOLAR 10.7B paper, appendix A | as above |
+
+They are kept. Upstage is the copyright holder of all five and published them inside a dataset
+it declares MIT, which permits redistribution with the copyright and permission notice; every
+manifest entry carries the DP-Bench attribution and `license: MIT`. The residual risk is that
+the MIT declaration is only in the card front-matter (no `LICENSE` file), which the adapter
+re-checks on every build. If Upstage ever narrows the declaration, these five ids are the ones to
+drop (re-run the adapter with them excluded and bump the dataset version). The 35 others are
+Library of Congress or OER pages, whose own licences are public domain or open.
 
 ## Caveats
 
@@ -87,7 +117,7 @@ subset cannot be balanced or tagged by Library of Congress / OER / Upstage.
 - **Chart and figure text counts against a parser here.** Upstream drops prediction elements that
   fall inside a ground-truth figure/chart region (`--filter-by-gt-area`), so transcribing axis
   labels costs nothing there. A transcript has no regions, so text a parser emits for a chart is
-  extra text against this truth. Tesseract, which OCRs every label, scores 65 on the `chart`
+  extra text against this truth. Tesseract, which OCRs every label, scores 66 on the `chart`
   pages against 99 on `text` pages. Read `has-chart` / `has-figure` pages with that in mind.
 - Upstream text is kept verbatim, including end-of-line hyphenation (`func-\ntions`), so a parser
   that de-hyphenates loses a character there.

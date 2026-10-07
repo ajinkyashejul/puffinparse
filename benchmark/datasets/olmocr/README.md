@@ -13,6 +13,28 @@ A curated subset of **[olmOCR-bench](https://huggingface.co/datasets/allenai/olm
 - Cite: Poznanski et al., *olmOCR: Unlocking Trillions of Tokens in PDFs with Vision Language
   Models*, arXiv:2502.18443. Each document keeps its page's original `source_url`.
 
+## Redistribution check (2026-10-08)
+
+The dataset card says the data *"is licensed under ODC-BY-1.0"* and is intended for research
+and educational use in accordance with AI2's Responsible Use Guidelines. Both were read on
+2026-10-08:
+
+- **ODC-BY-1.0** allows copying, redistributing and adapting the database (a subset and a
+  converted rule format count as a derivative database) provided the use is attributed and the
+  licence notice is kept. We do both: this README, the manifest's `license` / `attribution`
+  on every document, and the original `source_url` per page.
+- **AI2's Responsible Use Guidelines** ask users to evaluate outputs critically and list
+  prohibited uses (harm, harassment, deception, security and privacy attacks, undisclosed
+  automated posting, consequential decisions without a human in the loop). They contain no
+  redistribution or extra attribution clause and impose nothing on downstream redistributors.
+  Benchmarking document parsers is research and evaluation, which the guidelines permit.
+
+**Conclusion: redistributing this 40-document subset with attribution complies.** One caveat
+the card does not address: ODC-BY covers the database, not the copyright in each page. The
+pages come from arXiv, the Internet Archive, the Library of Congress and AI2's crawl, and AI2
+itself redistributes them under ODC-BY. We rely on the same basis and keep each page's
+`source_url` so a rights holder can identify a page and ask for it to be removed.
+
 ## Layout
 
 ```
