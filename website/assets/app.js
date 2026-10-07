@@ -23,10 +23,11 @@
 
   /* ---- copy to clipboard, with the plain-http fallback ---- */
   function copyText(text, btn) {
+    var label = btn.getAttribute("data-label") || "Copy";
     var done = function () {
       btn.textContent = "Copied";
       btn.classList.add("done");
-      setTimeout(function () { btn.textContent = "Copy"; btn.classList.remove("done"); }, 1400);
+      setTimeout(function () { btn.textContent = label; btn.classList.remove("done"); }, 1400);
     };
     var fallback = function () {            // clipboard API is unavailable over plain http
       var ta = document.createElement("textarea");
@@ -227,6 +228,15 @@
     else if (e.key === "Escape") { input.blur(); panel.hidden = true; }
   });
   document.addEventListener("click", function (e) { if (!panel.contains(e.target) && e.target !== input) panel.hidden = true; });
+
+  /* ---- deep link: /docs/?q=router opens the search with that query (WebSite SearchAction) ---- */
+  var initial = "";
+  try { initial = new URLSearchParams(location.search).get("q") || ""; } catch (e) { /* old browser */ }
+  if (initial) {
+    input.value = initial;
+    input.focus();
+    load().then(function () { render(input.value); });
+  }
   document.addEventListener("keydown", function (e) {
     var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
     if ((e.key === "/" && !typing) || (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey))) {

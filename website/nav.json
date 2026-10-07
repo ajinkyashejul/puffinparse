@@ -24,6 +24,13 @@
           "title": "Getting started",
           "source": "website/pages/getting-started.md",
           "description": "Install, set a provider key, and make your first call from Python, the CLI or Rust."
+        },
+        {
+          "slug": "agents",
+          "title": "PuffinParse for agents",
+          "nav_title": "For agents",
+          "source": "website/pages/agents.md",
+          "description": "For coding agents: install, model strings, choosing a model from the benchmark, minimal examples, key handling rules and a copyable onboarding prompt."
         }
       ]
     },

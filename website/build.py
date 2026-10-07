@@ -14,7 +14,7 @@ The site has two halves:
     python website/build.py                     # -> website/dist, base URL "/"
     python website/build.py --base-url /preview # hosted under a subpath
     python website/build.py --check             # build, then verify every internal link
-    python website/build.py --write-redirects   # refresh the /<slug> -> /docs/<slug> map in vercel.json
+    python website/build.py --write-redirects   # refresh the redirects + Markdown routes in vercel.json
 
 The only third-party dependency is ``markdown`` (``pip install markdown``); everything else is
 standard library. No syntax highlighter is used, so code blocks stay plain ``<pre><code>``.
@@ -97,6 +97,149 @@ def social_meta(site: Site, title: str, description: str, url: str) -> str:
     return "\n".join(f'<meta {k}="{v}" content="{html.escape(c, quote=True)}">' for k, v, c in tags)
 
 
+MIT_LICENSE_URL = "https://opensource.org/license/mit"
+
+
+def json_ld(data: dict[str, Any]) -> str:
+    """One ``<script type="application/ld+json">`` block. ``</`` is escaped so no string in the
+    data can close the script element early."""
+    payload = json.dumps({"@context": "https://schema.org", **data}, ensure_ascii=False, indent=1)
+    payload = payload.replace("</", "<\\/")
+    return f'<script type="application/ld+json">\n{payload}\n</script>'
+
+
+def landing_jsonld(site: Site, description: str) -> str:
+    """The landing page describes the software and the site (with the docs search deep link)."""
+    home = site.absolute(site.base)
+    docs = site.absolute(site.docs_base)
+    install = "pip install puffinparse (Python 3.9+) or npm install puffinparse (Node.js 18+)"
+    return json_ld(
+        {
+            "@graph": [
+                {
+                    "@type": ["SoftwareApplication", "SoftwareSourceCode"],
+                    "@id": f"{home}#software",
+                    "name": site.title,
+                    "description": f"{site.summary} Install: {install}.",
+                    "url": home,
+                    "codeRepository": site.repo,
+                    "programmingLanguage": ["Rust", "Python", "TypeScript"],
+                    "license": MIT_LICENSE_URL,
+                    "applicationCategory": "DeveloperApplication",
+                    "operatingSystem": "Linux, macOS, Windows",
+                    "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+                    "installUrl": site.absolute(site.url("getting-started")),
+                    "downloadUrl": "https://pypi.org/project/puffinparse/",
+                    "softwareRequirements": "Python 3.9+ or Node.js 18+",
+                    "softwareHelp": {"@type": "CreativeWork", "url": docs},
+                    "isAccessibleForFree": True,
+                },
+                {
+                    "@type": "WebSite",
+                    "@id": f"{home}#website",
+                    "name": site.title,
+                    "url": home,
+                    "description": description,
+                    "inLanguage": "en",
+                    "about": {"@id": f"{home}#software"},
+                    "potentialAction": {
+                        "@type": "SearchAction",
+                        "target": {"@type": "EntryPoint", "urlTemplate": f"{docs}?q={{search_term_string}}"},
+                        "query-input": "required name=search_term_string",
+                    },
+                },
+            ]
+        }
+    )
+
+
+def page_jsonld(site: Site, page: Page) -> str:
+    """A docs page is a TechArticle within the site, with its Markdown twin as an encoding."""
+    home = site.absolute(site.base)
+    data: dict[str, Any] = {
+        "@type": "TechArticle",
+        "headline": page.title,
+        "description": page.description,
+        "url": site.absolute(site.url(page.slug)),
+        "inLanguage": "en",
+        "license": MIT_LICENSE_URL,
+        "isPartOf": {"@type": "WebSite", "@id": f"{home}#website", "name": site.title, "url": home},
+        "about": {"@id": f"{home}#software"},
+    }
+    if page.has_md:
+        data["encoding"] = {
+            "@type": "MediaObject",
+            "encodingFormat": "text/markdown",
+            "contentUrl": site.absolute(site.url(page.slug, md=True)),
+        }
+    return json_ld(data)
+
+
+# Licence URLs for the SPDX ids the benchmark manifests use.
+LICENSE_URLS = {
+    "CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "Apache-2.0": "https://www.apache.org/licenses/LICENSE-2.0",
+    "ODC-By-1.0": "https://opendatacommons.org/licenses/by/1-0/",
+    "MIT": MIT_LICENSE_URL,
+}
+
+
+def benchmark_jsonld(site: Site) -> str:
+    """Dataset markup for the results viewer: the results themselves plus each redistributed
+    source dataset with its licence. Index-only datasets (research-only licences such as
+    OmniDocBench) are listed as ``isBasedOn`` only; their data is not served here."""
+    parts: list[dict[str, Any]] = []
+    based_on: list[dict[str, Any]] = []
+    for manifest_path in sorted((ROOT / "benchmark" / "datasets").glob("*/manifest.json")):
+        name = manifest_path.parent.name
+        if name.startswith("combined-"):
+            continue  # unions of the sources below, not datasets of their own
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        upstream = (manifest.get("upstream") or {}).get("url")
+        license_url = LICENSE_URLS.get(str(manifest.get("license", "")))
+        if license_url is None:
+            if upstream:
+                based_on.append({"@type": "Dataset", "name": name, "url": upstream})
+            continue
+        entry: dict[str, Any] = {
+            "@type": "Dataset",
+            "name": f"{site.title} benchmark: {name}",
+            "description": manifest.get("description") or name,
+            "url": site.blob(f"benchmark/datasets/{name}", tree=True),
+            "license": license_url,
+            "version": str(manifest.get("version", "")),
+        }
+        if upstream:
+            entry["isBasedOn"] = upstream
+        if manifest.get("attribution"):
+            entry["creditText"] = manifest["attribution"]
+        parts.append(entry)
+    viewer = site.absolute(site.viewer_url)
+    results: dict[str, Any] = {
+        "@type": "Dataset",
+        "name": f"{site.title} benchmark results",
+        "description": (
+            "Accuracy, latency and cost of document-parsing and OCR providers, measured with exact "
+            "ground truth and deterministic metrics. Every run, per-document score and model output "
+            "is published as JSON and Markdown."
+        ),
+        "url": viewer,
+        "isAccessibleForFree": True,
+        "creator": {"@type": "Organization", "name": site.title, "url": site.absolute(site.base)},
+        "distribution": [
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": f"{viewer}data/index.json",
+            }
+        ],
+        "hasPart": parts,
+    }
+    if based_on:
+        results["isBasedOn"] = based_on
+    return json_ld(results)
+
+
 THEME_BUTTON = (
     '<button class="iconbtn" id="theme" type="button" aria-label="Switch theme" title="Switch theme">'
     '<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">'
@@ -109,6 +252,10 @@ LINK_RE = re.compile(r"(\]\()(?!https?://|mailto:|#)([^)\s]+)((?:\s+\"[^\"]*\")?
 REFDEF_RE = re.compile(r"^(\s{0,3}\[[^\]]+\]:[ \t]*)(?!https?://|mailto:|#)(\S+)", re.M)
 TABLE_OPEN_RE = re.compile(r"<table>")
 H1_RE = re.compile(r"^#\s+.*$", re.M)
+# `<!-- copy-button: Label -->` right before a fenced block renders a labelled button that copies
+# that block (the onboarding prompt on /docs/agents/). The marker is dropped from the Markdown.
+COPY_MARK_RE = re.compile(r"^<!-- copy-button: .*? -->\n", re.M)
+COPY_HTML_RE = re.compile(r"<!-- copy-button: (.*?) -->\s*(<pre><code[^>]*>(.*?)</code></pre>)", re.S)
 
 
 # ---------------------------------------------------------------------------------------- model
@@ -248,6 +395,18 @@ def make_md() -> markdown.Markdown:
         extension_configs={"toc": {"permalink": "#", "permalink_class": "headerlink", "toc_depth": "2-3"}},
         output_format="html",
     )
+
+
+def copy_buttons(body: str) -> str:
+    def repl(m: re.Match[str]) -> str:
+        text = html.escape(html.unescape(m.group(3)), quote=True)
+        label = html.escape(m.group(1))
+        return (
+            f'<p><button class="btn primary" type="button" data-copy="{text}" '
+            f'data-label="{label}">{label}</button></p>\n{m.group(2)}'
+        )
+
+    return COPY_HTML_RE.sub(repl, body)
 
 
 def wrap_tables(body: str) -> str:
@@ -594,6 +753,7 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
         "SOCIAL": social_meta(site, f"{site.title}: {site.tagline}", description, site.absolute(site.base)),
         "ANALYTICS": ANALYTICS,
         "CANONICAL": site.absolute(site.base),
+        "JSONLD": landing_jsonld(site, description),
         "DESCRIPTION": html.escape(description, quote=True),
         "THEME_BUTTON": THEME_BUTTON,
         "MODELS": html.escape(json.dumps(models), quote=True),
@@ -685,6 +845,7 @@ def page_html(site: Site, page: Page, pages: list[Page]) -> str:
 <link rel="icon" href="{FAVICON}">
 {social_meta(site, title, page.description, canonical)}
 {ANALYTICS}
+{page_jsonld(site, page) if page.has_md else ""}
 <link rel="stylesheet" href="{site.base}tokens.css">
 <link rel="stylesheet" href="{site.base}style.css">
 <script>(function(){{try{{var t=localStorage.getItem('puffinparse-theme');
@@ -784,11 +945,11 @@ def build(base: str, out_dir: Path, site_url: str, docs_prefix: str = "docs") ->
         raw = src.read_text(encoding="utf-8")
         if page.home:
             _, raw = strip_badges(raw)
-        page.text = rewrite_links(raw, page.source, site, by_source, md_mode=True)
+        page.text = COPY_MARK_RE.sub("", rewrite_links(raw, page.source, site, by_source, md_mode=True))
         body = rewrite_links(raw, page.source, site, by_source, md_mode=False)
 
         md.reset()
-        rendered = wrap_tables(md.convert(body))
+        rendered = copy_buttons(wrap_tables(md.convert(body)))
         page.toc = list(getattr(md, "toc_tokens", []))
 
         if page.home:
@@ -824,6 +985,56 @@ def build(base: str, out_dir: Path, site_url: str, docs_prefix: str = "docs") ->
     return site, pages
 
 
+# AI crawlers and user-triggered agents, named explicitly so the policy is unambiguous to each.
+# Training crawlers, search/answer indexers and on-demand fetchers alike are welcome.
+AI_AGENTS = (
+    "GPTBot",
+    "ChatGPT-User",
+    "OAI-SearchBot",
+    "ClaudeBot",
+    "Claude-User",
+    "Claude-SearchBot",
+    "anthropic-ai",
+    "PerplexityBot",
+    "Perplexity-User",
+    "Google-Extended",
+    "GoogleOther",
+    "Applebot",
+    "Applebot-Extended",
+    "Amazonbot",
+    "meta-externalagent",
+    "meta-externalfetcher",
+    "CCBot",
+    "Bytespider",
+    "cohere-ai",
+    "cohere-training-data-crawler",
+    "MistralAI-User",
+    "DuckAssistBot",
+    "AI2Bot",
+)
+
+
+def robots_txt(site: Site) -> str:
+    sitemap = site.absolute(site.base + "sitemap.xml")
+    llms = site.absolute(site.base + "llms.txt")
+    lines = [
+        "# PuffinParse: everything here is public documentation and benchmark data.",
+        f"# Agents and LLMs: start at {llms} (site map) or {site.absolute(site.base + 'agents.md')}.",
+        "# Every docs page is also served as Markdown: <page>/index.md, or send Accept: text/markdown.",
+        "",
+        "User-agent: *",
+        "Allow: /",
+        "",
+        "# AI crawlers and agents: allowed, explicitly.",
+        *[f"User-agent: {ua}" for ua in AI_AGENTS],
+        "Allow: /",
+        "",
+        f"Sitemap: {sitemap}",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def write_extras(site: Site, pages: list[Page], out: Path) -> None:
     for asset in ("tokens.css", "style.css", "landing.css", "app.js", "mark.svg", "puffin.svg", OG_IMAGE):
         shutil.copyfile(WEB / "assets" / asset, out / asset)
@@ -842,7 +1053,43 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         f"> {site.summary}",
         "",
         f"Source: {site.repo} ({site.license}). The documentation lives under `{site.docs_base}`; every "
-        "page below is also available as HTML at the same URL without the trailing `index.md`.",
+        "page below is also available as HTML at the same URL without the trailing `index.md`, and "
+        "that HTML URL returns the Markdown when requested with `Accept: text/markdown`.",
+        "",
+        "## When to use PuffinParse",
+        "",
+        "- You call hosted document-parsing / OCR providers and want one API for all of them: switching "
+        "provider is a one-string change (`<provider>/<model>`).",
+        "- You want normalized output: the same markdown, typed blocks, bounding boxes, usage, cost and "
+        "typed errors whichever provider produced them.",
+        "- You want to compare providers on your own documents, or read the open benchmark (accuracy, "
+        "latency, cost per 1,000 pages) before choosing one.",
+        "",
+        "## When not to use it",
+        "",
+        "- You only ever use one provider and need features of its native SDK that the unified request "
+        "does not expose (provider-specific options are passed through, but not every feature maps).",
+        "- You need fully offline, high-accuracy layout parsing and no hosted provider: PuffinParse can "
+        "drive local Tesseract and self-hosted Docling, but the accuracy comes from those engines, so "
+        "using them (or another local parser) directly is simpler.",
+        "",
+        "## For agents",
+        "",
+        f"- [PuffinParse for agents]({site.url('agents', md=True)}): install, model strings, choosing a "
+        "model from the benchmark, minimal Python / TypeScript / CLI examples, key-handling rules and an "
+        f"onboarding prompt. The same page is served at [{site.base}agents.md]({site.base}agents.md).",
+        "",
+        "## Benchmark data",
+        "",
+        f"- [{site.viewer_url}data/index.json]({site.viewer_url}data/index.json): every benchmark run. "
+        "Top-level `datasets` (name, version, licence, document count, categories) and `runs`; each run "
+        "has `run_id`, `created_at`, `dataset`, `categories`, `file` (the full run) and `models`, where "
+        "each model has a `summary` with `overall`, the text and table metrics, `latency_p50_ms`, "
+        "`latency_p95_ms`, `cost_per_1k_pages_usd` and `by_category`. Prefer the newest `combined-v*` run.",
+        f"- `{site.viewer_url}data/runs/<run_id>.json`: one full run, including per-document scores, "
+        "latency and cost for every model.",
+        f"- `{site.viewer_url}data/outputs/<run_id>/<model with / replaced by _>/<doc>.md`: the markdown "
+        "each model produced for each document.",
         "",
         "## Docs",
         "",
@@ -878,8 +1125,21 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n',
         encoding="utf-8",
     )
-    sitemap = site.absolute(site.base + "sitemap.xml")
-    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {sitemap}\n", encoding="utf-8")
+    (out / "robots.txt").write_text(robots_txt(site), encoding="utf-8")
+
+    # /agents.md at the site root: the agents page as Markdown, for a short memorable URL.
+    agents = next((p for p in pages if p.slug == "agents"), None)
+    if agents is not None:
+        (out / "agents.md").write_text(agents.text.rstrip() + "\n", encoding="utf-8")
+    # What an agent asking for Markdown gets for a URL that does not exist.
+    (out / "404.md").write_text(
+        "# Page not found\n\n"
+        "There is no page at this URL on the PuffinParse site.\n\n"
+        f"- Site map for agents: {site.absolute(site.base + 'llms.txt')}\n"
+        f"- Agent guide: {site.absolute(site.base + 'agents.md')}\n"
+        f"- Documentation: {site.absolute(site.docs_base)}\n",
+        encoding="utf-8",
+    )
 
     notfound = Page(
         slug="404",
@@ -951,6 +1211,7 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
             "Accuracy, latency and cost for every document-parsing provider, with every output inspectable.",
             site.absolute(site.viewer_url),
         )
+        tags += "\n" + benchmark_jsonld(site)
         text = index.read_text(encoding="utf-8")
         index.write_text(text.replace("</head>", tags + "\n" + ANALYTICS + "\n</head>", 1), encoding="utf-8")
     return True
@@ -959,9 +1220,6 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
 # ------------------------------------------------------------------------------------ redirects
 
 VERCEL_JSON = ROOT / "vercel.json"
-# Former hostnames of the site; every path on them redirects to the same path on the canonical domain.
-OLD_HOSTS = ("puffinparse.vercel.app", "liteocr.vercel.app")
-CANONICAL_ORIGIN = "https://puffinparse.com"
 
 
 def redirect_map(site: Site, pages: list[Page]) -> list[dict[str, Any]]:
@@ -971,48 +1229,89 @@ def redirect_map(site: Site, pages: list[Page]) -> list[dict[str, Any]]:
     stay at the site root and are not redirected either.
     """
     prefix = site.docs_prefix
-    hosts = [
-        {
-            "source": "/:path*",
-            "has": [{"type": "host", "value": host}],
-            "destination": f"{CANONICAL_ORIGIN}/:path*",
-            "permanent": True,
-        }
-        for host in OLD_HOSTS
-    ]
-    return hosts + [
+    return [
         {"source": f"/{p.slug}/", "destination": f"/{prefix}/{p.slug}/", "permanent": True}
         for p in pages
         if p.slug
     ]
 
 
+# Content negotiation (``Accept: text/markdown``). vercel.json ``rewrites`` cannot do this: they
+# run only after the filesystem, and every docs URL is a real ``index.html``. ``routes`` run before
+# the filesystem, so each page gets one route that swaps in its ``index.md`` for Markdown clients.
+ACCEPT_MARKDOWN = [{"type": "header", "key": "accept", "value": "(.*)text/markdown(.*)"}]
+MARKDOWN_HEADERS = {"Content-Type": "text/markdown; charset=utf-8", "Vary": "Accept"}
+
+
+def negotiation_routes(site: Site, pages: list[Page]) -> list[dict[str, Any]]:
+    """``/docs/<slug>/`` (with or without the slash) -> ``/docs/<slug>/index.md`` for Markdown
+    clients; ``/`` -> the docs home's Markdown; any other extension-less docs path -> ``/404.md``
+    with status 404."""
+    routes: list[dict[str, Any]] = [
+        {
+            "src": "^/$",
+            "has": ACCEPT_MARKDOWN,
+            "dest": site.url("", md=True),
+            "headers": MARKDOWN_HEADERS,
+        }
+    ]
+    for p in pages:
+        if not p.has_md:
+            continue
+        routes.append(
+            {
+                "src": "^" + site.url(p.slug).rstrip("/") + "/?$",
+                "has": ACCEPT_MARKDOWN,
+                "dest": site.url(p.slug, md=True),
+                "headers": MARKDOWN_HEADERS,
+            }
+        )
+    routes.append(
+        {
+            "src": "^" + site.docs_base.rstrip("/") + "(?:/[^.]*)?$",
+            "has": ACCEPT_MARKDOWN,
+            "dest": "/404.md",
+            "status": 404,
+            "headers": MARKDOWN_HEADERS,
+        }
+    )
+    return routes
+
+
 def write_redirects(site: Site, pages: list[Page], path: Path = VERCEL_JSON) -> int:
-    """Rewrite the ``redirects`` array in vercel.json. Every other key is left untouched."""
+    """Rewrite the generated ``redirects`` and ``routes`` arrays in vercel.json. Every other key is
+    left untouched."""
     config = json.loads(path.read_text(encoding="utf-8"))
     config["redirects"] = redirect_map(site, pages)
+    config["routes"] = negotiation_routes(site, pages)
     path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
-    return len(config["redirects"])
+    return len(config["redirects"]) + len(config["routes"])
 
 
 def check_redirects(site: Site, pages: list[Page], out: Path, path: Path = VERCEL_JSON) -> list[str]:
-    """The committed redirects must cover every docs slug and land on a page that exists."""
+    """The committed redirects and Markdown routes must match nav.json and land on files that
+    exist."""
     if not path.exists():
         return [f"{path.name} is missing"]
-    current = json.loads(path.read_text(encoding="utf-8")).get("redirects", [])
-    expected = redirect_map(site, pages)
+    config = json.loads(path.read_text(encoding="utf-8"))
     problems = []
-    if current != expected:
-        problems.append(
-            f"{path.name}: redirects are stale ({len(current)} entries, expected {len(expected)}) "
-            "— run `python website/build.py --write-redirects`"
-        )
-    for r in expected:
-        if r["destination"].startswith("http"):
-            continue  # host redirects leave the site
+    for key, expected in (
+        ("redirects", redirect_map(site, pages)),
+        ("routes", negotiation_routes(site, pages)),
+    ):
+        current = config.get(key, [])
+        if current != expected:
+            problems.append(
+                f"{path.name}: {key} are stale ({len(current)} entries, expected {len(expected)}) "
+                "— run `python website/build.py --write-redirects`"
+            )
+    for r in redirect_map(site, pages):
         target = out / r["destination"].strip("/") / "index.html"
         if not target.exists():
             problems.append(f"{path.name}: redirect {r['source']} -> missing {r['destination']}")
+    for r in negotiation_routes(site, pages):
+        if not (out / r["dest"].lstrip("/")).is_file():
+            problems.append(f"{path.name}: route {r['src']} -> missing {r['dest']}")
     return problems
 
 
@@ -1020,6 +1319,55 @@ def check_redirects(site: Site, pages: list[Page], out: Path, path: Path = VERCE
 
 
 HREF_RE = re.compile(r'(?:href|src)="([^"]+)"')
+JSONLD_RE = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.S)
+# The schema.org types this site emits; anything else is a typo.
+JSONLD_TYPES = {
+    "SoftwareApplication",
+    "SoftwareSourceCode",
+    "WebSite",
+    "SearchAction",
+    "EntryPoint",
+    "Offer",
+    "CreativeWork",
+    "TechArticle",
+    "MediaObject",
+    "Dataset",
+    "DataDownload",
+    "Organization",
+}
+
+
+def check_jsonld(rel: Path, text: str, required: bool) -> list[str]:
+    """Every page carries exactly one JSON-LD block that parses and uses known schema.org types."""
+    blocks = JSONLD_RE.findall(text)
+    if not blocks:
+        return [f"{rel}: no JSON-LD block"] if required else []
+    if len(blocks) > 1:
+        return [f"{rel}: {len(blocks)} JSON-LD blocks, expected one"]
+    try:
+        data = json.loads(blocks[0])
+    except ValueError as exc:
+        return [f"{rel}: JSON-LD does not parse ({exc})"]
+    problems = []
+    if data.get("@context") != "https://schema.org":
+        problems.append(f"{rel}: JSON-LD @context is not https://schema.org")
+
+    def walk(node: Any) -> None:
+        if isinstance(node, list):
+            for item in node:
+                walk(item)
+        elif isinstance(node, dict):
+            types = node.get("@type", [])
+            for t in [types] if isinstance(types, str) else types:
+                if t not in JSONLD_TYPES:
+                    problems.append(f"{rel}: unexpected JSON-LD @type '{t}'")
+            for value in node.values():
+                walk(value)
+
+    walk(data)
+    return problems
+
+
 ID_RE = re.compile(r'id="([^"]+)"')
 
 
@@ -1040,7 +1388,14 @@ def check(site: Site, pages: list[Page], out: Path) -> int:
     if site.base == "/":
         problems.extend(check_redirects(site, pages, out))
     for f in files:
-        ids[f] = set(ID_RE.findall(f.read_text(encoding="utf-8")))
+        text = f.read_text(encoding="utf-8")
+        ids[f] = set(ID_RE.findall(text))
+        problems.extend(check_jsonld(f.relative_to(out), text, required=f.name != "404.html"))
+    viewer_index = viewer / "index.html"
+    if viewer_index.is_file():
+        problems.extend(
+            check_jsonld(viewer_index.relative_to(out), viewer_index.read_text(encoding="utf-8"), True)
+        )
     for f in files:
         rel = f.relative_to(out)
         for href in HREF_RE.findall(f.read_text(encoding="utf-8")):
@@ -1108,7 +1463,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument(
         "--write-redirects",
         action="store_true",
-        help="rewrite the old-URL -> /docs/ redirect map in vercel.json, then exit",
+        help="rewrite the generated redirects and Markdown routes in vercel.json",
     )
     args = ap.parse_args(argv)
 
@@ -1125,7 +1480,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         + f" ({files} files, {size}) -> {os.path.relpath(out, ROOT)}"
     )
     if args.write_redirects:
-        print(f"vercel.json: wrote {write_redirects(site, pages)} redirects")
+        print(f"vercel.json: wrote {write_redirects(site, pages)} redirects and routes")
     return check(site, pages, out) if args.check else 0
 
 
