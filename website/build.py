@@ -63,6 +63,8 @@ MARK = (
     f'<rect x="19" y="14.6" width="7.2" height="1.5" fill="{_TILE}"/>'
     f'<rect x="19" y="18.4" width="5.6" height="1.5" fill="{_TILE}"/></svg>'
 )
+# Vercel Web Analytics (cookieless). Only on Vercel builds: the script path exists only there.
+ANALYTICS = '<script defer src="/_vercel/insights/script.js"></script>' if os.environ.get("VERCEL") else ""
 OG_IMAGE = "og.png"  # 1200x630, rendered by website/og/render.py and committed
 
 
@@ -590,6 +592,7 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
         "MARK": MARK,
         "PUFFIN_HERO": puffin(115, "lp-puffin"),
         "SOCIAL": social_meta(site, f"{site.title}: {site.tagline}", description, site.absolute(site.base)),
+        "ANALYTICS": ANALYTICS,
         "CANONICAL": site.absolute(site.base),
         "DESCRIPTION": html.escape(description, quote=True),
         "THEME_BUTTON": THEME_BUTTON,
@@ -681,6 +684,7 @@ def page_html(site: Site, page: Page, pages: list[Page]) -> str:
 {alt}
 <link rel="icon" href="{FAVICON}">
 {social_meta(site, title, page.description, canonical)}
+{ANALYTICS}
 <link rel="stylesheet" href="{site.base}tokens.css">
 <link rel="stylesheet" href="{site.base}style.css">
 <script>(function(){{try{{var t=localStorage.getItem('puffinparse-theme');
@@ -948,7 +952,7 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
             site.absolute(site.viewer_url),
         )
         text = index.read_text(encoding="utf-8")
-        index.write_text(text.replace("</head>", tags + "\n</head>", 1), encoding="utf-8")
+        index.write_text(text.replace("</head>", tags + "\n" + ANALYTICS + "\n</head>", 1), encoding="utf-8")
     return True
 
 
@@ -1040,8 +1044,8 @@ def check(site: Site, pages: list[Page], out: Path) -> int:
     for f in files:
         rel = f.relative_to(out)
         for href in HREF_RE.findall(f.read_text(encoding="utf-8")):
-            if href.startswith(("http://", "https://", "mailto:", "data:", "//")):
-                continue
+            if href.startswith(("http://", "https://", "mailto:", "data:", "//", "/_vercel/")):
+                continue  # external, or served by the Vercel platform rather than the build
             path, _, frag = href.partition("#")
             target = f
             if path:
