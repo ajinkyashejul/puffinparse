@@ -2,7 +2,7 @@
 
 # PuffinParse
 
-[![CI](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE) [![Docs](https://img.shields.io/badge/docs-puffinparse.com-E95C20)](https://puffinparse.com/docs/) [![Benchmark](https://img.shields.io/badge/benchmark-results-E95C20)](https://puffinparse.com/benchmark-results/) [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/puffinparse?color=E95C20)](https://pypi.org/project/puffinparse/) [![GitHub stars](https://img.shields.io/github/stars/ajinkyashejul/puffinparse?style=flat&color=E95C20)](https://github.com/ajinkyashejul/puffinparse/stargazers) [![CI](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE) [![Docs](https://img.shields.io/badge/docs-puffinparse.com-E95C20)](https://puffinparse.com/docs/) [![Benchmark](https://img.shields.io/badge/benchmark-results-E95C20)](https://puffinparse.com/benchmark-results/) [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 
 **One API for every document parser: parse, OCR and extract.** Rust core, Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost.
 
@@ -561,6 +561,12 @@ Open items:
   ([#14](https://github.com/ajinkyashejul/puffinparse/issues/14)).
 - **Playground**: upload a document and compare up to three models side by side
   ([#18](https://github.com/ajinkyashejul/puffinparse/issues/18)).
+
+## Support
+
+PuffinParse is built in the open by one person. If it saved you time, a star on GitHub helps other
+developers find it. Reports of a wrong score, a missing provider or a confusing doc help even more:
+[open an issue](https://github.com/ajinkyashejul/puffinparse/issues/new/choose).
 
 ## Contributing
 
