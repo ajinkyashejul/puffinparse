@@ -463,7 +463,7 @@ the captured payloads live in `crates/puffinparse-core/tests/fixtures/` and driv
   `table→table`, else `other`.
 - Errors: FastAPI `{"detail": "…"}` / `{"detail": [ValidationError]}`.
 
-### 8.4 Self-hosted engines (Tesseract, Docling, PaddleOCR)
+### 8.4 Self-hosted engines (Tesseract, Docling, PaddleOCR, vLLM)
 
 Listed in `model::SELF_HOSTED`; `ProviderInfo::self_hosted()` is `true`, no API key is required
 (`env_var` is empty, or names an optional key), prices are `0.0` with `source: "self-hosted"`, and
@@ -475,9 +475,15 @@ and in Python `providers()`).
 - `docling/default`: docling-serve `POST /v1/convert/source/async` → poll → `GET /v1/result`;
   DoclingDocument items mapped to blocks, bottom-left boxes flipped to top-left.
 - `paddleocr/default`: PaddleX serving `POST /ocr` (ocr) and `POST /layout-parsing`
-  (PP-StructureV3, parse).
+  (PP-StructureV3, parse). `paddleocr/vl`: `POST /layout-parsing` on a PaddleOCR-VL pipeline server
+  (same response shape); `ocr` derived from `parse`.
+- `vllm/<preset>`: one `POST /v1/chat/completions` per page image (PDFs rasterised with
+  `pdftoppm`) to your vLLM / OpenAI-compatible server, with the preset's model-card prompt and
+  sampling; the answer's layout cells (`bbox`, `category`, `text`) become typed blocks with
+  normalised boxes (`infinity-parser2-flash`: 0–1000 grid; `dots.mocr`: pixels after
+  `smart_resize`). `ocr` derived from `parse`.
 
-Details, errors and limits: `docs/providers/{tesseract,docling,paddleocr}.md`.
+Details, errors and limits: `docs/providers/{tesseract,docling,paddleocr,vllm}.md`.
 
 ---
 

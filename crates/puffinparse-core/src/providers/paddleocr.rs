@@ -10,7 +10,12 @@
 //!   PP-StructureV3 pipeline. `result.layoutParsingResults[i].prunedResult.parsing_res_list[]`
 //!   gives `block_label`, `block_content` (tables as HTML) and `block_bbox` in reading order.
 //!
-//! Both take `{"file": <base64 or URL>, "fileType": 0 (PDF) | 1 (image)}` and answer
+//! - `vl` model, `parse` (and `ocr` derived from it): `POST {PADDLEOCR_VL_BASE_URL or
+//!   PADDLEOCR_BASE_URL}/layout-parsing` on a PaddleOCR-VL pipeline server (PaddleOCR-VL-1.6 by
+//!   default: layout detection + the 0.9B VLM). Same request and `layoutParsingResults` shape as
+//!   PP-StructureV3, so the same normaliser applies.
+//!
+//! All take `{"file": <base64 or URL>, "fileType": 0 (PDF) | 1 (image)}` and answer
 //! `{logId, errorCode, errorMsg, result: {..., dataInfo}}`; `dataInfo` gives each page's pixel
 //! size in the same space as the boxes. `provider_options` are merged into the request body
 //! (e.g. `useDocOrientationClassify`, `textRecScoreThresh`). No API key.
@@ -35,6 +40,9 @@ use std::collections::BTreeMap;
 pub const NAME: &str = "paddleocr";
 const ENV_BASE: &str = "PADDLEOCR_BASE_URL";
 const ENV_PARSE_BASE: &str = "PADDLEOCR_PARSE_BASE_URL";
+const ENV_VL_BASE: &str = "PADDLEOCR_VL_BASE_URL";
+/// The registry model served by a PaddleOCR-VL pipeline server.
+const VL_MODEL: &str = "vl";
 const DEFAULT_BASE: &str = "http://localhost:8080";
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -47,6 +55,11 @@ impl Provider for PaddleOcr {
     }
 
     async fn ocr(&self, request: &DocumentRequest, model: &str) -> Result<TextResponse> {
+        if model == VL_MODEL {
+            // PaddleOCR-VL has no OCR-only endpoint: derive the text from the layout parse.
+            let parsed = self.parse(request, model).await?;
+            return Ok(TextResponse::from_parse(&parsed));
+        }
         let base = provider::resolve_base_url(request, ENV_BASE, DEFAULT_BASE);
         let result = call(request, &format!("{base}/ocr")).await?;
         let ranges = request.pages.as_deref().map(crate::util::parse_page_ranges).transpose()?;
@@ -60,9 +73,10 @@ impl Provider for PaddleOcr {
     async fn parse(&self, request: &DocumentRequest, model: &str) -> Result<ParseResponse> {
         // An explicit `base_url` on the request wins; otherwise the parse-specific env var, then
         // the shared one, since PP-StructureV3 is usually served separately from the OCR pipeline.
+        let parse_env = if model == VL_MODEL { ENV_VL_BASE } else { ENV_PARSE_BASE };
         let base = match &request.base_url {
-            Some(_) => provider::resolve_base_url(request, ENV_PARSE_BASE, DEFAULT_BASE),
-            None => std::env::var(ENV_PARSE_BASE)
+            Some(_) => provider::resolve_base_url(request, parse_env, DEFAULT_BASE),
+            None => std::env::var(parse_env)
                 .ok()
                 .filter(|v| !v.trim().is_empty())
                 .map(|v| v.trim_end_matches('/').to_string())
@@ -100,7 +114,8 @@ fn connect_hint(e: reqwest::Error, url: &str) -> Error {
     if e.is_connect() {
         Error::network(format!(
             "cannot reach PaddleOCR serving at {url} ({e}); start it (`paddlex --serve --pipeline OCR` / \
-             `--pipeline PP-StructureV3`) or set {ENV_BASE} / {ENV_PARSE_BASE}"
+             `--pipeline PP-StructureV3` / `--pipeline PaddleOCR-VL`) or set {ENV_BASE} / {ENV_PARSE_BASE} / \
+             {ENV_VL_BASE}"
         ))
         .with_provider(NAME)
     } else {
@@ -362,7 +377,7 @@ fn map_block(label: &str, content: &str) -> (BlockType, String, String) {
 }
 
 /// Table HTML → one line per row, cells separated by spaces.
-fn table_html_text(html: &str) -> String {
+pub(crate) fn table_html_text(html: &str) -> String {
     let lower = html.to_ascii_lowercase();
     let mut rows = Vec::new();
     let mut pos = 0;
@@ -401,6 +416,7 @@ mod tests {
         let raw = match name {
             "ocr" => include_str!("../../tests/fixtures/paddleocr_ocr.json"),
             "layout" => include_str!("../../tests/fixtures/paddleocr_layout_parsing.json"),
+            "vl" => include_str!("../../tests/fixtures/paddleocr_vl_layout_parsing.json"),
             _ => unreachable!(),
         };
         serde_json::from_str(raw).unwrap()
@@ -429,6 +445,53 @@ mod tests {
         let only2 = normalize_ocr(&v, "default", Some(&[(2, Some(2))])).unwrap();
         assert_eq!(only2.pages.len(), 1);
         assert_eq!(only2.pages[0].page_number, 2);
+    }
+
+    #[test]
+    fn normalizes_paddleocr_vl_results() {
+        let v = check_envelope(200, &fixture("vl").to_string()).unwrap();
+        let resp = normalize_parse(&v, OutputFormat::Markdown, VL_MODEL, None).unwrap();
+        assert_eq!(resp.model, "paddleocr/vl");
+        assert_eq!(resp.pages.len(), 2);
+        let p = &resp.pages[0];
+        assert_eq!((p.width, p.height), (Some(1224.0), Some(1584.0)));
+        let types: Vec<BlockType> = p.blocks.iter().map(|b| b.block_type).collect();
+        assert_eq!(
+            types,
+            [
+                BlockType::Title,
+                BlockType::Text,
+                BlockType::Table,
+                BlockType::Formula,
+                BlockType::Figure,
+                BlockType::Footnote,
+                BlockType::Footer
+            ]
+        );
+        assert_eq!(p.blocks[0].content, "# Cedar Ridge Supply");
+        assert!(p.blocks[2].content.contains("| Fence post | 12 | $8.50 |"), "{}", p.blocks[2].content);
+        assert_eq!(p.blocks[2].text.as_deref(), Some("Item Qty Price\nFence post 12 $8.50"));
+        assert!(p.blocks[3].content.starts_with("$$"));
+        let bb = p.blocks[0].bbox.unwrap();
+        assert!((bb.x0 - 122.0 / 1224.0).abs() < 1e-9 && (bb.y1 - 158.0 / 1584.0).abs() < 1e-9, "{bb:?}");
+        assert_eq!(resp.pages[1].blocks[0].block_type, BlockType::SectionHeader);
+        assert!(!resp.metadata.contains_key("paddleocr_pages_truncated"));
+    }
+
+    #[tokio::test]
+    async fn vl_ocr_is_derived_from_the_layout_parsing_endpoint() {
+        let body = fixture("vl").to_string();
+        let (base, captured) = crate::testutil::serve(vec![(200, body)]).await;
+        let req = DocumentRequest::from_bytes(&b"%PDF-1.7 fake"[..], "invoice.pdf").base_url(&base);
+        let resp = PaddleOcr.ocr(&req, VL_MODEL).await.unwrap();
+        assert_eq!(resp.pages.len(), 2);
+        assert!(resp.text.contains("Payment due within 30 days."));
+        let seen = captured.lock().unwrap();
+        assert_eq!(seen.len(), 1);
+        assert_eq!(seen[0].route(), "POST /layout-parsing", "no /ocr endpoint on a PaddleOCR-VL server");
+        let sent: Value = serde_json::from_str(&seen[0].body).unwrap();
+        assert_eq!(sent["fileType"], 0);
+        assert_eq!(sent["visualize"], false);
     }
 
     #[test]

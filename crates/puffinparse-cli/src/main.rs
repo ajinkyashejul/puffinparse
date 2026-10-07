@@ -405,7 +405,7 @@ fn providers(mode: Option<&str>, json: bool) -> Result<()> {
     );
     println!(
         "Self-hosted (no key, $0/page; point them at your install): tesseract (TESSERACT_CMD), \
-         docling (DOCLING_BASE_URL), paddleocr (PADDLEOCR_BASE_URL)"
+         docling (DOCLING_BASE_URL), paddleocr (PADDLEOCR_BASE_URL), vllm (VLLM_BASE_URL)"
     );
     println!("Native output formats (--output-format, json only): {}", output_formats.join(" | "));
     Ok(())

@@ -17,6 +17,8 @@ use crate::error::{Error, Result};
 use crate::http::Deadline;
 use crate::provider::Provider;
 use crate::providers::local::{self, FileKind, ScratchDir};
+#[cfg(test)]
+use crate::providers::local::PDFTOPPM_INPUT_EXITS;
 use crate::types::{
     BBox, Block, BlockType, DocumentInput, DocumentRequest, Line, OutputFormat, Page, ParseResponse, TextPage,
     TextResponse, Usage, Word,
@@ -24,7 +26,6 @@ use crate::types::{
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
-use std::process::Stdio;
 
 pub const NAME: &str = "tesseract";
 const ENV_CMD: &str = "TESSERACT_CMD";
@@ -225,34 +226,10 @@ async fn run(request: &DocumentRequest) -> Result<Run> {
     let rasterized = kind == FileKind::Pdf;
     match kind {
         FileKind::Pdf => {
-            let pdf = scratch.path().join("input.pdf");
-            write(&pdf, &data).await?;
             let dpi = config.dpi.unwrap_or(DEFAULT_DPI);
-            let mut args = vec!["-r".to_string(), dpi.to_string(), "-png".to_string()];
-            if let Some(r) = &ranges {
-                // Rasterise only the span that covers the selection; pages outside it are skipped below.
-                let first = r.iter().map(|(s, _)| *s).min().unwrap_or(1);
-                args.extend(["-f".to_string(), first.to_string()]);
-                if let Some(last) = r.iter().map(|(_, e)| *e).try_fold(0u32, |acc, e| e.map(|e| acc.max(e))) {
-                    args.extend(["-l".to_string(), last.to_string()]);
-                }
-            }
-            args.push(pdf.to_string_lossy().into_owned());
-            args.push(scratch.path().join("page").to_string_lossy().into_owned());
-            exec(
-                &config.pdftoppm,
-                &args,
-                &deadline,
-                "pdftoppm",
-                "install poppler-utils (apt install poppler-utils / brew install poppler) or set PDFTOPPM_CMD",
-                PDFTOPPM_INPUT_EXITS,
-            )
-            .await?;
-            for (n, path) in rendered_pages(scratch.path()).await? {
-                if local::page_selected(ranges.as_deref(), n) {
-                    images.push((Some(n), path, Some(dpi)));
-                }
-            }
+            let (cmd, selection) = (&config.pdftoppm, ranges.as_deref());
+            let pages = local::rasterize_pdf(NAME, cmd, &data, dpi, selection, &scratch, &deadline).await?;
+            images.extend(pages.into_iter().map(|(n, path)| (Some(n), path, Some(dpi))));
             if images.is_empty() {
                 return Err(Error::input(format!("{filename}: no pages to OCR (page selection {:?})", request.pages)));
             }
@@ -307,40 +284,9 @@ async fn write(path: &Path, data: &[u8]) -> Result<()> {
     tokio::fs::write(path, data).await.map_err(|e| Error::input(format!("cannot write {}: {e}", path.display())))
 }
 
-/// `pdftoppm` names pages `page-1.png` or `page-01.png` (zero-padded to the page count's width).
-async fn rendered_pages(dir: &Path) -> Result<Vec<(u32, PathBuf)>> {
-    let mut out = Vec::new();
-    let mut rd = tokio::fs::read_dir(dir).await.map_err(|e| Error::provider(format!("pdftoppm output: {e}")))?;
-    while let Some(entry) = rd.next_entry().await.map_err(|e| Error::provider(format!("pdftoppm output: {e}")))? {
-        let name = entry.file_name().to_string_lossy().into_owned();
-        if let Some(n) = name.strip_prefix("page-").and_then(|s| s.strip_suffix(".png")).and_then(|s| s.parse().ok()) {
-            out.push((n, entry.path()));
-        }
-    }
-    out.sort();
-    Ok(out)
-}
-
-/// `pdftoppm` exit codes that mean the input is at fault: 1 cannot open/read the PDF (corrupt or not
-/// a PDF), 3 PDF permissions, 99 anything else, which in practice is a page range past the end.
-/// These are input errors, not retryable: another model would fail on the same file.
-const PDFTOPPM_INPUT_EXITS: &[i32] = &[1, 3, 99];
-
-/// Lines of a tool's stderr kept in an error message; a corrupt PDF can produce hundreds.
-const STDERR_LINES: usize = 5;
-
-/// The first [`STDERR_LINES`] lines of a tool's stderr, noting how many were dropped.
-fn stderr_excerpt(stderr: &str) -> String {
-    let lines: Vec<&str> = stderr.trim().lines().collect();
-    if lines.len() <= STDERR_LINES {
-        return lines.join("\n");
-    }
-    format!("{}\n... ({} more lines)", lines[..STDERR_LINES].join("\n"), lines.len() - STDERR_LINES)
-}
-
-/// Run a local binary with the call's deadline. A non-zero exit carries the start of the tool's
-/// stderr; exit codes in `input_exits` are reported as input errors, and 127 (the shell's "command
-/// not found", as seen in minimal containers) as a missing binary.
+/// Run a local binary (see [`local::run_tool`]). Tesseract's OpenMP threads oversubscribe the CPU
+/// when several pages run concurrently (a small PNG took 70 s instead of 0.7 s on 4 cores); one
+/// thread per process is the documented fix. An explicit OMP_THREAD_LIMIT in the environment wins.
 async fn exec(
     cmd: &str,
     args: &[String],
@@ -349,45 +295,9 @@ async fn exec(
     install_hint: &str,
     input_exits: &[i32],
 ) -> Result<Vec<u8>> {
-    let mut command = tokio::process::Command::new(cmd);
-    // Tesseract's OpenMP threads oversubscribe the CPU when several pages run concurrently (a
-    // small PNG took 70 s instead of 0.7 s on 4 cores); one thread per process is the documented
-    // fix. An explicit OMP_THREAD_LIMIT in the environment still wins.
-    if std::env::var_os("OMP_THREAD_LIMIT").is_none() {
-        command.env("OMP_THREAD_LIMIT", "1");
-    }
-    let child = command
-        .args(args)
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .kill_on_drop(true)
-        .spawn()
-        .map_err(|e| {
-            if e.kind() == std::io::ErrorKind::NotFound {
-                Error::provider(format!("{tool} binary '{cmd}' not found on PATH: {install_hint}"))
-            } else {
-                Error::provider(format!("could not start {tool} ('{cmd}'): {e}"))
-            }
-            .with_provider(NAME)
-        })?;
-    let output = match tokio::time::timeout(deadline.remaining(), child.wait_with_output()).await {
-        Ok(r) => r.map_err(|e| Error::provider(format!("{tool} failed: {e}")).with_provider(NAME))?,
-        Err(_) => return Err(Error::timeout(format!("deadline exceeded while running {tool}")).with_provider(NAME)),
-    };
-    if !output.status.success() {
-        let stderr = stderr_excerpt(&String::from_utf8_lossy(&output.stderr));
-        let code = output.status.code();
-        let err = match code {
-            Some(127) => Error::provider(format!("{tool} binary '{cmd}' could not be run (exit 127): {install_hint}")),
-            Some(c) if input_exits.contains(&c) => {
-                Error::input(format!("{tool} could not read the input (exit {c}): {stderr}"))
-            }
-            _ => Error::provider(format!("{tool} exited with {}: {stderr}", output.status)),
-        };
-        return Err(err.with_provider(NAME));
-    }
-    Ok(output.stdout)
+    let limit_threads = std::env::var_os("OMP_THREAD_LIMIT").is_none();
+    let envs: &[(&str, &str)] = if limit_threads { &[("OMP_THREAD_LIMIT", "1")] } else { &[] };
+    local::run_tool(NAME, cmd, args, envs, deadline, tool, install_hint, input_exits).await
 }
 
 // ---- TSV → unified types -----------------------------------------------------------------------
@@ -654,15 +564,6 @@ mod tests {
             .provider_options(json!({"pdftoppm_cmd": "/nonexistent/pdftoppm-puffinparse"}));
         let e = Tesseract.parse(&req, "default").await.unwrap_err();
         assert!(e.message.contains("pdftoppm binary") && e.message.contains("poppler"), "{e}");
-    }
-
-    #[test]
-    fn stderr_is_trimmed_to_a_few_lines() {
-        assert_eq!(stderr_excerpt("  one\ntwo\n"), "one\ntwo");
-        let long: String = (1..=300).map(|i| format!("Syntax Error ({i}): Illegal character\n")).collect();
-        let short = stderr_excerpt(&long);
-        assert_eq!(short.lines().count(), STDERR_LINES + 1);
-        assert!(short.ends_with("... (295 more lines)"), "{short}");
     }
 
     #[cfg(unix)]

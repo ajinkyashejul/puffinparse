@@ -22,12 +22,21 @@ Python package `puffinparse` share a single version. Entries before the rename s
   `gemini/3-flash-preview`, `gemini/3.8-flash-low` (Gemini 3.8 Flash with
   `thinkingLevel: "low"`) and `openai/gpt-6-luna`, with per-page estimates in `pricing.json` and
   exact token prices (including Haiku 5.5's over-100k-token tier) in the providers.
+- `vllm` provider (self-hosted, $0): open document-parsing VLMs on your own `vllm serve` /
+  OpenAI-compatible server (`VLLM_BASE_URL`, optional `VLLM_API_KEY`). Presets
+  `vllm/infinity-parser2-flash` and `vllm/dots.mocr` send each page image (PDFs rasterised with
+  `pdftoppm`) with the model card's prompt and sampling, and turn the layout JSON into typed
+  blocks with normalised boxes. Implemented from the model cards; not yet run against a server.
+- `paddleocr/vl`: the PaddleOCR-VL pipeline (PaddleOCR-VL-1.6 by default) through its
+  `/layout-parsing` serving API (`PADDLEOCR_VL_BASE_URL`); `ocr` is derived from `parse`.
 
 ### Changed
 
 - Anthropic: models that reject a forced `tool_choice` (Opus 5.5, Sonnet 5.5, Fable 5.1, Mythos 5.1)
   now get `tool_choice: auto` with a strict parse tool and an instruction to call it, decided from
   the model id actually sent (so a `provider_options.model` override is covered too).
+- The `pdftoppm` rasterisation and local-tool runner moved from the Tesseract provider to
+  `providers/local.rs` so the vLLM provider shares them.
 
 ## [0.1.4] - 2026-10-08
 

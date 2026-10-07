@@ -193,7 +193,13 @@
           "slug": "providers/paddleocr",
           "title": "PaddleOCR (self-hosted)",
           "source": "docs/providers/paddleocr.md",
-          "description": "PaddleOCR / PaddleX serving: OCR pipeline and PP-StructureV3 layout parsing. No key, $0."
+          "description": "PaddleOCR / PaddleX serving: OCR pipeline, PP-StructureV3 and PaddleOCR-VL layout parsing. No key, $0."
+        },
+        {
+          "slug": "providers/vllm",
+          "title": "vLLM (self-hosted)",
+          "source": "docs/providers/vllm.md",
+          "description": "Open document VLMs (Infinity-Parser2-Flash, dots.mocr) on your own vLLM server: layout blocks with boxes. No key, $0."
         }
       ]
     },

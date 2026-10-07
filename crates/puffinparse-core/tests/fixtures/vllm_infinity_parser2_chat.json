@@ -1,0 +1,27 @@
+{
+ "id": "chatcmpl-7f3a9c1e2b4d4e0f",
+ "object": "chat.completion",
+ "created": 1791417600,
+ "model": "infly/Infinity-Parser2-Flash",
+ "choices": [
+  {
+   "index": 0,
+   "message": {
+    "role": "assistant",
+    "content": "```json\n[{\"bbox\": [70, 18, 300, 36], \"category\": \"header\", \"text\": \"Cedar Ridge Supply · Invoice\"}, {\"bbox\": [70, 60, 640, 104], \"category\": \"title\", \"text\": \"# Cedar Ridge Supply\"}, {\"bbox\": [70, 130, 930, 180], \"category\": \"text\", \"text\": \"Invoice **#5521** issued to Hillside Farms on 2026-09-30.\"}, {\"bbox\": [70, 200, 930, 330], \"category\": \"table\", \"text\": \"<table><tr><th>Item</th><th>Qty</th><th>Price</th></tr><tr><td>Fence post</td><td>12</td><td>$8.50</td></tr></table>\"}, {\"bbox\": [70, 336, 500, 356], \"category\": \"table_caption\", \"text\": \"Table 1: Items delivered\"}, {\"bbox\": [300, 380, 700, 420], \"category\": \"formula\", \"text\": \"\\\\text{Total} = 12 \\\\times 8.50 = 102.00\"}, {\"bbox\": [70, 450, 500, 800], \"category\": \"figure\", \"text\": \"\"}, {\"bbox\": [70, 940, 600, 960], \"category\": \"page_footnote\", \"text\": \"Prices in USD.\"}, {\"bbox\": [460, 970, 540, 990], \"category\": \"footer\", \"text\": \"1\"}]\n```",
+    "reasoning_content": null,
+    "tool_calls": []
+   },
+   "logprobs": null,
+   "finish_reason": "stop",
+   "stop_reason": null
+  }
+ ],
+ "usage": {
+  "prompt_tokens": 4105,
+  "total_tokens": 4637,
+  "completion_tokens": 532,
+  "prompt_tokens_details": null
+ },
+ "prompt_logprobs": null
+}

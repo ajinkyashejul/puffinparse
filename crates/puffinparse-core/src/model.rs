@@ -43,7 +43,7 @@ pub struct ProviderInfo {
 /// Providers that run on the caller's machine or their own server: no API key is required and
 /// the per-page price is 0. Kept as a list (rather than a field on every entry) so adding one
 /// does not touch the hosted providers' registry entries.
-pub const SELF_HOSTED: &[&str] = &["tesseract", "docling", "paddleocr"];
+pub const SELF_HOSTED: &[&str] = &["tesseract", "docling", "paddleocr", "vllm"];
 
 impl ProviderInfo {
     /// `true` for local / self-hosted engines (see [`SELF_HOSTED`]).
@@ -768,17 +768,51 @@ pub const PROVIDERS: &[ProviderInfo] = &[
     ProviderInfo {
         name: "paddleocr",
         display_name: "PaddleOCR (PaddleX serving, self-hosted)",
-        // No key. PADDLEOCR_BASE_URL (OCR pipeline), PADDLEOCR_PARSE_BASE_URL (PP-StructureV3).
+        // No key. PADDLEOCR_BASE_URL (OCR pipeline), PADDLEOCR_PARSE_BASE_URL (PP-StructureV3),
+        // PADDLEOCR_VL_BASE_URL (PaddleOCR-VL pipeline).
         env_var: "",
         base_url: "http://localhost:8080",
         docs: "https://www.paddleocr.ai/latest/en/version3.x/deployment/serving.html",
-        models: &[ModelInfo {
-            provider: "paddleocr",
-            model: "default",
-            description: "PaddleOCR 3 serving: OCR pipeline for ocr, PP-StructureV3 for parse; free, self-hosted",
-            default: true,
-            modes: &[Mode::Ocr, Mode::Parse],
-        }],
+        models: &[
+            ModelInfo {
+                provider: "paddleocr",
+                model: "default",
+                description: "PaddleOCR 3 serving: OCR pipeline for ocr, PP-StructureV3 for parse; free, self-hosted",
+                default: true,
+                modes: &[Mode::Ocr, Mode::Parse],
+            },
+            ModelInfo {
+                provider: "paddleocr",
+                model: "vl",
+                description: "PaddleOCR-VL pipeline serving (PaddleOCR-VL-1.6 by default): layout + 0.9B VLM; free, self-hosted",
+                default: false,
+                modes: PARSE_OCR,
+            },
+        ],
+    },
+    ProviderInfo {
+        name: "vllm",
+        display_name: "vLLM (OpenAI-compatible server, self-hosted)",
+        // Optional: only when the server runs with `--api-key`. Base URL: VLLM_BASE_URL.
+        env_var: "VLLM_API_KEY",
+        base_url: "http://localhost:8000",
+        docs: "https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html",
+        models: &[
+            ModelInfo {
+                provider: "vllm",
+                model: "infinity-parser2-flash",
+                description: "infly/Infinity-Parser2-Flash on your vLLM: page images, doc2json layout with boxes; free, self-hosted",
+                default: true,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "vllm",
+                model: "dots.mocr",
+                description: "rednote-hilab/dots.mocr on your vLLM: page images, layout JSON with boxes; free, self-hosted",
+                default: false,
+                modes: PARSE_OCR,
+            },
+        ],
     },
 ];
 
@@ -820,6 +854,7 @@ impl ModelRef {
             "paddle" | "paddle_ocr" | "paddle-ocr" | "paddlex" => "paddleocr".to_string(),
             "docling_serve" | "docling-serve" => "docling".to_string(),
             "odr" | "open_doc_router" | "open-doc-router" => "opendocrouter".to_string(),
+            "vllm-server" | "vllm_server" | "openai-compatible" | "openai_compatible" => "vllm".to_string(),
             other => other.to_string(),
         };
         let info = provider_info(&prov).ok_or_else(|| {
@@ -933,7 +968,7 @@ mod tests {
             model_info("opendocrouter", "google/gemini-3-flash").unwrap().qualified(),
             "opendocrouter/google/gemini-3-flash"
         );
-        assert_eq!(m.len(), 76);
+        assert_eq!(m.len(), 79);
     }
 
     #[test]
@@ -946,6 +981,9 @@ mod tests {
         assert!(provider_info("reducto").unwrap().key_required());
         assert_eq!(ModelRef::parse_for("tesseract", Mode::Ocr).unwrap().qualified(), "tesseract/default");
         assert_eq!(ModelRef::parse_for("paddle", Mode::Parse).unwrap().qualified(), "paddleocr/default");
+        assert_eq!(ModelRef::parse_for("paddleocr/vl", Mode::Ocr).unwrap().qualified(), "paddleocr/vl");
+        assert_eq!(ModelRef::parse_for("vllm", Mode::Parse).unwrap().qualified(), "vllm/infinity-parser2-flash");
+        assert_eq!(ModelRef::parse("vllm/Dots.MOCR").unwrap().qualified(), "vllm/dots.mocr");
         let v = serde_json::to_value(provider_info("docling").unwrap()).unwrap();
         assert_eq!(v["self_hosted"], true);
         assert_eq!(v["models"][0]["model"], "default");

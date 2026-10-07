@@ -41,9 +41,9 @@ crates/puffinparse-core/src/
   http.rs         shared client, retry/backoff, deadline, polling helper
   jobs.rs         async jobs API types: JobHandle, JobStatus, webhook events (SPEC §15)
   provider.rs     Provider trait + helpers (keys, base URLs, multipart)
-  providers/      one file per provider (18) + mod.rs build(); vlm.rs = shared helpers of the
+  providers/      one file per provider (19) + mod.rs build(); vlm.rs = shared helpers of the
                   vision-LLM providers (gemini, openai, anthropic); local.rs = shared helpers of
-                  the self-hosted engines (tesseract, docling, paddleocr)
+                  the self-hosted engines (tesseract, docling, paddleocr, vllm)
   testutil.rs     test-only loopback HTTP server for provider wire tests
   compat/         render a unified response in a vendor's native JSON shape (docs/COMPAT.md)
   router.rs       ordered / round-robin fallbacks, stats

@@ -1,0 +1,26 @@
+{
+ "id": "chatcmpl-2c8e5d0a9b7f4c13",
+ "object": "chat.completion",
+ "created": 1791417660,
+ "model": "model",
+ "choices": [
+  {
+   "index": 0,
+   "message": {
+    "role": "assistant",
+    "content": "[{\"bbox\": [112, 84, 1600, 140], \"category\": \"Page-header\", \"text\": \"Cedar Ridge Supply\"}, {\"bbox\": [112, 200, 1200, 280], \"category\": \"Title\", \"text\": \"Delivery Terms\"}, {\"bbox\": [112, 320, 1600, 380], \"category\": \"Section-header\", \"text\": \"## 1. Payment\"}, {\"bbox\": [112, 400, 1600, 520], \"category\": \"Text\", \"text\": \"Payment is due within **30 days** of delivery.\"}, {\"bbox\": [140, 540, 1600, 580], \"category\": \"List-item\", \"text\": \"- Late fees apply after 45 days.\"}, {\"bbox\": [112, 600, 1600, 900], \"category\": \"Table\", \"text\": \"<table><thead><tr><th>Term</th><th>Days</th></tr></thead><tbody><tr><td>Net</td><td>30</td></tr></tbody></table>\"}, {\"bbox\": [400, 940, 1300, 1000], \"category\": \"Formula\", \"text\": \"$$fee = 0.015 \\\\times balance$$\"}, {\"bbox\": [854, 1106, 1708, 2212], \"category\": \"Picture\"}, {\"bbox\": [112, 2120, 800, 2160], \"category\": \"Page-footer\", \"text\": \"Page 2\"}]",
+    "tool_calls": []
+   },
+   "logprobs": null,
+   "finish_reason": "stop",
+   "stop_reason": null
+  }
+ ],
+ "usage": {
+  "prompt_tokens": 5321,
+  "total_tokens": 5934,
+  "completion_tokens": 613,
+  "prompt_tokens_details": null
+ },
+ "prompt_logprobs": null
+}
