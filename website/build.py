@@ -81,11 +81,12 @@ GH_STAR_ICON = (
 
 
 def gh_star(href: str, extra_class: str = "") -> str:
-    """Header star button; website/assets/stars.js fills in the live count."""
+    """Header GitHub button; website/assets/stars.js makes it Star + count from 1,000 stars."""
     cls = f"gh-star {extra_class}".strip()
     return (
-        f'<a class="{cls}" href="{href}" rel="noopener" aria-label="Star PuffinParse on GitHub">'
-        f'{GH_STAR_ICON}<span>Star</span><span class="gh-count" data-gh-stars hidden></span></a>'
+        f'<a class="{cls}" href="{href}" rel="noopener" aria-label="PuffinParse on GitHub">'
+        f"{GH_STAR_ICON}<span data-gh-label>GitHub</span>"
+        '<span class="gh-count" data-gh-stars hidden></span></a>'
     )
 
 
