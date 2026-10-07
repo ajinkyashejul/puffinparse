@@ -9,7 +9,7 @@ website/
   build.py            the entire build (landing section + docs section + link check + redirects)
   nav.json            the docs site map: sections, pages, sources, descriptions
   landing/index.html  the landing page template; {{PLACEHOLDER}}s filled from repo data
-  pages/*.md          the four pages written for the site (everything else is repo markdown)
+  pages/*.md          the pages written for the site (everything else is repo markdown)
   assets/style.css    the shared design system (docs chrome, prose, tokens)
   assets/landing.css  the landing layer: same tokens, bigger type, one vermilion accent
   assets/app.js       progressive enhancement for both halves
@@ -18,7 +18,7 @@ website/
 
 The docs do not duplicate documentation: most pages render markdown that already lives in the repo
 (`README.md`, `docs/`, `benchmark/`). Only four pages are written for the site, under
-`website/pages/`.
+`website/pages/` (getting started, the SDK and CLI references, and `agents.md`).
 
 The landing page duplicates nothing either — every number, provider, model and benchmark row on it
 is read out of the repository at build time (see *The landing page* below).
@@ -37,8 +37,8 @@ python website/build.py          # -> website/dist/
 | `--site-url <URL>` | `https://ajinkyashejul.github.io/puffinparse` | Public base URL of the deployed site, used for `<link rel="canonical">` and `sitemap.xml`. Independent of `--base-url`. |
 | `--docs-prefix <PATH>` | `docs` | Where the documentation is mounted below `--base-url`. The landing page always owns `--base-url` itself. |
 | `--with-benchmark` / `--no-benchmark` | Also build the results viewer into `<out>/benchmark-results/` (default on) |
-| `--check` | off | After building, verify that every internal link and `#fragment` resolves — on the landing page as well as the docs — and that `vercel.json` still redirects every old docs URL. |
-| `--write-redirects` | off | Rewrite the `redirects` array in `vercel.json` from `nav.json`. Run it after adding, renaming or removing a page. |
+| `--check` | off | After building, verify that every internal link and `#fragment` resolves — on the landing page as well as the docs — that every page carries one valid JSON-LD block, and that the generated `redirects` and `routes` in `vercel.json` match `nav.json`. |
+| `--write-redirects` | off | Rewrite the generated `redirects` and `routes` arrays in `vercel.json` from `nav.json`. Run it after adding, renaming or removing a page. |
 
 ```bash
 python website/build.py --check                        # build + link check (what CI should run)
@@ -111,13 +111,20 @@ follow the docs prefix and need no editing if it ever changes.
 | `llms.txt` | [llms.txt](https://llmstxt.org) site map, at the **site root**; entries point at `/docs/<slug>/index.md`. |
 | `llms-full.txt` | Every docs page concatenated in nav order, with `# Title` and a source-path comment. |
 | `search.json` | Page titles + headings, fetched lazily by the search box. |
-| `sitemap.xml`, `robots.txt` | Standard crawler files, built from `--site-url`. The sitemap lists the landing page and every docs page. |
-| `404.html` | Not-found page, styled like the rest, pointing at both halves. |
+| `agents.md` | The `/docs/agents/` page as Markdown at the site root, for a short URL to hand an agent. |
+| `sitemap.xml`, `robots.txt` | Standard crawler files, built from `--site-url`. The sitemap lists the landing page and every docs page; `robots.txt` allows everyone and names the major AI crawlers and agents explicitly. |
+| `404.html`, `404.md` | Not-found page, styled like the rest, pointing at both halves; `404.md` is what Markdown clients get. |
 | `style.css`, `landing.css`, `app.js` | Copied verbatim from `website/assets/`. |
 
 Every HTML page carries `<meta name="description">`, `<link rel="canonical">` and
 `<link rel="alternate" type="text/markdown">` pointing at its `index.md`, plus a "View as Markdown"
-link in the footer.
+link in the footer, and one schema.org JSON-LD block: `SoftwareApplication` + `WebSite` (with a
+`SearchAction` on `/docs/?q=`, which opens the docs search) on the landing page, `TechArticle` on
+docs pages, and `Dataset` entries (one per redistributed benchmark dataset, with its licence) on the
+results viewer.
+
+A fenced block preceded by `<!-- copy-button: Label -->` gets a labelled copy button (the
+onboarding prompt on `/docs/agents/`); the marker is dropped from the Markdown output.
 
 Two small blocks in the docs are generated from live repository data rather than prose, so they
 cannot drift:
@@ -151,19 +158,41 @@ JavaScript: the hero scanner (a sweep across a skeleton document, then the respo
 the next model string) and the leaderboard rows fading in on scroll. The provider tab strip is
 CSS-only — stacked radio panels in one grid cell, so switching tabs shifts nothing.
 
-## Redirects
+## Redirects and Markdown routes
 
 The docs used to live at the site root, so `vercel.json` carries one permanent redirect per docs
-slug (`/python/` → `/docs/python/`, 31 of them; `/` belongs to the landing page and `/llms.txt`
-stays at the root). They are generated, not hand-written:
+slug (`/python/` → `/docs/python/`; `/` belongs to the landing page and `/llms.txt` stays at the
+root). Redirects from the old `*.vercel.app` hostnames are domain-level redirects in the Vercel
+dashboard, not in `vercel.json`.
+
+Docs URLs also do content negotiation: a request with `Accept: text/markdown` gets the page's
+`index.md` (`Content-Type: text/markdown; charset=utf-8`), anything else gets HTML, and both carry
+`Vary: Accept`. An unknown path under `/docs/` gets `404.md` with status 404, and `/` gets the docs
+home's Markdown. This is a generated `routes` array, one route per page with a `has` condition on
+the `accept` header: `rewrites` cannot do it, because Vercel applies them only after the filesystem
+and every docs URL is a real `index.html`. The `Vary` header for HTML responses is a static
+`headers` rule.
+
+Both arrays are generated, not hand-written:
 
 ```bash
-python website/build.py --write-redirects     # rewrites only the "redirects" array in vercel.json
+python website/build.py --write-redirects     # rewrites the "redirects" and "routes" arrays
 ```
 
-`--check` fails if that array has drifted from `nav.json`, or if a redirect points at a page that
-does not exist in `dist/`. Run `--write-redirects` and commit `vercel.json` whenever a page is
-added, renamed or removed.
+`--check` fails if either array has drifted from `nav.json`, or if a redirect or route points at
+a file that does not exist in `dist/`. Run `--write-redirects` and commit `vercel.json` whenever a
+page is added, renamed or removed.
+
+Test the negotiation against the live site (or a preview URL):
+
+```bash
+curl -sI -H 'Accept: text/markdown' https://puffinparse.com/docs/getting-started/   # text/markdown
+curl -sI https://puffinparse.com/docs/getting-started/                              # text/html
+curl -s  -H 'Accept: text/markdown' https://puffinparse.com/docs/no-such-page/      # 404, Markdown
+curl -sI https://puffinparse.com/agents.md                                          # text/markdown
+```
+
+`python -m http.server` does not negotiate; locally, fetch `<page>/index.md` directly.
 
 ## Design notes
 

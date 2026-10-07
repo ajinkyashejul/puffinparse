@@ -9,6 +9,16 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+### Added
+
+- Agent-friendly website: docs URLs return their Markdown for `Accept: text/markdown` (with
+  `Vary: Accept`, and a Markdown 404 for unknown docs paths); one schema.org JSON-LD block per page
+  (`SoftwareApplication`, `WebSite` with a docs-search `SearchAction` backed by `/docs/?q=`,
+  `TechArticle`, and licensed `Dataset` entries on the benchmark viewer); `robots.txt` names the
+  major AI crawlers explicitly; `llms.txt` gains when-to-use guidance and the benchmark JSON
+  endpoints; and a new `/docs/agents/` page, also served as `/agents.md`, with a copyable
+  onboarding prompt.
+
 ## [0.1.1] - 2026-10-08
 
 ### Fixed
