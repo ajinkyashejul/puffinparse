@@ -73,7 +73,7 @@ there is no annotation noise. Metrics are text-only (char similarity, CER, WER, 
 table) computed in Rust. No LLM judge is required for the leaderboard.
 
 **Consequences.** Fully reproducible and cheap to run, but synthetic documents are cleaner than
-real scans; the combined open dataset (see TASKS) is the answer to that, not a looser scorer.
+real scans; the combined open dataset (ADR-10) is the answer to that, not a looser scorer.
 
 ## ADR-8: Benchmark runs disable provider result caches
 
@@ -236,7 +236,7 @@ conversion auditable.
 
 ## ADR-17: The benchmark results viewer stays vanilla JS
 
-**Context.** TASKS listed an open choice for `benchmark/site/` between a React app on Extend UI
+**Context.** The pre-release task list had an open choice for `benchmark/site/` between a React app on Extend UI
 (PDF viewer and layout overlays out of the box) and the zero-build vanilla viewer. The viewer has
 to be where every benchmark claim can be checked: page rendering, side-by-side outputs, diffs,
 rule checklists, bbox overlays, charts, deep links.
@@ -255,7 +255,7 @@ must follow scorer changes in `bench.rs`; the mismatch badge makes drift visible
 
 ## ADR-18: Webhooks are exposed as primitives, not received
 
-**Context.** TASKS asked for "webhooks instead of polling". An SDK cannot host an HTTP endpoint,
+**Context.** The pre-release task list asked for "webhooks instead of polling". An SDK cannot host an HTTP endpoint,
 and providers differ: Reducto and LlamaParse accept a per-job webhook URL, Extend only has
 workspace-level webhook endpoints.
 

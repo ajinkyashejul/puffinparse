@@ -3,7 +3,9 @@
 > **One API for every OCR / document-parsing provider.** Rust core, Python SDK, CLI,
 > and an open benchmark that ranks providers on accuracy, latency and cost.
 
-Status: `v0.1` — providers: **Reducto**, **Extend**, **LlamaParse**.
+Status: `v0.1` — 18 providers (the registry in `crates/puffinparse-core/src/model.rs`; per-provider
+references in [`providers/`](providers/README.md)). §8 spells out the wire mapping for the three
+live-verified providers, **Reducto**, **Extend** and **LlamaParse**, and the self-hosted engines.
 
 ---
 
@@ -114,12 +116,14 @@ Like LiteLLM, the `model` string selects provider and model: `"<provider>/<model
 | Provider | Models (v0.1) | Modes | Maps to |
 |---|---|---|---|
 | `reducto` | `reducto/standard` (default), `reducto/r-1`, `reducto/agentic` | parse, ocr | default settings / `settings.model="r-1"` / `enhance.agentic=[{scope:text},{scope:table}]` |
+| `reducto` | `reducto/extract` (default), `reducto/deep_extract` | extract | `POST /extract` / `settings.deep_extract=true` |
 | `extend` | `extend/parse_performance` (default), `extend/parse_light`, `extend/parse_auto` | parse, ocr | `config.engine` |
-| `llamaparse` | `llamaparse/fast`, `llamaparse/cost_effective` (default), `llamaparse/agentic`, `llamaparse/agentic_plus` | parse, ocr | `tier` form field (+ `version=latest`) |
+| `extend` | `extend/extraction_performance` (default), `extend/extraction_light` | extract | Extract run, `baseProcessor` |
+| `llamaparse` | `llamaparse/fast`, `llamaparse/cost_effective` (default), `llamaparse/agentic`, `llamaparse/agentic_plus` | parse, ocr; extract from `cost_effective` up | `tier` form field (+ `version=latest`); LlamaExtract `POST /api/v2/extract` |
 
-The three providers above serve `parse` and `ocr` only. `list_models("extract")` reports which
-models (if any) serve extraction; calling `extract` with a parse-only model raises
-`UnsupportedModelError` before any network call.
+These are the live-verified three; the other providers' models are listed in the README model
+tables and `docs/providers/`. `list_models("extract")` reports which models serve extraction;
+calling `extract` with a parse-only model raises `UnsupportedModelError` before any network call.
 
 Aliases: `llama`, `llama_parse`, `llamacloud` → `llamaparse`. Matching is case-insensitive.
 
