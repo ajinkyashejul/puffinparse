@@ -52,11 +52,11 @@ def test_providers_metadata() -> None:
     provs = puffinparse.providers()
     names = {p["name"] for p in provs}
     assert names >= {"reducto", "extend", "llamaparse"}
-    assert {p["name"] for p in provs if p["self_hosted"]} == {"tesseract", "docling", "paddleocr"}
+    assert {p["name"] for p in provs if p["self_hosted"]} == {"tesseract", "docling", "paddleocr", "vllm"}
     for p in provs:
         if p["self_hosted"]:
-            # Local engines need no key (docling names its optional one) and cost nothing.
-            assert p["env_var"] in ("", "DOCLING_API_KEY")
+            # Local engines need no key (docling and vllm name their optional one) and cost nothing.
+            assert p["env_var"] in ("", "DOCLING_API_KEY", "VLLM_API_KEY")
             assert p["base_url"] == "" or p["base_url"].startswith("http://localhost")
             for m in p["models"]:
                 for mode in m["modes"]:

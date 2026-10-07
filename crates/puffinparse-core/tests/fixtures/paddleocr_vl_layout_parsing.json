@@ -1,0 +1,59 @@
+{
+ "logId": "5e0c2d8a-1f4b-4a77-9d3e-7c2a9b1e4f60",
+ "errorCode": 0,
+ "errorMsg": "Success",
+ "result": {
+  "layoutParsingResults": [
+   {
+    "prunedResult": {
+     "page_count": 2,
+     "width": 1224,
+     "height": 1584,
+     "model_settings": {
+      "use_doc_preprocessor": false,
+      "use_layout_detection": true,
+      "use_chart_recognition": false,
+      "format_block_content": false,
+      "markdown_ignore_labels": ["number", "footnote", "header", "header_image", "footer", "footer_image", "aside_text"]
+     },
+     "parsing_res_list": [
+      {"block_label": "doc_title", "block_content": "Cedar Ridge Supply", "block_bbox": [122, 96, 704, 158], "block_id": 0, "block_order": 1},
+      {"block_label": "text", "block_content": "Invoice #5521 issued to Hillside Farms on 2026-09-30.", "block_bbox": [122, 190, 1100, 236], "block_id": 1, "block_order": 2},
+      {"block_label": "table", "block_content": "<table><tr><td>Item</td><td>Qty</td><td>Price</td></tr><tr><td>Fence post</td><td>12</td><td>$8.50</td></tr></table>", "block_bbox": [122, 260, 1100, 420], "block_id": 2, "block_order": 3},
+      {"block_label": "display_formula", "block_content": "$$\\text{Total} = 12 \\times 8.50$$", "block_bbox": [300, 450, 900, 500], "block_id": 3, "block_order": 4},
+      {"block_label": "image", "block_content": "", "block_bbox": [122, 530, 600, 900], "block_id": 4, "block_order": 5},
+      {"block_label": "vision_footnote", "block_content": "Photo: delivery yard.", "block_bbox": [122, 910, 600, 940], "block_id": 5, "block_order": 6},
+      {"block_label": "number", "block_content": "1", "block_bbox": [600, 1520, 624, 1550], "block_id": 6, "block_order": null}
+     ]
+    },
+    "markdown": {
+     "text": "# Cedar Ridge Supply\n\nInvoice #5521 issued to Hillside Farms on 2026-09-30.\n\n<table><tr><td>Item</td><td>Qty</td><td>Price</td></tr><tr><td>Fence post</td><td>12</td><td>$8.50</td></tr></table>\n\n$$\\text{Total} = 12 \\times 8.50$$",
+     "images": null
+    }
+   },
+   {
+    "prunedResult": {
+     "page_count": 2,
+     "width": 1224,
+     "height": 1584,
+     "model_settings": {
+      "use_doc_preprocessor": false,
+      "use_layout_detection": true,
+      "use_chart_recognition": false,
+      "format_block_content": false
+     },
+     "parsing_res_list": [
+      {"block_label": "paragraph_title", "block_content": "Terms", "block_bbox": [122, 96, 400, 140], "block_id": 0, "block_order": 1},
+      {"block_label": "text", "block_content": "Payment due within 30 days.", "block_bbox": [122, 160, 900, 200], "block_id": 1, "block_order": 2}
+     ]
+    },
+    "markdown": {"text": "## Terms\n\nPayment due within 30 days.", "images": null}
+   }
+  ],
+  "dataInfo": {
+   "numPages": 2,
+   "pages": [{"width": 1224, "height": 1584}, {"width": 1224, "height": 1584}],
+   "type": "pdf"
+  }
+ }
+}

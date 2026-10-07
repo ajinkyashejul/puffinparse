@@ -25,6 +25,7 @@ pub mod docling;
 pub(crate) mod local;
 pub mod paddleocr;
 pub mod tesseract;
+pub mod vllm;
 
 use crate::error::{Error, Result};
 use crate::provider::Provider;
@@ -52,6 +53,7 @@ pub fn build(name: &str) -> Result<Arc<dyn Provider>> {
         "tesseract" => Ok(Arc::new(tesseract::Tesseract)),
         "docling" => Ok(Arc::new(docling::Docling)),
         "paddleocr" => Ok(Arc::new(paddleocr::PaddleOcr)),
+        "vllm" => Ok(Arc::new(vllm::Vllm)),
         other => Err(Error::unsupported_model(format!("unknown provider '{other}'"))),
     }
 }

@@ -75,5 +75,8 @@
   "opendocrouter/paddlepaddle/paddleocr-vl-1.6": { "parse": 0.002111, "ocr": 0.002111, "source": "https://www.opendocrouter.ai/models (price version 2026-10-06: $0.24/0.24/1.20 per 1M input/cached/output tokens; per-page ESTIMATE = the site's average charge per page, $2.11/1k pages, without the $0.20/1M-token layout surcharge; real cost comes from charge_usd)", "updated": "2026-10-08" },
   "tesseract/default": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (local tesseract binary; your own compute)", "updated": "2026-09-24" },
   "docling/default": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (your docling-serve; your own compute)", "updated": "2026-09-24" },
-  "paddleocr/default": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (your PaddleOCR/PaddleX serving; your own compute)", "updated": "2026-09-24" }
+  "paddleocr/default": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (your PaddleOCR/PaddleX serving; your own compute)", "updated": "2026-09-24" },
+  "paddleocr/vl": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (your PaddleOCR-VL pipeline serving; your own compute)", "updated": "2026-10-08" },
+  "vllm/infinity-parser2-flash": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (infly/Infinity-Parser2-Flash on your vLLM server; your own compute)", "updated": "2026-10-08" },
+  "vllm/dots.mocr": { "parse": 0.0, "ocr": 0.0, "source": "self-hosted (rednote-hilab/dots.mocr on your vLLM server; your own compute)", "updated": "2026-10-08" }
 }

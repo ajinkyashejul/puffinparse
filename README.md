@@ -27,7 +27,7 @@ Two things make switching real rather than aspirational. **Modes**: every call n
 
 | | |
 |---|---|
-| **Providers (v0.1)** | 19 providers · 76 models · 3 modes. **Live-verified** against the real APIs: [Reducto](https://reducto.ai), [Extend](https://extend.ai), [LlamaParse](https://cloud.llamaindex.ai). **Verified locally**: the self-hosted Tesseract and Docling. **Docs-only** (implemented from the provider's API documentation and tested against fixture payloads, not yet run live): Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI, OpenDocRouter and the self-hosted PaddleOCR ([help verify them](https://github.com/ajinkyashejul/puffinparse/issues/10)). [Full table](#model-names) |
+| **Providers (v0.1)** | 20 providers · 79 models · 3 modes. **Live-verified** against the real APIs: [Reducto](https://reducto.ai), [Extend](https://extend.ai), [LlamaParse](https://cloud.llamaindex.ai). **Verified locally**: the self-hosted Tesseract and Docling. **Docs-only** (implemented from the provider's API documentation and tested against fixture payloads, not yet run live): Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI, OpenDocRouter and the self-hosted PaddleOCR and vLLM presets ([help verify them](https://github.com/ajinkyashejul/puffinparse/issues/10)). [Full table](#model-names) |
 | **Modes** | `parse` (markdown + blocks), `ocr` (plain text + boxes), `extract` (JSON from a schema) |
 | **Core** | Rust (`puffinparse-core`): `reqwest` + `tokio`, no vendor SDKs, `#![forbid(unsafe_code)]` |
 | **SDKs** | Python 3.9+ (sync + async, fully typed) and Node.js / TypeScript ([`js/`](https://github.com/ajinkyashejul/puffinparse/blob/main/js/README.md)), both on the same Rust core |
@@ -384,12 +384,16 @@ page per provider.
 | `opendocrouter/paddlepaddle/paddleocr-vl-1.6` | parse, ocr | $0.002111 · $0.002111 · — | PaddleOCR-VL-1.6 (open model hosted by the router) |
 
 **Self-hosted engines** · no key · $0/page — out-of-process: a local binary or a server you run. Tesseract and Docling are verified locally; PaddleOCR is docs-only.
+**Self-hosted engines** · no key · $0/page — out-of-process: a local binary or a server you run. Tesseract and Docling are verified locally; PaddleOCR and vLLM are docs-only.
 
 | Model | Modes | List price / page (parse · ocr · extract) | Notes |
 |---|---|---|---|
 | `tesseract/default` | ocr `*` (native), parse `*` | $0 · $0 · — | local `tesseract` binary (`TESSERACT_CMD`), PDFs via `pdftoppm`; word/line boxes + confidences, no layout model; verified locally |
 | `docling/default` | parse `*`, ocr `*` | $0 · $0 · — | your docling-serve (`DOCLING_BASE_URL`): layout, tables, OCR; verified locally |
 | `paddleocr/default` | ocr `*` (native), parse `*` (PP-StructureV3) | $0 · $0 · — | your PaddleOCR serving (`PADDLEOCR_BASE_URL`); docs-only |
+| `paddleocr/vl` | parse, ocr | $0 · $0 · — | your PaddleOCR-VL pipeline serving (`PADDLEOCR_VL_BASE_URL`; PaddleOCR-VL-1.6 by default): layout + 0.9B VLM; docs-only |
+| `vllm/infinity-parser2-flash` | parse `*`, ocr `*` | $0 · $0 · — | `infly/Infinity-Parser2-Flash` on your `vllm serve` (`VLLM_BASE_URL`): page images, layout blocks with boxes; docs-only |
+| `vllm/dots.mocr` | parse, ocr | $0 · $0 · — | `rednote-hilab/dots.mocr` on your `vllm serve` (`VLLM_BASE_URL`): page images, layout blocks with boxes; docs-only |
 
 ### Keep your Reducto / Extend / LlamaParse code
 

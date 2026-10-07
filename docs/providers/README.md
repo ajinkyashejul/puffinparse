@@ -35,9 +35,10 @@ Verification differs by provider, and the **Status** column says which applies:
 | OpenDocRouter | [`opendocrouter.md`](opendocrouter.md) | `providers/opendocrouter.rs` | `OPEN_DOC_ROUTER_API_KEY` | 11 router models as `<vendor>/<model>`: `google/gemini-3.8-flash-low` *(default)*, `google/gemini-3-flash`, `anthropic/claude-opus-5-5`, `anthropic/claude-haiku-5-5`, `openai/gpt-5.6-terra`, `openai/gpt-6-luna`, `infly/infinity-parser2-flash`, `opendatalab/mineru2.5-pro`, `xingchen-agi/teleocr`, `rednote-hilab/dots.mocr`, `paddlepaddle/paddleocr-vl-1.6` | docs-only |
 | Tesseract *(local)* | [`tesseract.md`](tesseract.md) | `providers/tesseract.rs` | none (`TESSERACT_CMD`, `PDFTOPPM_CMD`) | `default` | verified locally |
 | Docling *(self-hosted)* | [`docling.md`](docling.md) | `providers/docling.rs` | none (`DOCLING_BASE_URL`; optional `DOCLING_API_KEY`) | `default` | verified locally |
-| PaddleOCR *(self-hosted)* | [`paddleocr.md`](paddleocr.md) | `providers/paddleocr.rs` | none (`PADDLEOCR_BASE_URL`, `PADDLEOCR_PARSE_BASE_URL`) | `default` | docs-only |
+| PaddleOCR *(self-hosted)* | [`paddleocr.md`](paddleocr.md) | `providers/paddleocr.rs` | none (`PADDLEOCR_BASE_URL`, `PADDLEOCR_PARSE_BASE_URL`, `PADDLEOCR_VL_BASE_URL`) | `default`, `vl` (PaddleOCR-VL pipeline; implemented from docs) | docs-only |
+| vLLM *(self-hosted)* | [`vllm.md`](vllm.md) | `providers/vllm.rs` | none (`VLLM_BASE_URL`; optional `VLLM_API_KEY`, `VLLM_SERVED_MODEL`) | `infinity-parser2-flash` *(default)*, `dots.mocr` | docs-only (implemented from docs) |
 
-The three self-hosted engines need no API key and are priced at $0/page (`puffinparse providers` shows
+The four self-hosted engines need no API key and are priced at $0/page (`puffinparse providers` shows
 `local` in the Key column); they are the open baselines in the benchmark. Their shared helpers are
 in `providers/local.rs`.
 

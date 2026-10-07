@@ -237,6 +237,11 @@
       "permanent": true
     },
     {
+      "source": "/providers/vllm/",
+      "destination": "/docs/providers/vllm/",
+      "permanent": true
+    },
+    {
       "source": "/benchmark/",
       "destination": "/docs/benchmark/",
       "permanent": true
@@ -723,6 +728,21 @@
         }
       ],
       "dest": "/docs/providers/paddleocr/index.md",
+      "headers": {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Vary": "Accept"
+      }
+    },
+    {
+      "src": "^/docs/providers/vllm/?$",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": "(.*)text/markdown(.*)"
+        }
+      ],
+      "dest": "/docs/providers/vllm/index.md",
       "headers": {
         "Content-Type": "text/markdown; charset=utf-8",
         "Vary": "Accept"

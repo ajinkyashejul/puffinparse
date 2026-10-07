@@ -10,6 +10,11 @@
 > shapes. Mark this page **verified** after the `#[ignore]`d live test in `providers/paddleocr.rs`
 > passes against a real server.
 > Tracked in [issue #17](https://github.com/ajinkyashejul/puffinparse/issues/17).
+>
+> `paddleocr/vl` (added 2026-10-08) is **implemented from docs** too: the "Service Deployment"
+> section of `docs/version3.x/pipeline_usage/PaddleOCR-VL.en.md` (PaddlePaddle/PaddleOCR, read
+> 2026-10-08) and the PaddleOCR-VL-1.6 model card. Its fixture `paddleocr_vl_layout_parsing.json`
+> is hand-built from that documented shape; no PaddleOCR-VL server was run.
 
 ## 1. Summary
 
@@ -19,6 +24,7 @@
 | Runs | on your own PaddleOCR / PaddleX "basic serving" endpoints |
 | Base URL | `http://localhost:8080` (override: `base_url` on the request, or `PADDLEOCR_BASE_URL`) |
 | Parse base URL | `PADDLEOCR_PARSE_BASE_URL`, falling back to `PADDLEOCR_BASE_URL` (a `base_url` on the request wins for both modes) |
+| PaddleOCR-VL base URL | `PADDLEOCR_VL_BASE_URL` for `paddleocr/vl`, falling back to `PADDLEOCR_BASE_URL` (a `base_url` on the request wins) |
 | API key | none |
 | Price | $0 per page (`pricing.json` source `self-hosted`) |
 | Implementation | `crates/puffinparse-core/src/providers/paddleocr.rs` |
@@ -39,6 +45,41 @@ export PADDLEOCR_BASE_URL=http://localhost:8080 PADDLEOCR_PARSE_BASE_URL=http://
 |---|---|---|---|
 | `paddleocr/default` *(default)* | `ocr` (native) | `POST /ocr` — general OCR pipeline (PP-OCRv5 by default) | $0 |
 | | `parse` | `POST /layout-parsing` — PP-StructureV3 (layout, tables, formulas, reading order) | $0 |
+| `paddleocr/vl` | `parse`, `ocr` (derived from parse) | `POST /layout-parsing` on a **PaddleOCR-VL** pipeline server — PP-DocLayout layout detection + the PaddleOCR-VL 0.9B VLM per region | $0 |
+
+### PaddleOCR-VL (`paddleocr/vl`)
+
+PaddleOCR-VL is not a single-prompt page parser: its model card and the PaddleOCR docs run it
+through the PaddleOCR-VL **pipeline** (layout detection, then the VLM on each region with an
+element prompt such as `OCR:` or `Table Recognition:`). PuffinParse therefore talks to the
+pipeline's serving API, which has the same request body and `layoutParsingResults` response as
+PP-StructureV3, rather than to the VLM directly. The pipeline version is the server's
+`pipeline_version` (`v1.6`, i.e. PaddleOCR-VL-1.6, is the default; `v1.5` and `v1` also exist);
+the response does not report it.
+
+Serve it (commands from the PaddleOCR-VL usage doc, §4 "Service Deployment"):
+
+```bash
+# Docker Compose (recommended on NVIDIA GPUs): download compose.yaml and .env from
+# deploy/paddleocr_vl_docker/accelerators/nvidia-gpu/ in PaddlePaddle/PaddleOCR, then
+docker compose up            # pipeline API on :8080, VLM server (vLLM / FastDeploy) behind it
+
+# or manually: the VLM inference server, then the pipeline server pointing at it
+paddleocr genai_server --model_name PaddleOCR-VL-1.6-0.9B --backend vllm --port 8118
+paddlex --install serving
+paddlex --serve --pipeline PaddleOCR-VL          # :8080
+# to use the 8118 server, set in the pipeline config:
+#   VLRecognition: {genai_config: {backend: vllm-server, server_url: http://localhost:8118/v1}}
+
+export PADDLEOCR_VL_BASE_URL=http://localhost:8080
+```
+
+The pipeline can also use a server started with the default parameters of `vllm serve` as its VLM
+backend (`--vl_rec_backend vllm-server --vl_rec_server_url http://localhost:8000/v1
+--vl_rec_api_model_name 'PaddlePaddle/PaddleOCR-VL-1.6'` in the doc's CLI example). `provider_options` reach the pipeline's
+request fields: `useLayoutDetection`, `useChartRecognition`, `useSealRecognition`,
+`promptLabel`, `temperature`, `topP`, `repetitionPenalty`, `minPixels` / `maxPixels`,
+`maxNewTokens`, `markdownIgnoreLabels`, `restructurePages`, `mergeTables`, ….
 
 ## 3. Request flow PuffinParse uses
 
@@ -88,7 +129,7 @@ order:
 | `table` | `table`; `block_content` is HTML → converted to a markdown table when simple (no spans), else kept as HTML; `text` is one line per row |
 | `image`, `chart`, `seal`, `header_image`, `footer_image` | `figure` |
 | `figure_title`, `table_title`, `chart_title` | `caption` |
-| `formula` | `formula`, wrapped in `$$ … $$` unless already delimited |
+| `formula`, `display_formula`, `inline_formula` | `formula`, wrapped in `$$ … $$` unless already delimited |
 | `header` / `footer`, `number` | `header` / `footer` |
 | `footnote`, `vision_footnote` | `footnote` |
 | `algorithm` | `other`, fenced |
@@ -117,7 +158,9 @@ an `input_error` before any request.
   multi-page TIFF. Set `Serving: extra: max_num_input_imgs: null` in the pipeline config to lift
   it; PuffinParse flags truncation in `metadata.paddleocr_pages_truncated`.
 * **Two servers.** `ocr` and `parse` hit different pipelines. If only the OCR pipeline is
-  running, `parse` gets a 404; set `PADDLEOCR_PARSE_BASE_URL`.
+  running, `parse` gets a 404; set `PADDLEOCR_PARSE_BASE_URL`. `paddleocr/vl` is a third server
+  (`PADDLEOCR_VL_BASE_URL`); its `ocr` is derived from `parse` because the PaddleOCR-VL pipeline has
+  no `/ocr` endpoint.
 * **Image payloads.** Without `visualize: false` (PuffinParse sends it) the server returns several
   base64 JPEGs per page. PP-StructureV3 also returns markdown images unless
   `returnMarkdownImages: false` — pass it in `provider_options` to shrink responses.
@@ -135,6 +178,8 @@ puffinparse.ocr("photo.jpg", model="paddleocr",
 puffinparse.parse("report.pdf", model="paddleocr",
               provider_options={"returnMarkdownImages": False, "useChartRecognition": False})
 puffinparse.parse("report.pdf", model="paddleocr", base_url="http://gpu-box:8081")
+puffinparse.parse("report.pdf", model="paddleocr/vl",
+              provider_options={"useChartRecognition": True, "returnMarkdownImages": False})
 ```
 
 ## 8. Links
@@ -142,3 +187,5 @@ puffinparse.parse("report.pdf", model="paddleocr", base_url="http://gpu-box:8081
 * OCR pipeline, serving API: <https://www.paddleocr.ai/latest/en/version3.x/pipeline_usage/OCR.html>
 * PP-StructureV3, serving API: <https://www.paddleocr.ai/latest/en/version3.x/pipeline_usage/PP-StructureV3.html>
 * Serving deployment guide: <https://www.paddleocr.ai> (Deployment → Serving)
+* PaddleOCR-VL usage and serving API: <https://www.paddleocr.ai/latest/en/version3.x/pipeline_usage/PaddleOCR-VL.html>
+* PaddleOCR-VL-1.6 model card: <https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6>
