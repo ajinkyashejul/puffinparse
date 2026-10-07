@@ -38,10 +38,12 @@ const PARSE_SCHEMA_NAME: &str = "puffinparse_pages";
 const EXTRACT_SCHEMA_NAME: &str = "puffinparse_extraction";
 
 /// List price in USD per **1M** tokens, `(model, input, output)`.
-/// Source: <https://developers.openai.com/api/docs/pricing> (standard tier, short context).
-pub const PRICES_UPDATED: &str = "2026-09-11";
+/// Source: <https://developers.openai.com/api/docs/pricing> (standard tier, short context; gpt-6-luna
+/// added 2026-10-08 from <https://developers.openai.com/api/docs/models/gpt-6-luna>).
+pub const PRICES_UPDATED: &str = "2026-10-08";
 const PRICES: &[(&str, f64, f64)] = &[
     ("gpt-6-astra", 10.00, 50.00),
+    ("gpt-6-luna", 0.10, 0.50),
     ("gpt-5.6-astra", 10.00, 50.00),
     ("gpt-5.6-sol", 4.00, 20.00),
     ("gpt-5.6", 4.00, 20.00),
@@ -420,6 +422,10 @@ mod tests {
         assert_eq!(body["temperature"], 0);
         assert!(body.get("reasoning").is_none());
         assert!(supports_temperature("gpt-4o-mini") && !supports_temperature("gpt-5.6-luna"));
+        // gpt-6-luna is a reasoning model (effort none…max): no temperature, low effort.
+        let body = build_body(&req, "gpt-6-luna", json!({}), "p", "s", json!({"type": "object"})).unwrap();
+        assert!(body.get("temperature").is_none());
+        assert_eq!(body["reasoning"]["effort"], "low");
     }
 
     #[test]
@@ -575,8 +581,9 @@ mod tests {
         assert_eq!(round(per_page_estimate("gpt-5.6-terra").unwrap()), 0.0114);
         assert_eq!(round(per_page_estimate("gpt-5.6-sol").unwrap()), 0.02);
         assert_eq!(round(per_page_estimate("gpt-6-astra").unwrap()), 0.05);
+        assert_eq!(round(per_page_estimate("gpt-6-luna").unwrap()), 0.0005);
         assert!(per_page_estimate("gpt-unknown").is_none());
-        assert_eq!(PRICES_UPDATED, "2026-09-11");
+        assert_eq!(PRICES_UPDATED, "2026-10-08");
     }
 
     const SAMPLE: &str =

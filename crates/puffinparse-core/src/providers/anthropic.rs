@@ -39,26 +39,48 @@ const SYSTEM_PROMPT: &str =
     "You are a precise document transcription and extraction engine. You answer only by calling the \
      provided tool, and you never invent content that is not in the document.";
 
-/// Models that accept `output_config.effort` (Claude 4.6 and later). Older ones reject it.
-const EFFORT_MODELS: &[&str] =
-    &["claude-opus-5", "claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6", "claude-sonnet-5", "claude-sonnet-4-6"];
+/// Models that accept `output_config.effort` (Claude 4.6 and later, and Haiku 5.5). Older ones reject it.
+const EFFORT_MODELS: &[&str] = &[
+    "claude-fable-5-1",
+    "claude-opus-5-5",
+    "claude-opus-5",
+    "claude-opus-4-8",
+    "claude-opus-4-7",
+    "claude-opus-4-6",
+    "claude-sonnet-5-5",
+    "claude-sonnet-5",
+    "claude-sonnet-4-6",
+    "claude-haiku-5-5",
+];
+/// Models that reject a forced `tool_choice` (`any` / `tool`) with a 400. They get
+/// `tool_choice: auto`, a strict tool, and an instruction to call it; the answer is read the same way.
+/// Source: <https://platform.claude.com/docs/en/models/opus-5-5/overview> (checked 2026-10-08).
+const AUTO_TOOL_MODELS: &[&str] = &["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-mythos-5-1"];
 /// Models that still accept sampling parameters. Claude 4.6+ removed `temperature` (400 if sent).
 const TEMPERATURE_MODELS: &[&str] = &["claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-5"];
 
 /// List price in USD per **1M** tokens, `(model, input, output)`.
 /// Source: <https://platform.claude.com/docs/en/about-claude/pricing> (standard tier, no caching).
-pub const PRICES_UPDATED: &str = "2026-09-11";
+/// Opus 5.5 and Haiku 5.5 checked 2026-10-08 on their model pages
+/// (<https://platform.claude.com/docs/en/models/opus-5-5/overview>, `.../haiku-5-5/overview>`).
+pub const PRICES_UPDATED: &str = "2026-10-08";
 const PRICES: &[(&str, f64, f64)] = &[
     ("claude-fable-5-1", 10.00, 50.00),
     ("claude-fable-5", 10.00, 50.00),
+    ("claude-opus-5-5", 4.00, 20.00),
     ("claude-opus-5", 5.00, 25.00),
     ("claude-opus-4-8", 5.00, 25.00),
     ("claude-opus-4-7", 5.00, 25.00),
     ("claude-opus-4-6", 5.00, 25.00),
+    ("claude-sonnet-5-5", 2.00, 10.00),
     ("claude-sonnet-5", 2.00, 10.00),
     ("claude-sonnet-4-6", 3.00, 15.00),
+    ("claude-haiku-5-5", 0.10, 0.50),
     ("claude-haiku-4-5", 1.00, 5.00),
 ];
+/// Long-prompt tiers, `(model, input tokens above, input, output)` in USD per 1M tokens: Haiku 5.5
+/// bills a prompt over 100,000 tokens at $0.50 / $2.50 instead of $0.10 / $0.50.
+const LONG_PROMPT_PRICES: &[(&str, u64, f64, f64)] = &[("claude-haiku-5-5", 100_000, 0.50, 2.50)];
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Anthropic;
@@ -74,7 +96,10 @@ impl Provider for Anthropic {
         let tool =
             tool_definition(PARSE_TOOL, "Return the transcription of every page of the document.", pages_schema());
         let call = message(request, model, &prompt, PARSE_TOOL, tool).await?;
-        Ok(vlm::parse_response(NAME, PRICES, request, model, call))
+        let cost = provider_cost(model, call.input_tokens, call.output_tokens);
+        let mut resp = vlm::parse_response(NAME, PRICES, request, model, call);
+        resp.usage.provider_cost_usd = cost;
+        Ok(resp)
     }
 
     async fn extract(&self, request: &ExtractRequest, model: &str) -> Result<ExtractResponse> {
@@ -91,7 +116,10 @@ impl Provider for Anthropic {
         let call = message(doc, model, &prompt, EXTRACT_TOOL, tool).await?;
         // Claude's citations feature grounds *text* answers in a document; it cannot be combined
         // with the forced tool call PuffinParse uses for schema output, so `fields` stays empty.
-        Ok(vlm::extract_response(NAME, PRICES, request, model, call))
+        let cost = provider_cost(model, call.input_tokens, call.output_tokens);
+        let mut resp = vlm::extract_response(NAME, PRICES, request, model, call);
+        resp.usage.provider_cost_usd = cost;
+        Ok(resp)
     }
 }
 
@@ -165,25 +193,42 @@ fn build_body(
     tool_name: &str,
     tool: Value,
 ) -> Result<Value> {
+    let opts = passthrough_options(request);
+    if opts.as_ref().is_some_and(|o| !o.is_object()) {
+        return Err(Error::input("anthropic: provider_options must be a JSON object").with_provider(NAME));
+    }
+    // `provider_options.model` replaces the model id in the body, so gate on the model actually sent.
+    let effective = opts.as_ref().and_then(|o| o.get("model")).and_then(Value::as_str).unwrap_or(model);
+    let mut tool = tool;
+    let (system, tool_choice) = if forced_tool_supported(effective) {
+        (SYSTEM_PROMPT.to_string(), json!({"type": "tool", "name": tool_name}))
+    } else {
+        // Forced tool use is a 400 here: let the model choose, tell it to call the tool, and make
+        // the fixed `pages` schema strict so the arguments still validate.
+        if tool_name == PARSE_TOOL {
+            tool["strict"] = json!(true);
+        }
+        (
+            format!("{SYSTEM_PROMPT} Answer by calling the `{tool_name}` tool exactly once; never answer in prose."),
+            json!({"type": "auto"}),
+        )
+    };
     let mut body = json!({
         "model": model,
         "max_tokens": DEFAULT_MAX_TOKENS,
-        "system": SYSTEM_PROMPT,
+        "system": system,
         // Documents before text: Claude does better when the page comes first.
         "messages": [{"role": "user", "content": [document, {"type": "text", "text": prompt}]}],
         "tools": [tool],
-        "tool_choice": {"type": "tool", "name": tool_name},
+        "tool_choice": tool_choice,
     });
-    if supports_temperature(model) {
+    if supports_temperature(effective) {
         body["temperature"] = json!(0);
     }
-    if supports_effort(model) {
+    if supports_effort(effective) {
         body["output_config"] = json!({"effort": DEFAULT_EFFORT});
     }
-    if let Some(opts) = passthrough_options(request) {
-        if !opts.is_object() {
-            return Err(Error::input("anthropic: provider_options must be a JSON object").with_provider(NAME));
-        }
+    if let Some(opts) = opts {
         crate::util::deep_merge(&mut body, &opts);
     }
     Ok(body)
@@ -301,15 +346,22 @@ fn supports_effort(model: &str) -> bool {
     EFFORT_MODELS.contains(&model)
 }
 
+fn forced_tool_supported(model: &str) -> bool {
+    !AUTO_TOOL_MODELS.contains(&model)
+}
+
 /// Make a schema satisfy strict tool use (see [`vlm::sanitize_strict_schema`]).
 pub(crate) fn sanitize_strict_schema(schema: &mut Value) {
     vlm::sanitize_strict_schema(schema)
 }
 
-/// Dollar cost of one call from the embedded per-token price table (see [`PRICES`]).
-#[cfg(test)]
+/// Dollar cost of one call from the embedded per-token price tables (see [`PRICES`] and
+/// [`LONG_PROMPT_PRICES`]).
 fn provider_cost(model: &str, input_tokens: u64, output_tokens: u64) -> Option<f64> {
-    vlm::token_cost(PRICES, model, input_tokens, output_tokens)
+    match LONG_PROMPT_PRICES.iter().find(|(m, threshold, _, _)| *m == model && input_tokens > *threshold) {
+        Some((_, _, input, output)) => Some((input_tokens as f64 * input + output_tokens as f64 * output) / 1e6),
+        None => vlm::token_cost(PRICES, model, input_tokens, output_tokens),
+    }
 }
 
 /// Per-page price estimate used to seed `pricing.json` (~1,500 input + ~700 output tokens/page).
@@ -328,6 +380,7 @@ mod tests {
 
     const PARSE_FIXTURE: &str = include_str!("../../tests/fixtures/anthropic_messages_parse.json");
     const EXTRACT_FIXTURE: &str = include_str!("../../tests/fixtures/anthropic_messages_extract.json");
+    const AUTO_TOOL_FIXTURE: &str = include_str!("../../tests/fixtures/anthropic_messages_parse_auto_tool.json");
 
     fn pdf_request() -> DocumentRequest {
         DocumentRequest::from_bytes(bytes::Bytes::from_static(b"%PDF-1.7 fake"), "invoice.pdf")
@@ -422,6 +475,69 @@ mod tests {
         // Claude 4.6+ rejects sampling parameters.
         assert!(body.get("temperature").is_none(), "{body}");
         assert!(body.get("thinking").is_none(), "adaptive thinking is compatible with forced tool use");
+    }
+
+    #[test]
+    fn opus_5_5_uses_auto_tool_choice_and_a_strict_parse_tool() {
+        let req = pdf_request();
+        let tool = tool_definition(PARSE_TOOL, "desc", pages_schema());
+        let body = build_body(&req, "claude-opus-5-5", json!({}), "p", PARSE_TOOL, tool).unwrap();
+        assert_eq!(body["tool_choice"], json!({"type": "auto"}), "forced tool_choice is a 400 on Opus 5.5");
+        assert_eq!(body["tools"][0]["strict"], true);
+        assert!(body["system"].as_str().unwrap().contains("calling the `emit_pages` tool exactly once"));
+        assert_eq!(body["output_config"]["effort"], "low");
+        assert!(body.get("temperature").is_none() && body.get("thinking").is_none(), "{body}");
+
+        // Extract keeps the caller's schema non-strict unless asked, but still cannot force the tool.
+        let tool = tool_definition(EXTRACT_TOOL, "desc", json!({"type": "object"}));
+        let body = build_body(&req, "claude-opus-5-5", json!({}), "p", EXTRACT_TOOL, tool).unwrap();
+        assert_eq!(body["tool_choice"]["type"], "auto");
+        assert!(body["tools"][0].get("strict").is_none());
+
+        // The gate follows the model actually sent: a Fable 5.1 override also switches to auto.
+        let req = pdf_request().provider_options(json!({"model": "claude-fable-5-1"}));
+        let tool = tool_definition(PARSE_TOOL, "desc", pages_schema());
+        let body = build_body(&req, "claude-sonnet-5", json!({}), "p", PARSE_TOOL, tool).unwrap();
+        assert_eq!(body["model"], "claude-fable-5-1");
+        assert_eq!(body["tool_choice"]["type"], "auto");
+    }
+
+    #[test]
+    fn haiku_5_5_body_has_effort_and_no_sampling() {
+        let req = pdf_request();
+        let tool = tool_definition(PARSE_TOOL, "desc", pages_schema());
+        let body = build_body(&req, "claude-haiku-5-5", json!({}), "p", PARSE_TOOL, tool).unwrap();
+        assert_eq!(body["tool_choice"], json!({"type": "tool", "name": PARSE_TOOL}), "Haiku 5.5 accepts forced tools");
+        assert_eq!(body["output_config"]["effort"], "low");
+        assert!(body.get("temperature").is_none(), "Haiku 5.5 rejects non-default temperature");
+    }
+
+    #[test]
+    fn normalizes_auto_tool_fixture() {
+        let raw: Value = serde_json::from_str(AUTO_TOOL_FIXTURE).unwrap();
+        let data = tool_input(&raw, PARSE_TOOL).unwrap();
+        let req = pdf_request();
+        let call = Completion::new(raw, data);
+        let cost = provider_cost("claude-opus-5-5", call.input_tokens, call.output_tokens);
+        let mut resp = vlm::parse_response(NAME, PRICES, &req, "claude-opus-5-5", call);
+        resp.usage.provider_cost_usd = cost;
+        assert_eq!(resp.model, "anthropic/claude-opus-5-5");
+        assert_eq!(resp.pages.len(), 1);
+        assert!(resp.pages[0].markdown.contains("| Fence post | 12 | $8.50 |"));
+        assert_eq!(resp.provider_job_id.as_deref(), Some("msg_01Opus55AutoToolChoice0001"));
+        // 2480 * $4/1M + 512 * $20/1M
+        assert!((resp.usage.provider_cost_usd.unwrap() - 0.02016).abs() < 1e-9);
+    }
+
+    #[test]
+    fn haiku_5_5_long_prompt_tier() {
+        // Up to 100k prompt tokens: $0.10 / $0.50; above: $0.50 / $2.50 for the whole call.
+        let short = provider_cost("claude-haiku-5-5", 100_000, 1_000).unwrap();
+        assert!((short - (100_000.0 * 0.10 + 1_000.0 * 0.50) / 1e6).abs() < 1e-12);
+        let long = provider_cost("claude-haiku-5-5", 100_001, 1_000).unwrap();
+        assert!((long - (100_001.0 * 0.50 + 1_000.0 * 2.50) / 1e6).abs() < 1e-12);
+        let opus = provider_cost("claude-opus-5-5", 200_000, 0).unwrap();
+        assert!((opus - 0.8).abs() < 1e-12, "no long tier for Opus 5.5");
     }
 
     #[test]
@@ -566,8 +682,10 @@ mod tests {
         assert_eq!(round(per_page_estimate("claude-haiku-4-5").unwrap()), 0.005);
         assert_eq!(round(per_page_estimate("claude-sonnet-5").unwrap()), 0.01);
         assert_eq!(round(per_page_estimate("claude-opus-5").unwrap()), 0.025);
+        assert_eq!(round(per_page_estimate("claude-opus-5-5").unwrap()), 0.02);
+        assert_eq!(round(per_page_estimate("claude-haiku-5-5").unwrap()), 0.0005);
         assert!(per_page_estimate("claude-unknown").is_none());
-        assert_eq!(PRICES_UPDATED, "2026-09-11");
+        assert_eq!(PRICES_UPDATED, "2026-10-08");
     }
 
     const SAMPLE: &str =

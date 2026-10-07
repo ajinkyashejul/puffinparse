@@ -385,6 +385,20 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 default: false,
                 modes: Mode::ALL,
             },
+            ModelInfo {
+                provider: "gemini",
+                model: "3.8-flash-low",
+                description: "Gemini 3.8 Flash with thinkingConfig.thinkingLevel=low (cheaper, faster transcription)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "gemini",
+                model: "3-flash-preview",
+                description: "Gemini 3 Flash preview (gemini-3-flash-preview; PDF and image input)",
+                default: false,
+                modes: Mode::ALL,
+            },
         ],
     },
     ProviderInfo {
@@ -422,6 +436,13 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 default: false,
                 modes: Mode::ALL,
             },
+            ModelInfo {
+                provider: "openai",
+                model: "gpt-6-luna",
+                description: "OpenAI Responses API, gpt-6-luna (cheapest GPT-6, image and PDF input)",
+                default: false,
+                modes: Mode::ALL,
+            },
         ],
     },
     ProviderInfo {
@@ -449,6 +470,20 @@ pub const PROVIDERS: &[ProviderInfo] = &[
                 provider: "anthropic",
                 model: "claude-opus-5",
                 description: "Claude Messages API, claude-opus-5 (highest accuracy)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "anthropic",
+                model: "claude-opus-5-5",
+                description: "Claude Messages API, claude-opus-5-5 (current Opus; tool_choice auto, no forced tool)",
+                default: false,
+                modes: Mode::ALL,
+            },
+            ModelInfo {
+                provider: "anthropic",
+                model: "claude-haiku-5-5",
+                description: "Claude Messages API, claude-haiku-5-5 (cheapest Claude, 1M context)",
                 default: false,
                 modes: Mode::ALL,
             },
@@ -898,7 +933,7 @@ mod tests {
             model_info("opendocrouter", "google/gemini-3-flash").unwrap().qualified(),
             "opendocrouter/google/gemini-3-flash"
         );
-        assert_eq!(m.len(), 71);
+        assert_eq!(m.len(), 76);
     }
 
     #[test]
