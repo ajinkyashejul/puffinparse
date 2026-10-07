@@ -14,7 +14,7 @@ categories.workspace = true
 [dependencies]
 puffinparse-core = { workspace = true }
 axum = { version = "0.8", default-features = false, features = ["http1", "json", "multipart", "query", "tokio"] }
-tower-http = { version = "0.6", features = ["catch-panic"] }
+tower-http = { version = "0.7", features = ["catch-panic"] }
 tokio = { workspace = true, features = ["net", "signal"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
