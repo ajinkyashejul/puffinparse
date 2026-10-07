@@ -163,12 +163,12 @@ vendor shape), with headers `x-puffinparse-model` (served model), `x-puffinparse
 
 `job` is the core `JobHandle` (SPEC §15) minus the operator's `base_url`. Authentication, the
 key's model allow-list, aliases, the budget pre-check and `rpm` apply exactly as for
-`/v1/parse`. Only providers with a job queue can take jobs (`reducto`, `extend`, `llamaparse`;
-others give `400 unsupported_model_error`). **Fallback does not apply to jobs**: an alias submits
+`/v1/parse`. Only providers with a job queue can take jobs (`reducto`, `extend`, `llamaparse`,
+`opendocrouter`; others give `400 unsupported_model_error`). **Fallback does not apply to jobs**: an alias submits
 to its first target (in `round_robin`, the next one in rotation) and a request `fallbacks` list is
 rejected, because a provider failure only shows up later, on retrieve. `webhook_url` is
 forwarded to the provider's per-job webhook (Reducto `async.webhook`, LlamaParse `webhook_url`;
-Extend rejects it) and is refused by the synchronous endpoints.
+Extend and OpenDocRouter reject it) and is refused by the synchronous endpoints.
 
 `GET /v1/jobs/{id}` asks the provider once and returns
 

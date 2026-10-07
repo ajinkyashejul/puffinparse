@@ -334,7 +334,7 @@ export interface HandleWebhookOptions extends RetrieveOptions {
   model?: string
 }
 
-/** Start a `parse` job without waiting (providers with a job queue: reducto, extend, llamaparse). */
+/** Start a `parse` job without waiting (providers with a job queue: reducto, extend, llamaparse, opendocrouter). */
 export declare function submit(doc: DocumentInput, options?: SubmitOptions): Promise<Job>
 
 /**

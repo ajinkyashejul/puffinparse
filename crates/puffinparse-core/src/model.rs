@@ -614,6 +614,93 @@ pub const PROVIDERS: &[ProviderInfo] = &[
         ],
     },
     ProviderInfo {
+        name: "opendocrouter",
+        display_name: "OpenDocRouter",
+        env_var: "OPEN_DOC_ROUTER_API_KEY",
+        base_url: "https://www.opendocrouter.ai",
+        docs: "https://www.opendocrouter.ai/docs",
+        // Model ids are the router's own vendor-qualified ids: `opendocrouter/<vendor>/<model>`.
+        models: &[
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "google/gemini-3.8-flash-low",
+                description: "Gemini 3.8 Flash (low thinking) via OpenDocRouter; the router's quickstart model",
+                default: true,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "google/gemini-3-flash",
+                description: "Gemini 3 Flash via OpenDocRouter",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "anthropic/claude-opus-5-5",
+                description: "Claude Opus 5.5 via OpenDocRouter (frontier, most expensive)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "anthropic/claude-haiku-5-5",
+                description: "Claude Haiku 5.5 via OpenDocRouter",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "openai/gpt-5.6-terra",
+                description: "GPT-5.6 Terra via OpenDocRouter",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "openai/gpt-6-luna",
+                description: "GPT-6 Luna via OpenDocRouter (cheapest frontier model)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "infly/infinity-parser2-flash",
+                description: "Infinity-Parser2-Flash (open OCR model hosted by OpenDocRouter)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "opendatalab/mineru2.5-pro",
+                description: "MinerU2.5-Pro (open OCR model hosted by OpenDocRouter)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "xingchen-agi/teleocr",
+                description: "TeleOCR (open OCR model hosted by OpenDocRouter)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "rednote-hilab/dots.mocr",
+                description: "dots.mocr (open OCR model hosted by OpenDocRouter)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+            ModelInfo {
+                provider: "opendocrouter",
+                model: "paddlepaddle/paddleocr-vl-1.6",
+                description: "PaddleOCR-VL-1.6 (open OCR model hosted by OpenDocRouter)",
+                default: false,
+                modes: PARSE_OCR,
+            },
+        ],
+    },
+    ProviderInfo {
         name: "tesseract",
         display_name: "Tesseract (local)",
         // Local binary: no key. TESSERACT_CMD / PDFTOPPM_CMD override the binaries.
@@ -697,6 +784,7 @@ impl ModelRef {
             "landing" | "landing_ai" | "landing-ai" | "ade" => "landingai".to_string(),
             "paddle" | "paddle_ocr" | "paddle-ocr" | "paddlex" => "paddleocr".to_string(),
             "docling_serve" | "docling-serve" => "docling".to_string(),
+            "odr" | "open_doc_router" | "open-doc-router" => "opendocrouter".to_string(),
             other => other.to_string(),
         };
         let info = provider_info(&prov).ok_or_else(|| {
@@ -793,12 +881,10 @@ mod tests {
         assert_eq!(ModelRef::parse_for("azure", Mode::Ocr).unwrap().qualified(), "azure/read");
         assert_eq!(ModelRef::parse_for("azure", Mode::Parse).unwrap().qualified(), "azure/layout");
         assert_eq!(ModelRef::parse_for("azure", Mode::Extract).unwrap().qualified(), "azure/invoice");
-        assert!(list_models_for(Mode::Extract).iter().all(|m| model_info(
-            m.split('/').next().unwrap(),
-            m.split('/').nth(1).unwrap()
-        )
-        .unwrap()
-        .supports(Mode::Extract)));
+        assert!(list_models_for(Mode::Extract).iter().all(|m| {
+            let (provider, model) = m.split_once('/').unwrap();
+            model_info(provider, model).unwrap().supports(Mode::Extract)
+        }));
         assert!(list_models_for(Mode::Extract).contains(&"mistral/ocr-latest".to_string()));
     }
 
@@ -806,7 +892,13 @@ mod tests {
     fn lists_models() {
         let m = list_models();
         assert!(m.contains(&"extend/parse_performance".to_string()));
-        assert_eq!(m.len(), 60);
+        // Model ids may themselves contain '/': only the first one separates the provider.
+        assert!(m.contains(&"opendocrouter/google/gemini-3-flash".to_string()));
+        assert_eq!(
+            model_info("opendocrouter", "google/gemini-3-flash").unwrap().qualified(),
+            "opendocrouter/google/gemini-3-flash"
+        );
+        assert_eq!(m.len(), 71);
     }
 
     #[test]

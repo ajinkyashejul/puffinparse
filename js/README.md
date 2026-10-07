@@ -46,7 +46,7 @@ router.stats()
 listModels('extract')
 estimateCost('reducto/standard', 100)   // USD at list price
 
-// Async jobs (reducto, extend, llamaparse): submit now, collect later or from a webhook.
+// Async jobs (reducto, extend, llamaparse, opendocrouter): submit now, collect later or from a webhook.
 const job = await submit('200-pages.pdf', { model: 'reducto/standard', webhookUrl: 'https://example.com/hook' })
 const res = await retrieve(job)          // the same Job while running, then a ParseResponse
 await handleWebhook(req.body, { model: 'reducto' })   // in your webhook handler

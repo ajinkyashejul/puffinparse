@@ -1,0 +1,45 @@
+{
+  "id": "00000000-0000-4000-8000-000000000002",
+  "status": "partial",
+  "model": "anthropic/claude-haiku-5-5",
+  "model_version": "2026-10-07",
+  "price_version": "2026-10-06",
+  "mode": "sync",
+  "created_at": "2026-10-08T09:05:00.000Z",
+  "error_code": null,
+  "page_count": 3,
+  "pages_done": 3,
+  "pages": [
+    {
+      "page": 3,
+      "status": "ok",
+      "markdown": "Closing notes for the quarter.",
+      "cached": false,
+      "usage": { "input_tokens": 980, "output_tokens": 12 },
+      "charge_usd": 0.000104,
+      "layout": {
+        "status": "error",
+        "error": { "code": "timeout", "message": "The layout didn't finish before the request deadline" }
+      }
+    },
+    {
+      "page": 1,
+      "status": "ok",
+      "markdown": "# Quarterly Report\n\nRevenue grew 12%.",
+      "cached": false,
+      "usage": { "input_tokens": 1010, "output_tokens": 20 },
+      "charge_usd": 0.000111
+    },
+    {
+      "page": 2,
+      "status": "error",
+      "error": { "code": "content_filtered", "message": "The provider blocked the output", "reason": "SAFETY" },
+      "charge_usd": 0
+    }
+  ],
+  "has_more": false,
+  "next_cursor": null,
+  "usage": { "input_tokens": 1990, "output_tokens": 32 },
+  "charge_usd": 0.000215,
+  "results_expire_at": null
+}

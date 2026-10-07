@@ -10,8 +10,9 @@ documents, large batches or webhook-driven pipelines, split the call in two inst
 >>> # ... or, in the webhook handler:
 >>> result = puffinparse.handle_webhook(request.json(), model="reducto")
 
-Supported by the providers with a job queue: ``reducto``, ``extend``, ``llamaparse``. A failed
-job raises the same typed exceptions as :func:`puffinparse.parse`.
+Supported by the providers with a job queue: ``reducto``, ``extend``, ``llamaparse``,
+``opendocrouter`` (which has no webhooks). A failed job raises the same typed exceptions as
+:func:`puffinparse.parse`.
 """
 
 from __future__ import annotations

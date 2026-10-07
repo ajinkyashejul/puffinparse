@@ -54,7 +54,7 @@ pub trait Provider: Send + Sync {
 fn no_jobs(provider: &str, model: &str) -> Error {
     Error::unsupported_model(format!(
         "{provider}/{model} has no asynchronous job API in PuffinParse; use parse() \
-         (providers with jobs: reducto, extend, llamaparse)"
+         (providers with jobs: reducto, extend, llamaparse, opendocrouter)"
     ))
     .with_provider(provider)
 }

@@ -9,6 +9,15 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+### Added
+
+- OpenDocRouter provider (`opendocrouter/<vendor>/<model>`, 11 models, `OPEN_DOC_ROUTER_API_KEY`):
+  LlamaIndex's hosted parsing router, docs-only. Layout elements become typed blocks with boxes,
+  `cost_usd` is the response's actual `charge_usd`, partial results keep the pages that worked and
+  list the failed ones in `metadata.opendocrouter_failed_pages`, files over ~3 MB go through the
+  uploads flow, documents over 50 pages run async, and `submit` / `retrieve` jobs are supported.
+- Gateway key allow-lists accept nested prefixes such as `opendocrouter/google/*`.
+
 ## [0.1.4] - 2026-10-08
 
 ### Security
