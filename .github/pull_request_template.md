@@ -1,30 +1,17 @@
-## Summary
+## What and why
 
-<!-- What does this change and why? Link the issue it closes: "Closes #123". -->
+<!-- What does this change, and why? Link the issue it closes: "Closes #123". -->
 
-## Test plan
+## Checks run
 
-<!-- How did you verify this? Commands you ran, fixtures you added, and for a
-     provider or benchmark change the actual numbers before/after. -->
+<!-- Paste or tick what you ran. `make lint test` covers the Rust and Python
+     checks; add `make test-node` if you touched js/ or crates/puffinparse-node. -->
 
-```bash
-cargo test --workspace
-pytest python/tests -q
-```
+- [ ] `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`
+- [ ] `ruff check` / `ruff format --check` on `python/ benchmark/ examples/`, `mypy python/puffinparse`, `pytest python/tests -q`
+- [ ] New behaviour has a test that makes no network calls
+- [ ] Docs and `CHANGELOG.md` `## [Unreleased]` updated where relevant
+- [ ] No API keys, tokens, unredacted provider payloads or research-only dataset outputs are committed
 
-## Checklist
-
-- [ ] `cargo fmt --all --check` is clean
-- [ ] `cargo clippy --workspace --all-targets -- -D warnings` is clean
-- [ ] `cargo test --workspace` passes
-- [ ] `ruff check python/ benchmark/` and `ruff format --check python/ benchmark/` are clean
-- [ ] `mypy python/puffinparse` is clean
-- [ ] `pytest python/tests -q` passes
-- [ ] New behaviour is covered by a test that makes no network calls
-- [ ] Docs updated (`README.md`, `docs/SPEC.md`, `.env.example`) where relevant
-- [ ] `CHANGELOG.md` `## [Unreleased]` updated
-- [ ] No API keys, tokens or unredacted provider payloads are committed
-
-## Breaking changes
-
-<!-- None, or: what breaks, and what users must do. Note the semver impact. -->
+<!-- For a provider or benchmark change, include the numbers before and after.
+     For a breaking change, say what breaks and what users must do. -->

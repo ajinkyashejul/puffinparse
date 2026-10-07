@@ -2,7 +2,7 @@
 
 # PuffinParse
 
-[![CI](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE) [![Docs](https://img.shields.io/badge/docs-puffinparse.com-E95C20)](https://puffinparse.com/docs/) [![Benchmark](https://img.shields.io/badge/benchmark-results-E95C20)](https://puffinparse.com/benchmark-results/)
+[![CI](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE) [![Docs](https://img.shields.io/badge/docs-puffinparse.com-E95C20)](https://puffinparse.com/docs/) [![Benchmark](https://img.shields.io/badge/benchmark-results-E95C20)](https://puffinparse.com/benchmark-results/) [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 
 **One API for every document parser: parse, OCR and extract.** Rust core, Python and TypeScript SDKs, a CLI, a self-hosted gateway, and an open benchmark that ranks providers on accuracy, latency and cost.
 
@@ -19,10 +19,6 @@ print(text.text, text.pages[0].lines[0].bbox)
 
 Switch providers by changing one string. Same request, same response shape, same errors.
 
-[![CI](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml/badge.svg)](https://github.com/ajinkyashejul/puffinparse/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ajinkyashejul/puffinparse/blob/main/LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
-
 ## Why
 
 Every document-parsing vendor has its own upload flow, polling loop, JSON layout, block vocabulary, coordinate system and billing unit. PuffinParse hides all of that behind one call, tracks cost per call, retries and falls back across providers, and ships a reproducible benchmark so you can pick a provider on evidence instead of marketing.
@@ -31,7 +27,7 @@ Two things make switching real rather than aspirational. **Modes**: every call n
 
 | | |
 |---|---|
-| **Providers (v0.1)** | 18 providers · 60 models · 3 modes. [Reducto](https://reducto.ai), [Extend](https://extend.ai) and [LlamaParse](https://cloud.llamaindex.ai) are live-verified; 12 more hosted APIs (Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI) ship from their API references; 3 self-hosted engines (Tesseract, Docling, PaddleOCR) need no key — [full table](#model-names) |
+| **Providers (v0.1)** | 18 providers · 60 models · 3 modes. **Live-verified** against the real APIs: [Reducto](https://reducto.ai), [Extend](https://extend.ai), [LlamaParse](https://cloud.llamaindex.ai). **Verified locally**: the self-hosted Tesseract and Docling. **Docs-only** (implemented from the provider's API documentation and tested against fixture payloads, not yet run live): Mistral, Azure, Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage, Landing AI, Google Document AI and the self-hosted PaddleOCR ([help verify them](https://github.com/ajinkyashejul/puffinparse/issues/10)). [Full table](#model-names) |
 | **Modes** | `parse` (markdown + blocks), `ocr` (plain text + boxes), `extract` (JSON from a schema) |
 | **Core** | Rust (`puffinparse-core`): `reqwest` + `tokio`, no vendor SDKs, `#![forbid(unsafe_code)]` |
 | **SDKs** | Python 3.9+ (sync + async, fully typed) and Node.js / TypeScript ([`js/`](js/README.md)), both on the same Rust core |
@@ -41,7 +37,7 @@ Two things make switching real rather than aspirational. **Modes**: every call n
 | **Reliability** | Retries with jittered backoff, whole-call deadlines, `Router` with ordered fallbacks / round-robin |
 | **Compatibility** | `output_format` renders any provider's result in Reducto's, Extend's or LlamaParse's own JSON, so an existing integration keeps its parser ([`docs/COMPAT.md`](docs/COMPAT.md)) |
 | **Cost** | Embedded, overridable price table → `cost_usd` on every response |
-| **Benchmark** | One harness over synthetic data and public benchmarks (ParseBench, olmOCR-bench, OmniDocBench); deterministic metrics and rule checks, latency, $/1k pages; every output inspectable at [puffinparse.com/benchmark-results](https://puffinparse.com/benchmark-results/) |
+| **Benchmark** | One harness over synthetic data and public benchmarks (ParseBench, olmOCR-bench, OmniDocBench, DP-Bench); deterministic metrics and rule checks, latency, $/1k pages; every output inspectable at [puffinparse.com/benchmark-results](https://puffinparse.com/benchmark-results/) |
 
 ## Install
 
@@ -208,10 +204,19 @@ time with `puffinparse.set_pricing({"reducto/standard": 0.012}, "parse")`, and e
 (Gemini, OpenAI, Anthropic) bill tokens rather than pages, so their per-page numbers are
 **estimates** — see the source lines in `pricing.json`.
 
-**live-verified** means the provider's live tests have passed against the real API with a key.
-**docs-only** means it was implemented from the official API reference with fixture-backed tests
-and is waiting for a key to be promoted; `docs/providers/README.md` tracks the state and links one
-reference page per provider.
+Each provider carries one of three verification labels:
+
+- **live-verified**: the live tests pass against the real API with a key, and the fixtures include
+  redacted live responses (Reducto, Extend, LlamaParse).
+- **verified locally**: a self-hosted engine whose live tests pass against a local install
+  (Tesseract, Docling).
+- **docs-only**: implemented from the provider's API documentation and tested against fixture
+  payloads built from it, but not yet run against the live API. Expect wire-format differences
+  until it is verified; [issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10) tracks this, and a run with your own key is a welcome
+  contribution.
+
+[`docs/providers/README.md`](docs/providers/README.md) tracks the state and links one reference
+page per provider.
 
 **Reducto** · `REDUCTO_API_KEY` · live-verified — Layout parsing plus a schema extractor with citations; the default parse target.
 
@@ -345,12 +350,12 @@ reference page per provider.
 | `google_documentai/form` | parse, ocr, extract `*` | $0.03 · $0.03 · $0.03 | Form Parser processor: paragraphs + tables, entities as extraction |
 | `google_documentai/prebuilt` | parse, ocr, extract | $0.03 · $0.03 · $0.03 | Prebuilt or custom extractor (invoice, W2, ...): entities as extraction |
 
-**Self-hosted engines** · no key · $0/page — out-of-process: a local binary or a server you run.
+**Self-hosted engines** · no key · $0/page — out-of-process: a local binary or a server you run. Tesseract and Docling are verified locally; PaddleOCR is docs-only.
 
 | Model | Modes | List price / page (parse · ocr · extract) | Notes |
 |---|---|---|---|
-| `tesseract/default` | ocr `*` (native), parse `*` | $0 · $0 · — | local `tesseract` binary (`TESSERACT_CMD`), PDFs via `pdftoppm`; word/line boxes + confidences, no layout model |
-| `docling/default` | parse `*`, ocr `*` | $0 · $0 · — | your docling-serve (`DOCLING_BASE_URL`): layout, tables, OCR |
+| `tesseract/default` | ocr `*` (native), parse `*` | $0 · $0 · — | local `tesseract` binary (`TESSERACT_CMD`), PDFs via `pdftoppm`; word/line boxes + confidences, no layout model; verified locally |
+| `docling/default` | parse `*`, ocr `*` | $0 · $0 · — | your docling-serve (`DOCLING_BASE_URL`): layout, tables, OCR; verified locally |
 | `paddleocr/default` | ocr `*` (native), parse `*` (PP-StructureV3) | $0 · $0 · — | your PaddleOCR serving (`PADDLEOCR_BASE_URL`); docs-only |
 
 ### Keep your Reducto / Extend / LlamaParse code
@@ -500,10 +505,12 @@ Metrics (after NFKC + markdown stripping + whitespace collapsing, case-insensiti
 The current leaderboard is in [`benchmark/LEADERBOARD.md`](benchmark/LEADERBOARD.md), and every
 document, output, diff and rule check is browsable at
 [puffinparse.com/benchmark-results](https://puffinparse.com/benchmark-results/). Datasets:
-`synthetic-v1` (exact truth by construction) and `combined-v2`, which adds subsets of
-[ParseBench](https://github.com/run-llama/ParseBench), [olmOCR-bench](https://huggingface.co/datasets/allenai/olmOCR-bench)
-and [OmniDocBench](https://github.com/opendatalab/OmniDocBench) converted by
-[`benchmark/adapters/`](docs/benchmarks/adapters.md) at pinned revisions. Long runs are safe:
+`synthetic-v1` (exact truth by construction) and the headline `combined-v3`, which adds subsets of
+[ParseBench](https://github.com/run-llama/ParseBench), [olmOCR-bench](https://huggingface.co/datasets/allenai/olmOCR-bench),
+[OmniDocBench](https://github.com/opendatalab/OmniDocBench) and
+[DP-Bench](https://huggingface.co/datasets/upstage/dp-bench) converted by
+[`benchmark/adapters/`](docs/benchmarks/adapters.md) at pinned revisions. Older `combined-v1` and
+`combined-v2` runs are kept for comparison. Long runs are safe:
 `--dry-run` and `--max-cost` show and cap the spend before any call, and `--resume` continues an
 interrupted run.
 
@@ -535,18 +542,25 @@ docs/SPEC.md            specification
 
 ## Roadmap
 
-Planned work is tracked in [GitHub Issues](https://github.com/ajinkyashejul/puffinparse/issues). Next up:
+Planned work is tracked in [GitHub Issues](https://github.com/ajinkyashejul/puffinparse/issues).
+Open items:
 
-- Publish to PyPI and npm with prebuilt wheels and addons.
-- More public benchmarks (DP-Bench next) and fuzzy rule matching to mirror upstream scorers.
-- Promote docs-only providers to live-verified as keys become available; more providers
-  (Nanonets, Mindee, Chunkr, ...).
-- Gateway: job endpoints for long documents, HTTP key management, optional metrics auth.
-- Optional LLM-judge plug-in for metrics that need one (e.g. figure descriptions).
+- **Packaging**: publish 0.1.0 to PyPI, npm and crates.io with prebuilt wheels, addons and CLI
+  binaries ([#9](https://github.com/ajinkyashejul/puffinparse/issues/9)).
+- **Providers**: live-verify the docs-only providers ([#10](https://github.com/ajinkyashejul/puffinparse/issues/10)), including PaddleOCR
+  against a real server ([#17](https://github.com/ajinkyashejul/puffinparse/issues/17)).
+- **Benchmark**: add `tesseract/default` ([#11](https://github.com/ajinkyashejul/puffinparse/issues/11)) and `docling/default` with a hardware note
+  ([#12](https://github.com/ajinkyashejul/puffinparse/issues/12)) to `combined-v3`; regenerate the leaderboard in one command
+  ([#13](https://github.com/ajinkyashejul/puffinparse/issues/13)); score table-cell neighbour relations exactly ([#15](https://github.com/ajinkyashejul/puffinparse/issues/15)); a READoc
+  long-document track ([#16](https://github.com/ajinkyashejul/puffinparse/issues/16)).
+- **SDK**: `output_format="mistral"` for code written against Mistral OCR responses
+  ([#14](https://github.com/ajinkyashejul/puffinparse/issues/14)).
+- **Playground**: upload a document and compare up to three models side by side
+  ([#18](https://github.com/ajinkyashejul/puffinparse/issues/18)).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Adding a provider is one Rust file plus a fixture test; the checklist is in the [new provider issue template](.github/ISSUE_TEMPLATE/new_provider.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Adding a provider is one Rust file plus a fixture test; the checklist is in the [new provider issue template](.github/ISSUE_TEMPLATE/new_provider.md). Issues labelled [`good first issue`](https://github.com/ajinkyashejul/puffinparse/labels/good%20first%20issue) are a good place to start, and [AGENTS.md](AGENTS.md) summarises the build commands and conventions for coding agents.
 
 ## License
 

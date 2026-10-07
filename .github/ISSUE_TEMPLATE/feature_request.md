@@ -26,6 +26,8 @@ puffinparse.ocr("doc.pdf", model="reducto/standard", new_option=...)
 - [ ] Rust core (`crates/puffinparse-core`)
 - [ ] CLI (`crates/puffinparse-cli`)
 - [ ] Python SDK (`python/puffinparse`)
+- [ ] Node / TypeScript SDK (`js/`)
+- [ ] Gateway server (`puffinparse serve`)
 - [ ] Benchmark (`benchmark/`)
 - [ ] Docs
 

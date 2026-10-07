@@ -46,9 +46,9 @@ paste here
 ## Environment
 
 - PuffinParse version: <!-- pip show puffinparse, or the commit SHA -->
-- Installed via: <!-- PyPI wheel / maturin develop / cargo -->
+- Installed via: <!-- PyPI wheel / npm / maturin develop / cargo / Docker gateway -->
 - Provider and model: <!-- e.g. llamaparse/cost_effective -->
-- Python version:
+- Python or Node.js version:
 - Rust version (if building from source): <!-- rustc -V -->
 - OS / architecture:
 

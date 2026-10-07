@@ -1,10 +1,13 @@
 ---
-name: New provider
+name: Provider request
 about: Request or propose support for another OCR / document-parsing provider
 title: "Add <provider> provider"
-labels: enhancement, provider
+labels: enhancement, providers
 assignees: ""
 ---
+
+<!-- Want to verify one of the existing docs-only providers instead? Comment on
+     https://github.com/ajinkyashejul/puffinparse/issues/10 rather than opening a new issue. -->
 
 ## Provider
 
@@ -75,9 +78,11 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md#3-adding-a-provider).
       and `updated`
 - [ ] Redacted fixture in `crates/puffinparse-core/tests/fixtures/` plus a
       normalisation unit test (no network)
+- [ ] `docs/providers/<name>.md` with a status banner (live-verified or docs-only)
+      and a row in `docs/providers/README.md`
 - [ ] API-key env var added to `.env.example` and `README.md`
 - [ ] `CHANGELOG.md` `## [Unreleased]` entry
-- [ ] Benchmark run against `synthetic-v1` (results + leaderboard, if you have keys)
+- [ ] Benchmark run against `combined-v3` (results + leaderboard, if you have keys)
 
 ## Are you planning to send the PR?
 

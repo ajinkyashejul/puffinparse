@@ -14,10 +14,11 @@ only the latest released version is supported.
 
 **Please do not open a public issue for a security problem.**
 
-Report it privately through GitHub security advisories:
+Report it privately with GitHub's private vulnerability reporting, which is
+enabled for this repository:
 
 1. Go to https://github.com/ajinkyashejul/puffinparse/security/advisories/new
-   (repository → **Security** → **Advisories** → **Report a vulnerability**).
+   (repository → **Security** → **Report a vulnerability**).
 2. Describe the issue, the affected version or commit, and — if you can — a
    minimal reproduction and the impact you believe it has.
 
@@ -33,21 +34,26 @@ details — and we will take it from there.
 
 ## What is in scope
 
-- The Rust crates (`puffinparse-core`, `puffinparse-cli`, `puffinparse-python`) and the
-  Python package `puffinparse`.
+- The Rust crates (`puffinparse-core`, `puffinparse-cli`, `puffinparse-python`,
+  `puffinparse-node`, `puffinparse-server`), the Python package `puffinparse` and
+  the Node package `puffinparse`.
+- The self-hosted gateway (`puffinparse serve`): authentication with virtual
+  keys, budget and rate-limit enforcement, and anything that could leak a
+  provider key or document content through responses, logs or metrics.
 - The release and CI workflows in `.github/workflows/`, and the published
   artifacts (PyPI wheels/sdist, GitHub Release binaries).
 
-Out of scope: vulnerabilities in the third-party OCR providers themselves
-(report those to Reducto, Extend or LlamaIndex directly), and issues that
+Out of scope: vulnerabilities in the third-party providers themselves (report
+those to the provider directly), and issues that
 require an already-compromised machine or a malicious local Rust/Python
 dependency you introduced.
 
 ## How PuffinParse handles credentials
 
-- **Provider API keys are only read from the environment** (`REDUCTO_API_KEY`,
-  `EXTEND_API_KEY`, `LLAMA_API_KEY`) or passed explicitly as the `api_key`
-  argument. PuffinParse never reads them from anywhere else, never writes them to
+- **Provider API keys are only read from the environment** (each provider's
+  own variable, such as `REDUCTO_API_KEY`; `.env.example` lists them all), passed
+  explicitly as the `api_key` argument, or, for the gateway, referenced as
+  `env:` values in its config file. PuffinParse never reads them from anywhere else, never writes them to
   disk, and never sends them anywhere but the provider's own base URL.
 - **Keys are never logged.** `PUFFINPARSE_LOG=debug` traces requests, retries and
   polling, but `Authorization` headers and key values are redacted; errors carry

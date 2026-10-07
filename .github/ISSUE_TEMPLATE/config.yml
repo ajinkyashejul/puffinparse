@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/ajinkyashejul/puffinparse/discussions
+    about: Ask how to use PuffinParse or float an idea before it becomes an issue.
+  - name: Documentation
+    url: https://puffinparse.com/docs/
+    about: Guides, the provider reference and the API for Python, TypeScript, Rust and the CLI.
+  - name: Report a security vulnerability
+    url: https://github.com/ajinkyashejul/puffinparse/security/advisories/new
+    about: Please report security problems privately, not as a public issue.

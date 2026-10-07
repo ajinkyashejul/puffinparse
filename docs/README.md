@@ -14,19 +14,20 @@ without asking around is linked from this page; if something is missing, add it 
 | [`DESIGN.md`](DESIGN.md) | Design language: tokens, components, writing rules for every surface. |
 | [`benchmarks/`](benchmarks/) | Survey of public OCR benchmarks, adapter notes for the combined dataset, and [`findings.md`](benchmarks/findings.md) (what committed runs taught us: scorer v2, provider quirks). |
 | [`../benchmark/README.md`](../benchmark/README.md) | Benchmark methodology, metrics, how to run, dataset format. |
-| [`../benchmark/LEADERBOARD.md`](../benchmark/LEADERBOARD.md) | Generated leaderboard. Do not edit by hand; regenerate with `puffinparse bench report`. |
+| [`../benchmark/LEADERBOARD.md`](../benchmark/LEADERBOARD.md) | Leaderboard generated from committed results with `puffinparse bench report` (one section per dataset). Do not edit the numbers by hand. |
 | [`../benchmark/site/README.md`](../benchmark/site/README.md) | The static results viewer (GitHub Pages) and how to build it. |
-| [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Setup, checks, how to add a provider or a dataset, PR checklist. |
+| [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Setup, checks, how to add or verify a provider or a dataset, PR checklist. [`../AGENTS.md`](../AGENTS.md) is the short version for coding agents. |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | Keep-a-Changelog; add a line under Unreleased with every user-visible change. |
 
 ## Working in parallel
 
-1. Pick or open an issue on GitHub and say you are working on it.
-2. Work on `main` (see ADR-9). Small, reviewable commits; run `make lint test` before pushing.
+1. Pick or open an issue on GitHub and comment that you are working on it.
+2. Branch from `main` (the only long-lived branch, see ADR-9) and open a pull request. Small,
+   reviewable commits; run `make lint test` before pushing.
 3. Anything that changes an interface (unified types, model names, manifest format, result JSON)
    is a spec change: update `SPEC.md` in the same commit and add an ADR if it reverses a decision.
 4. Provider facts go in `providers/<name>.md`, never only in code comments or chat.
-5. When done, move the task to Done with the commit hash, and add a CHANGELOG line.
+5. Add a CHANGELOG line, and reference the issue in the pull request so it closes on merge.
 
 ## Layout cheat sheet
 

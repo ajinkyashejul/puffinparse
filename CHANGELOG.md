@@ -11,6 +11,15 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ### Changed
 
+- Provider verification labels are consistent across the README, the provider reference, the
+  landing page and the docs site: **live-verified** (Reducto, Extend, LlamaParse), **verified
+  locally** (Tesseract, Docling) and **docs-only** (the rest, implemented from documentation and
+  tested against fixtures, not yet run live; tracked in issue #10). Tesseract and Docling were
+  previously counted as live-verified on the landing page.
+- README roadmap now lists the open GitHub issues; added issue templates for benchmark and
+  dataset suggestions, a shorter pull-request template, `AGENTS.md`, and private vulnerability
+  reporting in `SECURITY.md`.
+
 - Benchmark and docs tables use sentence-case headers, and a column's best value is bold only
   when it is unique as displayed (ties are no longer bolded).
 

@@ -59,10 +59,11 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement by opening an
-issue at https://github.com/ajinkyashejul/puffinparse/issues. If the report contains
-information you do not want to be public, open a minimal issue asking a
-maintainer to get in touch and we will follow up privately.
+reported privately to the project maintainer,
+[@ajinkyashejul](https://github.com/ajinkyashejul), using the contact details on
+their GitHub profile. Please do not put the details of a report in a public
+issue or discussion; if you cannot find a private channel, open a minimal issue
+asking the maintainer to get in touch and we will follow up privately.
 
 All complaints will be reviewed and investigated promptly and fairly.
 

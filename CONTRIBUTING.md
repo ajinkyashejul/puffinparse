@@ -1,9 +1,24 @@
 # Contributing to PuffinParse
 
 Thanks for helping build PuffinParse — one API for every OCR / document-parsing
-provider. This document covers local setup, the checks CI runs, and the two
-contributions we get asked about most: **adding a provider** and **adding a
-benchmark dataset**.
+provider. This document covers local setup, the checks CI runs, and the
+contributions we get asked about most: **verifying or adding a provider** and
+**adding a benchmark dataset**. If you use a coding agent, point it at
+[AGENTS.md](AGENTS.md), which summarises the same rules.
+
+## Good first issues
+
+Issues labelled
+[`good first issue`](https://github.com/ajinkyashejul/puffinparse/labels/good%20first%20issue)
+are scoped to one area and list a "done when" condition. Comment on the issue to
+claim it so two people don't do the same work. Another useful first contribution
+if you have a key for one of the **docs-only** providers (Mistral, Azure,
+Textract, Gemini, OpenAI, Anthropic, Mathpix, Datalab, Unstructured, Upstage,
+Landing AI, Google Document AI, PaddleOCR) is running its live tests and
+reporting what differs; see
+[issue #10](https://github.com/ajinkyashejul/puffinparse/issues/10).
+Questions and ideas that are not yet issues go to
+[Discussions](https://github.com/ajinkyashejul/puffinparse/discussions).
 
 By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 PuffinParse is MIT licensed; contributions are accepted under the same license.
@@ -17,6 +32,7 @@ Prerequisites:
 - **Rust stable** (≥ 1.80 — the workspace `rust-version`), via [rustup](https://rustup.rs).
 - **Python 3.9+** (3.9 is the minimum we build abi3 wheels for).
 - A C toolchain (whatever `cc` your platform ships) for the native deps.
+- **Node.js 18+** only if you work on the TypeScript SDK in `js/`.
 
 ```bash
 git clone https://github.com/ajinkyashejul/puffinparse
@@ -47,6 +63,9 @@ export LLAMA_API_KEY=...       # LlamaCloud / LlamaParse, starts with llx-
 
 **You do not need any keys to contribute.** Every test that talks to a live
 provider skips itself when the relevant key is absent, and CI sets no secrets.
+Live tests are opt-in: `PUFFINPARSE_LIVE_TESTS=1 pytest python/tests -q` for
+Python and `cargo test -p puffinparse-core -- --ignored` for Rust. Never commit
+a `.env` file or paste a key into an issue, log or fixture.
 
 ### Debugging
 
@@ -65,18 +84,20 @@ On the Python side the same events also surface through
 
 ## 2. Tests, lint, formatting
 
-Run everything the CI runs with `make test lint`, or piecemeal:
+Run everything the CI runs with `make lint test` (and `make test-node` for the
+TypeScript SDK), or piecemeal:
 
 ```bash
 # Tests
 cargo test --workspace
 pytest python/tests -q
+cd js && npm ci && npm run build:debug && npm test     # Node SDK
 
 # Lint / format
 cargo fmt --all              # or `cargo fmt --all --check` to only verify
 cargo clippy --workspace --all-targets -- -D warnings
-ruff check python/ benchmark/
-ruff format --check python/ benchmark/
+ruff check python/ benchmark/ examples/
+ruff format --check python/ benchmark/ examples/
 mypy python/puffinparse
 ```
 
@@ -133,12 +154,25 @@ code.
    types, a bbox inside 0..1, `usage.pages`, and that the document-level
    `markdown` is the pages joined in order. Scrub keys, job ids, customer
    names and anything else non-public from the fixture.
-6. **Document it.** Add the API-key env var (and any `*_BASE_URL` override) to
-   `.env.example` and the provider table in `README.md`, and add a line to the
-   `## [Unreleased]` section of `CHANGELOG.md`.
-7. **Benchmark it.** Run `make bench` with your model included and, if you have
-   keys, commit the result JSON under `benchmark/results/` and regenerate the
-   leaderboard with `make leaderboard`.
+6. **Document it.** Add `docs/providers/<name>.md` (same sections as the
+   existing pages) with a status banner, a row in `docs/providers/README.md`,
+   the API-key env var (and any `*_BASE_URL` override) in `.env.example`, the
+   model table in `README.md`, and a line in the `## [Unreleased]` section of
+   `CHANGELOG.md`. Label the provider **live-verified** only if its live tests
+   passed against the real API; otherwise it is **docs-only**.
+7. **Benchmark it.** If you have keys, run the benchmark with
+   `--save-outputs`, commit the result JSON under `benchmark/results/` and the
+   per-document outputs under `benchmark/results/outputs/<run_id>/`, and add a
+   section to `benchmark/LEADERBOARD.md` (it is stitched per dataset by hand
+   until [#13](https://github.com/ajinkyashejul/puffinparse/issues/13) lands).
+
+### Verifying a docs-only provider
+
+Run its `#[ignore]`d live tests with your key
+(`cargo test -p puffinparse-core <provider> -- --ignored --nocapture`), fix any
+wire-format differences, replace the hand-built fixture with a redacted real
+response, and change the label to live-verified in `docs/providers/README.md`,
+the provider page's banner and `README.md`. One PR per provider.
 
 The Python SDK needs no changes: it forwards whatever model string the core
 accepts.
@@ -203,7 +237,9 @@ Each entry in `manifest.documents[]` is:
 - `license` in the manifest is required and must permit redistribution.
   **Only open datasets are committed.** For a public set that cannot be
   redistributed (olmOCR-bench, OmniDocBench), contribute a downloader/adapter
-  that produces this layout locally instead of the files themselves.
+  that produces this layout locally instead of the files themselves. The same
+  goes for outputs: per-document outputs of research-only datasets
+  (OmniDocBench) are not committed, only their scores.
 
 Ground truth must be *exact* — that is why the built-in set is generated:
 `make dataset` (`python benchmark/generate_synthetic.py`) renders documents
