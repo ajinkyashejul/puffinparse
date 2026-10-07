@@ -552,6 +552,19 @@ mod tests {
         std::fs::write(ds.join("manifest.json"), manifest.to_string()).unwrap();
     }
 
+    /// Decrements `n` if it is positive; true when a unit was taken. A compare-and-swap loop rather
+    /// than `fetch_update`, which newer toolchains deprecate and whose replacement postdates the MSRV.
+    fn take_one(n: &AtomicUsize) -> bool {
+        let mut current = n.load(Ordering::SeqCst);
+        while current > 0 {
+            match n.compare_exchange(current, current - 1, Ordering::SeqCst, Ordering::SeqCst) {
+                Ok(_) => return true,
+                Err(actual) => current = actual,
+            }
+        }
+        false
+    }
+
     /// Fake provider: `a` succeeds, `b` fails `b_failures` times with a retryable error then
     /// succeeds, `c` fails with a non-retryable error carrying a job id. Records calls by doc id.
     fn fake(calls: Arc<Mutex<Vec<String>>>, b_failures: usize) -> Caller {
@@ -563,9 +576,7 @@ mod tests {
                 let path = req.input.describe();
                 let id = Path::new(&path).file_stem().unwrap().to_string_lossy().to_string();
                 calls.lock().unwrap().push(id.clone());
-                if id == "b"
-                    && b_failures.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |n| n.checked_sub(1)).is_ok()
-                {
+                if id == "b" && take_one(&b_failures) {
                     return Err(Error::new(ErrorKind::RateLimit, "slow down")
                         .with_provider("reducto")
                         .with_status(429));
