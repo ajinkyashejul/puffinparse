@@ -65,6 +65,24 @@ MARK = (
 )
 # Vercel Web Analytics (cookieless). Only on Vercel builds: the script path exists only there.
 ANALYTICS = '<script defer src="/_vercel/insights/script.js"></script>' if os.environ.get("VERCEL") else ""
+GH_STAR_ICON = (
+    '<svg class="gh-star-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">'
+    '<path fill="currentColor" d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 '
+    ".416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1"
+    "-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 "
+    '.25Z"/></svg>'
+)
+
+
+def gh_star(href: str, extra_class: str = "") -> str:
+    """Header star button; website/assets/stars.js fills in the live count."""
+    cls = f"gh-star {extra_class}".strip()
+    return (
+        f'<a class="{cls}" href="{href}" rel="noopener" aria-label="Star PuffinParse on GitHub">'
+        f'{GH_STAR_ICON}<span>Star</span><span class="gh-count" data-gh-stars hidden></span></a>'
+    )
+
+
 OG_IMAGE = "og.png"  # 1200x630, rendered by website/og/render.py and committed
 
 
@@ -752,6 +770,7 @@ def landing_html(site: Site, providers: list[dict[str, Any]]) -> str:
         "PUFFIN_HERO": puffin(115, "lp-puffin"),
         "SOCIAL": social_meta(site, f"{site.title}: {site.tagline}", description, site.absolute(site.base)),
         "ANALYTICS": ANALYTICS,
+        "GH_STAR": gh_star(site.repo),
         "CANONICAL": site.absolute(site.base),
         "JSONLD": landing_jsonld(site, description),
         "DESCRIPTION": html.escape(description, quote=True),
@@ -863,7 +882,7 @@ if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();<
 </div>
 <span class="kbd hide-sm">/</span>
 <a class="plain hide-sm" href="{site.base}llms.txt">llms.txt</a>
-<a class="plain hide-sm" href="{site.repo}">GitHub</a>
+{gh_star(site.repo, "hide-sm")}
 {THEME_BUTTON}
 </div></header>
 <details class="menu"><summary>Documentation menu</summary><div class="side">{nav}</div></details>
@@ -883,6 +902,7 @@ if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();<
 </main>
 </div>
 <script src="{site.base}app.js" defer></script>
+<script src="{site.base}stars.js" defer></script>
 </body>
 </html>
 """
@@ -1036,7 +1056,17 @@ def robots_txt(site: Site) -> str:
 
 
 def write_extras(site: Site, pages: list[Page], out: Path) -> None:
-    for asset in ("tokens.css", "style.css", "landing.css", "app.js", "mark.svg", "puffin.svg", OG_IMAGE):
+    assets = (
+        "tokens.css",
+        "style.css",
+        "landing.css",
+        "app.js",
+        "stars.js",
+        "mark.svg",
+        "puffin.svg",
+        OG_IMAGE,
+    )
+    for asset in assets:
         shutil.copyfile(WEB / "assets" / asset, out / asset)
 
     index = [{"t": p.title, "u": site.url(p.slug), "h": flat_headings(p.toc)} for p in pages]
@@ -1213,7 +1243,9 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
         )
         tags += "\n" + benchmark_jsonld(site)
         text = index.read_text(encoding="utf-8")
-        index.write_text(text.replace("</head>", tags + "\n" + ANALYTICS + "\n</head>", 1), encoding="utf-8")
+        stars = f'<script src="{site.base}stars.js" defer></script>'
+        head = "\n".join(part for part in (tags, ANALYTICS, stars) if part)
+        index.write_text(text.replace("</head>", head + "\n</head>", 1), encoding="utf-8")
     return True
 
 

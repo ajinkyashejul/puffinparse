@@ -171,3 +171,5 @@ bad-request and input errors never do — they would fail on every provider.
 - [Providers](/providers/) — exactly what PuffinParse sends and how the response is mapped.
 - [Benchmark](/benchmark/) — how the leaderboard is produced, and its caveats.
 - [Specification](/project/spec/) — the contract the implementations follow.
+
+Working? A star on [GitHub](https://github.com/ajinkyashejul/puffinparse) helps other developers find PuffinParse.

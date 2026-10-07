@@ -1598,3 +1598,13 @@ dialog h2 {
     font-size: 2.125rem;
   }
 }
+
+/* Header star button: GitHub link with a live star count (website/assets/stars.js). */
+.gh-star { display: inline-flex; align-items: center; gap: .35rem; padding: .2rem .55rem; border: 1px solid var(--rule);
+  border-radius: var(--r-2); background: var(--paper); color: var(--ink); font-size: .8rem; line-height: 1.6;
+  text-decoration: none; white-space: nowrap; }
+.gh-star:hover { border-color: var(--ink-3); background: var(--paper-2); color: var(--ink); }
+.gh-star-icon { color: var(--ink-2); transition: color var(--dur, .16s) var(--ease, ease); }
+.gh-star:hover .gh-star-icon { color: var(--scan); }
+.gh-count { margin-left: .1rem; padding-left: .45rem; border-left: 1px solid var(--rule); color: var(--ink-2);
+  font-variant-numeric: tabular-nums; }
