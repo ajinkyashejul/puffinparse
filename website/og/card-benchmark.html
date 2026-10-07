@@ -1,0 +1,51 @@
+<!doctype html>
+<!-- Social card for /benchmark-results/ (1200x630). Render with `python website/og/render.py`; the PNG
+     is committed as website/assets/og-benchmark.png. The rows are combined-v3 from
+     benchmark/LEADERBOARD.md: update them (and re-render) when the leaderboard changes. -->
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../assets/tokens.css">
+<style>
+  html, body { margin: 0; }
+  body { width: 1200px; height: 630px; background: var(--paper); color: var(--ink); font-family: var(--font-sans);
+    position: relative; overflow: hidden; }
+  .wrap { position: absolute; inset: 60px 80px 84px; display: grid; grid-template-columns: 420px 1fr; gap: 48px; }
+  .word { display: flex; align-items: center; gap: 14px; font-size: 30px; font-weight: 640; letter-spacing: -.02em; }
+  .word img { width: 40px; height: 40px; }
+  h1 { margin: 44px 0 0; font-size: 56px; line-height: 1.04; letter-spacing: -.035em; font-weight: 700; }
+  p { margin: 22px 0 0; font-size: 24px; line-height: 1.4; color: var(--ink-2); }
+  .board { align-self: center; display: grid; gap: 13px; }
+  .row { display: grid; grid-template-columns: 290px 1fr 70px; align-items: center; gap: 14px; }
+  .name { font-family: var(--font-mono); font-size: 19px; color: var(--ink-2); white-space: nowrap; }
+  .bar { height: 26px; border-radius: 4px; background: var(--paper-2); position: relative; overflow: hidden; }
+  .bar i { position: absolute; inset: 0 auto 0 0; background: var(--rule); border-radius: 4px; }
+  .row.top .bar i { background: var(--scan); }
+  .row.top .name { color: var(--ink); font-weight: 600; }
+  .score { font-size: 22px; font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; }
+  .head { font-size: 16px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3, var(--ink-2)); margin-bottom: 4px; }
+  .scan { position: absolute; left: 80px; right: 80px; bottom: 52px; height: 3px; background: var(--rule); }
+  .scan::before { content: ""; position: absolute; left: 0; top: 0; width: 96px; height: 3px; background: var(--scan); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div>
+      <div class="word"><img src="../assets/mark.svg" alt="">PuffinParse</div>
+      <h1>The open benchmark for document parsers</h1>
+      <p>199 docs from 5 public datasets. Every output, diff and rule check is inspectable.</p>
+    </div>
+    <div class="board">
+      <div class="head">Overall score · combined-v3</div>
+      <div class="row top"><span class="name">llamaparse/cost_effective</span><span class="bar"><i style="width:84.35%"></i></span><span class="score">84.35</span></div>
+      <div class="row"><span class="name">llamaparse/agentic</span><span class="bar"><i style="width:83.49%"></i></span><span class="score">83.49</span></div>
+      <div class="row"><span class="name">reducto/r-1</span><span class="bar"><i style="width:82.40%"></i></span><span class="score">82.40</span></div>
+      <div class="row"><span class="name">reducto/standard</span><span class="bar"><i style="width:79.78%"></i></span><span class="score">79.78</span></div>
+      <div class="row"><span class="name">extend/parse_performance</span><span class="bar"><i style="width:77.43%"></i></span><span class="score">77.43</span></div>
+      <div class="row"><span class="name">extend/parse_light</span><span class="bar"><i style="width:76.46%"></i></span><span class="score">76.46</span></div>
+      <div class="row"><span class="name">tesseract/default</span><span class="bar"><i style="width:56.36%"></i></span><span class="score">56.36</span></div>
+    </div>
+  </div>
+  <div class="scan"></div>
+</body>
+</html>

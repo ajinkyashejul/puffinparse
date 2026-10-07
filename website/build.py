@@ -91,6 +91,7 @@ def gh_star(href: str, extra_class: str = "") -> str:
 
 
 OG_IMAGE = "og.png"  # 1200x630, rendered by website/og/render.py and committed
+OG_IMAGE_BENCHMARK = "og-benchmark.png"  # the results viewer's own card, same pipeline
 
 
 def puffin(width: int, extra_class: str = "") -> str:
@@ -101,9 +102,9 @@ def puffin(width: int, extra_class: str = "") -> str:
     return svg.replace("<svg ", f'<svg class="{cls}" width="{width}" ', 1)
 
 
-def social_meta(site: Site, title: str, description: str, url: str) -> str:
+def social_meta(site: Site, title: str, description: str, url: str, card: str = OG_IMAGE) -> str:
     """Open Graph / Twitter card tags; the image needs an absolute URL, so none without site_url."""
-    image = site.absolute(site.base + OG_IMAGE) if site.site_url else ""
+    image = site.absolute(site.base + card) if site.site_url else ""
     tags = [
         ("property", "og:type", "website"),
         ("property", "og:site_name", site.title),
@@ -1072,6 +1073,7 @@ def write_extras(site: Site, pages: list[Page], out: Path) -> None:
         "mark.svg",
         "puffin.svg",
         OG_IMAGE,
+        OG_IMAGE_BENCHMARK,
     )
     for asset in assets:
         shutil.copyfile(WEB / "assets" / asset, out / asset)
@@ -1239,7 +1241,7 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
         print(f"benchmark viewer: build.py exited {code}, skipping", file=sys.stderr)
         shutil.rmtree(out / BENCH_PREFIX, ignore_errors=True)
         return False
-    # The viewer is the page people share most; give it the same social card as the site.
+    # The viewer is the page people share most; it gets its own card (the leaderboard).
     index = out / BENCH_PREFIX / "index.html"
     if index.is_file():
         tags = social_meta(
@@ -1247,6 +1249,7 @@ def build_benchmark_viewer(site: Site, out: Path) -> bool:
             f"{site.title} Benchmark",
             "Accuracy, latency and cost for every document-parsing provider, with every output inspectable.",
             site.absolute(site.viewer_url),
+            OG_IMAGE_BENCHMARK,
         )
         tags += "\n" + benchmark_jsonld(site)
         text = index.read_text(encoding="utf-8")
