@@ -11,16 +11,12 @@ Until then, `cargo doc -p puffinparse-core --open` from a clone.
 
 ## Install
 
+The crate is not on crates.io yet; depend on the repository:
+
 ```toml
 [dependencies]
-puffinparse-core = "0.1"
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
-```
-
-From the repository while it is pre-release:
-
-```toml
 puffinparse-core = { git = "https://github.com/ajinkyashejul/puffinparse" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
 
 ## First call

@@ -16,7 +16,10 @@ SDK to add.
 
 ### CLI
 
-The `puffinparse` binary is built from the Rust workspace:
+Download the archive for your platform from
+[GitHub Releases](https://github.com/ajinkyashejul/puffinparse/releases/latest) (macOS, Linux and
+Windows; checksums in `SHA256SUMS`). On macOS, a binary downloaded with a browser needs
+`xattr -d com.apple.quarantine ./puffinparse` once, since it is not notarized yet. Or build it:
 
 ```bash
 cargo install --git https://github.com/ajinkyashejul/puffinparse puffinparse-cli
@@ -28,7 +31,7 @@ cargo build --release -p puffinparse-cli     # ./target/release/puffinparse
 
 ```toml
 [dependencies]
-puffinparse-core = "0.1"
+puffinparse-core = { git = "https://github.com/ajinkyashejul/puffinparse" }   # not on crates.io yet
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
 
@@ -125,7 +128,7 @@ text.text, text.pages[0].lines[0].bbox
 data = puffinparse.extract(
     "invoice.pdf",
     {"type": "object", "properties": {"total": {"type": "number"}}},
-    model="reducto/standard",
+    model="reducto/extract",
     citations=True,
 )
 data.data["total"], data.citations("/total")

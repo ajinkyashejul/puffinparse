@@ -138,7 +138,7 @@ def landing_jsonld(site: Site, description: str) -> str:
     """The landing page describes the software and the site (with the docs search deep link)."""
     home = site.absolute(site.base)
     docs = site.absolute(site.docs_base)
-    install = "pip install puffinparse (Python 3.9+) or npm install puffinparse (Node.js 18+)"
+    install = "pip install puffinparse (Python 3.9+)"
     return json_ld(
         {
             "@graph": [

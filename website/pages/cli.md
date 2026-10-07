@@ -1,7 +1,7 @@
 # CLI
 
 The `puffinparse` binary wraps the same Rust core as the SDK. One subcommand per mode — `parse`, `ocr`,
-`extract` — plus `providers` and `bench`.
+`extract` — plus `providers`, `bench` and `serve` (the [gateway](../server/)).
 
 ```bash
 cargo build --release -p puffinparse-cli    # ./target/release/puffinparse

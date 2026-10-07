@@ -27,13 +27,15 @@ defaults: `127.0.0.1:4000`, no aliases, **no auth** (a warning is printed). Anyt
 beyond localhost should have a `master_key` or `[[keys]]`.
 
 Docker (multi-stage build, distroless runtime, runs as non-root). Releases publish a linux/amd64
-image to `ghcr.io/ajinkyashejul/puffinparse` (tags `latest`, `0.1.0`, `0.1`); or build it yourself
-with `docker build -t puffinparse .`:
+image to `ghcr.io/ajinkyashejul/puffinparse` (tags `latest`, the version such as `0.1.2`, and `0.1`);
+on Apple Silicon pass `--platform linux/amd64` (an arm64 image is planned), or build it yourself
+with `docker build -t puffinparse .`. The image contains no self-hosted engines (Tesseract,
+Docling, PaddleOCR): use it for the hosted providers, or build an image that adds them.
 
 ```bash
 docker run --rm -p 4000:4000 -v $PWD/examples/server/puffinparse.toml:/etc/puffinparse/puffinparse.toml:ro \
   -e PUFFINPARSE_MASTER_KEY -e PUFFINPARSE_KEY_BILLING -e PUFFINPARSE_KEY_RESEARCH \
-  -e REDUCTO_API_KEY -e EXTEND_API_KEY -e LLAMA_API_KEY ghcr.io/ajinkyashejul/puffinparse
+  -e REDUCTO_API_KEY -e EXTEND_API_KEY -e LLAMA_API_KEY --platform linux/amd64 ghcr.io/ajinkyashejul/puffinparse
 ```
 
 The image's default command is `serve --host 0.0.0.0 --config /etc/puffinparse/puffinparse.toml`; it exits

@@ -10,13 +10,16 @@ Full reference: [`website/pages/typescript.md`](../website/pages/typescript.md) 
 
 ## Quickstart
 
+Not on npm yet. Build it from a clone of the repo (needs Rust and Node 18+):
+
 ```bash
-npm install puffinparse  # prebuilt: Linux x64/arm64 (glibc), macOS x64/arm64, Windows x64; Node 18+
-export LLAMA_API_KEY=... # or REDUCTO_API_KEY, EXTEND_API_KEY, ...
+cd js && npm install && npm run build   # release build -> puffinparse.<platform>.node + native.js
+export LLAMA_API_KEY=...                # or REDUCTO_API_KEY, EXTEND_API_KEY, ...
 ```
 
-Other platforms build from a clone of the repo (needs Rust): `cd js && npm install && npm run build`
-(release build of the addon -> `puffinparse.<platform>.node` + `native.js`).
+Then depend on it by path (`npm install ../puffinparse/js`) or `npm link`. Once published,
+`npm install puffinparse` will ship prebuilt binaries for Linux x64/arm64 (glibc), macOS and
+Windows x64.
 
 ```ts
 import { parse, extract, submit, retrieve, handleWebhook, Router, listModels, estimateCost } from 'puffinparse'

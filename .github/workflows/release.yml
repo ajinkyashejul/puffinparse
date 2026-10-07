@@ -524,7 +524,7 @@ jobs:
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true
           body: |
-            Install with `pip install puffinparse`, `npm install puffinparse`, `cargo install puffinparse-cli`,
-            `docker pull ghcr.io/${{ github.repository }}:latest`, or one of the CLI archives below
+            Install with `pip install puffinparse`, `docker pull --platform linux/amd64 ghcr.io/${{ github.repository }}:latest`,
+            or one of the CLI archives below (on macOS: `xattr -d com.apple.quarantine ./puffinparse` once)
             (checksums in `SHA256SUMS`). What changed: [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md).
           files: release/*
