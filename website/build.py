@@ -1140,6 +1140,7 @@ def playground_html(site: Site, models: list[dict[str, Any]], index: dict[str, A
         ),
         "ANALYTICS": ANALYTICS,
         "JSONLD": playground_jsonld(site, description),
+        "API_LINKS": api_links(site),
         "CANONICAL": site.absolute(f"{site.base}{PLAYGROUND}/"),
         "DESCRIPTION": html.escape(description, quote=True),
         "THEME_BUTTON": THEME_BUTTON,
