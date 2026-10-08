@@ -202,7 +202,14 @@ Input handling (`DocumentInput`) is identical in all three modes:
 - **Path** → read bytes, sniff MIME from extension (`mime_guess`), upload.
 - **Bytes** → require `filename` (used for MIME + provider upload).
 - **URL** (`http(s)://`) → passed to the provider as a remote URL when the
-  provider supports it (all three do); otherwise downloaded and uploaded.
+  provider supports it (all three do); otherwise downloaded and uploaded. Which providers download
+  in-process is `fetch::fetches_url_in_process(provider, mode)`; the download itself is
+  `fetch::fetch_document`: http(s) only, public addresses only (the resolved address is checked and
+  pinned, redirects re-checked, at most 5), at most 50 MiB (`PUFFINPARSE_MAX_DOWNLOAD_MB`), within
+  the request deadline, and error messages never include the response body.
+  `PUFFINPARSE_ALLOW_PRIVATE_URLS=1` (process-wide, never per request) lifts the address check for
+  trusted setups; an embedding application may fix the policy with `fetch::set_process_policy`.
+  The self-hosted engines' servers (docling-serve, PaddleOCR serving) are never handed a URL.
 
 Supported document types are whatever the provider accepts; PuffinParse does not
 pre-validate beyond a non-empty body.

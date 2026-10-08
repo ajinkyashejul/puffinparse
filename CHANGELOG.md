@@ -58,6 +58,31 @@ Python package `puffinparse` share a single version. Entries before the rename s
   `run-20260924T211006Z` and `run-20260925T090851Z` point at a zero UUID; the scored `.md` outputs
   are untouched and `bench rescore` reproduces every score. Benchmark results keep
   `provider_job_id` for auditability, as `SECURITY.md` now states.
+### Security
+
+- **Document URLs are downloaded through one hardened path** (`puffinparse_core::fetch`). Providers
+  without URL input (Tesseract, Docling, PaddleOCR, vLLM, Unstructured, Textract, Gemini, the
+  OpenAI and Anthropic vision models, Upstage, Document AI, LlamaParse extract) fetched
+  `document_url` in-process with no address filtering and reqwest's default 10 redirects, so a
+  caller-chosen URL could reach `169.254.169.254`, localhost or the private network (SSRF). The
+  download now accepts http(s) only, resolves the host itself and refuses loopback, private,
+  link-local, CGNAT, unique-local, multicast, broadcast and reserved addresses (including
+  IPv4-mapped and NAT64/6to4 forms), connects only to the vetted address (no DNS rebinding),
+  ignores proxy variables, follows at most 5 redirects re-checking each hop, stops at 50 MiB
+  (`PUFFINPARSE_MAX_DOWNLOAD_MB`) and the request deadline, and never echoes the response body in
+  an error (Gemini, Upstage and Document AI used to include part of it).
+- `DocumentRequest`'s `Debug` output no longer prints `api_key` or `webhook_url` (which may carry a
+  shared secret), nor the document bytes.
+
+### Changed
+
+- **Behaviour change for SDK and CLI users:** a URL input to one of the providers above that
+  points at a private, loopback or link-local address now fails with `InputError`. Set
+  `PUFFINPARSE_ALLOW_PRIVATE_URLS=1` in a trusted setup to allow it (process-wide; there is no
+  per-request switch). Downloads over 50 MiB fail unless `PUFFINPARSE_MAX_DOWNLOAD_MB` is raised.
+- Docling and PaddleOCR no longer forward a URL input to docling-serve / the PaddleOCR server
+  (which would fetch it from inside your network); PuffinParse downloads it through the same path
+  and sends the bytes. PaddleOCR's `fileType` now always comes from the downloaded bytes.
 
 ## [0.1.6] - 2026-10-08
 
