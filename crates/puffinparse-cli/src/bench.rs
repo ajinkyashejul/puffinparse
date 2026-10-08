@@ -113,6 +113,15 @@ pub struct ReportArgs {
     /// Output format.
     #[arg(short, long, default_value = "markdown")]
     format: String,
+    /// One `## <dataset>` section per dataset instead of one merged table: the dataset of the newest
+    /// run first, marked `(headline)`, then the others newest first. This is how
+    /// `benchmark/LEADERBOARD.md` is generated (`make leaderboard`).
+    #[arg(long)]
+    by_dataset: bool,
+    /// Markdown printed before the sections with `--by-dataset` (the leaderboard's hand-written
+    /// introduction).
+    #[arg(long, requires = "by_dataset")]
+    intro: Option<PathBuf>,
 }
 
 // ---- dataset manifest ---------------------------------------------------------------------------
@@ -802,12 +811,45 @@ fn report(args: ReportArgs) -> Result<()> {
         let raw = std::fs::read_to_string(p).with_context(|| format!("reading {}", p.display()))?;
         runs.push(serde_json::from_str::<RunResult>(&raw).with_context(|| format!("parsing {}", p.display()))?);
     }
+    if args.by_dataset {
+        if !matches!(args.format.as_str(), "markdown" | "md") {
+            bail!("--by-dataset renders markdown only");
+        }
+        let intro = match &args.intro {
+            Some(p) => Some(std::fs::read_to_string(p).with_context(|| format!("reading {}", p.display()))?),
+            None => None,
+        };
+        print!("{}", render_by_dataset(&runs, intro.as_deref()));
+        return Ok(());
+    }
     match args.format.as_str() {
         "markdown" | "md" => println!("{}", render_markdown(&runs)),
         "json" => println!("{}", serde_json::to_string_pretty(&runs.iter().flat_map(|r| r.models.iter().map(|m| serde_json::json!({"run_id": r.run_id, "dataset": r.dataset.name, "model": m.model, "summary": m.summary}))).collect::<Vec<_>>())?),
         other => bail!("unknown format '{other}' (markdown|json)"),
     }
     Ok(())
+}
+
+/// The leaderboard page: `intro`, then one section per dataset. Datasets are ordered by their
+/// newest run (`created_at`, RFC 3339, so it sorts as text), newest first; ties break on the name.
+fn render_by_dataset(runs: &[RunResult], intro: Option<&str>) -> String {
+    let mut groups: BTreeMap<&str, Vec<RunResult>> = BTreeMap::new();
+    for run in runs {
+        groups.entry(run.dataset.name.as_str()).or_default().push(run.clone());
+    }
+    let mut order: Vec<(&str, &str)> =
+        groups.iter().map(|(name, rs)| (*name, rs.iter().map(|r| r.created_at.as_str()).max().unwrap_or(""))).collect();
+    order.sort_by(|a, b| b.1.cmp(a.1).then(a.0.cmp(b.0)));
+    let mut out = String::new();
+    if let Some(intro) = intro.map(str::trim).filter(|s| !s.is_empty()) {
+        out.push_str(intro);
+        out.push_str("\n\n");
+    }
+    for (i, (name, _)) in order.iter().enumerate() {
+        let headline = if i == 0 { " (headline)" } else { "" };
+        out.push_str(&format!("## {name}{headline}\n\n{}\n\n", render_markdown(&groups[name]).trim_end()));
+    }
+    format!("{}\n", out.trim_end())
 }
 
 fn render_markdown(runs: &[RunResult]) -> String {
@@ -926,6 +968,27 @@ fn render_by_source(run: &RunResult) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// `benchmark/LEADERBOARD.md` must be exactly what `make leaderboard` writes from the committed
+    /// results, so a re-score or a new run cannot land without the page being regenerated.
+    #[test]
+    fn committed_leaderboard_is_generated() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let mut files: Vec<PathBuf> = std::fs::read_dir(root.join("benchmark/results"))
+            .unwrap()
+            .map(|e| e.unwrap().path())
+            .filter(|p| p.extension().is_some_and(|x| x == "json"))
+            .collect();
+        files.sort();
+        let runs: Vec<RunResult> =
+            files.iter().map(|p| serde_json::from_str(&std::fs::read_to_string(p).unwrap()).unwrap()).collect();
+        let intro = std::fs::read_to_string(root.join("benchmark/LEADERBOARD.intro.md")).unwrap();
+        let committed = std::fs::read_to_string(root.join("benchmark/LEADERBOARD.md")).unwrap();
+        assert!(
+            render_by_dataset(&runs, Some(&intro)) == committed,
+            "benchmark/LEADERBOARD.md is stale: run `make leaderboard`"
+        );
+    }
 
     #[test]
     fn manifest_doc_defaults_to_a_transcript() {
