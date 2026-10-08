@@ -48,6 +48,17 @@ Python package `puffinparse` share a single version. Entries before the rename s
 - `pyproject.toml` uses an SPDX `license = "MIT"` with `license-files` (core metadata 2.4) and
   requires maturin >= 1.9.3.
 
+### Security
+
+- Real provider ids are gone from committed test data: the Extend run, parse-run and file ids and
+  the dashboard link, the LlamaParse extract/parse job, file and project ids, and the Reducto job
+  ids and studio links in the live-captured fixtures (and the matching samples in
+  `docs/providers/extend.md` / `reducto.md`) are now obviously fake ids of the same prefix and
+  length. The 556 `studio.reducto.ai/job/<id>` links in the saved raw responses of runs
+  `run-20260924T211006Z` and `run-20260925T090851Z` point at a zero UUID; the scored `.md` outputs
+  are untouched and `bench rescore` reproduces every score. Benchmark results keep
+  `provider_job_id` for auditability, as `SECURITY.md` now states.
+
 ## [0.1.6] - 2026-10-08
 
 ### Changed
