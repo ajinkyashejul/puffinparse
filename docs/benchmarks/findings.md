@@ -3,6 +3,27 @@
 Notes on things the committed runs taught us about the providers and about our own scorer. Each
 entry says what was observed, how it was checked, and what (if anything) changed because of it.
 
+## 2026-10-08 — Scorer v3: formatting artefacts, figures and table headers
+
+A launch review re-scored modified copies of the saved outputs and found five places where the
+scorer charged formatting, not reading:
+
+| Fix | Who it cost | Example |
+|---|---|---|
+| Single `*italic*` / `_italic_` markers were left in the text | LlamaParse (writes `*italic*`; Reducto writes `<i>`, Extend drops italics) | olmOCR `table_tests_371cfed…_pg10_pg1`, `multi_column_*`, `long_tiny_text_*` |
+| Inline tags split words (`9<sup>th</sup>` → `9 th`) | anyone emitting `<sup>`, `<sub>`, `<i>` | olmOCR `old_scans_41` |
+| Dot leaders in a table of contents compared character by character | parsers that drop the dots | DP-Bench `01030000000018` |
+| Figure descriptions a parser adds (`<figure><caption>…</caption></figure>`) counted as extra text, though the truth has no figure content | Extend on DP-Bench (about 15 points on that source) | DP-Bench `…059`, `…076`, `…100`, `…136` |
+| `table_cell` rules could not match the header row | parsers that mark the header correctly | olmOCR `table_tests_0953927d…pg20` |
+
+Every committed run was re-scored offline (`bench rescore`); latency and cost are unchanged.
+`combined-v3` moved: `llamaparse/cost_effective` 84.35 → 85.63, `llamaparse/agentic` 83.49 →
+85.28, `reducto/r-1` 82.40 → 82.80, `extend/parse_performance` 77.43 → 80.77, `reducto/standard`
+79.78 → 80.29, `extend/parse_light` 76.46 → 79.89, `tesseract/default` 56.36 → 56.41.
+`extend/parse_performance` moves from 5th to 4th; the LlamaParse models stay first and second and
+are now clearly ahead of `reducto/r-1` (see the bootstrap intervals in the leaderboard). The 40
+OmniDocBench documents keep their v2 scores, since their outputs are not committed.
+
 ## 2026-09-24 — Scorer v2: the first combined-v1 run was partly scoring the scorer
 
 The first `combined-v1` run (`benchmark/results/2026-09-11-combined-v1.json`, outputs under

@@ -120,11 +120,14 @@ Library of Congress or OER pages, whose own licences are public domain or open.
   *removing* newlines and uses `rapidfuzz.fuzz.ratio` on text only; its TEDS works on the full
   HTML tree. PuffinParse scores a normalised markdown transcript, tables included, and `teds_grid`
   on the flattened grid.
-- **Chart and figure text counts against a parser here.** Upstream drops prediction elements that
-  fall inside a ground-truth figure/chart region (`--filter-by-gt-area`), so transcribing axis
-  labels costs nothing there. A transcript has no regions, so text a parser emits for a chart is
-  extra text against this truth. Tesseract, which OCRs every label, scores 66 on the `chart`
-  pages against 99 on `text` pages. Read `has-chart` / `has-figure` pages with that in mind.
+- **Chart and figure text: only marked-up figures are excused.** Upstream drops prediction
+  elements that fall inside a ground-truth figure/chart region (`--filter-by-gt-area`), so
+  transcribing axis labels costs nothing there. A transcript has no regions. Since scorer v3 the
+  transcript scorer drops what a parser itself marks as a figure (`<figure>…</figure>`, markdown
+  images `![…](…)`), which covers figure descriptions; text a parser emits for a chart *without*
+  such markup (axis labels OCR'd as plain text, a chart turned into a table) still counts as extra
+  text. Tesseract, which OCRs every label, scores far lower on the `chart` pages than on `text`
+  pages. Read `has-chart` / `has-figure` pages with that in mind.
 - Upstream text is kept verbatim, including end-of-line hyphenation (`func-\ntions`), so a parser
   that de-hyphenates loses a character there.
 - Equations are compared as literal LaTeX.

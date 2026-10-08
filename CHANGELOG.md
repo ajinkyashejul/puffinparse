@@ -9,6 +9,18 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+### Changed
+
+- Benchmark scorer v3 (`SCORER_VERSION = 3`): single `*` / `_` emphasis is stripped, inline HTML
+  tags (`<sup>`, `<i>`, …) no longer split words, dot leaders collapse to a space, figure markup and
+  markdown images are dropped from transcript predictions (the truths carry no figure content), and
+  `table_cell` rules can match a table's header row. The results viewer's in-browser rule checker
+  mirrors all of it. Every committed run was re-scored offline: `combined-v3` is now led by
+  `llamaparse/cost_effective` 85.63 and `llamaparse/agentic` 85.28 (a statistical tie), then
+  `reducto/r-1` 82.80, `extend/parse_performance` 80.77, `reducto/standard` 80.29,
+  `extend/parse_light` 79.89 and `tesseract/default` 56.41. OmniDocBench's 40 documents keep their
+  v2 scores (outputs not committed). Details in `docs/benchmarks/findings.md`.
+
 ## [0.1.5] - 2026-10-08
 
 ### Added
