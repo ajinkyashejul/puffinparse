@@ -9,6 +9,8 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-10-08
+
 ### Changed
 
 - Benchmark scorer v3 (`SCORER_VERSION = 3`): single `*` / `_` emphasis is stripped, inline HTML
@@ -361,7 +363,8 @@ Initial release.
   across the three providers; `bench run` disables provider result caches by
   default (`--allow-cache` to opt out) so latency reflects real work.
 
-[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/ajinkyashejul/puffinparse/compare/v0.1.2...v0.1.3

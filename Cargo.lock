@@ -1395,7 +1395,7 @@ dependencies = [
 
 [[package]]
 name = "puffinparse-cli"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1415,7 +1415,7 @@ dependencies = [
 
 [[package]]
 name = "puffinparse-core"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1439,7 +1439,7 @@ dependencies = [
 
 [[package]]
 name = "puffinparse-node"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "bytes",
  "napi",
@@ -1453,7 +1453,7 @@ dependencies = [
 
 [[package]]
 name = "puffinparse-python"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "bytes",
  "puffinparse-core",
@@ -1468,7 +1468,7 @@ dependencies = [
 
 [[package]]
 name = "puffinparse-server"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "bytes",
