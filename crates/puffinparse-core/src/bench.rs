@@ -20,7 +20,10 @@ pub use tables::{extract_tables, teds_grid, Grid};
 /// * `1` — initial scorer (pipe tables only, exact rule matching, headline in `char_similarity`).
 /// * `2` — HTML tables, `teds_grid`, punctuation-spacing-insensitive rule matching, fuzzy
 ///   `bag_of_sentences`, entity decoding, explicit `Summary::score`.
-pub const SCORER_VERSION: u32 = 2;
+/// * `3` — single `*` / `_` emphasis stripped, inline HTML tags (`<sup>`, `<i>`) no longer split
+///   words, dot leaders collapsed, figure markup and image descriptions dropped from transcript
+///   predictions ([`strip_figures`]), and `table_cell` rules can match the header row.
+pub const SCORER_VERSION: u32 = 3;
 
 /// A `bag_of_sentences` sentence counts as present when some window of the prediction is within
 /// this normalised character similarity of it (`1 - edit_distance / |sentence|`).
@@ -67,6 +70,7 @@ pub fn normalize(s: &str, opts: NormalizeOptions) -> String {
         .replace(['\u{2018}', '\u{2019}'], "'")
         .replace(['\u{201C}', '\u{201D}'], "\"")
         .replace(['\u{2013}', '\u{2014}'], "-");
+    let s = collapse_dot_leaders(&s);
     let s = if opts.case_insensitive { s.to_lowercase() } else { s };
     let mut out = String::with_capacity(s.len());
     let mut last_space = true;
@@ -84,6 +88,98 @@ pub fn normalize(s: &str, opts: NormalizeOptions) -> String {
         }
     }
     out.trim().to_string()
+}
+
+/// Dot leaders (`Chapter 1 ........ 7`, `. . . .`) become one space: whether a parser keeps the
+/// dots of a table of contents says nothing about its reading. Four or more dots, optionally
+/// single-spaced; a three-dot ellipsis is text and stays.
+fn collapse_dot_leaders(s: &str) -> String {
+    let chars: Vec<char> = s.chars().collect();
+    let mut out = String::with_capacity(s.len());
+    let mut i = 0;
+    while i < chars.len() {
+        if chars[i] == '.' {
+            // Walk a run of dots separated by at most one space.
+            let (mut j, mut dots, mut end) = (i, 0, i);
+            while j < chars.len() {
+                if chars[j] == '.' {
+                    dots += 1;
+                    j += 1;
+                    end = j;
+                } else if chars[j] == ' ' && chars.get(j + 1) == Some(&'.') {
+                    j += 1;
+                } else {
+                    break;
+                }
+            }
+            if dots >= 4 {
+                out.push(' ');
+                i = end;
+                continue;
+            }
+        }
+        out.push(chars[i]);
+        i += 1;
+    }
+    out
+}
+
+/// Figure content a parser *adds*: `<figure>…</figure>` blocks (a description or caption a vision
+/// model wrote) and markdown images (`![description](src)`). Transcript truths carry no figure or
+/// chart content (DP-Bench drops them, as upstream ignores predictions inside figure regions), so
+/// this text is not a reading of the page and is not scored. Tags are matched case-insensitively;
+/// an unclosed `<figure>` runs to the end.
+pub fn strip_figures(s: &str) -> String {
+    let lower = s.to_ascii_lowercase();
+    let mut out = String::with_capacity(s.len());
+    let mut i = 0;
+    while let Some(rel) = lower[i..].find("<figure") {
+        let start = i + rel;
+        // `<figure>` or `<figure ...>`, not `<figures>`.
+        let next = lower.as_bytes().get(start + 7).copied();
+        if !matches!(next, Some(b'>' | b' ' | b'\t' | b'\n' | b'\r' | b'/')) {
+            out.push_str(&s[i..start + 7]);
+            i = start + 7;
+            continue;
+        }
+        out.push_str(&s[i..start]);
+        out.push(' ');
+        i = match lower[start..].find("</figure>") {
+            Some(e) => start + e + "</figure>".len(),
+            None => s.len(),
+        };
+    }
+    out.push_str(&s[i..]);
+    strip_markdown_images(&out)
+}
+
+/// `![alt](src)` → nothing (`[` without a following `](…)` is kept as text).
+fn strip_markdown_images(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut rest = s;
+    while let Some(at) = rest.find("![") {
+        let after = &rest[at + 2..];
+        let image_end = after.find("](").and_then(|close| {
+            let alt = &after[..close];
+            if alt.contains('\n') {
+                return None;
+            }
+            after[close + 2..].find(')').map(|p| at + 2 + close + 2 + p + 1)
+        });
+        match image_end {
+            Some(end) => {
+                out.push_str(&rest[..at]);
+                out.push(' ');
+                rest = &rest[end..];
+            }
+            None => {
+                out.push_str(&rest[..at + 2]);
+                rest = &rest[at + 2..];
+            }
+        }
+    }
+    out.push_str(rest);
+    out
 }
 
 /// Scores for one (prediction, truth) pair. All in `0..=1` unless noted.
@@ -127,6 +223,7 @@ pub struct Metrics {
 
 /// Compute all metrics for a prediction vs truth (both raw; normalisation applied internally).
 pub fn score(pred: &str, truth: &str, opts: NormalizeOptions) -> Metrics {
+    let pred = &strip_figures(pred);
     let p = normalize(pred, opts);
     let t = normalize(truth, opts);
     let p_chars: Vec<char> = p.chars().collect();
@@ -918,7 +1015,9 @@ fn check_table_cell(cache: &PredictionCache<'_>, cell: &CellRule, cs: bool, k: u
             }
             None => None,
         };
-        for row in &table.rows {
+        // The header row is a row too: a cell rule may be about a header cell (olmOCR's neighbour
+        // tests are), and a parser that marks the header correctly must not lose that rule.
+        for row in std::iter::once(&table.header).chain(&table.rows) {
             if !row_matches(row, row_header.as_deref(), k) {
                 continue;
             }
@@ -1039,6 +1138,44 @@ pub fn metrics_from_rules(score: &RuleScore) -> Metrics {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn scorer_v3_dot_leaders() {
+        let o = NormalizeOptions::default();
+        assert_eq!(normalize("Intro ........ 7", o), "intro 7");
+        assert_eq!(normalize("Intro . . . . . 7", o), "intro 7");
+        assert_eq!(normalize("Wait... what", o), "wait... what");
+        assert_eq!(score("Intro 7", "Intro .......... 7", o).char_similarity, 1.0);
+    }
+
+    #[test]
+    fn scorer_v3_strips_figures_from_transcripts() {
+        assert_eq!(strip_figures("a <figure><caption>A bar chart</caption></figure> b"), "a   b");
+        assert_eq!(strip_figures("a <FIGURE id=\"f\">x</Figure> b"), "a   b");
+        assert_eq!(strip_figures("<figures> stay"), "<figures> stay");
+        assert_eq!(strip_figures("see ![chart of sales](img.png) here"), "see   here");
+        assert_eq!(strip_figures("[link](x) and ![ no close"), "[link](x) and ![ no close");
+        let o = NormalizeOptions::default();
+        let truth = "Revenue grew.";
+        let pred = "Revenue grew.\n<figure><caption>The chart shows growth</caption></figure>";
+        assert_eq!(score(pred, truth, o).char_similarity, 1.0);
+    }
+
+    #[test]
+    fn scorer_v3_emphasis_and_inline_tags() {
+        let o = NormalizeOptions::default();
+        assert_eq!(score("An *italic* word", "An italic word", o).char_similarity, 1.0);
+        assert_eq!(score("the 9<sup>th</sup> day", "the 9th day", o).char_similarity, 1.0);
+    }
+
+    #[test]
+    fn scorer_v3_table_cell_can_match_the_header_row() {
+        let pred = "| Name | Value |\n|---|---|\n| a | 1 |";
+        let c = CellRule { value: "Value".into(), row_header: Some("Name".into()), col_header: None };
+        let r = Rule { cell: Some(c), ..rule("hdr", RuleType::TableCell) };
+        let got = score_rules(pred, &[r], NormalizeOptions::default());
+        assert_eq!(got.passed, 1, "{got:?}");
+    }
 
     #[test]
     fn levenshtein_basic() {

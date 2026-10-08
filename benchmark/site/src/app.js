@@ -1652,6 +1652,12 @@
   // crates/puffinparse-core, so every assertion can be shown passing or failing. The recorded
   // `rules_passed` from the Rust scorer stays authoritative; the viewer says when they differ.
 
+  /** `INLINE_TAGS` in types.rs: removing these must not split a word (`9<sup>th</sup>`). */
+  var INLINE_TAGS = [
+    "a", "abbr", "b", "bdi", "bdo", "cite", "code", "data", "del", "dfn", "em", "font", "i", "ins", "kbd", "mark",
+    "q", "s", "samp", "small", "span", "strike", "strong", "sub", "sup", "time", "tt", "u", "var",
+  ];
+
   function stripHtmlTags(s) {
     var out = "";
     for (var i = 0; i < s.length; i++) {
@@ -1659,7 +1665,8 @@
       if (c === "<" && /[A-Za-z\/]/.test(s[i + 1] || "")) {
         var close = s.indexOf(">", i + 1);
         if (close !== -1) {
-          out += " ";
+          var name = (/^\/*([A-Za-z0-9]*)/.exec(s.slice(i + 1, close)) || ["", ""])[1].toLowerCase();
+          if (INLINE_TAGS.indexOf(name) === -1) out += " ";
           i = close;
           continue;
         }
@@ -1670,6 +1677,26 @@
       out += c;
     }
     return out;
+  }
+
+  /** `strip_single_emphasis` in types.rs: `*x*` / `_x_` delimiters go, ` * ` and `a_b` stay. */
+  function stripSingleEmphasis(s) {
+    var chars = Array.from(s);
+    function open(c) {
+      return c === undefined || /\s/.test(c) || (/[!-\/:-@\[-`{-~]/.test(c) && c !== "*" && c !== "_");
+    }
+    var out = "";
+    for (var i = 0; i < chars.length; i++) {
+      var c = chars[i];
+      if ((c === "*" || c === "_") && open(chars[i - 1]) !== open(chars[i + 1])) continue;
+      out += c;
+    }
+    return out;
+  }
+
+  /** `collapse_dot_leaders` in bench.rs: 4+ dots (single spaces allowed between) become a space. */
+  function collapseDotLeaders(s) {
+    return s.replace(/\.(?: ?\.){3,}/g, " ");
   }
 
   function markdownToText(md) {
@@ -1697,13 +1724,15 @@
           })
           .join(" ");
       }
-      s = s.split("**").join("").split("__").join("").split("`").join("");
+      s = stripSingleEmphasis(s.split("**").join("").split("__").join("").split("`").join(""));
       out.push(s.trim());
     });
     return out.join("\n").replace(/\s+$/, "");
   }
 
-  // Scorer v2 (SCORER_VERSION = 2 in bench.rs): HTML entities decoded after markdown stripping,
+  // Scorer v3 (SCORER_VERSION = 3 in bench.rs) adds single-emphasis stripping, word-preserving
+  // inline tags, dot-leader collapsing and header-row matching for table_cell rules.
+  // Scorer v2: HTML entities decoded after markdown stripping,
   // spaces touching punctuation dropped for rule matching, markdown *and* HTML tables, fuzzy
   // bag_of_sentences (0.8 per sentence, default threshold 0.8) and olmOCR `max_diffs`.
   var BAG_SENTENCE_MIN_SIMILARITY = 0.8;
@@ -1758,6 +1787,7 @@
     s = s.normalize ? s.normalize("NFKC") : s;
     if (opts.strip_markdown) s = decodeEntities(markdownToText(s));
     s = s.replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-");
+    s = collapseDotLeaders(s);
     if (opts.case_insensitive) s = s.toLowerCase();
     var out = "";
     var lastSpace = true;
@@ -2239,8 +2269,9 @@
         if (col === -1) continue;
         sawCol = true;
       }
-      for (var r = 0; r < table.rows.length; r++) {
-        var row = table.rows[r];
+      var allRows = [table.header].concat(table.rows);
+      for (var r = 0; r < allRows.length; r++) {
+        var row = allRows[r];
         if (rowH !== null && !row.some(function (c) { return containsWithin(c, rowH, k); })) continue;
         sawRow = true;
         if (col !== null) {

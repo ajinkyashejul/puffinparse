@@ -507,7 +507,15 @@ pub fn pages_from_blocks(blocks: Vec<Block>, page_dims: &BTreeMap<u32, (f64, f64
         .collect()
 }
 
-/// Remove simple inline HTML tags (`<b>`, `</i>`, `<br/>`, …) that some providers embed in markdown.
+/// Inline HTML elements: their tags sit inside a word (`9<sup>th</sup>`, `<i>Nature</i>,`), so
+/// removing them must not split the word. Every other tag (`<br>`, `<p>`, `<td>`, …) separates text.
+const INLINE_TAGS: &[&str] = &[
+    "a", "abbr", "b", "bdi", "bdo", "cite", "code", "data", "del", "dfn", "em", "font", "i", "ins", "kbd", "mark", "q",
+    "s", "samp", "small", "span", "strike", "strong", "sub", "sup", "time", "tt", "u", "var",
+];
+
+/// Remove HTML tags that some providers embed in markdown: inline tags (`<b>`, `</i>`, `<sup>`)
+/// vanish, any other tag (`<br/>`, `<p>`) becomes a space.
 pub fn strip_html_tags(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     let mut chars = s.chars().peekable();
@@ -518,17 +526,49 @@ pub fn strip_html_tags(s: &str) -> String {
             let looks_like_tag = matches!(probe.next(), Some(n) if n.is_ascii_alphabetic() || n == '/');
             if looks_like_tag {
                 let mut closed = false;
+                let mut inner = String::new();
                 for n in chars.by_ref() {
                     if n == '>' {
                         closed = true;
                         break;
                     }
+                    inner.push(n);
                 }
                 if closed {
-                    // `<br>` acts as a line break.
-                    out.push(' ');
+                    let name: String = inner
+                        .trim_start_matches('/')
+                        .chars()
+                        .take_while(char::is_ascii_alphanumeric)
+                        .collect::<String>()
+                        .to_ascii_lowercase();
+                    if !INLINE_TAGS.contains(&name.as_str()) {
+                        out.push(' ');
+                    }
                     continue;
                 }
+            }
+        }
+        out.push(c);
+    }
+    out
+}
+
+/// Drop single `*` / `_` emphasis delimiters (`*italic*`, `_italic_`). A delimiter is a marker
+/// with text on one side and a space, punctuation or the line edge on the other; a lone ` * `
+/// (multiplication) and intraword markers (`snake_case`, `a*b`) are kept, as in CommonMark.
+fn strip_single_emphasis(s: &str) -> String {
+    let chars: Vec<char> = s.chars().collect();
+    let open = |c: Option<&char>| match c {
+        None => true,
+        Some(&c) => c.is_whitespace() || (c.is_ascii_punctuation() && c != '*' && c != '_'),
+    };
+    let mut out = String::with_capacity(s.len());
+    for (i, &c) in chars.iter().enumerate() {
+        if c == '*' || c == '_' {
+            let before = open(if i == 0 { None } else { chars.get(i - 1) });
+            let after = open(chars.get(i + 1));
+            if before != after {
+                continue;
             }
         }
         out.push(c);
@@ -560,7 +600,7 @@ pub fn markdown_to_text(md: &str) -> String {
         if s.starts_with('|') {
             s = s.trim_matches('|').split('|').map(str::trim).collect::<Vec<_>>().join(" ");
         }
-        let s = s.replace("**", "").replace("__", "").replace('`', "");
+        let s = strip_single_emphasis(&s.replace("**", "").replace("__", "").replace('`', ""));
         out.push_str(s.trim());
         out.push('\n');
     }
@@ -616,9 +656,18 @@ mod tests {
 
     #[test]
     fn strips_inline_html() {
-        assert_eq!(strip_html_tags("<b>Bold</b> and <i>it</i><br/>x"), " Bold  and  it  x");
+        assert_eq!(strip_html_tags("<b>Bold</b> and <i>it</i><br/>x"), "Bold and it x");
+        assert_eq!(strip_html_tags("9<sup>th</sup> and H<sub>2</sub>O<p>next"), "9th and H2O next");
         assert_eq!(strip_html_tags("a < b and c > d"), "a < b and c > d");
         assert_eq!(markdown_to_text("# <b>Title</b>\n\n| <b>ID</b> | x |\n|-|-|\n| 1 | 2 |"), "Title\n\nID x\n1 2");
+    }
+
+    #[test]
+    fn markdown_to_text_strips_single_emphasis() {
+        assert_eq!(markdown_to_text("An *italic* and _also_ word, (*x*)."), "An italic and also word, (x).");
+        assert_eq!(markdown_to_text("***both*** here"), "both here");
+        assert_eq!(markdown_to_text("keep snake_case, a*b and 2 * 3"), "keep snake_case, a*b and 2 * 3");
+        assert_eq!(markdown_to_text("* bullet with *em*"), "bullet with em");
     }
 
     #[test]
