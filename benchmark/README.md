@@ -111,7 +111,7 @@ whose ids carry a `<source>/` prefix — a per-source breakdown of documents and
 Each model's `summary` carries `headline` (0–1; rank on this, `overall = 100 × headline`),
 `char_similarity` (literal), `table_score`, `teds_grid`, `rule_pass_rate`, and each document its
 own `headline`. The run records `scorer_version` (`puffinparse_core::bench::SCORER_VERSION`, currently
-`2`). Files without it are scorer v1: read `headline` as `overall / 100`; their
+`3`). Files without it are scorer v1: read `headline` as `overall / 100`; their
 `summary.char_similarity` held the headline, and they have no `teds_grid`. Re-score them offline:
 
 ```bash

@@ -1,9 +1,9 @@
 {
   "run_id": "run-20260911T081636Z",
   "created_at": "2026-09-11T08:16:36Z",
-  "liteocr_version": "0.1.0",
-  "scorer_version": 2,
-  "rescored_at": "2026-09-24T20:46:26Z",
+  "puffinparse_version": "0.1.0",
+  "scorer_version": 3,
+  "rescored_at": "2026-10-08T00:33:35Z",
   "dataset": {
     "name": "synthetic-v1",
     "version": "1.1.0",
@@ -510,17 +510,17 @@
           "table_only": false,
           "pages": 1,
           "metrics": {
-            "char_similarity": 0.999231950844854,
-            "cer": 0.0007686395080707148,
-            "wer": 0.004694835680751174,
-            "word_recall": 0.9953051643192489,
-            "word_precision": 0.9953051643192489,
-            "word_f1": 0.9953051643192489,
+            "char_similarity": 1.0,
+            "cer": 0.0,
+            "wer": 0.0,
+            "word_recall": 1.0,
+            "word_precision": 1.0,
+            "word_f1": 1.0,
             "order_score": 1.0,
-            "pred_chars": 1302,
+            "pred_chars": 1301,
             "truth_chars": 1301
           },
-          "headline": 0.999231950844854,
+          "headline": 1.0,
           "latency_ms": 4347,
           "cost_usd": 0.015,
           "cache_hit": null
@@ -915,21 +915,22 @@
       "summary": {
         "documents": 39,
         "failed": 0,
-        "headline": 0.9996042241714901,
-        "char_similarity": 0.9996042241714901,
-        "cer": 0.0003967018495406855,
-        "wer": 0.0014496680301608533,
-        "word_f1": 0.9987977091518624,
+        "headline": 0.9996239177395708,
+        "char_similarity": 0.9996239177395708,
+        "cer": 0.0003769931442055389,
+        "wer": 0.0013292876280903104,
+        "word_f1": 0.9989180895539329,
         "order_score": 1.0,
         "table_score": 0.998250205638886,
         "teds_grid": 0.9863527712523409,
-        "overall": 99.960422417149,
+        "overall": 99.96239177395708,
         "latency_p50_ms": 2848,
         "latency_p95_ms": 4347,
         "latency_per_page_ms": 2669.095238095238,
         "total_pages": 42,
         "total_cost_usd": 0.6300000000000004,
         "cost_per_1k_pages_usd": 15.00000000000001,
+        "empty_outputs": 0,
         "by_category": {
           "complex_table": {
             "documents": 3,
@@ -1019,13 +1020,13 @@
           "noisy_scan": {
             "documents": 3,
             "failed": 0,
-            "headline": 0.9983358740644331,
-            "char_similarity": 0.9983358740644331,
-            "cer": 0.0016672195608637838,
-            "wer": 0.008683174567368621,
-            "word_f1": 0.9920097382861649,
+            "headline": 0.9985918904494818,
+            "char_similarity": 0.9985918904494818,
+            "cer": 0.001411006391506879,
+            "wer": 0.007118229340451562,
+            "word_f1": 0.9935746835130819,
             "order_score": 1.0,
-            "overall": 99.83358740644331
+            "overall": 99.85918904494818
           },
           "plain": {
             "documents": 3,
@@ -1993,6 +1994,7 @@
         "total_pages": 42,
         "total_cost_usd": 0.42000000000000015,
         "cost_per_1k_pages_usd": 10.000000000000004,
+        "empty_outputs": 0,
         "by_category": {
           "complex_table": {
             "documents": 3,
@@ -3063,6 +3065,7 @@
         "total_pages": 42,
         "total_cost_usd": 1.0500000000000003,
         "cost_per_1k_pages_usd": 25.000000000000004,
+        "empty_outputs": 0,
         "by_category": {
           "complex_table": {
             "documents": 3,
@@ -4135,6 +4138,7 @@
         "total_pages": 42,
         "total_cost_usd": 0.26250000000000007,
         "cost_per_1k_pages_usd": 6.250000000000001,
+        "empty_outputs": 0,
         "by_category": {
           "complex_table": {
             "documents": 3,
@@ -5195,6 +5199,7 @@
         "total_pages": 42,
         "total_cost_usd": 0.05250000000000002,
         "cost_per_1k_pages_usd": 1.2500000000000004,
+        "empty_outputs": 0,
         "by_category": {
           "complex_table": {
             "documents": 3,
@@ -5432,17 +5437,17 @@
           "table_only": false,
           "pages": 1,
           "metrics": {
-            "char_similarity": 0.9997987927565393,
-            "cer": 0.0002012477359629704,
-            "wer": 0.0024271844660194173,
-            "word_recall": 0.9987864077669902,
-            "word_precision": 0.9975757575757576,
-            "word_f1": 0.998180715585203,
+            "char_similarity": 1.0,
+            "cer": 0.0,
+            "wer": 0.0,
+            "word_recall": 1.0,
+            "word_precision": 1.0,
+            "word_f1": 1.0,
             "order_score": 1.0,
-            "pred_chars": 4970,
+            "pred_chars": 4969,
             "truth_chars": 4969
           },
-          "headline": 0.9997987927565393,
+          "headline": 1.0,
           "latency_ms": 14872,
           "cost_usd": 0.00375,
           "cache_hit": null
@@ -5954,17 +5959,17 @@
           "table_only": false,
           "pages": 1,
           "metrics": {
-            "char_similarity": 0.9986091794158554,
-            "cer": 0.001392757660167131,
-            "wer": 0.0041841004184100415,
-            "word_recall": 0.99581589958159,
-            "word_precision": 0.99581589958159,
-            "word_f1": 0.99581589958159,
+            "char_similarity": 1.0,
+            "cer": 0.0,
+            "wer": 0.0,
+            "word_recall": 1.0,
+            "word_precision": 1.0,
+            "word_f1": 1.0,
             "order_score": 1.0,
-            "pred_chars": 1438,
+            "pred_chars": 1436,
             "truth_chars": 1436
           },
-          "headline": 0.9986091794158554,
+          "headline": 1.0,
           "latency_ms": 9261,
           "cost_usd": 0.00375,
           "cache_hit": null
@@ -6249,21 +6254,22 @@
       "summary": {
         "documents": 39,
         "failed": 0,
-        "headline": 0.9999591787736511,
-        "char_similarity": 0.9999591787736511,
-        "cer": 0.00004087193323410516,
-        "wer": 0.000169520125241781,
-        "word_f1": 0.9998460670555588,
+        "headline": 1.0,
+        "char_similarity": 1.0,
+        "cer": 0.0,
+        "wer": 0.0,
+        "word_f1": 1.0,
         "order_score": 1.0,
         "table_score": 1.0,
         "teds_grid": 1.0,
-        "overall": 99.99591787736512,
+        "overall": 100.0,
         "latency_p50_ms": 9157,
         "latency_p95_ms": 14872,
         "latency_per_page_ms": 8909.5,
         "total_pages": 42,
         "total_cost_usd": 0.1575000000000001,
         "cost_per_1k_pages_usd": 3.7500000000000027,
+        "empty_outputs": 0,
         "by_category": {
           "complex_table": {
             "documents": 3,
@@ -6281,13 +6287,13 @@
           "dense": {
             "documents": 3,
             "failed": 0,
-            "headline": 0.9999329309188464,
-            "char_similarity": 0.9999329309188464,
-            "cer": 0.00006708257865432347,
-            "wer": 0.0008090614886731391,
-            "word_f1": 0.9993935718617344,
+            "headline": 1.0,
+            "char_similarity": 1.0,
+            "cer": 0.0,
+            "wer": 0.0,
+            "word_f1": 1.0,
             "order_score": 1.0,
-            "overall": 99.99329309188464
+            "overall": 100.0
           },
           "faded": {
             "documents": 3,
@@ -6364,13 +6370,13 @@
           "plain": {
             "documents": 3,
             "failed": 0,
-            "headline": 0.9995363931386185,
-            "char_similarity": 0.9995363931386185,
-            "cer": 0.00046425255338904364,
-            "wer": 0.001394700139470014,
-            "word_f1": 0.99860529986053,
+            "headline": 1.0,
+            "char_similarity": 1.0,
+            "cer": 0.0,
+            "wer": 0.0,
+            "word_f1": 1.0,
             "order_score": 1.0,
-            "overall": 99.95363931386186
+            "overall": 100.0
           },
           "receipt": {
             "documents": 3,
@@ -7337,6 +7343,7 @@
         "total_pages": 42,
         "total_cost_usd": 0.5250000000000001,
         "cost_per_1k_pages_usd": 12.500000000000002,
+        "empty_outputs": 0,
         "by_category": {
           "complex_table": {
             "documents": 3,
