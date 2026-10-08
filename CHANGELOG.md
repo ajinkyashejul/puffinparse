@@ -73,6 +73,11 @@ Python package `puffinparse` share a single version. Entries before the rename s
   an error (Gemini, Upstage and Document AI used to include part of it).
 - `DocumentRequest`'s `Debug` output no longer prints `api_key` or `webhook_url` (which may carry a
   shared secret), nor the document bytes.
+- Gateway hardening (`docs/SERVER.md#hardening`): `document_url` is no longer downloaded inside the
+  gateway by default; self-hosted engines are no longer open to every key; concurrency, a
+  per-request time limit and a header read timeout are enforced; `/metrics` needs a key; the
+  gateway refuses to start unauthenticated on a public address; `Debug` of the gateway's config,
+  deployments, virtual keys and state redacts every secret. The "do not expose yet" warning is gone.
 
 ### Changed
 
@@ -80,6 +85,29 @@ Python package `puffinparse` share a single version. Entries before the rename s
   points at a private, loopback or link-local address now fails with `InputError`. Set
   `PUFFINPARSE_ALLOW_PRIVATE_URLS=1` in a trusted setup to allow it (process-wide; there is no
   per-request switch). Downloads over 50 MiB fail unless `PUFFINPARSE_MAX_DOWNLOAD_MB` is raised.
+- **Breaking for gateway operators** (`puffinparse serve`):
+  - The gateway refuses to start on a non-loopback `host` (for example the Docker image's
+    `0.0.0.0`) without `master_key` or `[[keys]]`; set `server.allow_unauthenticated = true` if a
+    proxy in front already authenticates every caller.
+  - `document_url` with a model whose provider cannot fetch URLs (Tesseract, Docling, PaddleOCR,
+    vLLM, Unstructured, Textract, Gemini, OpenAI, Anthropic, Upstage, Document AI, LlamaParse
+    extract) is rejected with `400 input_error`, also when only an alias target or a request
+    fallback would download. Uploads and URL-capable providers (Reducto, Extend, LlamaParse parse,
+    Mistral, Azure, Datalab, Mathpix, Landing AI, OpenDocRouter) are unaffected. New
+    `server.fetch_document_urls = true` restores it, with public addresses only
+    (`server.allow_private_document_urls`, `server.max_download_mb`); the gateway ignores
+    `PUFFINPARSE_ALLOW_PRIVATE_URLS`.
+  - Self-hosted engines named directly (`tesseract`, `docling/default`, ...) get `403
+    model_not_allowed` unless the key's `models` names them (`"*"` or an empty list does not
+    count), the master key calls, or `server.allow_local_engines = true`. Aliases targeting them
+    work as before. `GET /v1/models` hides them from keys that cannot use them.
+  - `GET /metrics` needs a gateway key (any virtual key or the master key) unless
+    `server.public_metrics = true`; point the Prometheus scraper at it with a bearer token.
+  - New limits: `server.max_concurrent_requests` (default 64 document requests in flight, the
+    rest wait), `server.request_timeout_secs` (default `max_timeout_secs` + 60; then `504
+    timeout_error`), `server.header_read_timeout_secs` (default 30).
+  - `server.allow_direct_models` keeps its default (`true`); give every key an explicit `models`
+    list.
 - Docling and PaddleOCR no longer forward a URL input to docling-serve / the PaddleOCR server
   (which would fetch it from inside your network); PuffinParse downloads it through the same path
   and sends the bytes. PaddleOCR's `fileType` now always comes from the downloaded bytes.
