@@ -397,3 +397,29 @@ schemas in CI.
 renamed path or field needs a schema update (CI enforces it) and should stay backward compatible
 or get a CHANGELOG entry. Schemas list the always-present keys as `required` and leave objects
 open, so new fields do not break clients or CI.
+
+## ADR-26: The playground is a static page over the gateway's jobs API
+
+**Context.** Visitors want to try a parser on their own document before installing anything
+(README roadmap, #18). The site is static on Vercel; the gateway (ADR-15, ADR-21) already holds
+provider keys, budgets and an async jobs API. Running parsers for strangers costs real money and
+invites abuse, and model output is untrusted text that ends up in a browser.
+
+**Decision.** `/playground/` is a static page built by `website/build.py` with no framework. Sample
+documents show committed benchmark outputs (no provider call). Live runs go from the browser to a
+public gateway that serves `/v1/playground/*` (docs/SERVER.md): one upload fans out to one job per
+model, and the browser polls `GET /v1/jobs/{id}`. Two ways to pay, never mixed: a **free tier** for
+users signed in with Supabase (GitHub or email), behind Turnstile, a per-user daily model-page
+allowance, a global daily USD budget, a per-IP rate limit, and only models at or under a list-price
+ceiling; or **your own keys**, sent per request in `x-provider-key-<provider>` headers, never
+stored, with jobs owned by an in-memory HMAC of the key. Supabase holds sign-in and two counters,
+reached only through `security definer` functions callable by the service role. The page renders
+model output with its own escaping Markdown renderer under a stricter CSP than the rest of the site.
+
+**Consequences.** The site stays static and works without the gateway (samples only). The gateway
+gains its first public, unauthenticated-by-gateway-key surface, so it must be deployed with the
+hardening defaults and the `[playground]` limits; free-tier spend is capped per day by
+configuration, not by provider accounts. Three choices are left to the owner and are single
+constants: the API origin (`PLAYGROUND_API_ORIGIN`, also in `vercel.json`'s CSP), the free-tier
+price ceiling (`FREE_TIER_MAX_PRICE_PER_PAGE`, mirrored by the gateway's
+`free_tier_max_price_per_page`) and the sample set (`PLAYGROUND_SAMPLES`).

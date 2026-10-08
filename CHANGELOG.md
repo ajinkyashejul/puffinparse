@@ -9,6 +9,18 @@ Python package `puffinparse` share a single version. Entries before the rename s
 
 ## [Unreleased]
 
+### Added
+
+- Website `/playground/`: pick a sample document (or, once a gateway is configured, upload a PDF or
+  image) and compare up to three models' Markdown side by side, with latency, pages and cost.
+  Samples are five redistributable documents from the newest `combined-v3` run with their committed
+  outputs, so showing them calls no provider. Live runs are off until the build gets
+  `PUFFINPARSE_PLAYGROUND_API`; they offer a signed-in free tier (Supabase, Turnstile, daily
+  model-page allowance) or your own provider keys, which are sent per request and never stored.
+  Model output is rendered by an escaping Markdown renderer, and `/playground/` has a stricter
+  Content-Security-Policy. The browser/gateway contract is in `docs/SERVER.md` ("Playground API"),
+  the free-tier counters in `infra/supabase/`, and offline tests in `website/tests/`.
+
 ### Security
 
 - Real provider ids are gone from committed test data: the Extend run, parse-run and file ids and

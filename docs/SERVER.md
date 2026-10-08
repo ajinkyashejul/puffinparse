@@ -276,6 +276,92 @@ gateway key (any virtual key or the master key; give the scraper its own `[[keys
 `job_retrieve`, `webhook` for the jobs API, so job latencies do not mix with blocking calls. A
 job's pages and cost are counted once, when it is first seen succeeded.
 
+### Playground API (`/v1/playground/*`, optional)
+
+> **Planned.** This is the contract the website's playground page is built against; the gateway
+> does not serve these routes yet.
+
+Off by default (404). With `[playground] enabled = true` the gateway serves the website's
+[`/playground/`](../website/playground/index.html) page: a browser uploads one document, picks up
+to three models and polls one job per model. It is a thin layer over the jobs API above: a run is
+one `POST /v1/jobs` per model, and the browser polls `GET /v1/jobs/{id}`. There are two ways to
+pay, never mixed in one request:
+
+- **Free tier**: `Authorization: Bearer <Supabase access token>` (GitHub or email sign-in on the
+  page) plus a Cloudflare Turnstile token. The gateway's own provider keys pay, so it is gated by
+  a per-user daily allowance in model-pages, a global daily budget in USD and a per-IP rate
+  limit, and offers only models priced at or under `free_tier_max_price_per_page`.
+- **Your own keys**: one `x-provider-key-<provider>` header per provider (`reducto`, `extend`,
+  `llamaparse`) and no `Authorization` header. The key goes to that provider for this request and
+  its polls only. It is never stored, logged or written to `state_file`; the jobs it creates are
+  owned by an in-memory HMAC of the key (keyed by a per-process random secret), so only the same
+  key can read them and nothing about the key survives a restart.
+
+```toml
+[playground]
+enabled = false
+allowed_origins = ["https://puffinparse.com"]   # CORS: exact origins, no credentials
+models = ["reducto/standard", "reducto/r-1", "extend/parse_light", "llamaparse/fast",
+          "llamaparse/cost_effective", "llamaparse/agentic"]   # registry ids with a job queue
+free_tier_max_price_per_page = 0.025           # USD list price; dearer models are own-key only
+max_file_mb = 4
+max_pages = 10                                 # per document, counted by the gateway
+max_models = 3
+free_model_pages_per_day = 30                  # per signed-in user, UTC day
+free_daily_budget_usd = 5.0                    # all users together; 0 pauses the free tier
+ip_rpm = 20                                    # runs per minute per client IP (both tiers)
+trust_forwarded_for = 1                        # proxies in front (Cloud Run: 1); 0 = socket IP
+supabase_url = "https://<project>.supabase.co" # JWKS: <url>/auth/v1/.well-known/jwks.json
+supabase_jwt_secret = "env:SUPABASE_JWT_SECRET"           # only for legacy HS256 projects
+supabase_service_key = "env:SUPABASE_SERVICE_ROLE_KEY"    # quota counters (infra/supabase/)
+turnstile_secret = "env:TURNSTILE_SECRET_KEY"
+```
+
+**`GET /v1/playground/config`** (optional bearer) answers what the page may offer right now:
+
+```json
+{"limits": {"max_file_bytes": 4194304, "accepted_types": ["application/pdf", "image/png", "image/jpeg"],
+            "models_per_run": 3, "pages_per_run": 10, "model_pages_per_day": 30},
+ "free_tier": {"available": true, "reason": null, "user": {"model_pages_remaining": 27}},
+ "byok": {"available": true},
+ "models": [{"id": "reducto/standard", "provider": "reducto", "price_per_page_usd": 0.015,
+             "free_tier": true, "byok": true}]}
+```
+
+`free_tier.reason` is `budget_exhausted` or `paused` when `available` is false; `user` is set only
+for a valid bearer. **`POST /v1/playground/runs`** is multipart: `file` (PDF, PNG or JPEG, checked
+by magic bytes), `models` (repeated, 1 to `max_models`), and `turnstile_token` on the free tier.
+The gateway counts the pages, reserves `pages × models` model-pages (free tier), submits one job
+per model and answers **202**:
+
+```json
+{"id": "pgrun_…", "mode": "free" | "byok", "pages": 2,
+ "jobs": [{"model": "reducto/standard", "id": "job_…", "status": "pending", "error": null},
+          {"model": "extend/parse_light", "id": null, "status": "failed", "error": {"type": "provider_error", "message": "…"}}],
+ "usage": {"model_pages_remaining": 21}}
+```
+
+A model whose submit failed comes back `failed` with its error and is not charged; its
+reservation is released. Poll each `id` with `GET /v1/jobs/{id}` and the same auth headers as the
+submit. A free-tier job's cost is charged to the global budget once, on first success (as for any
+job). Besides the errors above:
+
+| HTTP | `type` | Cause |
+|---|---|---|
+| 400 | `too_many_models`, `too_many_pages` | Over `max_models` / `max_pages` (`details.limit`, `details.pages`) |
+| 400 | `missing_provider_key` | Own-key run without a key for a chosen model's provider (`details.provider`) |
+| 403 | `turnstile_failed` | Free tier without a valid Turnstile token |
+| 403 | `model_not_allowed` | Model not in `[playground] models`, or above the free-tier price |
+| 413 | `payload_too_large` | File over `max_file_mb` |
+| 415 | `unsupported_media_type` | Not a PDF, PNG or JPEG |
+| 429 | `quota_exceeded` | The user's daily model-pages are used up (`details.requested`, `details.remaining`) |
+| 429 | `ip_rate_limited` | `ip_rpm` reached (`Retry-After` set) |
+| 503 | `free_tier_unavailable` | Global budget spent or free tier off (`details.reason`) |
+
+The request log records `key_id` as `playground:free:<user id hash>` or `playground:byok`; it never
+records the document, the output, a provider key, the bearer or the Turnstile token. Documents are
+held in memory only for the submit and are not written to disk.
+
 ## Hardening
 
 What the defaults do, and the setting that loosens each one. Changing a default is a deliberate
