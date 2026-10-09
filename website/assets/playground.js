@@ -1068,8 +1068,16 @@
             $("pg-form-error").textContent = errorSentence(err, { pagesLimit: limits().pages_per_run, modelsLimit: limits().models_per_run });
             if (err.type === "unauthorized" && S.sb) S.sb.auth.signOut();
           });
-      }).catch(function () {
-        $("pg-form-error").textContent = "The document could not be read. Choose it again.";
+      }, function () {
+        // Only the document step lands here: a sample that did not download, or an upload the
+        // browser can no longer read (moved or deleted since it was chosen).
+        $("pg-results").hidden = true;
+        $("pg-form-error").textContent = S.source === "upload"
+          ? "The document could not be read. Choose it again."
+          : "The sample document could not be downloaded. Check your connection and try again.";
+      }).catch(function (err) {
+        if (window.console) console.error(err);
+        $("pg-form-error").textContent = "Something went wrong on this page. Reload it and try again.";
       }).then(function () {
         S.running = false;
         if (S.mode === "free") loadServerConfig();
